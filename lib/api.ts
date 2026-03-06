@@ -29,6 +29,16 @@ export interface Project {
   github_stars: number | null;
   github_commits_30d: number | null;
   github_contributors: number | null;
+  snapshot_proposals_count: number | null;
+  snapshot_voters_count: number | null;
+  snapshot_proposal_activity_30d: number | null;
+  reddit_subscribers: number | null;
+  reddit_active_users: number | null;
+  hn_mentions_90d: number | null;
+  hn_total_points: number | null;
+  twitter_followers: number | null;
+  telegram_members: number | null;
+  token_holder_count: number | null;
   last_enriched_at: string | null;
   created_at: string;
 }
