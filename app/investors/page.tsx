@@ -1,25 +1,36 @@
 import Link from "next/link";
 import { getInvestors } from "@/lib/api";
+import { formatNumber } from "@/lib/format";
 import Pagination from "@/components/pagination";
 
 interface Props {
   searchParams: Promise<{
     offset?: string;
     search?: string;
-    type?: string;
+    sort?: string;
   }>;
 }
 
 export default async function InvestorsPage({ searchParams }: Props) {
   const params = await searchParams;
   const offset = parseInt(params.offset || "0");
+  const sort = params.sort || "rounds_count";
 
   const { data: investors, meta } = await getInvestors({
     limit: 50,
     offset,
     search: params.search,
-    type: params.type,
+    sort,
   });
+
+  const sortLink = (field: string) => {
+    const sp = new URLSearchParams();
+    sp.set("sort", field);
+    if (params.search) sp.set("search", params.search);
+    return `/investors?${sp.toString()}`;
+  };
+
+  const sortArrow = (field: string) => (sort === field ? " \u25BC" : "");
 
   return (
     <div>
@@ -38,6 +49,7 @@ export default async function InvestorsPage({ searchParams }: Props) {
             defaultValue={params.search}
             className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 placeholder-zinc-500 focus:border-zinc-500 focus:outline-none"
           />
+          <input type="hidden" name="sort" value={sort} />
           <button
             type="submit"
             className="rounded-md bg-zinc-800 px-3 py-1.5 text-sm text-zinc-300 hover:bg-zinc-700"
@@ -51,10 +63,12 @@ export default async function InvestorsPage({ searchParams }: Props) {
         <table className="w-full text-sm">
           <thead className="border-b border-zinc-800 bg-zinc-900/50">
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-zinc-400">Name</th>
-              <th className="px-4 py-3 text-left font-medium text-zinc-400">Type</th>
-              <th className="px-4 py-3 text-left font-medium text-zinc-400">Location</th>
-              <th className="px-4 py-3 text-left font-medium text-zinc-400">Website</th>
+              <th className="px-4 py-3 text-left font-medium text-zinc-400">
+                <Link href={sortLink("name")}>Name{sortArrow("name")}</Link>
+              </th>
+              <th className="px-4 py-3 text-right font-medium text-zinc-400">
+                <Link href={sortLink("rounds_count")}>Rounds{sortArrow("rounds_count")}</Link>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800/50">
@@ -68,20 +82,8 @@ export default async function InvestorsPage({ searchParams }: Props) {
                     {inv.name}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-zinc-400">
-                  {inv.type && (
-                    <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs">
-                      {inv.type}
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-zinc-400">{inv.hq_location || "—"}</td>
-                <td className="px-4 py-3">
-                  {inv.website && (
-                    <a href={inv.website} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs">
-                      {inv.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-                    </a>
-                  )}
+                <td className="px-4 py-3 text-right font-mono text-zinc-300">
+                  {formatNumber(inv.rounds_count)}
                 </td>
               </tr>
             ))}

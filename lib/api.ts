@@ -96,6 +96,7 @@ export interface Investor {
   twitter: string | null;
   description: string | null;
   hq_location: string | null;
+  rounds_count: number;
   created_at: string;
 }
 
@@ -178,12 +179,14 @@ export async function getInvestors(params?: {
   offset?: number;
   search?: string;
   type?: string;
+  sort?: string;
 }): Promise<InvestorListResponse> {
   const p: Record<string, string> = {};
   if (params?.limit) p.limit = String(params.limit);
   if (params?.offset) p.offset = String(params.offset);
   if (params?.search) p.search = params.search;
   if (params?.type) p.type = params.type;
+  if (params?.sort) p.sort = params.sort;
   return apiFetch<InvestorListResponse>("/investors", p);
 }
 

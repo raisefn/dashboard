@@ -68,7 +68,6 @@ export default async function RoundsPage({ searchParams }: Props) {
               <th className="px-4 py-3 text-left font-medium text-zinc-400">Project</th>
               <th className="px-4 py-3 text-left font-medium text-zinc-400">Type</th>
               <th className="px-4 py-3 text-right font-medium text-zinc-400">Amount</th>
-              <th className="px-4 py-3 text-right font-medium text-zinc-400">Valuation</th>
               <th className="px-4 py-3 text-left font-medium text-zinc-400">Sector</th>
               <th className="px-4 py-3 text-left font-medium text-zinc-400">Investors</th>
             </tr>
@@ -96,9 +95,6 @@ export default async function RoundsPage({ searchParams }: Props) {
                 </td>
                 <td className="px-4 py-3 text-right font-mono text-zinc-300">
                   {formatUSD(r.amount_usd)}
-                </td>
-                <td className="px-4 py-3 text-right font-mono text-zinc-300">
-                  {formatUSD(r.valuation_usd)}
                 </td>
                 <td className="px-4 py-3 text-zinc-400">
                   {r.sector && (
