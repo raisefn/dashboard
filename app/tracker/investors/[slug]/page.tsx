@@ -13,7 +13,7 @@ export default async function InvestorDetailPage({ params }: Props) {
 
   return (
     <div>
-      <Link href="/investors" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+      <Link href="/tracker/investors" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
         &larr; Back to investors
       </Link>
 
@@ -73,7 +73,7 @@ export default async function InvestorDetailPage({ params }: Props) {
                   </td>
                   <td className="px-4 py-3">
                     <Link
-                      href={`/projects/${r.project.slug}`}
+                      href={`/tracker/projects/${r.project.slug}`}
                       className="font-medium text-white hover:text-blue-400 transition-colors"
                     >
                       {r.project.name}

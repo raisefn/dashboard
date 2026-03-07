@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "raisefn — Crypto Fundraising Intelligence",
-  description: "Track crypto fundraising rounds, project metrics, and investor activity.",
+  title: "raise(fn) — Fundraising Intelligence for the Crypto Era",
+  description: "The intelligence layer for crypto fundraising — built for founders, VCs, and the agent economy.",
 };
 
 export default function RootLayout({
@@ -29,7 +29,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-950 text-zinc-100 min-h-screen`}
       >
         <Nav />
-        <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
+        <div className="warm-glow" />
+        <div className="teal-glow" />
+        {children}
       </body>
     </html>
   );

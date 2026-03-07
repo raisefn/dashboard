@@ -3,38 +3,91 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const links = [
-  { href: "/projects", label: "Projects" },
-  { href: "/rounds", label: "Rounds" },
-  { href: "/investors", label: "Investors" },
+const topLinks = [
+  { href: "/tracker", label: "Eyes & Ears", prefix: "/tracker" },
+  { href: "/brain", label: "Brain", prefix: "/brain" },
+  { href: "/sdk", label: "Agent SDK", prefix: "/sdk" },
+];
+
+const trackerLinks = [
+  { href: "/tracker/projects", label: "Projects" },
+  { href: "/tracker/rounds", label: "Rounds" },
+  { href: "/tracker/investors", label: "Investors" },
+];
+
+const brainLinks = [
+  { href: "/brain/entrepreneurs", label: "Entrepreneurs" },
+  { href: "/brain/investors", label: "Investors" },
+  { href: "/brain/agents", label: "Agents" },
 ];
 
 export default function Nav() {
   const pathname = usePathname();
+  const isTracker = pathname.startsWith("/tracker");
+  const isBrain = pathname.startsWith("/brain");
+
+  const subLinks = isTracker ? trackerLinks : isBrain ? brainLinks : null;
 
   return (
-    <nav className="border-b border-zinc-800 bg-zinc-950">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-        <Link href="/" className="text-lg font-bold">
-          <span className="text-orange-500">raise</span>
-          <span className="text-teal-400">(fn)</span>
-        </Link>
-        <div className="flex gap-6">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`text-sm font-medium transition-colors ${
-                pathname === link.href || (link.href === "/projects" && pathname === "/")
-                  ? "text-white"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+    <header className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-md">
+      {/* Primary nav */}
+      <nav className="border-b border-zinc-800">
+        <div className="relative mx-auto flex max-w-7xl items-center justify-center px-4 py-3">
+          {/* Logo — absolute left */}
+          <Link href="/" className="absolute left-4 text-lg font-bold">
+            <span className="text-orange-500">raise</span>
+            <span className="text-teal-400">(fn)</span>
+          </Link>
+
+          {/* Centered links */}
+          <div className="flex gap-1">
+            {topLinks.map((link) => {
+              const active = pathname.startsWith(link.prefix);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    active
+                      ? "bg-zinc-800/80 text-teal-400"
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Sub-nav (tracker or brain) */}
+      {subLinks && (
+        <nav className="border-b border-zinc-800/60 bg-zinc-950/60">
+          <div className="relative mx-auto flex max-w-7xl items-center justify-center px-4 py-2">
+            <div className="flex gap-6">
+              {subLinks.map((link) => {
+                const active =
+                  pathname === link.href ||
+                  (link.href === "/tracker/projects" && pathname === "/tracker");
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`text-sm font-medium transition-colors ${
+                      active
+                        ? "text-white"
+                        : "text-zinc-500 hover:text-zinc-300"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </nav>
+      )}
+    </header>
   );
 }

@@ -17,7 +17,7 @@ export default async function ProjectDetailPage({ params }: Props) {
 
   return (
     <div>
-      <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+      <Link href="/tracker/projects" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
         &larr; Back to projects
       </Link>
 
@@ -110,13 +110,13 @@ export default async function ProjectDetailPage({ params }: Props) {
                       {r.investors
                         .filter((i) => i.is_lead)
                         .map((i) => (
-                          <Link key={i.id} href={`/investors/${i.slug}`} className="text-blue-400 hover:text-blue-300 mr-2">
+                          <Link key={i.id} href={`/tracker/investors/${i.slug}`} className="text-blue-400 hover:text-blue-300 mr-2">
                             {i.name}
                           </Link>
                         ))}
                       {r.investors.filter((i) => i.is_lead).length === 0 &&
                         r.investors.slice(0, 3).map((i) => (
-                          <Link key={i.id} href={`/investors/${i.slug}`} className="text-zinc-400 hover:text-zinc-300 mr-2">
+                          <Link key={i.id} href={`/tracker/investors/${i.slug}`} className="text-zinc-400 hover:text-zinc-300 mr-2">
                             {i.name}
                           </Link>
                         ))}

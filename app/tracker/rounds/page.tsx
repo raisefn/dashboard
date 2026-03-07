@@ -35,25 +35,25 @@ export default async function RoundsPage({ searchParams }: Props) {
 
       <div className="mb-4 flex gap-2 text-sm">
         <Link
-          href="/rounds"
+          href="/tracker/rounds"
           className={`rounded-md px-3 py-1.5 ${!params.min_amount ? "bg-zinc-700 text-white" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"}`}
         >
           All
         </Link>
         <Link
-          href="/rounds?min_amount=1000000"
+          href="/tracker/rounds?min_amount=1000000"
           className={`rounded-md px-3 py-1.5 ${params.min_amount === "1000000" ? "bg-zinc-700 text-white" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"}`}
         >
           $1M+
         </Link>
         <Link
-          href="/rounds?min_amount=10000000"
+          href="/tracker/rounds?min_amount=10000000"
           className={`rounded-md px-3 py-1.5 ${params.min_amount === "10000000" ? "bg-zinc-700 text-white" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"}`}
         >
           $10M+
         </Link>
         <Link
-          href="/rounds?min_amount=50000000"
+          href="/tracker/rounds?min_amount=50000000"
           className={`rounded-md px-3 py-1.5 ${params.min_amount === "50000000" ? "bg-zinc-700 text-white" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"}`}
         >
           $50M+
@@ -80,7 +80,7 @@ export default async function RoundsPage({ searchParams }: Props) {
                 </td>
                 <td className="px-4 py-3">
                   <Link
-                    href={`/projects/${r.project.slug}`}
+                    href={`/tracker/projects/${r.project.slug}`}
                     className="font-medium text-white hover:text-blue-400 transition-colors"
                   >
                     {r.project.name}
@@ -106,7 +106,7 @@ export default async function RoundsPage({ searchParams }: Props) {
                 <td className="px-4 py-3 text-zinc-400 max-w-xs truncate">
                   {r.investors.slice(0, 3).map((i, idx) => (
                     <span key={i.id}>
-                      <Link href={`/investors/${i.slug}`} className="text-zinc-400 hover:text-zinc-300">
+                      <Link href={`/tracker/investors/${i.slug}`} className="text-zinc-400 hover:text-zinc-300">
                         {i.name}
                       </Link>
                       {idx < Math.min(r.investors.length, 3) - 1 && ", "}

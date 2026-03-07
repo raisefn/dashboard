@@ -5,6 +5,10 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Background grid pattern */
 .grid-bg {
   position: fixed;
@@ -17,6 +21,30 @@
   background-size: 60px 60px;
   mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
   -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
+}
+
+/* Warm ambient glow — top right (orange) */
+.warm-glow {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 40vw;
+  height: 40vh;
+  background: radial-gradient(ellipse at top right, rgba(249, 115, 22, 0.05), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Cool ambient glow — bottom left (teal) */
+.teal-glow {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 40vw;
+  height: 40vh;
+  background: radial-gradient(ellipse at bottom left, rgba(45, 212, 191, 0.05), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* Dashed line flow animation */
@@ -73,4 +101,18 @@
 
 .animate-fade-in {
   animation: fade-in-up 0.8s ease-out both;
+}
+
+/* Pulsing ring expansion */
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.3; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* Subtle vertical flow for particles */
+@keyframes flow-up {
+  0% { transform: translateY(0); opacity: 0; }
+  20% { opacity: 0.6; }
+  80% { opacity: 0.6; }
+  100% { transform: translateY(-200px); opacity: 0; }
 }

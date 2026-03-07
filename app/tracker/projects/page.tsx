@@ -30,7 +30,7 @@ export default async function ProjectsPage({ searchParams }: Props) {
     sp.set("sort", field);
     if (params.search) sp.set("search", params.search);
     if (params.sector) sp.set("sector", params.sector);
-    return `/projects?${sp.toString()}`;
+    return `/tracker/projects?${sp.toString()}`;
   };
 
   const sortArrow = (field: string) => (sort === field ? " \u25BC" : "");
@@ -44,7 +44,7 @@ export default async function ProjectsPage({ searchParams }: Props) {
             {meta.total.toLocaleString()} projects tracked
           </p>
         </div>
-        <form action="/projects" className="flex gap-2">
+        <form action="/tracker/projects" className="flex gap-2">
           <input
             type="text"
             name="search"
@@ -90,7 +90,7 @@ export default async function ProjectsPage({ searchParams }: Props) {
               <tr key={p.id} className="hover:bg-zinc-900/50 transition-colors">
                 <td className="px-4 py-3">
                   <Link
-                    href={`/projects/${p.slug}`}
+                    href={`/tracker/projects/${p.slug}`}
                     className="font-medium text-white hover:text-blue-400 transition-colors"
                   >
                     {p.name}

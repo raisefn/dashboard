@@ -27,7 +27,7 @@ export default async function InvestorsPage({ searchParams }: Props) {
     const sp = new URLSearchParams();
     sp.set("sort", field);
     if (params.search) sp.set("search", params.search);
-    return `/investors?${sp.toString()}`;
+    return `/tracker/investors?${sp.toString()}`;
   };
 
   const sortArrow = (field: string) => (sort === field ? " \u25BC" : "");
@@ -76,7 +76,7 @@ export default async function InvestorsPage({ searchParams }: Props) {
               <tr key={inv.id} className="hover:bg-zinc-900/50 transition-colors">
                 <td className="px-4 py-3">
                   <Link
-                    href={`/investors/${inv.slug}`}
+                    href={`/tracker/investors/${inv.slug}`}
                     className="font-medium text-white hover:text-blue-400 transition-colors"
                   >
                     {inv.name}
