@@ -7,6 +7,7 @@ const topLinks = [
   { href: "/tracker", label: "Eyes & Ears", prefix: "/tracker" },
   { href: "/brain", label: "Brain", prefix: "/brain" },
   { href: "/sdk", label: "Agent SDK", prefix: "/sdk" },
+  { href: "/pricing", label: "Pricing", prefix: "/pricing" },
 ];
 
 const trackerLinks = [
