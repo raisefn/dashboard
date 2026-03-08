@@ -61,91 +61,121 @@ function HeroRings() {
 function StackDiagram() {
   const layers = [
     {
-      label: "Agent SDK",
-      desc: "Your agent calls raise(fn)",
-      color: "#a78bfa",
-      borderColor: "rgba(167,139,250,0.3)",
-      href: "/sdk",
-      y: 0,
-    },
-    {
-      label: "Brain",
-      desc: "Domain intelligence + pattern recognition",
-      color: "#f97316",
-      borderColor: "rgba(249,115,22,0.3)",
-      href: "/brain",
-      y: 120,
-    },
-    {
+      layer: 1,
       label: "Eyes & Ears",
-      desc: "30+ live data sources",
+      headline: "Bloomberg for startups.",
+      interaction: "Human to human.",
+      desc: "Live data from 290+ identified sources — every round, investor, valuation, sector trend, and co-investment pattern, continuously updated.",
       color: "#2dd4bf",
-      borderColor: "rgba(45,212,191,0.3)",
+      borderColor: "rgba(45,212,191,0.25)",
+      badge: "OPEN SOURCE",
+      badgeColor: "text-teal-400 border-teal-700/50",
       href: "/tracker",
-      y: 240,
+    },
+    {
+      layer: 2,
+      label: "The Brain",
+      headline: "AI intelligence layer.",
+      interaction: "Human to AI.",
+      desc: "Investor matching, readiness evaluation, pitch analysis, narrative guidance, signal reading, term sheet comps. Expert fundraising judgment encoded as queryable intelligence.",
+      color: "#f97316",
+      borderColor: "rgba(249,115,22,0.25)",
+      badge: "CLOSED · PAID",
+      badgeColor: "text-orange-400 border-orange-700/50",
+      href: "/brain",
+    },
+    {
+      layer: 3,
+      label: "Agent SDK",
+      headline: "The future.",
+      interaction: "AI to AI.",
+      desc: "Pre-built integrations for LangChain, CrewAI, and Claude. When an AI agent needs fundraising intelligence, it calls raise(fn).",
+      color: "#a78bfa",
+      borderColor: "rgba(167,139,250,0.25)",
+      badge: "OPEN SOURCE",
+      badgeColor: "text-violet-400 border-violet-700/50",
+      href: "/sdk",
     },
   ];
 
   return (
-    <div className="relative mx-auto" style={{ width: 500, height: 340 }}>
-      <svg
-        className="absolute inset-0 pointer-events-none"
-        width={500}
-        height={340}
-        viewBox="0 0 500 340"
-      >
-        {[0, 1].map((i) => (
-          <g key={i}>
-            <line
-              x1={250}
-              y1={layers[i].y + 56}
-              x2={250}
-              y2={layers[i + 1].y + 4}
-              stroke={layers[i + 1].color}
-              strokeWidth={1.5}
-              strokeOpacity={0.25}
-              strokeDasharray="6 4"
-              className="animate-dash"
-              style={{ animationDelay: `${i * 0.5}s` }}
-            />
-            {[0, 1, 2].map((p) => (
-              <circle
-                key={`particle-${i}-${p}`}
-                r={2.5}
-                fill={layers[i + 1].color}
-                opacity={0.5}
-              >
-                <animateMotion
-                  dur={`${2 + p * 0.5}s`}
-                  repeatCount="indefinite"
-                  begin={`${p * 0.7}s`}
-                  path={`M${230 + p * 20},${layers[i + 1].y + 4} L${230 + p * 20},${layers[i].y + 56}`}
-                />
-              </circle>
-            ))}
-          </g>
-        ))}
-      </svg>
-
-      {layers.map((layer) => (
+    <div className="mx-auto max-w-3xl space-y-4">
+      {layers.map((layer, i) => (
         <Link
           key={layer.label}
           href={layer.href}
-          className="absolute left-0 right-0 flex items-center justify-between rounded-xl border px-8 py-4 transition-all hover:bg-zinc-800/30"
+          className="group relative block rounded-xl border px-6 py-5 sm:px-8 sm:py-6 transition-all hover:bg-zinc-800/20"
           style={{
-            top: layer.y,
             borderColor: layer.borderColor,
             background:
-              "linear-gradient(135deg, rgba(24,24,27,0.8), rgba(24,24,27,0.95))",
+              "linear-gradient(135deg, rgba(24,24,27,0.7), rgba(24,24,27,0.95))",
+            minHeight: 130,
           }}
         >
-          <span
-            className="font-semibold text-lg"
-            style={{ color: layer.color }}
-          >
-            {layer.label}
-          </span>
-          <span className="text-sm text-zinc-500">{layer.desc}</span>
+          <div className="flex items-start gap-5 sm:gap-6">
+            {/* Layer badge */}
+            <div
+              className="shrink-0 flex items-center justify-center rounded-lg text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5 mt-0.5"
+              style={{
+                color: layer.color,
+                border: `1px solid ${layer.borderColor}`,
+                background: "rgba(24,24,27,0.8)",
+              }}
+            >
+              Layer {layer.layer}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-baseline flex-wrap gap-x-2 mb-1">
+                <span
+                  className="text-lg font-bold sm:text-xl"
+                  style={{ color: layer.color }}
+                >
+                  {layer.label}
+                </span>
+                <span className="text-zinc-400 text-sm font-medium">
+                  — {layer.headline}
+                </span>
+              </div>
+              <p className="text-sm text-zinc-500 leading-relaxed">
+                <span className="text-zinc-400 font-medium">
+                  {layer.interaction}
+                </span>{" "}
+                {layer.desc}
+              </p>
+            </div>
+
+            {/* Badge */}
+            <span
+              className={`shrink-0 hidden sm:inline-block rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-wider ${layer.badgeColor}`}
+            >
+              {layer.badge}
+            </span>
+          </div>
+
+          {/* Animated connecting line between layers */}
+          {i < layers.length - 1 && (
+            <svg
+              className="absolute left-1/2 -bottom-4 -translate-x-1/2 pointer-events-none"
+              width={2}
+              height={16}
+              viewBox="0 0 2 16"
+            >
+              <line
+                x1={1}
+                y1={0}
+                x2={1}
+                y2={16}
+                stroke={layers[i + 1].color}
+                strokeWidth={1.5}
+                strokeOpacity={0.2}
+                strokeDasharray="4 3"
+                className="animate-dash"
+                style={{ animationDelay: `${i * 0.5}s` }}
+              />
+            </svg>
+          )}
         </Link>
       ))}
     </div>
@@ -166,7 +196,7 @@ export default function LandingPage() {
             <span className="text-teal-400">(fn)</span>
           </h1>
           <p className="mx-auto mt-6 max-w-md text-lg text-zinc-400">
-            The intelligence layer for crypto fundraising.
+            The intelligence layer for startup fundraising.
           </p>
           <div className="mt-16 flex justify-center animate-fade-in" style={{ animationDelay: "1s" }}>
             <svg
@@ -195,7 +225,7 @@ export default function LandingPage() {
               The problem
             </p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-6">
-              Crypto fundraising is{" "}
+              Fundraising is{" "}
               <span className="text-orange-500">a black box</span>
             </h2>
             <p className="text-zinc-400 leading-relaxed max-w-2xl mx-auto mb-16">
@@ -206,7 +236,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
               {[
                 { label: "Opaque investors", desc: "Who's actually deploying?" },
-                { label: "Fragmented data", desc: "Scattered across 30+ sources" },
+                { label: "Fragmented data", desc: "Scattered across 290+ sources" },
                 { label: "No live signals", desc: "Stale info, bad timing" },
                 { label: "No agent brain", desc: "AI can't help if it can't see" },
               ].map((item) => (
@@ -225,21 +255,17 @@ export default function LandingPage() {
       {/* ── The Stack ── */}
       <section className="relative py-32 px-4">
         <FadeInSection>
-          <div className="mx-auto max-w-3xl text-center mb-16">
+          <div className="mx-auto max-w-3xl mb-12">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
               The solution
             </p>
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              Three layers. One stack.
+            <h2 className="text-3xl font-bold sm:text-4xl">
+              <span className="text-white">Three layers.</span>
+              <br />
+              <span className="text-teal-400">One stack.</span>
             </h2>
           </div>
           <StackDiagram />
-          <div className="mx-auto max-w-3xl mt-12 flex items-center justify-center gap-3">
-            <div className="h-8 w-1 bg-teal-400 rounded-full" />
-            <p className="text-lg font-semibold text-white">
-              &ldquo;The data layer is open. The brain is not.&rdquo;
-            </p>
-          </div>
         </FadeInSection>
       </section>
 
@@ -300,9 +326,9 @@ export default function LandingPage() {
           <div className="mx-auto max-w-4xl">
             <div className="grid grid-cols-3 gap-8 text-center">
               {[
-                { stat: "6,400+", label: "rounds tracked" },
-                { stat: "8,900+", label: "investors profiled" },
-                { stat: "30+", label: "data sources" },
+                { stat: "2M+", label: "funding rounds" },
+                { stat: "500K+", label: "investors" },
+                { stat: "290+", label: "data sources" },
               ].map((item) => (
                 <div key={item.label}>
                   <p className="text-5xl font-bold text-teal-400 sm:text-6xl">

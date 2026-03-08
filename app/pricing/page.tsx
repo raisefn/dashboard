@@ -27,8 +27,8 @@ export default function PricingPage() {
               <span className="text-2xl font-bold text-teal-400">Free</span>
             </div>
             <p className="text-sm text-zinc-400 mb-8 max-w-xl">
-              Full access to the Eyes &amp; Ears tracker &mdash; 6,400+ rounds,
-              8,900+ investors, 30+ data sources. Browse, search, and export.
+              Full access to the Eyes &amp; Ears tracker &mdash; 2M+ rounds,
+              500K+ investors, 290+ data sources. Browse, search, and export.
               Plus one free Brain query to see what the intelligence layer can
               do.
             </p>
@@ -189,7 +189,7 @@ export default function PricingPage() {
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
               Continuous market intelligence for investors and analysts. The
-              Bloomberg of crypto fundraising &mdash; recurring, predictable,
+              Bloomberg of startup fundraising &mdash; recurring, predictable,
               and sticky because switching means losing the context
               you&apos;ve built.
             </p>

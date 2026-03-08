@@ -29,7 +29,7 @@ export default function AgentsPage() {
           <div className="mx-auto max-w-2xl space-y-10">
             {[
               {
-                action: "Match investors for a DeFi project raising Series A",
+                action: "Match investors for a SaaS company raising Series A",
                 result: "50 ranked investors with fit scores, recent investments, and preferred intro paths.",
                 color: "#2dd4bf",
               },

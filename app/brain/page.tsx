@@ -34,8 +34,8 @@ const nodes = [
     label: c.shortLabel.replace("\n", " "), desc: c.label.split(" ").slice(-1)[0], color: c.color, active: true,
   })),
   // Data inputs (active, colored)
-  { label: "Live Rounds", desc: "6,400+ tracked", color: "#2dd4bf", active: true },
-  { label: "Investor Profiles", desc: "8,900+ profiled", color: "#fb923c", active: true },
+  { label: "Live Rounds", desc: "2M+ tracked", color: "#2dd4bf", active: true },
+  { label: "Investor Profiles", desc: "500K+ profiled", color: "#fb923c", active: true },
   { label: "Co-Investment", desc: "Network graphs", color: "#a78bfa", active: true },
   { label: "Outcome Data", desc: "Calibration", color: "#34d399", active: true },
   // Future capabilities (inactive, will render greyscale)
@@ -216,8 +216,8 @@ export default function BrainPage() {
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
             The brain knows which investors are actively deploying in your
             sector, whether your metrics are strong enough to raise, and what
-            terms you should expect. It&apos;s built on 6,400+ real rounds and
-            8,900+ investor profiles — updated continuously, calibrated on
+            terms you should expect. Built on thousands of real rounds and
+            investor profiles — updated continuously, calibrated on
             outcomes, and accessible through a single API call.
           </p>
         </div>
@@ -295,7 +295,7 @@ export default function BrainPage() {
           </div>
           <div className="mx-auto max-w-3xl grid gap-8 sm:grid-cols-2">
             {[
-              { title: "Live Tracker Data", desc: "6,400+ rounds, 8,900+ investors, 30+ sources — updated continuously. Not a static dataset.", color: "#2dd4bf" },
+              { title: "Live Tracker Data", desc: "2M+ rounds, 500K+ investors, 290+ sources — updated continuously. Not a static dataset.", color: "#2dd4bf" },
               { title: "Behavioral Patterns", desc: "What investors actually do — response timing, deal flow patterns, co-investment networks.", color: "#fb923c" },
               { title: "Outcome Calibration", desc: "Every recommendation calibrated against real raise outcomes. The brain gets smarter with every raise that runs through it.", color: "#fbbf24" },
               { title: "Persistent Context", desc: "Remembers your project, metrics, and raise history. Every query builds on the last.", color: "#a78bfa" },

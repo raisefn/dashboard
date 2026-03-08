@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "raise(fn) — Fundraising Intelligence for the Crypto Era",
-  description: "The intelligence layer for crypto fundraising — built for founders, VCs, and the agent economy.",
+  title: "raise(fn) — Fundraising Intelligence for Startups",
+  description: "The intelligence layer for startup fundraising — built for founders, VCs, and the agent economy.",
 };
 
 export default function RootLayout({

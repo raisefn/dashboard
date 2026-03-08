@@ -6,40 +6,38 @@ import { useEffect, useRef, useState } from "react";
 
 // All data sources — active and planned
 const sources = [
-  // Active enrichers
-  { label: "DefiLlama", desc: "TVL & protocols", color: "#a78bfa", active: true },
-  { label: "CoinGecko", desc: "Market data", color: "#fbbf24", active: true },
+  // Active sources
+  { label: "SEC EDGAR", desc: "Regulatory filings", color: "#cbd5e1", active: true },
   { label: "GitHub", desc: "Dev activity", color: "#e4e4e7", active: true },
-  { label: "Hacker News", desc: "Dev mindshare", color: "#fb923c", active: true },
-  { label: "Reddit", desc: "Community", color: "#f87171", active: true },
-  { label: "Snapshot", desc: "Governance", color: "#facc15", active: true },
-  { label: "CoinGecko Community", desc: "Social metrics", color: "#34d399", active: true },
+  { label: "Hacker News", desc: "Founder mindshare", color: "#fb923c", active: true },
+  { label: "Reddit", desc: "Community signals", color: "#f87171", active: true },
+  { label: "Product Hunt", desc: "Launch traction", color: "#fbbf24", active: true },
   // Planned / identified sources
-  { label: "Etherscan", desc: "On-chain data", color: "#60a5fa", active: false },
-  { label: "Dune Analytics", desc: "SQL queries", color: "#c084fc", active: false },
-  { label: "Messari", desc: "Research", color: "#38bdf8", active: false },
   { label: "Crunchbase", desc: "Funding rounds", color: "#f472b6", active: false },
+  { label: "PitchBook", desc: "Deal data", color: "#a78bfa", active: false },
+  { label: "AngelList", desc: "Startup profiles", color: "#60a5fa", active: false },
+  { label: "LinkedIn", desc: "Team & network", color: "#38bdf8", active: false },
   { label: "Twitter / X", desc: "Social signals", color: "#94a3b8", active: false },
-  { label: "Telegram", desc: "Group activity", color: "#2dd4bf", active: false },
-  { label: "Discord", desc: "Server metrics", color: "#818cf8", active: false },
-  { label: "Mirror", desc: "Web3 publishing", color: "#67e8f9", active: false },
-  { label: "Nostr", desc: "Decentralized social", color: "#d946ef", active: false },
-  { label: "Farcaster", desc: "Crypto social", color: "#a78bfa", active: false },
-  { label: "Lens Protocol", desc: "Social graph", color: "#86efac", active: false },
-  { label: "DeBank", desc: "Wallet profiles", color: "#fca5a1", active: false },
-  { label: "Nansen", desc: "Wallet labels", color: "#7dd3fc", active: false },
-  { label: "Token Terminal", desc: "Revenue data", color: "#fde68a", active: false },
-  { label: "L2Beat", desc: "Layer 2 data", color: "#c4b5fd", active: false },
-  { label: "Artemis", desc: "Chain metrics", color: "#6ee7b7", active: false },
-  { label: "DeFi Pulse", desc: "Protocol rankings", color: "#fdba74", active: false },
-  { label: "Chainlink", desc: "Oracle data", color: "#93c5fd", active: false },
-  { label: "The Graph", desc: "Subgraphs", color: "#a5b4fc", active: false },
-  { label: "Alchemy", desc: "Node data", color: "#5eead4", active: false },
-  { label: "Flipside", desc: "On-chain analytics", color: "#f9a8d4", active: false },
-  { label: "SEC EDGAR", desc: "Regulatory filings", color: "#cbd5e1", active: false },
+  { label: "Y Combinator", desc: "Batch data", color: "#fb923c", active: false },
+  { label: "Techstars", desc: "Accelerator data", color: "#2dd4bf", active: false },
+  { label: "SimilarWeb", desc: "Web traffic", color: "#818cf8", active: false },
+  { label: "G2", desc: "Product reviews", color: "#67e8f9", active: false },
+  { label: "Glassdoor", desc: "Team growth", color: "#34d399", active: false },
+  { label: "App Store", desc: "Mobile traction", color: "#d946ef", active: false },
+  { label: "Google Play", desc: "Android traction", color: "#86efac", active: false },
+  { label: "npm / PyPI", desc: "Package stats", color: "#bef264", active: false },
+  { label: "AWS Marketplace", desc: "Enterprise traction", color: "#fca5a1", active: false },
+  { label: "Stripe Atlas", desc: "Incorporation data", color: "#7dd3fc", active: false },
+  { label: "Discord", desc: "Community size", color: "#a5b4fc", active: false },
+  { label: "Substack", desc: "Content traction", color: "#fde68a", active: false },
   { label: "arXiv", desc: "Research papers", color: "#fca5a1", active: false },
-  { label: "npm / crates.io", desc: "Package stats", color: "#bef264", active: false },
-  { label: "Galaxy Research", desc: "Institutional", color: "#e879f9", active: false },
+  { label: "Patent Office", desc: "IP filings", color: "#c4b5fd", active: false },
+  { label: "CoinGecko", desc: "Crypto markets", color: "#6ee7b7", active: false },
+  { label: "DefiLlama", desc: "Protocol data", color: "#fdba74", active: false },
+  { label: "CB Insights", desc: "Market maps", color: "#93c5fd", active: false },
+  { label: "Owler", desc: "Company intel", color: "#5eead4", active: false },
+  { label: "BuiltWith", desc: "Tech stacks", color: "#f9a8d4", active: false },
+  { label: "Sensor Tower", desc: "App analytics", color: "#e879f9", active: false },
 ];
 
 // Seeded pseudo-random for consistent layout across renders
@@ -114,7 +112,7 @@ export default function TrackerLandingPage() {
         className="mx-auto max-w-lg text-center text-base text-zinc-400 animate-fade-in mt-8"
         style={{ animationDelay: "0.3s" }}
       >
-        Real-time crypto fundraising data from 30+ sources &mdash; projects,
+        Real-time startup fundraising data from 290+ identified sources &mdash; companies,
         rounds, investors, normalized and enriched.
       </p>
 
@@ -254,9 +252,9 @@ export default function TrackerLandingPage() {
           </div>
           <div className="mx-auto max-w-3xl grid gap-8 sm:grid-cols-3 text-center">
             {[
-              { title: "Projects", stat: "6,400+", desc: "Crypto projects tracked across every stage — from pre-seed to Series C. Sector, traction, team, tech stack, and raise history.", color: "#2dd4bf" },
-              { title: "Rounds", stat: "6,400+", desc: "Individual funding rounds with valuation, amount raised, investors, terms, and timing. Updated as rounds close.", color: "#fbbf24" },
-              { title: "Investors", stat: "8,900+", desc: "VCs, angels, and DAOs profiled by sector focus, stage preference, check size, deployment pace, and co-investment patterns.", color: "#fb923c" },
+              { title: "Companies", stat: "4M+", desc: "Startups tracked across every stage — from pre-seed to Series C. Sector, traction, team, tech stack, and raise history.", color: "#2dd4bf" },
+              { title: "Rounds", stat: "2M+", desc: "Individual funding rounds with valuation, amount raised, investors, terms, and timing. Updated as rounds close.", color: "#fbbf24" },
+              { title: "Investors", stat: "500K+", desc: "VCs, angels, and funds profiled by sector focus, stage preference, check size, deployment pace, and co-investment patterns.", color: "#fb923c" },
             ].map((item) => (
               <div key={item.title}>
                 <p className="text-3xl font-bold mb-1" style={{ color: item.color }}>{item.stat}</p>
@@ -281,7 +279,7 @@ export default function TrackerLandingPage() {
           </div>
           <div className="mx-auto max-w-2xl space-y-10">
             {[
-              { title: "Multi-source ingestion", desc: "Data pulled from 30+ sources — protocol analytics, social platforms, developer activity, governance, market data. Not a single-vendor dependency.", color: "#2dd4bf" },
+              { title: "Multi-source ingestion", desc: "Data pulled from 290+ identified sources — funding databases, social platforms, developer activity, regulatory filings, market data. Not a single-vendor dependency.", color: "#2dd4bf" },
               { title: "Normalization", desc: "Different sources report differently. The tracker normalizes everything into a unified schema — consistent naming, categorization, and structure across every data point.", color: "#fbbf24" },
               { title: "Enrichment", desc: "Raw data gets enriched with derived signals — investor deployment velocity, sector concentration, co-investment networks, round timing patterns.", color: "#fb923c" },
               { title: "Continuous updates", desc: "Not a quarterly report. Not a static dataset. The tracker runs continuously, so the data reflects what's happening now — not what happened last quarter.", color: "#a78bfa" },
@@ -303,7 +301,7 @@ export default function TrackerLandingPage() {
               Live sources
             </p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              7 sources live. 25+ identified.
+              5 sources live. 290+ identified.
             </h2>
           </div>
           <div className="mx-auto max-w-md space-y-2">
