@@ -63,7 +63,7 @@ function StackDiagram() {
     {
       layer: 1,
       label: "Eyes & Ears",
-      headline: "Bloomberg for startups.",
+      headline: "The startup data layer.",
       interaction: "Human to human.",
       desc: "Live data from 290+ identified sources — every round, investor, valuation, sector trend, and co-investment pattern, continuously updated.",
       color: "#2dd4bf",
@@ -217,36 +217,63 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── The Problem ── */}
+      {/* ── Competitive Positioning ── */}
       <section className="relative py-32 px-4">
         <FadeInSection>
-          <div className="mx-auto max-w-3xl text-center">
+          <div className="mx-auto max-w-3xl text-center mb-16">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
-              The problem
+              The difference
             </p>
-            <h2 className="text-3xl font-bold text-white sm:text-4xl mb-6">
-              Fundraising is{" "}
-              <span className="text-orange-500">a black box</span>
+            <h2 className="text-3xl font-bold sm:text-4xl">
+              <span className="text-white">Data platforms are rearview mirrors.</span>
+              <br />
+              <span className="text-teal-400">This is GPS.</span>
             </h2>
-            <p className="text-zinc-400 leading-relaxed max-w-2xl mx-auto mb-16">
-              Founders pitch the wrong investors. VCs miss deals that fit their
-              thesis. Everyone relies on stale data and secondhand advice. The
-              information asymmetry is massive — and it costs real money.
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
-              {[
-                { label: "Opaque investors", desc: "Who's actually deploying?" },
-                { label: "Fragmented data", desc: "Scattered across 290+ sources" },
-                { label: "No live signals", desc: "Stale info, bad timing" },
-                { label: "No agent brain", desc: "AI can't help if it can't see" },
-              ].map((item) => (
-                <div key={item.label}>
-                  <p className="text-sm font-semibold text-white mb-1">
-                    {item.label}
+          </div>
+          <div className="mx-auto max-w-2xl grid grid-cols-2 gap-12">
+            <div>
+              <p className="text-sm font-semibold text-zinc-600 uppercase tracking-wider mb-6">
+                Rearview mirror
+              </p>
+              <div className="space-y-4">
+                {[
+                  "Search \"Series A SaaS\" — get 2,000 results",
+                  "Build your own target list in a spreadsheet",
+                  "No idea who's actually deploying right now",
+                  "Same list your competitor is building",
+                  "You are the analyst",
+                ].map((text) => (
+                  <p
+                    key={text}
+                    className="text-sm text-zinc-600 flex items-start gap-2"
+                  >
+                    <span className="text-zinc-700 mt-0.5">—</span>
+                    {text}
                   </p>
-                  <p className="text-xs text-zinc-600">{item.desc}</p>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-teal-400 uppercase tracking-wider mb-6">
+                GPS
+              </p>
+              <div className="space-y-4">
+                {[
+                  "\"Who should lead my Series A?\" — 15 ranked matches",
+                  "Knows who's deploying this quarter, not last year",
+                  "Flags your metrics are weak before you pitch",
+                  "Sequences outreach so the right investor moves first",
+                  "The analyst is built in",
+                ].map((text) => (
+                  <p
+                    key={text}
+                    className="text-sm text-zinc-300 flex items-start gap-2"
+                  >
+                    <span className="text-teal-400 mt-0.5">—</span>
+                    {text}
+                  </p>
+                ))}
+              </div>
             </div>
           </div>
         </FadeInSection>
@@ -266,6 +293,50 @@ export default function LandingPage() {
             </h2>
           </div>
           <StackDiagram />
+        </FadeInSection>
+      </section>
+
+      {/* ── The Flywheel ── */}
+      <section className="relative py-32 px-4">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl text-center mb-16">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-500 mb-4">
+              The flywheel
+            </p>
+            <h2 className="text-3xl font-bold sm:text-4xl">
+              <span className="text-white">Every raise makes the next one</span>{" "}
+              <span className="text-teal-400">smarter.</span>
+            </h2>
+          </div>
+          <div className="mx-auto max-w-2xl space-y-10">
+            {[
+              {
+                title: "More founders raise → better investor matching",
+                desc: "Every raise generates outcome data — who responded, who passed, who led, what terms closed. The Brain calibrates on real results, not assumptions.",
+                color: "#2dd4bf",
+              },
+              {
+                title: "More data sources → harder to replicate",
+                desc: "290+ sources normalized into one schema. Each new source requires custom ingestion, normalization, and enrichment. The pipeline compounds — copying one source is easy, copying the network is not.",
+                color: "#fb923c",
+              },
+              {
+                title: "Persistent context → switching costs",
+                desc: "The Brain remembers your raise — metrics, investor conversations, pitch iterations. Walk away and you start from zero somewhere else.",
+                color: "#a78bfa",
+              },
+              {
+                title: "Agent integrations → infrastructure lock-in",
+                desc: "Once an AI agent calls raise(fn) for fundraising intelligence, it becomes infrastructure. Ripping out a working API is a cost nobody pays voluntarily.",
+                color: "#fbbf24",
+              },
+            ].map((item) => (
+              <div key={item.title} className="border-l-2 pl-6" style={{ borderColor: `${item.color}40` }}>
+                <p className="text-sm font-semibold mb-1" style={{ color: item.color }}>{item.title}</p>
+                <p className="text-sm text-zinc-500 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
         </FadeInSection>
       </section>
 

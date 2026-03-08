@@ -316,26 +316,32 @@ export default function BrainPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
               The moat
             </p>
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              Three things that compound
+            <h2 className="text-3xl font-bold sm:text-4xl">
+              <span className="text-white">Why the Brain can&apos;t be</span>{" "}
+              <span className="text-orange-500">copied.</span>
             </h2>
           </div>
           <div className="mx-auto max-w-2xl space-y-10">
             {[
               {
-                title: "Live data feed",
-                desc: "The brain's answers are only as good as the data. Because it's connected to the Eyes & Ears in real time, it's always calibrated to current conditions — not a training cutoff from six months ago.",
+                title: "Proprietary outcome data",
+                desc: "Every raise that runs through raisefn generates signal that exists nowhere else — which outreach got responses, which investors moved fast, what narratives landed, what terms closed. This dataset grows with every customer and cannot be scraped, purchased, or replicated.",
                 color: "#2dd4bf",
               },
               {
-                title: "Outcome data",
-                desc: "Every raise that runs through raisefn contributes signal — what outreach worked, which investors moved, what narratives resonated, what terms closed. This data exists nowhere publicly and compounds with every raise.",
+                title: "Live calibration, not frozen training data",
+                desc: "Generic AI models are trained on data from 18 months ago. The Brain is connected to the Eyes & Ears in real time — investor deployment pace this quarter, sector momentum this month, round terms this week. The answers reflect now, not then.",
                 color: "#fb923c",
               },
               {
-                title: "Domain encoding",
-                desc: "The prompts, scoring models, and evaluation frameworks encode how an expert fundraiser actually thinks. A competitor can build an API wrapper around an LLM. They can't replicate the calibration.",
+                title: "Domain judgment, not generic inference",
+                desc: "The scoring models, evaluation frameworks, and sequencing logic encode how the best fundraising advisors actually think. An LLM wrapper can answer questions about fundraising. It can't tell you to pitch Investor A before Investor B because A's commitment will unlock B.",
                 color: "#a78bfa",
+              },
+              {
+                title: "Compounding network effects",
+                desc: "More founders raising → more outcome data → better recommendations → more founders raising. Every raise makes the next recommendation more accurate. Competitors start at zero. We start at every raise that came before.",
+                color: "#fbbf24",
               },
             ].map((item) => (
               <div key={item.title} className="border-l-2 pl-6" style={{ borderColor: `${item.color}40` }}>

@@ -188,10 +188,9 @@ export default function PricingPage() {
               </span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              Continuous market intelligence for investors and analysts. The
-              Bloomberg of startup fundraising &mdash; recurring, predictable,
-              and sticky because switching means losing the context
-              you&apos;ve built.
+              Continuous market intelligence for investors and analysts.
+              Recurring, predictable, and sticky because switching means
+              losing the context you&apos;ve built.
             </p>
 
             {/* Analyst */}
@@ -319,7 +318,7 @@ export default function PricingPage() {
               For context
             </h2>
           </div>
-          <div className="mx-auto max-w-2xl grid grid-cols-2 gap-12">
+          <div className="mx-auto max-w-3xl grid grid-cols-3 gap-8">
             <div>
               <p className="text-sm font-semibold text-zinc-600 uppercase tracking-wider mb-6">
                 Traditional
@@ -328,7 +327,6 @@ export default function PricingPage() {
                 {[
                   "Placement agent: 3–5% of round",
                   "Fundraising advisor: $500–$1K/hr",
-                  "VC data terminal: $20K–$50K/yr",
                   "Months of manual research",
                   "Stale data, static reports",
                 ].map((text) => (
@@ -343,6 +341,27 @@ export default function PricingPage() {
               </div>
             </div>
             <div>
+              <p className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-6">
+                Data platforms
+              </p>
+              <div className="space-y-4">
+                {[
+                  "Crunchbase Pro: $49–$99/mo",
+                  "PitchBook: $20K–$50K/yr",
+                  "Raw data, no intelligence",
+                  "You do the analysis yourself",
+                ].map((text) => (
+                  <p
+                    key={text}
+                    className="text-sm text-zinc-500 flex items-start gap-2"
+                  >
+                    <span className="text-zinc-600 mt-0.5">—</span>
+                    {text}
+                  </p>
+                ))}
+              </div>
+            </div>
+            <div>
               <p className="text-sm font-semibold text-teal-400 uppercase tracking-wider mb-6">
                 raise(fn)
               </p>
@@ -350,8 +369,8 @@ export default function PricingPage() {
                 {[
                   "Founder raise: $2.5K–$15K flat",
                   "Fund subscription: $1K–$2K/mo",
-                  "Live data, updated continuously",
-                  "Intelligence in seconds, not weeks",
+                  "Live intelligence, not raw data",
+                  "Answers, not spreadsheets",
                   "Gets smarter with every raise",
                 ].map((text) => (
                   <p
