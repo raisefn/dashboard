@@ -295,7 +295,7 @@ export default function BrainPage() {
           </div>
           <div className="mx-auto max-w-3xl grid gap-8 sm:grid-cols-2">
             {[
-              { title: "Live Tracker Data", desc: "2M+ rounds, 500K+ investors, 290+ sources — updated continuously. Not a static dataset.", color: "#2dd4bf" },
+              { title: "Live Tracker Data", desc: "Rounds, investors, and companies — cross-referenced from SEC filings, accelerator data, investor registries, and traction signals. Updated continuously.", color: "#2dd4bf" },
               { title: "Behavioral Patterns", desc: "What investors actually do — response timing, deal flow patterns, co-investment networks.", color: "#fb923c" },
               { title: "Outcome Calibration", desc: "Every recommendation calibrated against real raise outcomes. The brain gets smarter with every raise that runs through it.", color: "#fbbf24" },
               { title: "Persistent Context", desc: "Remembers your project, metrics, and raise history. Every query builds on the last.", color: "#a78bfa" },

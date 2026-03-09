@@ -18,7 +18,7 @@ export default function InvestorsPage() {
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto">
             Live deal flow, market signals, and competitive intelligence —
-            from the same data layer that powers 2M+ tracked rounds.
+            built on cross-referenced SEC filings, investor registries, accelerator data, and real-time traction signals.
           </p>
         </div>
       </section>

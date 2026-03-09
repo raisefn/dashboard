@@ -65,7 +65,7 @@ function StackDiagram() {
       label: "Eyes & Ears",
       headline: "The startup data layer.",
       interaction: "Human to human.",
-      desc: "Live data from 290+ identified sources — every round, investor, valuation, sector trend, and co-investment pattern, continuously updated.",
+      desc: "SEC filings, accelerator directories, investor registries, and traction platforms — cross-referenced to surface intelligence no single source reveals. Continuously updated.",
       color: "#2dd4bf",
       borderColor: "rgba(45,212,191,0.25)",
       badge: "OPEN SOURCE",
@@ -317,7 +317,7 @@ export default function LandingPage() {
               },
               {
                 title: "More data sources → harder to replicate",
-                desc: "290+ sources normalized into one schema. Each new source requires custom ingestion, normalization, and enrichment. The pipeline compounds — copying one source is easy, copying the network is not.",
+                desc: "SEC filings, accelerator directories, investor registries, traction platforms — each with custom ingestion, normalization, and cross-referencing logic. Copying one source is easy. Copying the intelligence that emerges from combining them is not.",
                 color: "#fb923c",
               },
               {
@@ -397,9 +397,9 @@ export default function LandingPage() {
           <div className="mx-auto max-w-4xl">
             <div className="grid grid-cols-3 gap-8 text-center">
               {[
-                { stat: "2M+", label: "funding rounds" },
-                { stat: "500K+", label: "investors" },
-                { stat: "290+", label: "data sources" },
+                { stat: "2M+", label: "funding rounds tracked" },
+                { stat: "500K+", label: "investor profiles built" },
+                { stat: "56K+", label: "SEC filings processed yearly" },
               ].map((item) => (
                 <div key={item.label}>
                   <p className="text-5xl font-bold text-teal-400 sm:text-6xl">

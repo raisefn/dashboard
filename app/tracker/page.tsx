@@ -6,38 +6,52 @@ import { useEffect, useRef, useState } from "react";
 
 // All data sources — active and planned
 const sources = [
-  // Active sources
-  { label: "SEC EDGAR", desc: "Regulatory filings", color: "#cbd5e1", active: true },
-  { label: "GitHub", desc: "Dev activity", color: "#e4e4e7", active: true },
+  // ── Active: Fundraising data ──
+  { label: "SEC EDGAR", desc: "Form D filings & offerings", color: "#cbd5e1", active: true },
+  { label: "RSS News", desc: "TechCrunch & CB News", color: "#f472b6", active: true },
+  // ── Active: Company directories ──
+  { label: "Y Combinator", desc: "5,690 startup profiles", color: "#fb923c", active: true },
+  { label: "Techstars", desc: "Accelerator portfolio", color: "#2dd4bf", active: true },
+  { label: "500 Global", desc: "Accelerator portfolio", color: "#a78bfa", active: true },
+  // ── Active: Traction enrichment ──
+  { label: "GitHub", desc: "Dev activity & stars", color: "#e4e4e7", active: true },
   { label: "Hacker News", desc: "Founder mindshare", color: "#fb923c", active: true },
   { label: "Reddit", desc: "Community signals", color: "#f87171", active: true },
   { label: "Product Hunt", desc: "Launch traction", color: "#fbbf24", active: true },
-  // Planned / identified sources
+  { label: "npm", desc: "Package downloads", color: "#bef264", active: true },
+  { label: "PyPI", desc: "Package downloads", color: "#86efac", active: true },
+  // ── Active: Investor intelligence ──
+  { label: "SEC Form ADV", desc: "Family offices & advisers", color: "#93c5fd", active: true },
+  { label: "SEC 13F", desc: "Institutional holdings", color: "#7dd3fc", active: true },
+  { label: "Form D Persons", desc: "Angel investor signals", color: "#c4b5fd", active: true },
+  { label: "IRS 990", desc: "Family foundations", color: "#fde68a", active: true },
+  // ── Active: Legacy crypto ──
+  { label: "DefiLlama", desc: "Protocol TVL", color: "#fdba74", active: true },
+  { label: "CoinGecko", desc: "Token markets", color: "#6ee7b7", active: true },
+  // ── Planned / identified ──
+  { label: "Companies House", desc: "UK company data", color: "#38bdf8", active: false },
   { label: "Crunchbase", desc: "Funding rounds", color: "#f472b6", active: false },
   { label: "PitchBook", desc: "Deal data", color: "#a78bfa", active: false },
   { label: "AngelList", desc: "Startup profiles", color: "#60a5fa", active: false },
   { label: "LinkedIn", desc: "Team & network", color: "#38bdf8", active: false },
   { label: "Twitter / X", desc: "Social signals", color: "#94a3b8", active: false },
-  { label: "Y Combinator", desc: "Batch data", color: "#fb923c", active: false },
-  { label: "Techstars", desc: "Accelerator data", color: "#2dd4bf", active: false },
   { label: "SimilarWeb", desc: "Web traffic", color: "#818cf8", active: false },
   { label: "G2", desc: "Product reviews", color: "#67e8f9", active: false },
   { label: "Glassdoor", desc: "Team growth", color: "#34d399", active: false },
   { label: "App Store", desc: "Mobile traction", color: "#d946ef", active: false },
   { label: "Google Play", desc: "Android traction", color: "#86efac", active: false },
-  { label: "npm / PyPI", desc: "Package stats", color: "#bef264", active: false },
   { label: "AWS Marketplace", desc: "Enterprise traction", color: "#fca5a1", active: false },
   { label: "Stripe Atlas", desc: "Incorporation data", color: "#7dd3fc", active: false },
   { label: "Discord", desc: "Community size", color: "#a5b4fc", active: false },
   { label: "Substack", desc: "Content traction", color: "#fde68a", active: false },
   { label: "arXiv", desc: "Research papers", color: "#fca5a1", active: false },
   { label: "Patent Office", desc: "IP filings", color: "#c4b5fd", active: false },
-  { label: "CoinGecko", desc: "Crypto markets", color: "#6ee7b7", active: false },
-  { label: "DefiLlama", desc: "Protocol data", color: "#fdba74", active: false },
   { label: "CB Insights", desc: "Market maps", color: "#93c5fd", active: false },
   { label: "Owler", desc: "Company intel", color: "#5eead4", active: false },
   { label: "BuiltWith", desc: "Tech stacks", color: "#f9a8d4", active: false },
   { label: "Sensor Tower", desc: "App analytics", color: "#e879f9", active: false },
+  { label: "OpenVC", desc: "Investor profiles", color: "#34d399", active: false },
+  { label: "Angel Capital Assn", desc: "Angel group directory", color: "#fca5a1", active: false },
 ];
 
 // Seeded pseudo-random for consistent layout across renders
@@ -112,8 +126,8 @@ export default function TrackerLandingPage() {
         className="mx-auto max-w-lg text-center text-base text-zinc-400 animate-fade-in mt-8"
         style={{ animationDelay: "0.3s" }}
       >
-        Real-time startup fundraising data from 290+ identified sources &mdash; companies,
-        rounds, investors, normalized and enriched.
+        Cross-referencing SEC filings, investor registries, accelerator data, and real-time traction signals
+        to surface intelligence that no single source can reveal.
       </p>
 
       {/* Neural network */}
@@ -247,17 +261,16 @@ export default function TrackerLandingPage() {
               What it tracks
             </p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              Three datasets, one unified view
+              What the tracker sees
             </h2>
           </div>
           <div className="mx-auto max-w-3xl grid gap-8 sm:grid-cols-3 text-center">
             {[
-              { title: "Companies", stat: "4M+", desc: "Startups tracked across every stage — from pre-seed to Series C. Sector, traction, team, tech stack, and raise history.", color: "#2dd4bf" },
-              { title: "Rounds", stat: "2M+", desc: "Individual funding rounds with valuation, amount raised, investors, terms, and timing. Updated as rounds close.", color: "#fbbf24" },
-              { title: "Investors", stat: "500K+", desc: "VCs, angels, and funds profiled by sector focus, stage preference, check size, deployment pace, and co-investment patterns.", color: "#fb923c" },
+              { title: "Companies", desc: "Every startup that files with the SEC, launches from a top accelerator, or shows traction on developer and product platforms — continuously tracked.", color: "#2dd4bf" },
+              { title: "Rounds", desc: "Fundraising events detected from regulatory filings, news, and public records — cross-referenced for accuracy, enriched with context.", color: "#fbbf24" },
+              { title: "Investors", desc: "VCs, angels, family offices, and foundations — identified from SEC registrations, 13F holdings, Form D filings, and foundation tax records.", color: "#fb923c" },
             ].map((item) => (
               <div key={item.title}>
-                <p className="text-3xl font-bold mb-1" style={{ color: item.color }}>{item.stat}</p>
                 <p className="text-sm font-semibold mb-2" style={{ color: item.color }}>{item.title}</p>
                 <p className="text-sm text-zinc-500 leading-relaxed">{item.desc}</p>
               </div>
@@ -271,18 +284,18 @@ export default function TrackerLandingPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
-              How it works
+              What it sees
             </p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              Crawl. Normalize. Enrich. Repeat.
+              Intelligence that emerges from combination.
             </h2>
           </div>
           <div className="mx-auto max-w-2xl space-y-10">
             {[
-              { title: "Multi-source ingestion", desc: "Data pulled from 290+ identified sources — funding databases, social platforms, developer activity, regulatory filings, market data. Not a single-vendor dependency.", color: "#2dd4bf" },
-              { title: "Normalization", desc: "Different sources report differently. The tracker normalizes everything into a unified schema — consistent naming, categorization, and structure across every data point.", color: "#fbbf24" },
-              { title: "Enrichment", desc: "Raw data gets enriched with derived signals — investor deployment velocity, sector concentration, co-investment networks, round timing patterns.", color: "#fb923c" },
-              { title: "Continuous updates", desc: "Not a quarterly report. Not a static dataset. The tracker runs continuously, so the data reflects what's happening now — not what happened last quarter.", color: "#a78bfa" },
+              { title: "Family offices that are actually deploying", desc: "Cross-reference SEC Form ADV registrations with Form D filings to find family offices actively writing checks into early-stage — not just ones that exist on paper.", color: "#2dd4bf" },
+              { title: "Angel investors hiding in plain sight", desc: "Analyze promoter patterns across thousands of Form D filings to build angel profiles — who keeps showing up on cap tables, in which sectors, at what stages.", color: "#fbbf24" },
+              { title: "Traction signals that predict funding", desc: "Correlate GitHub commit velocity, Hacker News mention spikes, and Product Hunt launches with funding timing to identify companies likely raising before they announce.", color: "#fb923c" },
+              { title: "Investor behavior, not investor marketing", desc: "13F holdings data reveals what institutions actually hold. Form D filings reveal who actually led. This is what investors do — not what they say they do.", color: "#a78bfa" },
             ].map((item) => (
               <div key={item.title} className="border-l-2 pl-6" style={{ borderColor: `${item.color}40` }}>
                 <p className="text-sm font-semibold mb-1" style={{ color: item.color }}>{item.title}</p>
@@ -293,29 +306,46 @@ export default function TrackerLandingPage() {
         </FadeInSection>
       </section>
 
-      {/* ── Active Sources ── */}
+      {/* ── Why This Is Different ── */}
       <section className="relative py-24 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
-              Live sources
+              Why this matters
             </p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              5 sources live. 290+ identified.
+              Any one source is a list. Combined, it&apos;s intelligence.
             </h2>
           </div>
-          <div className="mx-auto max-w-md space-y-2">
-            {sources.filter(s => s.active).map((source) => (
-              <div key={source.label} className="flex items-center gap-4 py-3">
-                <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: source.color }} />
-                <span className="text-sm font-medium text-zinc-300">{source.label}</span>
-                <span className="text-xs text-zinc-600">{source.desc}</span>
+          <div className="mx-auto max-w-2xl space-y-10">
+            {[
+              {
+                title: "SEC Form D says a company raised $5M",
+                then: "The tracker finds the same company in YC's W24 batch, sees their GitHub repo gained 2,000 stars last month, and identifies the lead investor from Form ADV as a family office with $400M AUM that's deployed into 12 similar deals.",
+                color: "#2dd4bf",
+              },
+              {
+                title: "A name appears on 8 Form D filings in 18 months",
+                then: "Cross-reference with 13F data and IRS 990 records — this is a family foundation converting to direct startup investing. They're writing $250K–$500K checks in developer tools. No database lists them as an angel.",
+                color: "#fbbf24",
+              },
+              {
+                title: "A YC company's npm package hits 50K weekly downloads",
+                then: "Product Hunt launch got 1,200 upvotes. Reddit threads are growing. GitHub stars accelerating. No funding round announced yet — but the pattern matches companies that raised within 60 days.",
+                color: "#fb923c",
+              },
+              {
+                title: "An investor's 13F shows they sold 3 portfolio positions",
+                then: "Their Form ADV shows dry powder. Their last 4 Form D appearances were in AI infrastructure. They haven't led a deal in 90 days. This investor is about to deploy.",
+                color: "#a78bfa",
+              },
+            ].map((item) => (
+              <div key={item.title} className="border-l-2 pl-6" style={{ borderColor: `${item.color}40` }}>
+                <p className="text-sm font-semibold mb-2" style={{ color: item.color }}>{item.title}</p>
+                <p className="text-sm text-zinc-500 leading-relaxed">{item.then}</p>
               </div>
             ))}
           </div>
-          <p className="mx-auto max-w-md text-center text-xs text-zinc-600 mt-8">
-            Planned sources shown in the diagram above in grey.
-          </p>
         </FadeInSection>
       </section>
 
