@@ -32,7 +32,7 @@ export default function Nav() {
 
   // TODO: restore sub-nav when tracker/brain pages are built
   // const subLinks = isTracker ? trackerLinks : isBrain ? brainLinks : null;
-  const subLinks = null;
+  const subLinks: typeof trackerLinks | null = null;
 
   return (
     <>
