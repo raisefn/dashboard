@@ -419,9 +419,6 @@ export default function BrainPage() {
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">The intelligence layer is live</h2>
             <p className="text-zinc-500 mb-8">Get early access to the brain.</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <a href="mailto:justinpetsche@gmail.com?subject=raise(fn) Brain — Early Access" className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30">
-                Request Early Access
-              </a>
               <Link href="/tracker" className="rounded-full border border-zinc-700 px-8 py-3 text-sm font-medium text-zinc-300 transition-all hover:border-zinc-500 hover:text-white">
                 Explore the Tracker
               </Link>
