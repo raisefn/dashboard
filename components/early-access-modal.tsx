@@ -11,6 +11,7 @@ export default function EarlyAccessModal({ open, onClose }: Props) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
+  const [role, setRole] = useState<"" | "investor" | "founder" | "builder">("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -38,6 +39,11 @@ export default function EarlyAccessModal({ open, onClose }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!role) {
+      setStatus("error");
+      setErrorMsg("");
+      return;
+    }
     setStatus("submitting");
     setErrorMsg("");
 
@@ -45,7 +51,7 @@ export default function EarlyAccessModal({ open, onClose }: Props) {
       const res = await fetch("/api/early-access", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, company }),
+        body: JSON.stringify({ name, email, company, role }),
       });
 
       const data = await res.json();
@@ -143,7 +149,35 @@ export default function EarlyAccessModal({ open, onClose }: Props) {
                 />
               </div>
 
-              {status === "error" && (
+              <div>
+                <label className="block text-xs text-zinc-500 mb-2">I am a...</label>
+                <div className="flex gap-2">
+                  {([
+                    { value: "investor", label: "Investor" },
+                    { value: "founder", label: "Founder" },
+                    { value: "builder", label: "Builder" },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setRole(opt.value)}
+                      className={`flex-1 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
+                        role === opt.value
+                          ? "border-teal-600 bg-teal-950/40 text-teal-300"
+                          : "border-zinc-800 bg-zinc-900/50 text-zinc-500 hover:border-zinc-700 hover:text-zinc-400"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {!role && status === "error" && !errorMsg && (
+                <p className="text-sm text-red-400">Please select a role.</p>
+              )}
+
+              {status === "error" && errorMsg && (
                 <p className="text-sm text-red-400">{errorMsg}</p>
               )}
 

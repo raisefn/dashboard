@@ -6,11 +6,19 @@ export async function POST(req: Request) {
   try {
     const supabase = getSupabase();
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const { name, email, company } = await req.json();
+    const { name, email, company, role } = await req.json();
 
-    if (!name?.trim() || !email?.trim() || !company?.trim()) {
+    if (!name?.trim() || !email?.trim() || !company?.trim() || !role?.trim()) {
       return NextResponse.json(
-        { error: "Name, email, and company are required." },
+        { error: "All fields are required." },
+        { status: 400 }
+      );
+    }
+
+    const validRoles = ["investor", "founder", "builder"];
+    if (!validRoles.includes(role)) {
+      return NextResponse.json(
+        { error: "Invalid role." },
         { status: 400 }
       );
     }
@@ -46,7 +54,7 @@ export async function POST(req: Request) {
       // Re-send verification for unverified signup
       await supabase
         .from("early_access")
-        .update({ name: name.trim(), company: company.trim(), token })
+        .update({ name: name.trim(), company: company.trim(), role, token })
         .eq("id", existing.id);
     } else {
       const { error: insertError } = await supabase
@@ -55,6 +63,7 @@ export async function POST(req: Request) {
           name: name.trim(),
           email: email.toLowerCase().trim(),
           company: company.trim(),
+          role,
           token,
           verified: false,
         });

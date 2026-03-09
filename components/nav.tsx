@@ -67,7 +67,7 @@ export default function Nav() {
           {/* Early Access — absolute right */}
           <button
             onClick={() => setShowEarlyAccess(true)}
-            className="absolute right-4 rounded-full border border-orange-700/50 bg-orange-950/20 px-4 py-1.5 text-xs font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30"
+            className="absolute right-4 rounded-full bg-orange-600 px-5 py-1.5 text-xs font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
           >
             Early Access
           </button>

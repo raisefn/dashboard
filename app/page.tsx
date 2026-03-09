@@ -670,12 +670,6 @@ export default function LandingPage() {
               >
                 GitHub
               </a>
-              <a
-                href="mailto:justinpetsche@gmail.com"
-                className="rounded-full border border-zinc-700 px-8 py-3 text-sm font-medium text-zinc-300 transition-all hover:border-zinc-500 hover:text-white"
-              >
-                Get in Touch
-              </a>
             </div>
           </div>
         </FadeInSection>
