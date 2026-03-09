@@ -364,14 +364,6 @@ export default function TrackerLandingPage() {
               is available for anyone to use, verify, and build on.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <a
-                href="https://github.com/raisefn/tracker"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30"
-              >
-                View on GitHub
-              </a>
               <Link
                 href="/tracker/projects"
                 className="rounded-full border border-zinc-700 px-8 py-3 text-sm font-medium text-zinc-300 transition-all hover:border-zinc-500 hover:text-white"

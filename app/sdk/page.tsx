@@ -253,20 +253,6 @@ export default function SDKPage() {
               The tracker is open source. The SDK is open source.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <a
-                href="https://github.com/raisefn"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-full border border-violet-700/50 bg-violet-950/20 px-8 py-3 text-sm font-medium text-violet-300 transition-all hover:border-violet-500 hover:bg-violet-900/30"
-              >
-                View on GitHub
-              </a>
-              <a
-                href="mailto:justinpetsche@gmail.com?subject=raise(fn) SDK — API Key Request"
-                className="rounded-full border border-zinc-700 px-8 py-3 text-sm font-medium text-zinc-300 transition-all hover:border-zinc-500 hover:text-white"
-              >
-                Request API Key
-              </a>
             </div>
           </div>
         </FadeInSection>

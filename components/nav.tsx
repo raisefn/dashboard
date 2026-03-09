@@ -30,7 +30,9 @@ export default function Nav() {
   const isBrain = pathname.startsWith("/brain");
   const [showEarlyAccess, setShowEarlyAccess] = useState(false);
 
-  const subLinks = isTracker ? trackerLinks : isBrain ? brainLinks : null;
+  // TODO: restore sub-nav when tracker/brain pages are built
+  // const subLinks = isTracker ? trackerLinks : isBrain ? brainLinks : null;
+  const subLinks = null;
 
   return (
     <>

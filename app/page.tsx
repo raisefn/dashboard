@@ -662,14 +662,6 @@ export default function LandingPage() {
               >
                 Explore the Tracker
               </Link>
-              <a
-                href="https://github.com/raisefn/tracker"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-full border border-zinc-700 px-8 py-3 text-sm font-medium text-zinc-300 transition-all hover:border-zinc-500 hover:text-white"
-              >
-                GitHub
-              </a>
             </div>
           </div>
         </FadeInSection>
