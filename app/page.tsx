@@ -235,7 +235,7 @@ function StackDiagram() {
       label: "Eyes & Ears",
       headline: "The startup data layer.",
       interaction: "Human to human.",
-      desc: "SEC filings, accelerator directories, investor registries, and traction platforms — cross-referenced to surface intelligence no single source reveals. Continuously updated.",
+      desc: "Hundreds of data sources — standardized, enriched, and updated continuously. Cross-referenced to surface intelligence no single source reveals. Real-time social signals. Free and open source.",
       color: "#2dd4bf",
       borderColor: "rgba(45,212,191,0.25)",
       badge: "OPEN SOURCE",
