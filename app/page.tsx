@@ -145,7 +145,7 @@ function BrainDemo() {
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950/50 text-emerald-400 border border-emerald-800/30 font-semibold">READY — WITH FLAGS</span>
                 </div>
                 {/* Metric benchmarks */}
-                <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
                   {[
                     { metric: "ARR", value: "$1.8M", percentile: "top 18%", status: "strong" },
                     { metric: "Growth", value: "45% MoM", percentile: "top 4%", status: "flag" },
@@ -361,7 +361,7 @@ export default function LandingPage() {
       <section className="relative flex min-h-[85vh] flex-col items-center justify-center px-4 text-center overflow-hidden">
         <HeroRings />
         <div className="relative z-10 animate-fade-in">
-          <h1 className="text-7xl font-bold tracking-tight sm:text-8xl md:text-9xl">
+          <h1 className="text-5xl font-bold tracking-tight sm:text-7xl md:text-8xl lg:text-9xl">
             <span className="text-orange-500">raise</span>
             <span className="text-teal-400">(fn)</span>
           </h1>
@@ -433,7 +433,7 @@ export default function LandingPage() {
               <span className="text-teal-400">This is GPS.</span>
             </h2>
           </div>
-          <div className="mx-auto max-w-2xl grid grid-cols-2 gap-12">
+          <div className="mx-auto max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12">
             <div>
               <p className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-6">
                 Rearview mirror
@@ -581,7 +581,7 @@ export default function LandingPage() {
       <section className="relative py-24 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-4xl">
-            <div className="grid grid-cols-3 gap-8 text-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
               {[
                 { stat: "2M+", label: "funding rounds tracked" },
                 { stat: "500K+", label: "investor profiles built" },

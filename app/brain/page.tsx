@@ -363,7 +363,7 @@ export default function BrainPage() {
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-12 text-center">
               This isn&apos;t a wrapper on an LLM
             </h2>
-            <div className="grid grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12">
               <div>
                 <p className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-6">Generic AI</p>
                 <div className="space-y-4">

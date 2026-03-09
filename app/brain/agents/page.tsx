@@ -179,7 +179,7 @@ export default function AgentsPage() {
               Or hit the REST API directly.
             </p>
           </div>
-          <div className="mx-auto max-w-md grid grid-cols-2 gap-4">
+          <div className="mx-auto max-w-md grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
               { name: "LangChain", desc: "Tool & retriever", color: "#2dd4bf" },
               { name: "CrewAI", desc: "Agent tool", color: "#f97316" },

@@ -103,7 +103,7 @@ export default function InvestorsPage() {
       <section className="relative py-24 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">
-            <div className="grid grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12">
               <div>
                 <p className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-6">Without the brain</p>
                 <div className="space-y-4">

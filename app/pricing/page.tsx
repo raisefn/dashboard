@@ -318,7 +318,7 @@ export default function PricingPage() {
               For context
             </h2>
           </div>
-          <div className="mx-auto max-w-3xl grid grid-cols-3 gap-8">
+          <div className="mx-auto max-w-3xl grid grid-cols-1 sm:grid-cols-3 gap-8">
             <div>
               <p className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-6">
                 Traditional

@@ -264,7 +264,7 @@ export default function TrackerLandingPage() {
               What the tracker sees
             </h2>
           </div>
-          <div className="mx-auto max-w-3xl grid gap-8 sm:grid-cols-3 text-center">
+          <div className="mx-auto max-w-3xl grid grid-cols-1 gap-8 sm:grid-cols-3 text-center">
             {[
               { title: "Companies", desc: "Every startup that files with the SEC, launches from a top accelerator, or shows traction on developer and product platforms — continuously tracked.", color: "#2dd4bf" },
               { title: "Rounds", desc: "Fundraising events detected from regulatory filings, news, and public records — cross-referenced for accuracy, enriched with context.", color: "#fbbf24" },
