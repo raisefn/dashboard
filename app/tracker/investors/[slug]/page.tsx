@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getInvestor, getInvestorRounds } from "@/lib/api";
 import { formatUSD, formatDate } from "@/lib/format";
+import TrackerComingSoon from "@/components/tracker-coming-soon";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -8,8 +9,15 @@ interface Props {
 
 export default async function InvestorDetailPage({ params }: Props) {
   const { slug } = await params;
-  const investor = await getInvestor(slug);
-  const { data: rounds } = await getInvestorRounds(slug, { limit: 100 });
+
+  let investor, rounds;
+  try {
+    investor = await getInvestor(slug);
+    const res = await getInvestorRounds(slug, { limit: 100 });
+    rounds = res.data;
+  } catch {
+    return <TrackerComingSoon />;
+  }
 
   return (
     <div>

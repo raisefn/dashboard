@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+import EarlyAccessModal from "@/components/early-access-modal";
 
 const topLinks = [
   { href: "/tracker", label: "Eyes & Ears", prefix: "/tracker" },
@@ -26,10 +28,12 @@ export default function Nav() {
   const pathname = usePathname();
   const isTracker = pathname.startsWith("/tracker");
   const isBrain = pathname.startsWith("/brain");
+  const [showEarlyAccess, setShowEarlyAccess] = useState(false);
 
   const subLinks = isTracker ? trackerLinks : isBrain ? brainLinks : null;
 
   return (
+    <>
     <header className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-md">
       {/* Primary nav */}
       <nav className="border-b border-zinc-800">
@@ -59,6 +63,14 @@ export default function Nav() {
               );
             })}
           </div>
+
+          {/* Early Access — absolute right */}
+          <button
+            onClick={() => setShowEarlyAccess(true)}
+            className="absolute right-4 rounded-full border border-orange-700/50 bg-orange-950/20 px-4 py-1.5 text-xs font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30"
+          >
+            Early Access
+          </button>
         </div>
       </nav>
 
@@ -90,5 +102,7 @@ export default function Nav() {
         </nav>
       )}
     </header>
+    <EarlyAccessModal open={showEarlyAccess} onClose={() => setShowEarlyAccess(false)} />
+    </>
   );
 }

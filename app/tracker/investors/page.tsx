@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getInvestors } from "@/lib/api";
 import { formatNumber } from "@/lib/format";
 import Pagination from "@/components/pagination";
+import TrackerComingSoon from "@/components/tracker-coming-soon";
 
 interface Props {
   searchParams: Promise<{
@@ -16,12 +17,19 @@ export default async function InvestorsPage({ searchParams }: Props) {
   const offset = parseInt(params.offset || "0");
   const sort = params.sort || "rounds_count";
 
-  const { data: investors, meta } = await getInvestors({
-    limit: 50,
-    offset,
-    search: params.search,
-    sort,
-  });
+  let investors, meta;
+  try {
+    const res = await getInvestors({
+      limit: 50,
+      offset,
+      search: params.search,
+      sort,
+    });
+    investors = res.data;
+    meta = res.meta;
+  } catch {
+    return <TrackerComingSoon />;
+  }
 
   const sortLink = (field: string) => {
     const sp = new URLSearchParams();

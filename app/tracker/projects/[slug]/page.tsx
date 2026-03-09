@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getProject, getRounds } from "@/lib/api";
 import { formatUSD, formatNumber, formatPercent, formatPrice, formatDate, percentColor } from "@/lib/format";
 import StatsCard from "@/components/stats-card";
+import TrackerComingSoon from "@/components/tracker-coming-soon";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -9,11 +10,15 @@ interface Props {
 
 export default async function ProjectDetailPage({ params }: Props) {
   const { slug } = await params;
-  const project = await getProject(slug);
 
-  // Fetch rounds for this project
-  const { data: allRounds } = await getRounds({ limit: 200 });
-  const rounds = allRounds.filter((r) => r.project.slug === slug);
+  let project, rounds;
+  try {
+    project = await getProject(slug);
+    const { data: allRounds } = await getRounds({ limit: 200 });
+    rounds = allRounds.filter((r) => r.project.slug === slug);
+  } catch {
+    return <TrackerComingSoon />;
+  }
 
   return (
     <div>

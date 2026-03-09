@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getProjects } from "@/lib/api";
 import { formatUSD, formatNumber, formatPercent, formatPrice, percentColor } from "@/lib/format";
 import Pagination from "@/components/pagination";
+import TrackerComingSoon from "@/components/tracker-coming-soon";
 
 interface Props {
   searchParams: Promise<{
@@ -17,13 +18,20 @@ export default async function ProjectsPage({ searchParams }: Props) {
   const offset = parseInt(params.offset || "0");
   const sort = params.sort || "github_stars";
 
-  const { data: projects, meta } = await getProjects({
-    limit: 50,
-    offset,
-    sort,
-    search: params.search,
-    sector: params.sector,
-  });
+  let projects, meta;
+  try {
+    const res = await getProjects({
+      limit: 50,
+      offset,
+      sort,
+      search: params.search,
+      sector: params.sector,
+    });
+    projects = res.data;
+    meta = res.meta;
+  } catch {
+    return <TrackerComingSoon />;
+  }
 
   const sortLink = (field: string) => {
     const sp = new URLSearchParams();

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getRounds } from "@/lib/api";
 import { formatUSD, formatDate } from "@/lib/format";
 import Pagination from "@/components/pagination";
+import TrackerComingSoon from "@/components/tracker-coming-soon";
 
 interface Props {
   searchParams: Promise<{
@@ -16,13 +17,20 @@ export default async function RoundsPage({ searchParams }: Props) {
   const params = await searchParams;
   const offset = parseInt(params.offset || "0");
 
-  const { data: rounds, meta } = await getRounds({
-    limit: 50,
-    offset,
-    sector: params.sector,
-    round_type: params.round_type,
-    min_amount: params.min_amount ? parseInt(params.min_amount) : undefined,
-  });
+  let rounds, meta;
+  try {
+    const res = await getRounds({
+      limit: 50,
+      offset,
+      sector: params.sector,
+      round_type: params.round_type,
+      min_amount: params.min_amount ? parseInt(params.min_amount) : undefined,
+    });
+    rounds = res.data;
+    meta = res.meta;
+  } catch {
+    return <TrackerComingSoon />;
+  }
 
   return (
     <div>
