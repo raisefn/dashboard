@@ -30,8 +30,8 @@ export default function Nav() {
   const isBrain = pathname.startsWith("/brain");
   const [showEarlyAccess, setShowEarlyAccess] = useState(false);
 
-  // TODO: restore sub-nav when tracker/brain pages are built
-  // const subLinks = isTracker ? trackerLinks : isBrain ? brainLinks : null;
+  // TODO: restore tracker sub-nav when tracker pages are built
+  const subLinks = isBrain ? brainLinks : null;
 
   return (
     <>
@@ -75,15 +75,12 @@ export default function Nav() {
         </div>
       </nav>
 
-      {/* TODO: restore sub-nav when tracker/brain pages are built
       {subLinks && (
         <nav className="border-b border-zinc-800/60 bg-zinc-950/60">
           <div className="relative mx-auto flex max-w-7xl items-center justify-center px-4 py-2">
             <div className="flex gap-6">
               {subLinks.map((link) => {
-                const active =
-                  pathname === link.href ||
-                  (link.href === "/tracker/projects" && pathname === "/tracker");
+                const active = pathname === link.href;
                 return (
                   <Link
                     key={link.href}
@@ -102,7 +99,6 @@ export default function Nav() {
           </div>
         </nav>
       )}
-      */}
     </header>
     <EarlyAccessModal open={showEarlyAccess} onClose={() => setShowEarlyAccess(false)} />
     </>
