@@ -262,20 +262,20 @@ export default function BrainPage() {
       <section className="relative py-24 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center mb-12">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-600 mb-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500 mb-4">
               Coming Next
             </p>
-            <h2 className="text-3xl font-bold text-zinc-600 sm:text-4xl">
+            <h2 className="text-3xl font-bold text-zinc-500 sm:text-4xl">
               On the roadmap
             </h2>
           </div>
           <div className="mx-auto max-w-4xl grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
             {futureCaps.map((cap, i) => (
               <div key={i} className="text-center px-2">
-                <p className="text-sm font-semibold mb-2 text-zinc-600">
+                <p className="text-sm font-semibold mb-2 text-zinc-500">
                   {cap.label}
                 </p>
-                <p className="text-sm text-zinc-700 leading-relaxed">{cap.desc}</p>
+                <p className="text-sm text-zinc-500 leading-relaxed">{cap.desc}</p>
               </div>
             ))}
           </div>
@@ -365,11 +365,11 @@ export default function BrainPage() {
             </h2>
             <div className="grid grid-cols-2 gap-12">
               <div>
-                <p className="text-sm font-semibold text-zinc-600 uppercase tracking-wider mb-6">Generic AI</p>
+                <p className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-6">Generic AI</p>
                 <div className="space-y-4">
                   {["Training data from 18 months ago", "Public info — what investors say", "No domain calibration", "Forgets everything between sessions", "Generic answers to domain-specific questions"].map((text) => (
-                    <p key={text} className="text-sm text-zinc-600 flex items-start gap-2">
-                      <span className="text-zinc-700 mt-0.5">—</span>{text}
+                    <p key={text} className="text-sm text-zinc-500 flex items-start gap-2">
+                      <span className="text-zinc-600 mt-0.5">—</span>{text}
                     </p>
                   ))}
                 </div>
@@ -405,7 +405,7 @@ export default function BrainPage() {
               <Link key={item.who} href={item.href} className="group transition-all hover:bg-zinc-900/30 rounded-xl p-4">
                 <p className="text-sm font-semibold mb-2 group-hover:brightness-125" style={{ color: item.color }}>{item.who}</p>
                 <p className="text-sm text-zinc-500">{item.what}</p>
-                <p className="text-xs mt-3 text-zinc-600 group-hover:text-zinc-400 transition-colors">Learn more &rarr;</p>
+                <p className="text-xs mt-3 text-zinc-500 group-hover:text-zinc-300 transition-colors">Learn more &rarr;</p>
               </Link>
             ))}
           </div>

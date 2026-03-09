@@ -33,7 +33,7 @@ export default function AgentsPage() {
                 <div className="h-3 w-3 rounded-full bg-zinc-700" />
                 <div className="h-3 w-3 rounded-full bg-zinc-700" />
                 <div className="h-3 w-3 rounded-full bg-zinc-700" />
-                <span className="ml-2 text-xs text-zinc-600">match-investors.py</span>
+                <span className="ml-2 text-xs text-zinc-400">match-investors.py</span>
               </div>
               <pre className="p-6 text-sm leading-relaxed overflow-x-auto">
                 <code>
@@ -188,7 +188,7 @@ export default function AgentsPage() {
             ].map((fw) => (
               <div key={fw.name} className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
                 <p className="text-sm font-semibold" style={{ color: fw.color }}>{fw.name}</p>
-                <p className="text-xs text-zinc-600 mt-0.5">{fw.desc}</p>
+                <p className="text-xs text-zinc-400 mt-0.5">{fw.desc}</p>
               </div>
             ))}
           </div>

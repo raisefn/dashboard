@@ -435,7 +435,7 @@ export default function LandingPage() {
           </div>
           <div className="mx-auto max-w-2xl grid grid-cols-2 gap-12">
             <div>
-              <p className="text-sm font-semibold text-zinc-600 uppercase tracking-wider mb-6">
+              <p className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-6">
                 Rearview mirror
               </p>
               <div className="space-y-4">
@@ -448,9 +448,9 @@ export default function LandingPage() {
                 ].map((text) => (
                   <p
                     key={text}
-                    className="text-sm text-zinc-600 flex items-start gap-2"
+                    className="text-sm text-zinc-500 flex items-start gap-2"
                   >
-                    <span className="text-zinc-700 mt-0.5">—</span>
+                    <span className="text-zinc-600 mt-0.5">—</span>
                     {text}
                   </p>
                 ))}

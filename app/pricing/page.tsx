@@ -88,7 +88,7 @@ export default function PricingPage() {
                   $2,500
                 </span>
               </div>
-              <p className="text-xs text-zinc-600 mb-4">
+              <p className="text-xs text-zinc-500 mb-4">
                 Core intelligence for your raise
               </p>
               <div className="space-y-2">
@@ -114,7 +114,7 @@ export default function PricingPage() {
                   $7,500
                 </span>
               </div>
-              <p className="text-xs text-zinc-600 mb-4">
+              <p className="text-xs text-zinc-500 mb-4">
                 Everything in Starter, plus
               </p>
               <div className="space-y-2">
@@ -143,7 +143,7 @@ export default function PricingPage() {
                   $15,000
                 </span>
               </div>
-              <p className="text-xs text-zinc-600 mb-4">
+              <p className="text-xs text-zinc-500 mb-4">
                 Everything in Pro, plus
               </p>
               <div className="space-y-2">
@@ -202,9 +202,9 @@ export default function PricingPage() {
                 <span className="text-lg font-bold text-orange-400">
                   $1,000
                 </span>
-                <span className="text-sm text-zinc-600">/month</span>
+                <span className="text-sm text-zinc-500">/month</span>
               </div>
-              <p className="text-xs text-zinc-600 mb-4">
+              <p className="text-xs text-zinc-500 mb-4">
                 Market intelligence and deal flow
               </p>
               <div className="space-y-2">
@@ -231,9 +231,9 @@ export default function PricingPage() {
                 <span className="text-lg font-bold text-orange-400">
                   $2,000
                 </span>
-                <span className="text-sm text-zinc-600">/month</span>
+                <span className="text-sm text-zinc-500">/month</span>
               </div>
-              <p className="text-xs text-zinc-600 mb-4">
+              <p className="text-xs text-zinc-500 mb-4">
                 Everything in Analyst, plus
               </p>
               <div className="space-y-2">
@@ -252,7 +252,7 @@ export default function PricingPage() {
               </div>
             </div>
 
-            <p className="text-xs text-zinc-600 mb-8">
+            <p className="text-xs text-zinc-500 mb-8">
               Also available for founders between raises at $500–$1K/mo
             </p>
 
@@ -320,7 +320,7 @@ export default function PricingPage() {
           </div>
           <div className="mx-auto max-w-3xl grid grid-cols-3 gap-8">
             <div>
-              <p className="text-sm font-semibold text-zinc-600 uppercase tracking-wider mb-6">
+              <p className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-6">
                 Traditional
               </p>
               <div className="space-y-4">
@@ -332,9 +332,9 @@ export default function PricingPage() {
                 ].map((text) => (
                   <p
                     key={text}
-                    className="text-sm text-zinc-600 flex items-start gap-2"
+                    className="text-sm text-zinc-500 flex items-start gap-2"
                   >
-                    <span className="text-zinc-700 mt-0.5">—</span>
+                    <span className="text-zinc-600 mt-0.5">—</span>
                     {text}
                   </p>
                 ))}
@@ -355,7 +355,7 @@ export default function PricingPage() {
                     key={text}
                     className="text-sm text-zinc-500 flex items-start gap-2"
                   >
-                    <span className="text-zinc-600 mt-0.5">—</span>
+                    <span className="text-zinc-500 mt-0.5">—</span>
                     {text}
                   </p>
                 ))}

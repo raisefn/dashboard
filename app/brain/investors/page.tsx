@@ -40,8 +40,8 @@ export default function InvestorsPage() {
               "Your portfolio company is raising their next round and you find out from Twitter.",
               "A sector you've been watching heats up and you're the last to deploy.",
             ].map((text, i) => (
-              <p key={i} className="text-sm text-zinc-600 flex items-start gap-3">
-                <span className="text-zinc-700 mt-0.5 shrink-0">—</span>
+              <p key={i} className="text-sm text-zinc-400 flex items-start gap-3">
+                <span className="text-zinc-500 mt-0.5 shrink-0">—</span>
                 {text}
               </p>
             ))}
@@ -105,7 +105,7 @@ export default function InvestorsPage() {
           <div className="mx-auto max-w-3xl">
             <div className="grid grid-cols-2 gap-12">
               <div>
-                <p className="text-sm font-semibold text-zinc-600 uppercase tracking-wider mb-6">Without the brain</p>
+                <p className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-6">Without the brain</p>
                 <div className="space-y-4">
                   {[
                     "Source from your network and hope it's enough",
@@ -114,8 +114,8 @@ export default function InvestorsPage() {
                     "Portfolio support means intro emails",
                     "Market reads from conferences and Twitter",
                   ].map((text) => (
-                    <p key={text} className="text-sm text-zinc-600 flex items-start gap-2">
-                      <span className="text-zinc-700 mt-0.5">—</span>{text}
+                    <p key={text} className="text-sm text-zinc-400 flex items-start gap-2">
+                      <span className="text-zinc-500 mt-0.5">—</span>{text}
                     </p>
                   ))}
                 </div>

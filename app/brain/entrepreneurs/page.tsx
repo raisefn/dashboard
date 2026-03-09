@@ -213,8 +213,8 @@ export default function EntrepreneursPage() {
               "You spend 6 months raising when it should have taken 3.",
               "You burn your best relationships before your metrics were ready.",
             ].map((text, i) => (
-              <p key={i} className="text-sm text-zinc-600 flex items-start gap-3">
-                <span className="text-zinc-700 mt-0.5 shrink-0">—</span>
+              <p key={i} className="text-sm text-zinc-400 flex items-start gap-3">
+                <span className="text-zinc-500 mt-0.5 shrink-0">—</span>
                 {text}
               </p>
             ))}
