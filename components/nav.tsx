@@ -32,7 +32,6 @@ export default function Nav() {
 
   // TODO: restore sub-nav when tracker/brain pages are built
   // const subLinks = isTracker ? trackerLinks : isBrain ? brainLinks : null;
-  const subLinks: typeof trackerLinks | null = null;
 
   return (
     <>
@@ -76,7 +75,7 @@ export default function Nav() {
         </div>
       </nav>
 
-      {/* Sub-nav (tracker or brain) */}
+      {/* TODO: restore sub-nav when tracker/brain pages are built
       {subLinks && (
         <nav className="border-b border-zinc-800/60 bg-zinc-950/60">
           <div className="relative mx-auto flex max-w-7xl items-center justify-center px-4 py-2">
@@ -103,6 +102,7 @@ export default function Nav() {
           </div>
         </nav>
       )}
+      */}
     </header>
     <EarlyAccessModal open={showEarlyAccess} onClose={() => setShowEarlyAccess(false)} />
     </>
