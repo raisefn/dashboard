@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import FadeInSection from "@/components/fade-in-section";
+import EarlyAccessModal from "@/components/early-access-modal";
+import { useState } from "react";
 
 export default function PricingPage() {
+  const [showEarlyAccess, setShowEarlyAccess] = useState(false);
   return (
     <div className="relative">
       <div className="grid-bg" />
@@ -27,9 +32,9 @@ export default function PricingPage() {
               <span className="text-2xl font-bold text-teal-400">Free</span>
             </div>
             <p className="text-sm text-zinc-400 mb-8 max-w-xl">
-              Full access to the Eyes &amp; Ears tracker &mdash; companies, rounds,
+              Full access to the tracker &mdash; companies, rounds,
               and investors cross-referenced from SEC filings, accelerator directories, and traction signals. Browse, search, and export.
-              Plus one free Brain query to see what the intelligence layer can
+              Plus one free Brain query to see what the intelligence can
               do.
             </p>
             <div className="space-y-3 mb-8">
@@ -46,12 +51,12 @@ export default function PricingPage() {
                 </div>
               ))}
             </div>
-            <Link
-              href="/tracker"
+            <button
+              onClick={() => setShowEarlyAccess(true)}
               className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30"
             >
-              Start Exploring
-            </Link>
+              Request Early Access
+            </button>
           </div>
         </FadeInSection>
       </section>
@@ -106,10 +111,12 @@ export default function PricingPage() {
               </div>
             </div>
 
-            {/* Pro */}
+            {/* Full Service */}
             <div className="mb-10">
               <div className="flex items-baseline gap-3 mb-1">
-                <span className="text-lg font-bold text-orange-300">Pro</span>
+                <span className="text-lg font-bold text-orange-300">
+                  Full Service
+                </span>
                 <span className="text-lg font-bold text-orange-400">
                   $7,500
                 </span>
@@ -124,33 +131,6 @@ export default function PricingPage() {
                   "Term sheet intelligence — comp data and negotiation context",
                   "Persistent context — the Brain remembers your entire raise",
                   "Unlimited queries for the duration of your raise",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <span className="text-orange-400 mt-0.5 shrink-0">—</span>
-                    <span className="text-sm text-zinc-300">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Full Service */}
-            <div className="mb-10">
-              <div className="flex items-baseline gap-3 mb-1">
-                <span className="text-lg font-bold text-orange-300">
-                  Full Service
-                </span>
-                <span className="text-lg font-bold text-orange-400">
-                  $15,000
-                </span>
-              </div>
-              <p className="text-xs text-zinc-500 mb-4">
-                Everything in Pro, plus
-              </p>
-              <div className="space-y-2">
-                {[
-                  "Co-investor sequencing — optimal order of investor conversations",
-                  "Competitive raise intel — who else is raising in your space",
-                  "Dedicated support — direct access throughout your raise",
                   "Dramatically cheaper than a placement agent (3–5% of round)",
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-3">
@@ -161,12 +141,12 @@ export default function PricingPage() {
               </div>
             </div>
 
-            <a
-              href="mailto:justinpetsche@gmail.com?subject=raise(fn) — Founder Access"
+            <button
+              onClick={() => setShowEarlyAccess(true)}
               className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30"
             >
-              Start Your Raise
-            </a>
+              Request Early Access
+            </button>
           </div>
         </FadeInSection>
       </section>
@@ -175,93 +155,49 @@ export default function PricingPage() {
         <div className="border-t border-zinc-800/50" />
       </div>
 
-      {/* ── Fund (Subscription) ── */}
+      {/* ── Professional (Consultants + Investors) ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">
             <div className="flex items-baseline gap-4 mb-2">
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Fund
+                Professional
               </h2>
               <span className="text-2xl font-bold text-orange-400">
-                Monthly
+                $1,000
               </span>
+              <span className="text-sm text-zinc-500">/month</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              Continuous market intelligence for investors and analysts.
-              Recurring, predictable, and sticky because switching means
-              losing the context you&apos;ve built.
+              For fundraising consultants and investors who use the Brain as
+              a daily tool. Continuous intelligence across multiple deals,
+              persistent context, and the ability to run multiple raises or
+              evaluations simultaneously.
             </p>
 
-            {/* Analyst */}
-            <div className="mb-10">
-              <div className="flex items-baseline gap-3 mb-1">
-                <span className="text-lg font-bold text-orange-300">
-                  Analyst
-                </span>
-                <span className="text-lg font-bold text-orange-400">
-                  $1,000
-                </span>
-                <span className="text-sm text-zinc-500">/month</span>
-              </div>
-              <p className="text-xs text-zinc-500 mb-4">
-                Market intelligence and deal flow
-              </p>
-              <div className="space-y-2">
-                {[
-                  "Live deal flow — surface projects matching your thesis",
-                  "Sector trend analysis and valuation benchmarking",
-                  "Investor activity monitoring — deployment pace, sector shifts",
-                  "Due diligence support — instant comparables for any deal",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <span className="text-orange-400 mt-0.5 shrink-0">—</span>
-                    <span className="text-sm text-zinc-300">{item}</span>
-                  </div>
-                ))}
-              </div>
+            <div className="space-y-2 mb-10">
+              {[
+                "Full Brain access — all six intelligence capabilities",
+                "Multiple concurrent raises or deal evaluations",
+                "Live deal flow matching and investor activity monitoring",
+                "Sector trend analysis and valuation benchmarking",
+                "Term sheet intelligence with comp data",
+                "Persistent context — the Brain remembers your portfolio and thesis",
+                "Unlimited queries",
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-3">
+                  <span className="text-orange-400 mt-0.5 shrink-0">—</span>
+                  <span className="text-sm text-zinc-300">{item}</span>
+                </div>
+              ))}
             </div>
 
-            {/* Partner */}
-            <div className="mb-10">
-              <div className="flex items-baseline gap-3 mb-1">
-                <span className="text-lg font-bold text-orange-300">
-                  Partner
-                </span>
-                <span className="text-lg font-bold text-orange-400">
-                  $2,000
-                </span>
-                <span className="text-sm text-zinc-500">/month</span>
-              </div>
-              <p className="text-xs text-zinc-500 mb-4">
-                Everything in Analyst, plus
-              </p>
-              <div className="space-y-2">
-                {[
-                  "Co-investment pattern analysis — who&apos;s investing alongside whom",
-                  "Portfolio company support — help portfolio cos raise their next round",
-                  "Competitive landscape monitoring — what&apos;s raising in your sectors",
-                  "Persistent context — the Brain remembers your thesis and portfolio",
-                  "Unlimited queries",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <span className="text-orange-400 mt-0.5 shrink-0">—</span>
-                    <span className="text-sm text-zinc-300">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <p className="text-xs text-zinc-500 mb-8">
-              Also available for founders between raises at $500–$1K/mo
-            </p>
-
-            <a
-              href="mailto:justinpetsche@gmail.com?subject=raise(fn) — Fund Access"
+            <button
+              onClick={() => setShowEarlyAccess(true)}
               className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30"
             >
-              Get Fund Access
-            </a>
+              Request Early Access
+            </button>
           </div>
         </FadeInSection>
       </section>
@@ -283,8 +219,8 @@ export default function PricingPage() {
               </span>
             </div>
             <p className="text-sm text-zinc-400 mb-8 max-w-xl">
-              Per-call pricing for developers building on raisefn and AI agents
-              calling the Brain. Each endpoint has a defined cost. The marginal
+              Per-call pricing for developers embedding fundraising intelligence
+              in their products. Each endpoint has a defined cost. The marginal
               cost is low. The volume potential is enormous.
             </p>
             <div className="space-y-3 mb-8">
@@ -300,12 +236,12 @@ export default function PricingPage() {
                 </div>
               ))}
             </div>
-            <a
-              href="mailto:justinpetsche@gmail.com?subject=raise(fn) — API Key Request"
+            <button
+              onClick={() => setShowEarlyAccess(true)}
               className="rounded-full border border-violet-700/50 bg-violet-950/20 px-8 py-3 text-sm font-medium text-violet-300 transition-all hover:border-violet-500 hover:bg-violet-900/30"
             >
-              Request API Key
-            </a>
+              Request Early Access
+            </button>
           </div>
         </FadeInSection>
       </section>
@@ -367,8 +303,8 @@ export default function PricingPage() {
               </p>
               <div className="space-y-4">
                 {[
-                  "Founder raise: $2.5K–$15K flat",
-                  "Fund subscription: $1K–$2K/mo",
+                  "Founder raise: $2.5K–$7.5K flat",
+                  "Professional: $1K/mo",
                   "Live intelligence, not raw data",
                   "Answers, not spreadsheets",
                   "Gets smarter with every raise",
@@ -392,23 +328,23 @@ export default function PricingPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
-              Start with the data. Pay for the intelligence.
+              Start with the data. Raise with the Brain.
             </h2>
             <p className="text-zinc-500 mb-8">
               The tracker is free and open source. The Brain is where the value
               lives.
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link
-                href="/tracker"
-                className="rounded-full border border-teal-700/50 bg-teal-950/30 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/40 hover:text-teal-200"
-              >
-                Explore the Tracker
-              </Link>
-            </div>
+            <button
+              onClick={() => setShowEarlyAccess(true)}
+              className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
+            >
+              Request Early Access
+            </button>
           </div>
         </FadeInSection>
       </section>
+
+      <EarlyAccessModal open={showEarlyAccess} onClose={() => setShowEarlyAccess(false)} />
     </div>
   );
 }

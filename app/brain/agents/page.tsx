@@ -10,14 +10,14 @@ export default function AgentsPage() {
       <section className="relative py-24 px-4">
         <div className="mx-auto max-w-3xl text-center animate-fade-in">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-400 mb-4">
-            Brain for AI Agents
+            Brain for Developers
           </p>
           <h1 className="text-4xl font-bold text-white sm:text-5xl mb-6">
-            Fundraising intelligence{" "}
-            <span className="text-violet-400">as an API</span>
+            Embed fundraising intelligence{" "}
+            <span className="text-violet-400">in your product</span>
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            Your agent can match investors, score readiness, analyze narratives,
+            Your product can match investors, score readiness, analyze narratives,
             decode signals, and benchmark terms — in a single call. No scraping.
             No training. Just intelligence.
           </p>
@@ -175,14 +175,14 @@ export default function AgentsPage() {
               Works with your stack
             </h2>
             <p className="text-sm text-zinc-500 mt-4 max-w-lg mx-auto">
-              Native integrations for the frameworks AI agents actually use.
+              Native integrations for the frameworks developers actually use.
               Or hit the REST API directly.
             </p>
           </div>
           <div className="mx-auto max-w-md grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              { name: "LangChain", desc: "Tool & retriever", color: "#2dd4bf" },
-              { name: "CrewAI", desc: "Agent tool", color: "#f97316" },
+              { name: "LangChain", desc: "Python SDK", color: "#2dd4bf" },
+              { name: "CrewAI", desc: "Orchestration", color: "#f97316" },
               { name: "Claude / MCP", desc: "Native server", color: "#a78bfa" },
               { name: "REST API", desc: "Any language", color: "#71717a" },
             ].map((fw) => (
@@ -219,7 +219,7 @@ export default function AgentsPage() {
               },
               {
                 point: "LLMs forget everything between calls.",
-                detail: "The brain maintains persistent context across your entire raise.",
+                detail: "The brain maintains persistent context across an entire raise.",
               },
             ].map((item) => (
               <div key={item.point}>
@@ -239,7 +239,7 @@ export default function AgentsPage() {
               Build with raise(fn)
             </h2>
             <p className="text-zinc-500 mb-8">
-              API access is in early access. Get in before it opens.
+              Ship fundraising intelligence in your product.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link

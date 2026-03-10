@@ -7,8 +7,8 @@ import { useEffect, useRef, useState } from "react";
 /* ── SDK ecosystem nodes ── */
 const nodes = [
   // Frameworks (active)
-  { label: "LangChain", desc: "Python agents", color: "#2dd4bf", active: true },
-  { label: "CrewAI", desc: "Multi-agent", color: "#fb923c", active: true },
+  { label: "LangChain", desc: "Python SDK", color: "#2dd4bf", active: true },
+  { label: "CrewAI", desc: "Orchestration", color: "#fb923c", active: true },
   { label: "Claude / MCP", desc: "Native tools", color: "#a78bfa", active: true },
   { label: "REST API", desc: "Any language", color: "#94a3b8", active: true },
   // Brain capabilities exposed via SDK
@@ -21,14 +21,14 @@ const nodes = [
   // Ecosystem / planned integrations
   { label: "AutoGPT", desc: "Autonomous", color: "#60a5fa", active: false },
   { label: "OpenAI Agents", desc: "Function calling", color: "#34d399", active: false },
-  { label: "Semantic Kernel", desc: ".NET agents", color: "#c084fc", active: false },
-  { label: "Haystack", desc: "Retrieval agents", color: "#38bdf8", active: false },
-  { label: "LlamaIndex", desc: "Data agents", color: "#f472b6", active: false },
-  { label: "Vercel AI SDK", desc: "Edge agents", color: "#fca5a1", active: false },
+  { label: "Semantic Kernel", desc: ".NET SDK", color: "#c084fc", active: false },
+  { label: "Haystack", desc: "Retrieval", color: "#38bdf8", active: false },
+  { label: "LlamaIndex", desc: "Data framework", color: "#f472b6", active: false },
+  { label: "Vercel AI SDK", desc: "Edge runtime", color: "#fca5a1", active: false },
   { label: "Webhooks", desc: "Event-driven", color: "#86efac", active: false },
   { label: "Zapier", desc: "No-code", color: "#fde68a", active: false },
   { label: "n8n", desc: "Workflow", color: "#67e8f9", active: false },
-  { label: "Custom Agents", desc: "Your stack", color: "#d946ef", active: false },
+  { label: "Custom Integration", desc: "Your stack", color: "#d946ef", active: false },
 ];
 
 function seededRandom(seed: number) {
@@ -143,7 +143,7 @@ function SDKDiagram() {
             <span style={{ color: "#F97316" }}>raise</span>
             <span style={{ color: "#2DD4BF" }}>(fn)</span>
           </span>
-          <span className="mt-1 text-xs text-zinc-500">the agent sdk</span>
+          <span className="mt-1 text-xs text-zinc-500">developer sdk</span>
         </div>
 
         {/* Nodes */}
@@ -195,9 +195,9 @@ export default function SDKPage() {
       <section className="relative pt-16 pb-4 px-4">
         <div className="mx-auto max-w-3xl text-center animate-fade-in">
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto">
-            Native integrations for LangChain, CrewAI, Claude, and any agent
-            framework. Give your agent the same fundraising intelligence a
-            human founder would get — through a single function call.
+            Native integrations for LangChain, CrewAI, Claude, and REST.
+            Build fundraising intelligence into your product — investor matching,
+            readiness scoring, signal reading — through a single function call.
           </p>
         </div>
       </section>
@@ -209,7 +209,7 @@ export default function SDKPage() {
           className="mx-auto max-w-lg text-center text-base text-zinc-400 animate-fade-in"
           style={{ animationDelay: "0.3s", marginTop: -20 }}
         >
-          Frameworks, tools, and capabilities — all connected through one SDK.
+          Frameworks, capabilities, and integrations — all connected through one SDK.
         </p>
       </section>
 
@@ -221,7 +221,7 @@ export default function SDKPage() {
               Capabilities
             </p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              What your agent can do with raise(fn)
+              What you can build with raise(fn)
             </h2>
           </div>
           <div className="mx-auto max-w-4xl grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -252,7 +252,7 @@ export default function SDKPage() {
               Build with raise(fn)
             </h2>
             <p className="text-zinc-500 mb-8">
-              The tracker is open source. The SDK is open source.
+              The SDK is open source. The intelligence is not.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
             </div>

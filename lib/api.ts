@@ -151,6 +151,7 @@ export async function getProject(slug: string): Promise<Project> {
 export async function getRounds(params?: {
   limit?: number;
   offset?: number;
+  sort?: string;
   sector?: string;
   chain?: string;
   round_type?: string;
@@ -163,6 +164,7 @@ export async function getRounds(params?: {
   const p: Record<string, string> = {};
   if (params?.limit) p.limit = String(params.limit);
   if (params?.offset) p.offset = String(params.offset);
+  if (params?.sort) p.sort = params.sort;
   if (params?.sector) p.sector = params.sector;
   if (params?.chain) p.chain = params.chain;
   if (params?.round_type) p.round_type = params.round_type;
@@ -208,4 +210,74 @@ export async function getProjectRounds(slug: string): Promise<RoundListResponse>
   // Fetch rounds and filter — or we need a project_slug param on the API
   // For now, get all rounds and the project detail page will show them
   return apiFetch<RoundListResponse>("/rounds", { limit: "200" });
+}
+
+// --- Health ---
+
+export interface HealthResponse {
+  status: string;
+  round_count: number;
+  investor_count: number;
+  project_count: number;
+  last_collection: string;
+}
+
+export async function getHealth(): Promise<HealthResponse> {
+  const res = await fetch(`${API_BASE}/health`, { next: { revalidate: 60 } });
+  if (!res.ok) throw new Error(`Health check failed: ${res.status}`);
+  return res.json();
+}
+
+// --- Stats ---
+
+export interface RoundTypeBreakdown {
+  round_type: string;
+  count: number;
+  total_capital: number | null;
+}
+
+export interface StatsOverview {
+  period: string;
+  total_rounds: number;
+  total_capital: number | null;
+  avg_round_size: number | null;
+  median_round_size: number | null;
+  by_round_type: RoundTypeBreakdown[];
+  prior_period_change: {
+    total_rounds_pct: number | null;
+    total_capital_pct: number | null;
+  } | null;
+}
+
+export interface InvestorStats {
+  id: string;
+  name: string;
+  slug: string;
+  round_count: number;
+  total_deployed: number | null;
+}
+
+export interface StatsInvestors {
+  period: string;
+  most_active: InvestorStats[];
+  biggest_deployers: InvestorStats[];
+}
+
+export interface SectorStats {
+  sector: string;
+  round_count: number;
+  total_capital: number | null;
+  avg_round_size: number | null;
+}
+
+export async function getStatsOverview(period = "90d"): Promise<StatsOverview> {
+  return apiFetch<StatsOverview>("/stats/overview", { period });
+}
+
+export async function getStatsInvestors(period = "90d", limit = 10): Promise<StatsInvestors> {
+  return apiFetch<StatsInvestors>("/stats/investors", { period, limit: String(limit) });
+}
+
+export async function getStatsSectors(period = "90d"): Promise<SectorStats[]> {
+  return apiFetch<SectorStats[]>("/stats/sectors", { period });
 }

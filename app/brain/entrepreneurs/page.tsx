@@ -10,7 +10,7 @@ export default function EntrepreneursPage() {
       <section className="relative py-24 px-4">
         <div className="mx-auto max-w-3xl text-center animate-fade-in">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
-            Brain for Entrepreneurs
+            Brain for Founders
           </p>
           <h1 className="text-4xl font-bold text-white sm:text-5xl mb-6">
             Your raise is too important{" "}

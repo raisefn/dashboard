@@ -6,22 +6,24 @@ import { useState } from "react";
 import EarlyAccessModal from "@/components/early-access-modal";
 
 const topLinks = [
-  { href: "/tracker", label: "Eyes & Ears", prefix: "/tracker" },
   { href: "/brain", label: "Brain", prefix: "/brain" },
-  { href: "/sdk", label: "Agent SDK", prefix: "/sdk" },
+  { href: "/tracker", label: "Tracker", prefix: "/tracker" },
+  { href: "/sdk", label: "Developer SDK", prefix: "/sdk" },
   { href: "/pricing", label: "Pricing", prefix: "/pricing" },
 ];
 
 const trackerLinks = [
-  { href: "/tracker/projects", label: "Projects" },
+  { href: "/tracker/feed", label: "Live Feed" },
+  { href: "/tracker/pulse", label: "Market Pulse" },
   { href: "/tracker/rounds", label: "Rounds" },
   { href: "/tracker/investors", label: "Investors" },
+  { href: "/tracker/projects", label: "Projects" },
 ];
 
 const brainLinks = [
-  { href: "/brain/entrepreneurs", label: "Entrepreneurs" },
+  { href: "/brain/entrepreneurs", label: "Founders" },
   { href: "/brain/investors", label: "Investors" },
-  { href: "/brain/agents", label: "Agents" },
+  { href: "/brain/agents", label: "Developers" },
 ];
 
 export default function Nav() {
@@ -31,8 +33,7 @@ export default function Nav() {
   const [showEarlyAccess, setShowEarlyAccess] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // TODO: restore tracker sub-nav when tracker pages are built
-  const subLinks = isBrain ? brainLinks : null;
+  const subLinks = isTracker ? trackerLinks : isBrain ? brainLinks : null;
 
   return (
     <>

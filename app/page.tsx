@@ -232,10 +232,22 @@ function StackDiagram() {
   const layers = [
     {
       layer: 1,
+      label: "The Brain",
+      headline: "Fundraising intelligence for your raise.",
+      interaction: "Three things no language model has:",
+      desc: "Live data — who's actually writing checks this quarter. Cross-referencing — SEC filings matched against accelerator records, traction signals, and investor portfolios. Outcome calibration — answers tuned on what actually worked, not what sounded right in training data.",
+      color: "#f97316",
+      borderColor: "rgba(249,115,22,0.25)",
+      badge: "THE PRODUCT",
+      badgeColor: "text-orange-400 border-orange-700/50",
+      href: "/brain",
+    },
+    {
+      layer: 2,
       label: "Eyes & Ears",
-      headline: "The startup data layer.",
-      interaction: "Human to human.",
-      desc: "Hundreds of data sources — standardized, enriched, and updated continuously. Cross-referenced to surface intelligence no single source reveals. Real-time social signals. Free and open source.",
+      headline: "How the Brain knows what it knows.",
+      interaction: "The data layer.",
+      desc: "SEC filings, accelerator directories, investor registries, traction signals — standardized, cross-referenced, and updated continuously. Free and open source.",
       color: "#2dd4bf",
       borderColor: "rgba(45,212,191,0.25)",
       badge: "OPEN SOURCE",
@@ -243,23 +255,11 @@ function StackDiagram() {
       href: "/tracker",
     },
     {
-      layer: 2,
-      label: "The Brain",
-      headline: "AI intelligence layer.",
-      interaction: "Human to AI.",
-      desc: "Investor matching, readiness evaluation, pitch analysis, narrative guidance, signal reading, term sheet comps. Expert fundraising judgment encoded as queryable intelligence.",
-      color: "#f97316",
-      borderColor: "rgba(249,115,22,0.25)",
-      badge: "CLOSED · PAID",
-      badgeColor: "text-orange-400 border-orange-700/50",
-      href: "/brain",
-    },
-    {
       layer: 3,
-      label: "Agent SDK",
-      headline: "The future.",
-      interaction: "AI to AI.",
-      desc: "Pre-built integrations for LangChain, CrewAI, and Claude. When an AI agent needs fundraising intelligence, it calls raise(fn).",
+      label: "Developer SDK",
+      headline: "For tools that embed fundraising intelligence.",
+      interaction: "Build on it.",
+      desc: "REST API and native integrations for LangChain, CrewAI, and Claude. Build fundraising intelligence into your product with a single call.",
       color: "#a78bfa",
       borderColor: "rgba(167,139,250,0.25)",
       badge: "OPEN SOURCE",
@@ -365,8 +365,8 @@ export default function LandingPage() {
             <span className="text-orange-500">raise</span>
             <span className="text-teal-400">(fn)</span>
           </h1>
-          <p className="mx-auto mt-6 max-w-md text-lg text-zinc-400">
-            The intelligence layer for startup fundraising.
+          <p className="mx-auto mt-6 max-w-lg text-lg text-zinc-400">
+            Fundraising intelligence that requires live data, real outcomes, and cross-referencing no model has.
           </p>
           <div className="mt-16 flex justify-center animate-fade-in" style={{ animationDelay: "1s" }}>
             <svg
@@ -411,9 +411,7 @@ export default function LandingPage() {
               How it works
             </p>
             <h2 className="text-3xl font-bold sm:text-4xl">
-              <span className="text-white">Three layers.</span>
-              <br />
-              <span className="text-teal-400">One stack.</span>
+              <span className="text-white">Not a database with a chatbot bolted on.</span>
             </h2>
           </div>
           <StackDiagram />
@@ -440,9 +438,9 @@ export default function LandingPage() {
               </p>
               <div className="space-y-4">
                 {[
-                  "Search \"Series A SaaS\" — get 2,000 results",
+                  "Pay $20K–$50K/yr to search a database",
                   "Build your own target list in a spreadsheet",
-                  "No idea who's actually deploying right now",
+                  "Stale data — no idea who's deploying right now",
                   "Same list your competitor is building",
                   "You are the analyst",
                 ].map((text) => (
@@ -458,12 +456,12 @@ export default function LandingPage() {
             </div>
             <div>
               <p className="text-sm font-semibold text-teal-400 uppercase tracking-wider mb-6">
-                GPS
+                raise(fn)
               </p>
               <div className="space-y-4">
                 {[
                   "\"Who should lead my Series A?\" — 15 ranked matches",
-                  "Knows who's deploying this quarter, not last year",
+                  "Live data — who's deploying this quarter, not last year",
                   "Flags your metrics are weak before you pitch",
                   "Sequences outreach so the right investor moves first",
                   "The analyst is built in",
@@ -497,8 +495,8 @@ export default function LandingPage() {
           <div className="mx-auto max-w-2xl space-y-10">
             {[
               {
-                title: "More founders raise → better investor matching",
-                desc: "Every raise generates outcome data — who responded, who passed, who led, what terms closed. The Brain calibrates on real results, not assumptions.",
+                title: "More founders raise → real outcome data",
+                desc: "Every raise generates data no model can train on — who responded, who passed, who led, what terms closed. The Brain calibrates on results. That's a dataset you can't download.",
                 color: "#2dd4bf",
               },
               {
@@ -512,8 +510,8 @@ export default function LandingPage() {
                 color: "#a78bfa",
               },
               {
-                title: "Agent integrations → infrastructure lock-in",
-                desc: "Once an AI agent calls raise(fn) for fundraising intelligence, it becomes infrastructure. Ripping out a working API is a cost nobody pays voluntarily.",
+                title: "Tool integrations → infrastructure lock-in",
+                desc: "Once a product embeds raise(fn) for fundraising intelligence, it becomes infrastructure. Ripping out a working API is a cost nobody pays voluntarily.",
                 color: "#fbbf24",
               },
             ].map((item) => (
@@ -577,24 +575,13 @@ export default function LandingPage() {
         </FadeInSection>
       </section>
 
-      {/* ── By the Numbers ── */}
-      <section className="relative py-24 px-4">
+      {/* ── Data backing ── */}
+      <section className="relative py-16 px-4">
         <FadeInSection>
-          <div className="mx-auto max-w-4xl">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
-              {[
-                { stat: "2M+", label: "funding rounds tracked" },
-                { stat: "500K+", label: "investor profiles built" },
-                { stat: "56K+", label: "SEC filings processed yearly" },
-              ].map((item) => (
-                <div key={item.label}>
-                  <p className="text-5xl font-bold text-teal-400 sm:text-6xl">
-                    {item.stat}
-                  </p>
-                  <p className="mt-2 text-sm text-zinc-500">{item.label}</p>
-                </div>
-              ))}
-            </div>
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-sm text-zinc-500">
+              Every answer backed by verified records, not training data.
+            </p>
           </div>
         </FadeInSection>
       </section>
@@ -607,25 +594,25 @@ export default function LandingPage() {
               Built for
             </p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              Founders. VCs. Agents.
+              Founders raising. Tools building. VCs sourcing.
             </h2>
           </div>
           <div className="mx-auto max-w-3xl grid gap-6 sm:grid-cols-3 text-center">
             {[
               {
                 who: "Founders raising",
-                what: "Know who to pitch, when you're ready, and what terms to expect.",
+                what: "Know who to pitch, when you're ready, and what terms to expect. Use it for your raise, not forever.",
                 color: "#2dd4bf",
+              },
+              {
+                who: "Tools building",
+                what: "Embed fundraising intelligence in your product. One API, full raise coverage.",
+                color: "#a78bfa",
               },
               {
                 who: "VCs sourcing",
                 what: "Live deal flow, market signals, and investor activity tracking.",
                 color: "#f97316",
-              },
-              {
-                who: "AI agents building",
-                what: "Give your agent fundraising intelligence through a single API call.",
-                color: "#a78bfa",
               },
             ].map((item) => (
               <div key={item.who}>
@@ -647,20 +634,23 @@ export default function LandingPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
-              The data layer is open.
-              <br />
-              <span className="text-teal-400">The brain is not.</span>
+              Ready to raise?
             </h2>
             <p className="text-zinc-500 mb-10">
-              Start with the tracker. When you&apos;re ready, the brain is
-              waiting.
+              The Brain is in early access. Get in before it opens.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
-                href="/tracker"
-                className="rounded-full border border-teal-700/50 bg-teal-950/30 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/40 hover:text-teal-200"
+                href="/brain/entrepreneurs"
+                className="rounded-full border border-orange-700/50 bg-orange-950/30 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/40 hover:text-orange-200"
               >
-                Explore the Tracker
+                Start Your Raise
+              </Link>
+              <Link
+                href="/tracker"
+                className="rounded-full border border-zinc-700/50 bg-zinc-900/30 px-8 py-3 text-sm font-medium text-zinc-400 transition-all hover:border-zinc-500 hover:bg-zinc-800/40 hover:text-zinc-300"
+              >
+                Explore the data
               </Link>
             </div>
           </div>

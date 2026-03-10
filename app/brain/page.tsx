@@ -396,13 +396,13 @@ export default function BrainPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">Built for</p>
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">Three audiences. One brain.</h2>
+            <h2 className="text-3xl font-bold text-white sm:text-4xl">Who it&apos;s for</h2>
           </div>
           <div className="mx-auto max-w-3xl grid gap-6 sm:grid-cols-3 text-center">
             {[
-              { who: "Entrepreneurs", what: "Navigate your raise with intelligence — from readiness to close.", color: "#2dd4bf", href: "/brain/entrepreneurs" },
+              { who: "Founders", what: "Navigate your raise with intelligence — from readiness to close.", color: "#2dd4bf", href: "/brain/entrepreneurs" },
               { who: "Investors", what: "Better deal flow, faster diligence, and market intelligence.", color: "#f97316", href: "/brain/investors" },
-              { who: "AI Agents", what: "Fundraising intelligence through a single API call.", color: "#a78bfa", href: "/brain/agents" },
+              { who: "Developers", what: "Embed fundraising intelligence in your product.", color: "#a78bfa", href: "/brain/agents" },
             ].map((item) => (
               <Link key={item.who} href={item.href} className="group transition-all hover:bg-zinc-900/30 rounded-xl p-4">
                 <p className="text-sm font-semibold mb-2 group-hover:brightness-125" style={{ color: item.color }}>{item.who}</p>
@@ -418,11 +418,14 @@ export default function BrainPage() {
       <section className="relative py-24 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">The intelligence layer is live</h2>
-            <p className="text-zinc-500 mb-8">Get early access to the brain.</p>
+            <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">Ready to raise?</h2>
+            <p className="text-zinc-500 mb-8">The Brain is in early access.</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/tracker" className="rounded-full border border-zinc-700 px-8 py-3 text-sm font-medium text-zinc-300 transition-all hover:border-zinc-500 hover:text-white">
-                Explore the Tracker
+              <Link href="/brain/entrepreneurs" className="rounded-full border border-orange-700/50 bg-orange-950/30 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/40 hover:text-orange-200">
+                Start Your Raise
+              </Link>
+              <Link href="/tracker" className="rounded-full border border-zinc-700/50 bg-zinc-900/30 px-8 py-3 text-sm font-medium text-zinc-400 transition-all hover:border-zinc-500 hover:bg-zinc-800/40 hover:text-zinc-300">
+                Explore the data
               </Link>
             </div>
           </div>
