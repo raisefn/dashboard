@@ -1,7 +1,22 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async rewrites() {
+    return [
+      {
+        source: "/brain/api/:path*",
+        destination: "https://brain-production-61da.up.railway.app/v1/brain/:path*",
+      },
+      {
+        source: "/brain/chat",
+        destination: "https://brain-production-61da.up.railway.app/v1/chat",
+      },
+      {
+        source: "/v1/brain/:path*",
+        destination: "https://brain-production-61da.up.railway.app/v1/brain/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
