@@ -100,7 +100,7 @@ function BrainDiagram() {
   return (
     <div
       ref={containerRef}
-      className="relative mx-auto w-full max-w-[800px]"
+      className="relative mx-auto w-full max-w-[800px] overflow-hidden"
       style={{ height: 800 * scale }}
     >
       <div
@@ -108,7 +108,9 @@ function BrainDiagram() {
           transform: `scale(${scale})`,
           transformOrigin: "top center",
           width: 800, height: 800,
-          position: "relative",
+          position: "absolute",
+          left: "50%",
+          marginLeft: -400,
         }}
       >
         <svg className="absolute inset-0" width={800} height={800} viewBox="0 0 800 800">
