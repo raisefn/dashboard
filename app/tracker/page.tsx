@@ -133,7 +133,7 @@ export default function TrackerLandingPage() {
       {/* Neural network */}
       <div
         ref={containerRef}
-        className="relative mx-auto mt-4 w-full max-w-[800px]"
+        className="relative mx-auto mt-4 w-full max-w-[800px] overflow-hidden"
         style={{ height: 800 * scale }}
       >
         <div
