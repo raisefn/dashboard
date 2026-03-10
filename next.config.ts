@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
         destination: "https://brain-production-61da.up.railway.app/v1/brain/:path*",
       },
       {
-        source: "/brain/chat",
+        source: "/brain/deploy",
         destination: "https://brain-production-61da.up.railway.app/v1/chat",
       },
       {
