@@ -139,10 +139,12 @@ export default function TrackerLandingPage() {
         <div
           style={{
             transform: `scale(${scale})`,
-            transformOrigin: "top center",
+            transformOrigin: "top left",
             width: 800,
             height: 800,
-            position: "relative",
+            position: "absolute",
+            left: "50%",
+            marginLeft: -400,
           }}
         >
           {/* SVG connection lines */}
