@@ -139,7 +139,7 @@ export default function TrackerLandingPage() {
         <div
           style={{
             transform: `scale(${scale})`,
-            transformOrigin: "top left",
+            transformOrigin: "top center",
             width: 800,
             height: 800,
             position: "absolute",
