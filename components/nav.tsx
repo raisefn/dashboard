@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import EarlyAccessModal from "@/components/early-access-modal";
+import { useAuth } from "@/context/auth";
 
 const topLinks = [
   { href: "/brain", label: "Brain", prefix: "/brain" },
@@ -28,12 +29,19 @@ const brainLinks = [
 
 export default function Nav() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, signOut } = useAuth();
   const isTracker = pathname.startsWith("/tracker");
   const isBrain = pathname.startsWith("/brain");
   const [showEarlyAccess, setShowEarlyAccess] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const subLinks = isTracker ? trackerLinks : isBrain ? brainLinks : null;
+
+  async function handleSignOut() {
+    await signOut();
+    router.push("/");
+  }
 
   return (
     <>
@@ -67,14 +75,26 @@ export default function Nav() {
             })}
           </div>
 
-          {/* Right side: Early Access + hamburger */}
+          {/* Right side: user or Early Access + hamburger */}
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowEarlyAccess(true)}
-              className="rounded-full bg-orange-600 px-5 py-1.5 text-xs font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
-            >
-              Early Access
-            </button>
+            {user ? (
+              <div className="hidden md:flex items-center gap-3">
+                <span className="text-xs text-zinc-500 truncate max-w-[160px]">{user.email}</span>
+                <button
+                  onClick={handleSignOut}
+                  className="rounded-full border border-zinc-700 px-4 py-1.5 text-xs font-medium text-zinc-400 transition-all hover:border-zinc-500 hover:text-zinc-200"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowEarlyAccess(true)}
+                className="rounded-full bg-orange-600 px-5 py-1.5 text-xs font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
+              >
+                Early Access
+              </button>
+            )}
 
             {/* Mobile hamburger */}
             <button
