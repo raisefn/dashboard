@@ -576,12 +576,23 @@ export default function LandingPage() {
       </section>
 
       {/* ── Data backing ── */}
-      <section className="relative py-16 px-4">
+      <section className="relative py-32 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-sm text-zinc-500">
-              Every answer backed by verified records, not training data.
-            </p>
+            <div className="rounded-2xl border border-teal-800/40 px-8 py-12 sm:px-12 sm:py-16" style={{ background: "linear-gradient(180deg, rgba(45,212,191,0.04), rgba(9,9,11,0.98))" }}>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-6">
+                The foundation
+              </p>
+              <h2 className="text-2xl font-bold text-white sm:text-3xl md:text-4xl leading-tight mb-6">
+                raise(fn) tracks every startup funding round in real time across 290+ sources.
+              </h2>
+              <p className="text-lg text-zinc-300 leading-relaxed mb-4">
+                No AI model has this data. It doesn&apos;t exist in any training set.
+              </p>
+              <p className="text-lg text-teal-400 font-medium">
+                It&apos;s live, it&apos;s comprehensive, and it&apos;s the foundation everything else is built on.
+              </p>
+            </div>
           </div>
         </FadeInSection>
       </section>
