@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import FadeInSection from "@/components/fade-in-section";
 import { useEffect, useRef, useState } from "react";
 
@@ -11,6 +10,7 @@ const nodes = [
   { label: "CrewAI", desc: "Orchestration", color: "#fb923c", active: true },
   { label: "Claude / MCP", desc: "Native tools", color: "#a78bfa", active: true },
   { label: "REST API", desc: "Any language", color: "#94a3b8", active: true },
+  { label: "x402", desc: "Autonomous pay", color: "#7c3aed", active: true },
   // Brain capabilities exposed via SDK
   { label: "match_investors", desc: "Ranked by fit", color: "#2dd4bf", active: true },
   { label: "evaluate_readiness", desc: "Metric scoring", color: "#34d399", active: true },
@@ -240,6 +240,63 @@ export default function SDKPage() {
                 <p className="text-sm text-zinc-500">{tool.desc}</p>
               </div>
             ))}
+          </div>
+        </FadeInSection>
+      </section>
+
+      {/* ── x402 ── */}
+      <section className="relative py-24 px-4">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl">
+            <div className="text-center mb-12">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-400 mb-4">
+                Agent-native payments
+              </p>
+              <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
+                Agents pay. No keys required.
+              </h2>
+              <p className="text-zinc-400 max-w-xl mx-auto">
+                raise(fn) supports the x402 payment protocol. Autonomous agents can discover, pay for, and consume fundraising data in a single HTTP cycle — no signup, no API key, no human in the loop.
+              </p>
+            </div>
+
+            {/* 3-step flow */}
+            <div className="grid grid-cols-3 gap-6 mb-12">
+              {[
+                { step: "01", title: "Agent requests data", desc: "Standard HTTP GET to any raise(fn) endpoint" },
+                { step: "02", title: "API returns price", desc: "402 response with USDC amount and wallet address" },
+                { step: "03", title: "Agent pays, gets data", desc: "Auto-signed payment, immediate response" },
+              ].map((s) => (
+                <div key={s.step} className="text-center">
+                  <p className="text-xs font-mono text-violet-500 mb-2">{s.step}</p>
+                  <p className="text-sm font-semibold text-white mb-1">{s.title}</p>
+                  <p className="text-xs text-zinc-500">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Code snippet */}
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 font-mono text-sm mb-6">
+              <div className="flex gap-2 mb-5">
+                <span className="w-3 h-3 rounded-full bg-zinc-700" />
+                <span className="w-3 h-3 rounded-full bg-zinc-700" />
+                <span className="w-3 h-3 rounded-full bg-zinc-700" />
+              </div>
+              <pre className="text-zinc-400 leading-relaxed overflow-x-auto whitespace-pre-wrap">
+                <span className="text-violet-400">from</span>{" x402 "}
+                <span className="text-violet-400">import</span>{" x402Client\n\n"}
+                {"client = x402Client(\n"}
+                {"  "}<span className="text-teal-400">private_key</span>{"=AGENT_KEY,\n"}
+                {"  "}<span className="text-teal-400">network</span>{"="}<span className="text-orange-400">"base"</span>{"\n"})
+                {"\n\n"}<span className="text-zinc-600">{"# One call. Auto-pays via x402. No API key."}</span>{"\n"}
+                {"rounds = "}<span className="text-violet-400">await</span>{" client.get(\n"}
+                {"  "}<span className="text-orange-400">"https://raisefn.com/v1/brain/rounds"</span>{"\n)"}
+              </pre>
+            </div>
+
+            <p className="text-center text-xs text-zinc-600">
+              x402 is co-governed by Coinbase and Cloudflare — supported by Google, Anthropic, AWS, and Vercel
+            </p>
           </div>
         </FadeInSection>
       </section>

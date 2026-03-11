@@ -259,7 +259,7 @@ function StackDiagram() {
       label: "Developer SDK",
       headline: "For tools that embed fundraising intelligence.",
       interaction: "Build on it.",
-      desc: "REST API and native integrations for LangChain, CrewAI, and Claude. Build fundraising intelligence into your product with a single call.",
+      desc: "REST API and native integrations for LangChain, CrewAI, and Claude. Build fundraising intelligence into your product with a single call. x402 native — agents discover and pay autonomously, no key required.",
       color: "#a78bfa",
       borderColor: "rgba(167,139,250,0.25)",
       badge: "OPEN SOURCE",

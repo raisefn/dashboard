@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import FadeInSection from "@/components/fade-in-section";
 import EarlyAccessModal from "@/components/early-access-modal";
 import { useState } from "react";
@@ -226,6 +225,7 @@ export default function PricingPage() {
             <div className="space-y-3 mb-8">
               {[
                 "Per-call pricing — investor match, readiness score, signal read, term analysis",
+                "x402 compatible — agents pay per call in USDC, no API key required",
                 "LangChain, CrewAI, Claude/MCP, and REST integrations",
                 "Build fundraising tools on top of raisefn intelligence",
                 "Scales non-linearly — one integration, thousands of calls",
