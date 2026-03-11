@@ -592,6 +592,18 @@ export default function LandingPage() {
               <p className="text-xl text-teal-400 font-semibold">
                 It&apos;s live, it&apos;s comprehensive, and it&apos;s the foundation everything else is built on.
               </p>
+              <div className="mt-10 pt-8 border-t border-teal-800/30 grid grid-cols-3 gap-4">
+                {[
+                  { value: "290+", label: "Live sources" },
+                  { value: "Real-time", label: "No delays, no batches" },
+                  { value: "Ground truth", label: "The data AI models don't have" },
+                ].map(({ value, label }) => (
+                  <div key={label} className="text-center">
+                    <p className="text-2xl font-bold text-white">{value}</p>
+                    <p className="text-xs text-zinc-500 mt-1">{label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </FadeInSection>
