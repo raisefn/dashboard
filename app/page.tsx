@@ -366,7 +366,7 @@ export default function LandingPage() {
             <span className="text-teal-400">(fn)</span>
           </h1>
           <p className="mx-auto mt-6 max-w-lg text-lg text-zinc-400">
-            Fundraising intelligence that requires live data, real outcomes, and cross-referencing no model has.
+            Fundraising intelligence built on live data, real outcomes, and cross-referencing no model has.
           </p>
           <div className="mt-16 flex justify-center animate-fade-in" style={{ animationDelay: "1s" }}>
             <svg
