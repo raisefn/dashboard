@@ -232,18 +232,6 @@ function StackDiagram() {
   const layers = [
     {
       layer: 1,
-      label: "The Brain",
-      headline: "Fundraising intelligence for your raise.",
-      interaction: "Not a chatbot. An analyst that never sleeps.",
-      desc: "It knows which funds actually closed deals in your sector last month — not last year. It knows what terms those deals got. It knows when an investor's 13F shows they're sitting on dry powder. Every answer traces back to a filing, a signal, or a pattern in real deal flow — then calibrates on what actually worked, not what sounded right in training data.",
-      color: "#f97316",
-      borderColor: "rgba(249,115,22,0.25)",
-      badge: "THE PRODUCT",
-      badgeColor: "text-orange-400 border-orange-700/50",
-      href: "/brain",
-    },
-    {
-      layer: 2,
       label: "Eyes & Ears",
       headline: "How the Brain knows what it knows.",
       interaction: "The data layer.",
@@ -253,6 +241,18 @@ function StackDiagram() {
       badge: "OPEN SOURCE",
       badgeColor: "text-teal-400 border-teal-700/50",
       href: "/tracker",
+    },
+    {
+      layer: 2,
+      label: "The Brain",
+      headline: "Fundraising intelligence for your raise.",
+      interaction: "Not a chatbot. An analyst that never sleeps.",
+      desc: "It knows which funds actually closed deals in your sector last month — not last year. It knows what terms those deals got. It knows when an investor's 13F shows they're sitting on dry powder. Every answer traces back to a filing, a signal, or a pattern in real deal flow — then calibrates on what actually worked, not what sounded right in training data.",
+      color: "#f97316",
+      borderColor: "rgba(249,115,22,0.25)",
+      badge: "THE PRODUCT",
+      badgeColor: "text-orange-400 border-orange-700/50",
+      href: "/brain",
     },
     {
       layer: 3,
