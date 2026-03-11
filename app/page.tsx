@@ -411,7 +411,7 @@ export default function LandingPage() {
               How it works
             </p>
             <h2 className="text-3xl font-bold sm:text-4xl">
-              <span className="text-white">Not a database with a chatbot bolted on.</span>
+              <span className="text-white">The tool founders never had. Now they do.</span>
             </h2>
           </div>
           <StackDiagram />
