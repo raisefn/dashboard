@@ -24,7 +24,7 @@ export default async function RoundsPage({ searchParams }: Props) {
       offset,
       sector: params.sector,
       round_type: params.round_type,
-      min_amount: params.min_amount ? parseInt(params.min_amount) : undefined,
+      min_amount: parseInt(params.min_amount || "1000000"),
     });
     rounds = res.data;
     meta = res.meta;
@@ -43,14 +43,14 @@ export default async function RoundsPage({ searchParams }: Props) {
 
       <div className="mb-4 flex gap-2 text-sm">
         <Link
-          href="/tracker/rounds"
-          className={`rounded-md px-3 py-1.5 ${!params.min_amount ? "bg-zinc-700 text-white" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"}`}
+          href="/tracker/rounds?min_amount=0"
+          className={`rounded-md px-3 py-1.5 ${params.min_amount === "0" ? "bg-zinc-700 text-white" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"}`}
         >
           All
         </Link>
         <Link
           href="/tracker/rounds?min_amount=1000000"
-          className={`rounded-md px-3 py-1.5 ${params.min_amount === "1000000" ? "bg-zinc-700 text-white" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"}`}
+          className={`rounded-md px-3 py-1.5 ${!params.min_amount || params.min_amount === "1000000" ? "bg-zinc-700 text-white" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"}`}
         >
           $1M+
         </Link>
