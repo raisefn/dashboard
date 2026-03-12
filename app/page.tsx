@@ -245,9 +245,9 @@ function StackDiagram() {
     {
       layer: 2,
       label: "The Brain",
-      headline: "A raise companion that learns from every fundraise.",
-      interaction: "Talk to it. It remembers everything.",
-      desc: "Tell it you're raising a $5M Series A in AI. It finds your best-fit investors, helps you plan outreach, and reads the signals when they respond. Had a meeting with a16z? Just tell it — it tracks your pipeline, asks the right follow-ups, and captures every detail. When you close, that outcome data makes it smarter for the next founder. No forms. No CRM. Just conversation.",
+      headline: "Fundraising intelligence for your raise.",
+      interaction: "Every conversation builds the dataset.",
+      desc: "Every raise that runs through it — the meetings, the passes, the ghosting, the terms, the close — becomes data. Not announcements. Not press releases. What actually happened, from the founder's side. That dataset doesn't exist anywhere else. And every raise makes the next one sharper: which investors actually write checks at your stage, how long they take, what makes them pass, and what makes them move — then calibrates on what actually worked, not what sounded right in training data.",
       color: "#f97316",
       borderColor: "rgba(249,115,22,0.25)",
       badge: "THE PRODUCT",
