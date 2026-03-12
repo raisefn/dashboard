@@ -281,3 +281,52 @@ export async function getStatsInvestors(period = "90d", limit = 10): Promise<Sta
 export async function getStatsSectors(period = "90d"): Promise<SectorStats[]> {
   return apiFetch<SectorStats[]>("/stats/sectors", { period });
 }
+
+// --- Derived Metrics ---
+
+export interface SectorMomentum {
+  sector: string;
+  current_count: number;
+  prior_count: number;
+  change_pct: number | null;
+  current_capital: number | null;
+  prior_capital: number | null;
+  capital_change_pct: number | null;
+}
+
+export interface ProjectSignal {
+  id: string;
+  name: string;
+  slug: string;
+  sector: string | null;
+  days_since_last_raise: number;
+  last_round_type: string | null;
+  last_round_amount: number | null;
+  total_raised: number | null;
+  round_count: number;
+  github_stars: number | null;
+  github_commits_30d: number | null;
+}
+
+export interface InvestorVelocity {
+  id: string;
+  name: string;
+  slug: string;
+  deals_30d: number;
+  deals_90d: number;
+  deals_365d: number;
+  total_deals: number;
+  avg_days_between_deals: number | null;
+}
+
+export async function getStatsMomentum(period = "90d"): Promise<SectorMomentum[]> {
+  return apiFetch<SectorMomentum[]>("/stats/momentum", { period });
+}
+
+export async function getStatsSignals(limit = 20): Promise<ProjectSignal[]> {
+  return apiFetch<ProjectSignal[]>("/stats/signals", { limit: String(limit) });
+}
+
+export async function getStatsVelocity(limit = 20): Promise<InvestorVelocity[]> {
+  return apiFetch<InvestorVelocity[]>("/stats/velocity", { limit: String(limit) });
+}
