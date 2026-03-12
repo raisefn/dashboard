@@ -246,7 +246,7 @@ function StackDiagram() {
       layer: 2,
       label: "The Brain",
       headline: "Fundraising intelligence for your raise.",
-      interaction: "Not a chatbot. An analyst that never sleeps.",
+      interaction: "Always watching. Always current.",
       desc: "It knows which funds actually closed deals in your sector last month — not last year. It knows what terms those deals got. It knows when an investor's 13F shows they're sitting on dry powder. Every answer traces back to a filing, a signal, or a pattern in real deal flow — then calibrates on what actually worked, not what sounded right in training data.",
       color: "#f97316",
       borderColor: "rgba(249,115,22,0.25)",
@@ -629,6 +629,49 @@ export default function LandingPage() {
               {
                 who: "Investors deploying",
                 what: "Source deals, benchmark terms, track competitive dynamics, and monitor portfolio signals — all from live data.",
+                color: "#f97316",
+              },
+            ].map((item) => (
+              <div key={item.who}>
+                <p
+                  className="text-sm font-semibold mb-2"
+                  style={{ color: item.color }}
+                >
+                  {item.who}
+                </p>
+                <p className="text-sm text-zinc-500">{item.what}</p>
+              </div>
+            ))}
+          </div>
+        </FadeInSection>
+      </section>
+
+      {/* ── Where This Goes ── */}
+      <section className="relative py-32 px-4">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl text-center mb-16">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-500 mb-4">
+              Where this goes
+            </p>
+            <h2 className="text-3xl font-bold text-white sm:text-4xl">
+              From tool to infrastructure.
+            </h2>
+          </div>
+          <div className="mx-auto max-w-3xl grid gap-8 sm:grid-cols-3 text-center">
+            {[
+              {
+                who: "Today",
+                what: "Founders use raise(fn) directly. The Brain knows your market, your investors, and your raise.",
+                color: "#2dd4bf",
+              },
+              {
+                who: "Tomorrow",
+                what: "Your AI assistant calls raise(fn) on your behalf. Same intelligence, agent-mediated.",
+                color: "#a78bfa",
+              },
+              {
+                who: "The future",
+                what: "Agents raise capital autonomously. raise(fn) is the context layer the whole ecosystem runs on.",
                 color: "#f97316",
               },
             ].map((item) => (
