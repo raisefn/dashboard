@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 export async function GET(req: Request) {
   const supabase = getSupabase();
   const { searchParams } = new URL(req.url);
@@ -27,7 +31,7 @@ export async function GET(req: Request) {
     );
   }
 
-  return new NextResponse(successPage(data.name), {
+  return new NextResponse(successPage(escapeHtml(data.name)), {
     status: 200,
     headers: { "Content-Type": "text/html" },
   });
