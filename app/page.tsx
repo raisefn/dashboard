@@ -246,7 +246,7 @@ function StackDiagram() {
       layer: 2,
       label: "The Brain",
       headline: "Fundraising intelligence for your raise.",
-      interaction: "Not a chatbot. An analyst that never sleeps.",
+      interaction: "Always watching. Always current.",
       desc: "It knows which funds actually closed deals in your sector last month — not last year. It knows what terms those deals got. It knows when an investor's 13F shows they're sitting on dry powder. Every answer traces back to a filing, a signal, or a pattern in real deal flow — then calibrates on what actually worked, not what sounded right in training data.",
       color: "#f97316",
       borderColor: "rgba(249,115,22,0.25)",
@@ -366,7 +366,7 @@ export default function LandingPage() {
             <span className="text-teal-400">(fn)</span>
           </h1>
           <p className="mx-auto mt-6 max-w-lg text-lg text-zinc-400">
-            Fundraising intelligence built on live data, real outcomes, and signal no model has.
+            Fundraising intelligence that gets smarter with every raise.
           </p>
           <div className="mt-16 flex justify-center animate-fade-in" style={{ animationDelay: "1s" }}>
             <svg
@@ -496,7 +496,7 @@ export default function LandingPage() {
             {[
               {
                 title: "More founders raise → real outcome data",
-                desc: "Every raise generates data no model can train on — who responded, who passed, who led, what terms closed. The Brain calibrates on results. That's a dataset you can't download.",
+                desc: "Every raise generates data no model can train on — who responded, who passed, who led, what terms closed. The Brain calibrates on results. That dataset doesn't exist anywhere else, and every raise that runs through raise(fn) makes it smarter for the next one.",
                 color: "#2dd4bf",
               },
               {
@@ -535,23 +535,14 @@ export default function LandingPage() {
               Fundraising intelligence, not guesswork
             </h2>
           </div>
-          <div className="mx-auto max-w-4xl grid gap-y-6 gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mx-auto max-w-3xl grid gap-y-8 gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
             {[
               { title: "Investor Matching", desc: "Ranked by actual fit — sector, stage, activity, check size. Not a directory.", color: "#2dd4bf" },
-              { title: "Readiness Evaluation", desc: "Your metrics vs. projects that raised at your stage. Know where you stand.", color: "#34d399" },
-              { title: "Narrative Analysis", desc: "Test your pitch against what target investors respond to. Before you send it.", color: "#fbbf24" },
               { title: "Signal Reading", desc: "Decode investor behavior into actionable signals from real pattern data.", color: "#fb923c" },
-              { title: "Outreach Guidance", desc: "Who to contact, what angle, who can intro. Per-investor strategy.", color: "#f87171" },
               { title: "Term Sheet Intel", desc: "Market-rate terms for your stage and sector. Know where you have leverage.", color: "#a78bfa" },
-              { title: "Valuation Calibration", desc: "What the data actually supports for your stage, sector, and metrics right now.", color: "#38bdf8" },
-              { title: "Raise Timing", desc: "Market cycle data, sector momentum, and macro signals. Know when to go out.", color: "#c084fc" },
-              { title: "Co-investor Sequencing", desc: "Who to bring in first to create social proof that unlocks the next investor.", color: "#f472b6" },
+              { title: "Readiness Evaluation", desc: "Your metrics vs. projects that raised at your stage. Know where you stand.", color: "#34d399" },
               { title: "Competitive Raise Intel", desc: "Who else in your sector is raising, at what valuation, with what traction.", color: "#86efac" },
-              { title: "Relationship Scoring", desc: "Score every investor on fit, fund cycle, relationship distance, and likelihood to move.", color: "#fde68a" },
-              { title: "Pitch Deck Analysis", desc: "Calibrated feedback against what works for your target investors and market.", color: "#67e8f9" },
-              { title: "Post-raise Intelligence", desc: "Monitor investor activity, flag follow-on timing, and track portfolio signals.", color: "#fdba74" },
-              { title: "Reference Check Intel", desc: "Strategically prepare your reference list — who to put forward and why.", color: "#d946ef" },
-              { title: "LP Intelligence", desc: "Who backs which VCs. Mandate, timeline, risk tolerance, reporting requirements.", color: "#bef264" },
+              { title: "Outreach Guidance", desc: "Who to contact, what angle, who can intro. Per-investor strategy.", color: "#f87171" },
             ].map((cap) => (
               <div key={cap.title} className="text-center">
                 <p
@@ -564,12 +555,15 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <div className="mx-auto max-w-3xl mt-12 text-center">
+          <p className="mx-auto max-w-3xl mt-10 text-center text-sm text-zinc-600">
+            Plus narrative analysis, valuation calibration, co-investor sequencing, pitch deck analysis, LP intelligence, and more.
+          </p>
+          <div className="mx-auto max-w-3xl mt-8 text-center">
             <Link
               href="/brain"
               className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30"
             >
-              Learn more about the Brain
+              See all 15 capabilities
             </Link>
           </div>
         </FadeInSection>
@@ -635,6 +629,49 @@ export default function LandingPage() {
               {
                 who: "VCs sourcing",
                 what: "Live deal flow, market signals, and investor activity tracking.",
+                color: "#f97316",
+              },
+            ].map((item) => (
+              <div key={item.who}>
+                <p
+                  className="text-sm font-semibold mb-2"
+                  style={{ color: item.color }}
+                >
+                  {item.who}
+                </p>
+                <p className="text-sm text-zinc-500">{item.what}</p>
+              </div>
+            ))}
+          </div>
+        </FadeInSection>
+      </section>
+
+      {/* ── Where This Goes ── */}
+      <section className="relative py-32 px-4">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl text-center mb-16">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-500 mb-4">
+              Where this goes
+            </p>
+            <h2 className="text-3xl font-bold text-white sm:text-4xl">
+              From tool to infrastructure.
+            </h2>
+          </div>
+          <div className="mx-auto max-w-3xl grid gap-8 sm:grid-cols-3 text-center">
+            {[
+              {
+                who: "Today",
+                what: "Founders use raise(fn) directly. The Brain knows your market, your investors, and your raise.",
+                color: "#2dd4bf",
+              },
+              {
+                who: "Tomorrow",
+                what: "Your AI assistant calls raise(fn) on your behalf. Same intelligence, agent-mediated.",
+                color: "#a78bfa",
+              },
+              {
+                who: "The future",
+                what: "Agents raise capital autonomously. raise(fn) is the context layer the whole ecosystem runs on.",
                 color: "#f97316",
               },
             ].map((item) => (

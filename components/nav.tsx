@@ -7,7 +7,7 @@ import EarlyAccessModal from "@/components/early-access-modal";
 
 const topLinks = [
   { href: "/brain", label: "Brain", prefix: "/brain" },
-  { href: "/tracker", label: "Tracker", prefix: "/tracker" },
+  { href: "/tracker", label: "Eyes & Ears", prefix: "/tracker" },
   { href: "/sdk", label: "Developer SDK", prefix: "/sdk" },
   { href: "/pricing", label: "Pricing", prefix: "/pricing" },
 ];
