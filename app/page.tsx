@@ -689,49 +689,6 @@ export default function LandingPage() {
         </FadeInSection>
       </section>
 
-      {/* ── Where This Goes ── */}
-      <section className="relative py-32 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl text-center mb-16">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-500 mb-4">
-              Where this goes
-            </p>
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              From tool to infrastructure.
-            </h2>
-          </div>
-          <div className="mx-auto max-w-3xl grid gap-8 sm:grid-cols-3 text-center">
-            {[
-              {
-                who: "Today",
-                what: "Founders use raise(fn) directly. The Brain knows your market, your investors, and your raise.",
-                color: "#2dd4bf",
-              },
-              {
-                who: "Tomorrow",
-                what: "Your AI assistant calls raise(fn) on your behalf. Same intelligence, agent-mediated.",
-                color: "#a78bfa",
-              },
-              {
-                who: "The future",
-                what: "Agents raise capital autonomously. raise(fn) is the context layer the whole ecosystem runs on.",
-                color: "#f97316",
-              },
-            ].map((item) => (
-              <div key={item.who}>
-                <p
-                  className="text-sm font-semibold mb-2"
-                  style={{ color: item.color }}
-                >
-                  {item.who}
-                </p>
-                <p className="text-sm text-zinc-500">{item.what}</p>
-              </div>
-            ))}
-          </div>
-        </FadeInSection>
-      </section>
-
       {/* ── CTA ── */}
       <section className="relative py-32 px-4">
         <FadeInSection>
