@@ -141,14 +141,31 @@ export default async function ProjectDetailPage({ params }: Props) {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        <StatsCard label="TVL" value={formatUSD(project.tvl)} subValue={project.tvl_change_7d != null ? `${formatPercent(project.tvl_change_7d)} 7d` : undefined} subColor={percentColor(project.tvl_change_7d)} />
-        <StatsCard label="Market Cap" value={formatUSD(project.market_cap)} />
-        <StatsCard label="Token Price" value={formatPrice(project.token_price_usd)} />
-        <StatsCard label="GitHub Stars" value={formatNumber(project.github_stars)} />
-        <StatsCard label="Contributors" value={formatNumber(project.github_contributors)} />
-        <StatsCard label="30d Commits" value={formatNumber(project.github_commits_30d)} />
-      </div>
+      {(() => {
+        const stats = [
+          project.tvl != null && { label: "TVL", value: formatUSD(project.tvl), subValue: project.tvl_change_7d != null ? `${formatPercent(project.tvl_change_7d)} 7d` : undefined, subColor: percentColor(project.tvl_change_7d) },
+          project.market_cap != null && { label: "Market Cap", value: formatUSD(project.market_cap) },
+          project.token_price_usd != null && { label: "Token Price", value: formatPrice(project.token_price_usd) },
+          project.github_stars != null && { label: "GitHub Stars", value: formatNumber(project.github_stars) },
+          project.github_contributors != null && { label: "Contributors", value: formatNumber(project.github_contributors) },
+          project.github_commits_30d != null && { label: "30d Commits", value: formatNumber(project.github_commits_30d) },
+          project.twitter_followers != null && { label: "Twitter Followers", value: formatNumber(project.twitter_followers) },
+          project.reddit_subscribers != null && { label: "Reddit Subscribers", value: formatNumber(project.reddit_subscribers) },
+          project.token_holder_count != null && { label: "Token Holders", value: formatNumber(project.token_holder_count) },
+        ].filter(Boolean) as { label: string; value: string; subValue?: string; subColor?: string }[];
+
+        if (stats.length === 0) return null;
+
+        const cols = stats.length <= 3 ? "sm:grid-cols-3" : stats.length <= 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3 lg:grid-cols-6";
+
+        return (
+          <div className={`grid grid-cols-2 gap-4 ${cols}`}>
+            {stats.map((s) => (
+              <StatsCard key={s.label} label={s.label} value={s.value} subValue={s.subValue} subColor={s.subColor} />
+            ))}
+          </div>
+        );
+      })()}
 
       {/* Founders */}
       {founders.length > 0 && (
