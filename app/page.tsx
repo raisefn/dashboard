@@ -611,7 +611,7 @@ export default function LandingPage() {
               Built for
             </p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              Founders raising. Tools building. VCs sourcing.
+              Founders raising. Tools building. Investors deploying.
             </h2>
           </div>
           <div className="mx-auto max-w-3xl grid gap-6 sm:grid-cols-3 text-center">
@@ -627,8 +627,8 @@ export default function LandingPage() {
                 color: "#a78bfa",
               },
               {
-                who: "VCs sourcing",
-                what: "Live deal flow, market signals, and investor activity tracking.",
+                who: "Investors deploying",
+                what: "Source deals, benchmark terms, track competitive dynamics, and monitor portfolio signals — all from live data.",
                 color: "#f97316",
               },
             ].map((item) => (
