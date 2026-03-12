@@ -7,9 +7,12 @@ raisefn is a fundraising intelligence platform. This repo is the frontend — a 
 
 - **Framework**: Next.js (App Router), React, Tailwind CSS
 - **Deployment**: Vercel (auto-deploys from main)
-- **Backend API**: FastAPI on Railway at `brain-production-61da.up.railway.app`
+- **Tracker API**: FastAPI on Railway at `api-production-5f7b.up.railway.app`
+  - Dashboard data pages (rounds, investors, projects, stats) use this
+  - Auth: `X-API-Key` header via `API_KEY` env var
+- **Brain API**: FastAPI on Railway at `brain-production-61da.up.railway.app`
   - Proxied through Vercel rewrites (see `next.config.ts`)
-  - Auth: `X-API-Key` header
+  - Used for chat/intelligence features
 - **Database**: PostgreSQL on Railway (shared with tracker)
 - **API client**: `lib/api.ts` — typed fetch helpers for all endpoints
 
@@ -68,8 +71,8 @@ Next.js (this repo) ← lib/api.ts fetches with 5-min cache (revalidate: 300)
 
 ## Environment Variables
 
-- `NEXT_PUBLIC_API_URL` — backend API base URL
-- `API_KEY` — server-side API key for backend requests
+- `NEXT_PUBLIC_API_URL` — tracker API base URL (`https://api-production-5f7b.up.railway.app`)
+- `API_KEY` — server-side API key for tracker API requests
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — for early access signups
 
 ## Backend (separate repos)

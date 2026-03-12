@@ -10,6 +10,19 @@ interface PaginationMeta {
 
 // --- Projects ---
 
+export interface Founder {
+  id: string;
+  name: string;
+  slug: string;
+  role: string | null;
+  linkedin: string | null;
+  twitter: string | null;
+  github: string | null;
+  bio: string | null;
+  previous_companies: { name: string; role?: string }[] | null;
+  source: string | null;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -39,6 +52,7 @@ export interface Project {
   twitter_followers: number | null;
   telegram_members: number | null;
   token_holder_count: number | null;
+  founders: Founder[];
   last_enriched_at: string | null;
   created_at: string;
 }
@@ -329,4 +343,24 @@ export async function getStatsSignals(limit = 20): Promise<ProjectSignal[]> {
 
 export async function getStatsVelocity(limit = 20): Promise<InvestorVelocity[]> {
   return apiFetch<InvestorVelocity[]>("/stats/velocity", { limit: String(limit) });
+}
+
+// --- Search ---
+
+export interface SearchResult {
+  entity_type: string;
+  id: string;
+  name: string;
+  slug: string;
+  score: number;
+  extra: Record<string, string>;
+}
+
+export interface SearchResponse {
+  results: SearchResult[];
+  total: number;
+}
+
+export async function search(q: string, type = "all", limit = 10): Promise<SearchResponse> {
+  return apiFetch<SearchResponse>("/search", { q, type, limit: String(limit) });
 }

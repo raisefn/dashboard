@@ -1,11 +1,77 @@
 import Link from "next/link";
-import { getProject, getRounds } from "@/lib/api";
+import { getProject, getRounds, type Founder } from "@/lib/api";
 import { formatUSD, formatNumber, formatPercent, formatPrice, formatDate, percentColor } from "@/lib/format";
 import StatsCard from "@/components/stats-card";
 import TrackerComingSoon from "@/components/tracker-coming-soon";
 
 interface Props {
   params: Promise<{ slug: string }>;
+}
+
+function FounderCard({ founder }: { founder: Founder }) {
+  return (
+    <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="font-medium text-white truncate">{founder.name}</h3>
+          {founder.role && (
+            <p className="text-xs text-zinc-500">{founder.role}</p>
+          )}
+        </div>
+        <div className="flex shrink-0 gap-2">
+          {founder.linkedin && (
+            <a
+              href={founder.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-400 hover:text-blue-300"
+            >
+              LinkedIn
+            </a>
+          )}
+          {founder.twitter && (
+            <a
+              href={`https://twitter.com/${founder.twitter.replace("@", "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-400 hover:text-blue-300"
+            >
+              {founder.twitter}
+            </a>
+          )}
+          {founder.github && (
+            <a
+              href={`https://github.com/${founder.github}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-400 hover:text-blue-300"
+            >
+              GitHub
+            </a>
+          )}
+        </div>
+      </div>
+      {founder.bio && (
+        <p className="mt-2 text-xs text-zinc-400 leading-relaxed line-clamp-3">
+          {founder.bio}
+        </p>
+      )}
+      {founder.previous_companies && founder.previous_companies.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          <span className="text-xs text-zinc-600">Previously:</span>
+          {founder.previous_companies.slice(0, 5).map((pc, i) => (
+            <span
+              key={i}
+              className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs text-zinc-400"
+            >
+              {pc.name}
+              {pc.role && <span className="text-zinc-600"> ({pc.role})</span>}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default async function ProjectDetailPage({ params }: Props) {
@@ -19,6 +85,8 @@ export default async function ProjectDetailPage({ params }: Props) {
   } catch {
     return <TrackerComingSoon />;
   }
+
+  const founders = project.founders || [];
 
   return (
     <div>
@@ -81,6 +149,18 @@ export default async function ProjectDetailPage({ params }: Props) {
         <StatsCard label="Contributors" value={formatNumber(project.github_contributors)} />
         <StatsCard label="30d Commits" value={formatNumber(project.github_commits_30d)} />
       </div>
+
+      {/* Founders */}
+      {founders.length > 0 && (
+        <div className="mt-8">
+          <h2 className="mb-4 text-xl font-semibold text-white">Team</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {founders.map((f) => (
+              <FounderCard key={f.id} founder={f} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {rounds.length > 0 && (
         <div className="mt-8">

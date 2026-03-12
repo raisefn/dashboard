@@ -246,8 +246,13 @@ export default async function PulsePage({ searchParams }: Props) {
                   .slice(0, 12)
                   .map((s) => (
                     <tr key={s.sector} className="hover:bg-zinc-800/30">
-                      <td className="py-2 text-zinc-300 capitalize">
-                        {s.sector.replace(/_/g, " ")}
+                      <td className="py-2 capitalize">
+                        <Link
+                          href={`/tracker/sectors/${encodeURIComponent(s.sector)}`}
+                          className="text-zinc-300 hover:text-white transition-colors"
+                        >
+                          {s.sector.replace(/_/g, " ")}
+                        </Link>
                       </td>
                       <td className="py-2 text-right font-mono text-zinc-400">
                         {s.current_count}

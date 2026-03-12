@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import EarlyAccessModal from "@/components/early-access-modal";
+import TrackerSearch from "@/components/tracker-search";
 
 const topLinks = [
   { href: "/brain", label: "Brain", prefix: "/brain" },
@@ -115,7 +116,7 @@ export default function Nav() {
 
       {subLinks && (
         <nav className="border-b border-zinc-800/60 bg-zinc-950/60">
-          <div className="mx-auto flex max-w-7xl items-center justify-center px-4 py-2">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2">
             <div className="flex gap-4 sm:gap-6">
               {subLinks.map((link) => {
                 const active = pathname === link.href;
@@ -134,6 +135,7 @@ export default function Nav() {
                 );
               })}
             </div>
+            {isTracker && <TrackerSearch />}
           </div>
         </nav>
       )}

@@ -23,6 +23,11 @@ const sourceColors: Record<string, string> = {
   sec_edgar: "text-sky-400",
   rss_news: "text-pink-400",
   crunchbase: "text-emerald-400",
+  news: "text-pink-400",
+  cryptorank: "text-violet-400",
+  nsf: "text-teal-400",
+  nih: "text-blue-400",
+  sbir: "text-cyan-400",
 };
 
 function confidenceDot(confidence: number) {
@@ -75,7 +80,7 @@ export default async function FeedPage() {
               title={`${Math.round(r.confidence * 100)}% confidence`}
             />
 
-            {/* Project + type */}
+            {/* Project + type + sector */}
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <Link
@@ -92,6 +97,14 @@ export default async function FeedPage() {
                   >
                     {r.round_type.replace(/_/g, " ")}
                   </span>
+                )}
+                {r.sector && (
+                  <Link
+                    href={`/tracker/sectors/${encodeURIComponent(r.sector)}`}
+                    className="rounded-full border border-zinc-700/50 px-2 py-0.5 text-[10px] text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 transition-colors capitalize"
+                  >
+                    {r.sector.replace(/_/g, " ")}
+                  </Link>
                 )}
               </div>
               {r.investors.length > 0 && (
@@ -114,13 +127,26 @@ export default async function FeedPage() {
 
             {/* Source + time */}
             <div className="hidden shrink-0 text-right sm:block">
-              <p
-                className={`text-xs font-medium ${
-                  sourceColors[r.source_type] || "text-zinc-500"
-                }`}
-              >
-                {r.source_type.replace(/_/g, " ")}
-              </p>
+              {r.source_url ? (
+                <a
+                  href={r.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`text-xs font-medium hover:underline ${
+                    sourceColors[r.source_type] || "text-zinc-500"
+                  }`}
+                >
+                  {r.source_type.replace(/_/g, " ")}
+                </a>
+              ) : (
+                <p
+                  className={`text-xs font-medium ${
+                    sourceColors[r.source_type] || "text-zinc-500"
+                  }`}
+                >
+                  {r.source_type.replace(/_/g, " ")}
+                </p>
+              )}
               <p className="text-xs text-zinc-600">{timeAgo(r.created_at)}</p>
             </div>
           </div>
