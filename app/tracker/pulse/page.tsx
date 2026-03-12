@@ -13,6 +13,7 @@ import {
 import { formatUSD, formatNumber, formatPercent, percentColor } from "@/lib/format";
 import StatsCard from "@/components/stats-card";
 import TrackerComingSoon from "@/components/tracker-coming-soon";
+import { typeColorsText } from "@/lib/colors";
 
 export const revalidate = 60;
 
@@ -22,20 +23,6 @@ const PERIODS = [
   { value: "1y", label: "1 year" },
   { value: "all", label: "All time" },
 ];
-
-const typeColors: Record<string, string> = {
-  seed: "text-emerald-400",
-  pre_seed: "text-emerald-300",
-  series_a: "text-blue-400",
-  series_b: "text-violet-400",
-  series_c: "text-purple-400",
-  series_d: "text-fuchsia-400",
-  strategic: "text-amber-400",
-  grant: "text-teal-400",
-  ico: "text-orange-400",
-  ido: "text-orange-300",
-  private: "text-zinc-300",
-};
 
 async function safeFetch<T>(fn: () => Promise<T>): Promise<T | null> {
   try {
@@ -165,7 +152,7 @@ export default async function PulsePage({ searchParams }: Props) {
                   <div key={rt.round_type} className="flex items-center gap-3">
                     <span
                       className={`w-24 text-sm font-medium ${
-                        typeColors[rt.round_type] || "text-zinc-400"
+                        typeColorsText[rt.round_type] || "text-zinc-400"
                       }`}
                     >
                       {rt.round_type.replace(/_/g, " ")}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import FadeInSection from "@/components/fade-in-section";
 import { useEffect, useRef, useState } from "react";
+import { generatePositions } from "@/lib/galaxy";
 
 // All data sources — active and planned
 const sources = [
@@ -54,44 +55,7 @@ const sources = [
   { label: "Angel Capital Assn", desc: "Angel group directory", color: "#fca5a1", active: true },
 ];
 
-// Seeded pseudo-random for consistent layout across renders
-function seededRandom(seed: number) {
-  const x = Math.sin(seed * 9301 + 49297) * 233280;
-  return x - Math.floor(x);
-}
-
-// Generate 3D galaxy positions — depth determines size, opacity, speed
-function generatePositions(count: number) {
-  const positions: {
-    x: number;
-    y: number;
-    depth: number; // 0 = far, 1 = close
-    size: number;
-    opacity: number;
-    speed: number;
-  }[] = [];
-
-  for (let i = 0; i < count; i++) {
-    const seed = i * 7 + 13;
-    const angle = seededRandom(seed) * Math.PI * 2;
-    const dist = 160 + seededRandom(seed + 1) * 240;
-    const depth = seededRandom(seed + 2);
-
-    const depthScale = 0.3 + depth * 0.7;
-
-    positions.push({
-      x: 400 + Math.cos(angle) * dist * (0.7 + depth * 0.3),
-      y: 400 + Math.sin(angle) * dist * (0.7 + depth * 0.3),
-      depth,
-      size: depthScale,
-      opacity: 0.25 + depth * 0.75,
-      speed: 3 + (1 - depth) * 4,
-    });
-  }
-  return positions;
-}
-
-const positions = generatePositions(sources.length);
+const positions = generatePositions(sources.length, 13);
 
 const CX = 400;
 const CY = 400;
