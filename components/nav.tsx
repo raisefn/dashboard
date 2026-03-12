@@ -116,7 +116,7 @@ export default function Nav() {
 
       {subLinks && (
         <nav className="border-b border-zinc-800/60 bg-zinc-950/60">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2">
+          <div className="relative mx-auto flex max-w-7xl items-center justify-center px-4 py-2">
             <div className="flex items-center gap-4 sm:gap-6">
               {subLinks.map((link) => {
                 const active = pathname === link.href;
@@ -135,7 +135,11 @@ export default function Nav() {
                 );
               })}
             </div>
-            {isTracker && <TrackerSearch />}
+            {isTracker && (
+              <div className="absolute right-4">
+                <TrackerSearch />
+              </div>
+            )}
           </div>
         </nav>
       )}
