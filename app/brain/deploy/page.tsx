@@ -130,6 +130,19 @@ const BRAIN_CSS = `
   }
   .admin-input:focus { border-color: #f97316; }
   .admin-input::placeholder { color: #52525b; }
+  select.admin-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2352525b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 24px;
+    max-width: 400px;
+    cursor: pointer;
+  }
+  select.admin-input option {
+    background: #18181b;
+    color: #e4e4e7;
+  }
   .admin-btn {
     background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.3);
     color: #fb923c; padding: 5px 12px; border-radius: 6px;
@@ -438,6 +451,12 @@ export default function BrainDeployPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [impersonateInput, setImpersonateInput] = useState("");
   const [impersonating, setImpersonating] = useState("");
+  const [adminUsers, setAdminUsers] = useState<Array<{
+    email: string; name: string; role: string; tier: string;
+    created_at: string | null;
+    campaign: { company: string | null; status: string | null; stage: string | null } | null;
+    events: number; last_active: string | null;
+  }>>([]);
 
   // Chat
   const [chatStarted, setChatStarted] = useState(false);
@@ -484,6 +503,17 @@ export default function BrainDeployPage() {
     });
     return () => subscription.unsubscribe();
   }, [router]);
+
+  /* ── Fetch admin user list ── */
+  useEffect(() => {
+    if (!isAdmin || !session) return;
+    fetch("/v1/brain/admin/users", {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => { if (Array.isArray(data)) setAdminUsers(data); })
+      .catch(() => {});
+  }, [isAdmin, session]);
 
   /* ── Canvas init + animation (exact port from chat.html) ── */
   useEffect(() => {
@@ -913,23 +943,54 @@ export default function BrainDeployPage() {
         <div className="admin-bar">
           <div className="admin-bar-inner">
             <span className="admin-label">Acting as</span>
-            <input
-              type="email"
-              value={impersonateInput}
-              onChange={(e) => setImpersonateInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") switchClient(impersonateInput.trim().toLowerCase());
-              }}
-              placeholder="client@email.com"
-              className="admin-input"
-            />
-            <button
-              onClick={() => switchClient(impersonateInput.trim().toLowerCase())}
-              disabled={!impersonateInput.trim()}
-              className="admin-btn"
-            >
-              Switch
-            </button>
+            {adminUsers.length > 0 ? (
+              <select
+                value={impersonating}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val) switchClient(val);
+                  else {
+                    setImpersonating("");
+                    setImpersonateInput("");
+                    if (messagesInnerRef.current) messagesInnerRef.current.innerHTML = "";
+                    historyRef.current = [];
+                    raiseIdRef.current = null;
+                    setChatStarted(false);
+                    hasAutoProbed.current = false;
+                    centerUiRef.current?.classList.remove("at-bottom");
+                    messagesRef.current?.classList.remove("active");
+                  }
+                }}
+                className="admin-input"
+              >
+                <option value="">Myself</option>
+                {adminUsers.map((u) => (
+                  <option key={u.email} value={u.email}>
+                    {u.name || u.email} — {u.role}{u.campaign ? ` — ${u.campaign.company || "no company"}` : ""} ({u.events} events)
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <>
+                <input
+                  type="email"
+                  value={impersonateInput}
+                  onChange={(e) => setImpersonateInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") switchClient(impersonateInput.trim().toLowerCase());
+                  }}
+                  placeholder="client@email.com"
+                  className="admin-input"
+                />
+                <button
+                  onClick={() => switchClient(impersonateInput.trim().toLowerCase())}
+                  disabled={!impersonateInput.trim()}
+                  className="admin-btn"
+                >
+                  Switch
+                </button>
+              </>
+            )}
             {impersonating && (
               <button
                 onClick={() => {
@@ -939,6 +1000,7 @@ export default function BrainDeployPage() {
                   historyRef.current = [];
                   raiseIdRef.current = null;
                   setChatStarted(false);
+                  hasAutoProbed.current = false;
                   centerUiRef.current?.classList.remove("at-bottom");
                   messagesRef.current?.classList.remove("active");
                 }}
