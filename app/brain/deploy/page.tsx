@@ -775,8 +775,8 @@ export default function BrainDeployPage() {
     const role = (session.user?.user_metadata?.role as string) || "founder";
     const welcomes: Record<string, string> = {
       founder:  `Welcome to raise(fn), ${firstName}! Are you looking to raise? Tell me about the company and where you're at today.`,
-      investor: `Welcome to raise(fn), ${firstName}! What's your fund and thesis? I can surface founders and deals that match what you're looking for.`,
-      builder:  `Welcome to raise(fn), ${firstName}! What are you working on? I can help with market intel, fundraising strategy, or whatever you need.`,
+      investor: `Welcome to raise(fn), ${firstName}! Are you currently deploying? What kinds of companies? Check size?\n\nI can help analyze deals, surface new companies, and quite a few other things. Just let me know how I can help.`,
+      builder:  `Welcome to raise(fn), ${firstName}! What are we working on? How can raise(fn) help?`,
     };
     const welcome = welcomes[role] || welcomes.founder;
 
