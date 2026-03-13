@@ -1,904 +1,970 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, FormEvent } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 import type { Session } from "@supabase/supabase-js";
 
-/* ------------------------------------------------------------------ */
-/*  Constants                                                          */
-/* ------------------------------------------------------------------ */
-
-const BRAIN_URL =
-  process.env.NEXT_PUBLIC_BRAIN_URL ||
-  "https://brain-production.up.railway.app";
-
 const ADMIN_EMAILS = ["justinpetsche@gmail.com"];
 
-const STARTER_PROMPTS = [
-  "Who are the best seed investors for a dev-tools company?",
-  "Help me qualify my raise — Series A, $8M target.",
-  "What signals should I look for before reaching out to a VC?",
-  "Analyze my fundraising narrative.",
+const STARTERS = [
+  "Who should I pitch?",
+  "Am I ready to raise?",
+  "Are these terms fair?",
+  "How should I position this?",
 ];
 
-/* ------------------------------------------------------------------ */
-/*  Types                                                              */
-/* ------------------------------------------------------------------ */
+/* ── Tool → color mapping (matches chat.html exactly) ── */
+const COLORS = {
+  teal:    { r: 45,  g: 212, b: 191 },
+  orange:  { r: 249, g: 115, b: 22  },
+  emerald: { r: 52,  g: 211, b: 153 },
+  violet:  { r: 167, g: 139, b: 250 },
+  zinc:    { r: 82,  g: 82,  b: 91  },
+};
+const COLOR_KEYS = Object.keys(COLORS) as (keyof typeof COLORS)[];
 
-interface ChatMessage {
-  role: "user" | "assistant" | "status";
-  content: string;
-}
-
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  r: number;
-  g: number;
-  b: number;
-  baseR: number;
-  baseG: number;
-  baseB: number;
-  radius: number;
-  speed: number;
-}
-
-type CanvasState = "idle" | "thinking" | "active";
-
-/* ------------------------------------------------------------------ */
-/*  Tool → color mapping                                               */
-/* ------------------------------------------------------------------ */
-
-const TOOL_COLORS: Record<string, { r: number; g: number; b: number }> = {
-  "match investors": { r: 45, g: 212, b: 191 },
-  "match_investors": { r: 45, g: 212, b: 191 },
-  "qualify raise": { r: 52, g: 211, b: 153 },
-  "qualify_raise": { r: 52, g: 211, b: 153 },
-  "analyze narrative": { r: 249, g: 115, b: 22 },
-  "analyze_narrative": { r: 249, g: 115, b: 22 },
-  "read signal": { r: 249, g: 115, b: 22 },
-  "read_signal": { r: 249, g: 115, b: 22 },
-  "plan outreach": { r: 249, g: 115, b: 22 },
-  "plan_outreach": { r: 249, g: 115, b: 22 },
-  "analyze terms": { r: 167, g: 139, b: 250 },
-  "analyze_terms": { r: 167, g: 139, b: 250 },
+const TOOL_COLORS: Record<string, keyof typeof COLORS> = {
+  "match investors":    "teal",
+  "qualify raise":      "emerald",
+  "analyze narrative":  "orange",
+  "read signal":        "orange",
+  "plan outreach":      "orange",
+  "analyze terms":      "violet",
 };
 
-const BRAND_COLORS = [
-  { r: 45, g: 212, b: 191 }, // teal
-  { r: 249, g: 115, b: 22 }, // orange
-  { r: 52, g: 211, b: 153 }, // emerald
-  { r: 167, g: 139, b: 250 }, // violet
-  { r: 161, g: 161, b: 170 }, // zinc-400
-];
-
-/* ------------------------------------------------------------------ */
-/*  Markdown renderer                                                  */
-/* ------------------------------------------------------------------ */
-
-function renderMarkdown(text: string): string {
-  let html = text;
-
-  // Escape HTML entities (but preserve our own tags later)
-  html = html
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-
-  // Code blocks (``` ... ```)
-  html = html.replace(
-    /```(\w*)\n?([\s\S]*?)```/g,
-    (_match, _lang, code) =>
-      `<pre class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 my-3 overflow-x-auto text-sm font-mono text-zinc-300"><code>${code.trim()}</code></pre>`
-  );
-
-  // Inline code
-  html = html.replace(
-    /`([^`]+)`/g,
-    '<code class="bg-zinc-800 px-1.5 py-0.5 rounded text-sm font-mono text-teal-300">$1</code>'
-  );
-
-  // Headings
-  html = html.replace(
-    /^#### (.+)$/gm,
-    '<h4 class="text-base font-semibold text-zinc-100 mt-4 mb-1">$1</h4>'
-  );
-  html = html.replace(
-    /^### (.+)$/gm,
-    '<h3 class="text-lg font-semibold text-zinc-100 mt-5 mb-2">$1</h3>'
-  );
-  html = html.replace(
-    /^## (.+)$/gm,
-    '<h2 class="text-xl font-bold text-zinc-100 mt-6 mb-2">$1</h2>'
-  );
-  html = html.replace(
-    /^# (.+)$/gm,
-    '<h1 class="text-2xl font-bold text-zinc-100 mt-6 mb-3">$1</h1>'
-  );
-
-  // Horizontal rules
-  html = html.replace(
-    /^---$/gm,
-    '<hr class="border-zinc-800 my-4" />'
-  );
-
-  // Bold + italic
-  html = html.replace(
-    /\*\*\*(.+?)\*\*\*/g,
-    '<strong class="font-bold text-zinc-100"><em>$1</em></strong>'
-  );
-  // Bold
-  html = html.replace(
-    /\*\*(.+?)\*\*/g,
-    '<strong class="font-bold text-zinc-100">$1</strong>'
-  );
-  // Italic
-  html = html.replace(
-    /\*(.+?)\*/g,
-    '<em class="italic text-zinc-300">$1</em>'
-  );
-
-  // Links
-  html = html.replace(
-    /\[([^\]]+)\]\(([^)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-teal-400 hover:text-teal-300 underline underline-offset-2">$1</a>'
-  );
-
-  // Unordered lists
-  html = html.replace(/^[\t ]*[-*] (.+)$/gm, (_, content) => {
-    return `<li class="ml-4 list-disc text-zinc-300">${content}</li>`;
+/* ── Markdown renderer (matches chat.html exactly) ── */
+function formatMarkdown(text: string): string {
+  if (!text) return "";
+  let t = text;
+  t = t.replace(/```(\w*)\n([\s\S]*?)```/g, (_, _lang, code) => {
+    const escaped = code.replace(/</g, "&lt;").replace(/>/g, "&gt;").trimEnd();
+    return `<pre class="code-block"><code>${escaped}</code></pre>`;
   });
-  // Wrap consecutive <li> in <ul>
-  html = html.replace(
-    /(<li[^>]*>[^]*?<\/li>\n?)+/g,
-    (match) => `<ul class="my-2 space-y-1">${match}</ul>`
-  );
-
-  // Ordered lists
-  html = html.replace(/^(\d+)\. (.+)$/gm, (_, _num, content) => {
-    return `<oli class="ml-4 list-decimal text-zinc-300">${content}</oli>`;
-  });
-  html = html.replace(
-    /(<oli[^>]*>[^]*?<\/oli>\n?)+/g,
-    (match) => {
-      const fixed = match.replace(/oli/g, "li");
-      return `<ol class="my-2 space-y-1 list-decimal">${fixed}</ol>`;
-    }
-  );
-
-  // Paragraphs: wrap lines that aren't already in a block element
-  html = html
-    .split("\n\n")
-    .map((block) => {
-      const trimmed = block.trim();
-      if (!trimmed) return "";
-      if (
-        trimmed.startsWith("<h") ||
-        trimmed.startsWith("<pre") ||
-        trimmed.startsWith("<ul") ||
-        trimmed.startsWith("<ol") ||
-        trimmed.startsWith("<hr") ||
-        trimmed.startsWith("<li")
-      ) {
-        return trimmed;
-      }
-      return `<p class="text-zinc-300 leading-relaxed my-2">${trimmed.replace(/\n/g, "<br/>")}</p>`;
-    })
-    .join("\n");
-
-  return html;
+  t = t.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+  t = t.replace(/^### (.+)$/gm, "<h3>$1</h3>");
+  t = t.replace(/^## (.+)$/gm, "<h2>$1</h2>");
+  t = t.replace(/^# (.+)$/gm, "<h1>$1</h1>");
+  t = t.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  t = t.replace(/\*(.+?)\*/g, "<em>$1</em>");
+  t = t.replace(/^(\d+)\. (.+)$/gm, '<li class="numbered"><span class="li-num">$1.</span> $2</li>');
+  t = t.replace(/^- (.+)$/gm, '<li class="bulleted">$1</li>');
+  t = t.replace(/((?:<li class="numbered">[\s\S]*?<\/li>\n?)+)/g, "<ol>$1</ol>");
+  t = t.replace(/((?:<li class="bulleted">[\s\S]*?<\/li>\n?)+)/g, "<ul>$1</ul>");
+  t = t.replace(/^---$/gm, "<hr>");
+  t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  t = t.replace(/(^|[^"=])(https?:\/\/[^\s<]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+  t = t.replace(/\n/g, "<br>");
+  t = t.replace(/<br>\s*(<\/?(?:ol|ul|li|pre|h[1-3]|hr))/g, "$1");
+  t = t.replace(/(<\/(?:ol|ul|pre|h[1-3]|hr)>)\s*<br>/g, "$1");
+  return t;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Particle system                                                    */
-/* ------------------------------------------------------------------ */
+/* ── CSS (exact copy from chat.html, minus api-key styles, plus admin bar) ── */
+const BRAIN_CSS = `
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-function createParticles(count: number, w: number, h: number): Particle[] {
-  const particles: Particle[] = [];
-  for (let i = 0; i < count; i++) {
-    const color = BRAND_COLORS[Math.floor(Math.random() * BRAND_COLORS.length)];
-    const speed = 0.15 + Math.random() * 0.35;
-    particles.push({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      vx: (Math.random() - 0.5) * speed,
-      vy: (Math.random() - 0.5) * speed,
-      r: color.r,
-      g: color.g,
-      b: color.b,
-      baseR: color.r,
-      baseG: color.g,
-      baseB: color.b,
-      radius: 1.5 + Math.random() * 1.5,
-      speed,
-    });
+  .brain-root {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #09090b;
+    color: #f4f4f5;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
   }
-  return particles;
+
+  .brain-root header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(9,9,11,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #27272a;
+    flex-shrink: 0;
+  }
+  .brain-root header nav {
+    max-width: 1280px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px;
+  }
+  .brain-logo { font-size: 18px; font-weight: 700; }
+  .brain-logo .raise { color: #f97316; }
+  .brain-logo .fn { color: #2dd4bf; }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-right .user-name { font-size: 13px; color: #a1a1aa; }
+  .nav-right .sign-out {
+    font-size: 12px; color: #52525b; cursor: pointer;
+    background: none; border: none; font-family: inherit;
+    transition: color 0.2s;
+  }
+  .nav-right .sign-out:hover { color: #a1a1aa; }
+  .key-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #2dd4bf; box-shadow: 0 0 8px rgba(45,212,191,0.4);
+    flex-shrink: 0;
+  }
+
+  /* Admin bar */
+  .admin-bar {
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(249,115,22,0.15);
+    background: rgba(249,115,22,0.03);
+    padding: 8px 16px;
+  }
+  .admin-bar-inner {
+    max-width: 1280px; margin: 0 auto;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .admin-label {
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    color: #f97316;
+  }
+  .admin-input {
+    flex: 1; max-width: 280px;
+    background: rgba(24,24,27,0.6); border: 1px solid #3f3f46;
+    color: #e4e4e7; padding: 5px 10px; border-radius: 6px;
+    font-size: 12px; font-family: inherit;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .admin-input:focus { border-color: #f97316; }
+  .admin-input::placeholder { color: #52525b; }
+  .admin-btn {
+    background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.3);
+    color: #fb923c; padding: 5px 12px; border-radius: 6px;
+    font-size: 11px; font-weight: 500; font-family: inherit;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .admin-btn:hover { background: rgba(249,115,22,0.2); }
+  .admin-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .admin-clear {
+    background: none; border: none; color: #52525b;
+    font-size: 11px; font-family: inherit; cursor: pointer;
+    transition: color 0.2s;
+  }
+  .admin-clear:hover { color: #a1a1aa; }
+
+  /* Main */
+  .brain-main {
+    flex: 1; position: relative; z-index: 1;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  .brain-canvas {
+    position: absolute; inset: 0;
+    z-index: 0;
+  }
+
+  /* Center UI */
+  .center-ui {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 10;
+    transition: all 0.7s cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none;
+  }
+  .center-ui > * { pointer-events: auto; }
+  .center-ui.at-bottom {
+    justify-content: flex-end;
+    padding-bottom: 0;
+  }
+
+  .center-label {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.2em;
+    color: #3f3f46; margin-bottom: 20px;
+    transition: all 0.5s;
+  }
+  .center-label .o { color: #f97316; }
+  .center-label .t { color: #2dd4bf; }
+  .at-bottom .center-label { opacity: 0; height: 0; margin: 0; overflow: hidden; }
+
+  .welcome-text {
+    text-align: center; margin-bottom: 24px;
+    transition: all 0.5s;
+  }
+  .welcome-text h2 {
+    font-size: 24px; font-weight: 700; color: #e4e4e7;
+  }
+  .welcome-text h2 .t { color: #2dd4bf; }
+  .welcome-text p {
+    font-size: 13px; color: #52525b; margin-top: 8px;
+  }
+  .at-bottom .welcome-text { opacity: 0; height: 0; margin: 0; overflow: hidden; }
+
+  .starters {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center; margin-bottom: 24px;
+    max-width: 520px;
+    transition: all 0.5s;
+  }
+  .at-bottom .starters { opacity: 0; height: 0; margin: 0; overflow: hidden; pointer-events: none; }
+  .starter {
+    background: rgba(24,24,27,0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid #27272a;
+    color: #71717a; padding: 7px 14px; border-radius: 9999px;
+    font-size: 12px; font-family: inherit; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .starter:hover {
+    border-color: #3f3f46; color: #d4d4d8;
+    background: rgba(39,39,42,0.6);
+  }
+
+  /* Input bar */
+  .input-bar {
+    display: flex; gap: 8px;
+    width: 100%; max-width: 560px;
+    transition: all 0.7s cubic-bezier(0.4,0,0.2,1);
+  }
+  .at-bottom .input-bar {
+    max-width: 680px;
+    padding: 12px 16px 20px;
+  }
+  .input-bar textarea {
+    flex: 1; background: rgba(24,24,27,0.8);
+    border: 1px solid #3f3f46;
+    color: #f4f4f5; padding: 12px 16px; border-radius: 12px;
+    font-size: 14px; font-family: inherit; resize: none;
+    height: 48px; max-height: 120px; line-height: 1.5;
+    transition: border-color 0.2s;
+    backdrop-filter: blur(12px);
+    outline: none;
+  }
+  .input-bar textarea:focus { border-color: #52525b; }
+  .input-bar textarea::placeholder { color: #52525b; }
+
+  .send-btn {
+    background: #f97316; color: white; border: none;
+    padding: 0 20px; border-radius: 9999px;
+    font-size: 13px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(249,115,22,0.2);
+  }
+  .send-btn:hover { background: #ea580c; box-shadow: 0 4px 16px rgba(249,115,22,0.3); }
+  .send-btn:disabled { background: #27272a; color: #52525b; cursor: not-allowed; box-shadow: none; }
+
+  /* Messages */
+  .messages-container {
+    display: none;
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    bottom: 80px;
+    overflow-y: auto;
+    z-index: 8;
+  }
+  .messages-container.active { display: flex; flex-direction: column; }
+  .messages-container::-webkit-scrollbar { width: 4px; }
+  .messages-container::-webkit-scrollbar-track { background: transparent; }
+  .messages-container::-webkit-scrollbar-thumb { background: #27272a; border-radius: 2px; }
+
+  .messages-inner {
+    width: 100%; max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 16px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  .message {
+    line-height: 1.7; font-size: 14px;
+    animation: fade-in-up 0.4s ease-out both;
+  }
+  .message.user {
+    align-self: flex-end;
+    max-width: 55%;
+    background: rgba(24,24,27,0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid #27272a;
+    padding: 12px 16px; border-radius: 16px 16px 4px 16px;
+    color: #d4d4d8;
+  }
+  .message.assistant { align-self: flex-start; max-width: 65%; padding: 4px 0; }
+  .message.assistant .content { color: #a1a1aa; }
+  .message.assistant .content h1,
+  .message.assistant .content h2,
+  .message.assistant .content h3 {
+    color: #f4f4f5; font-weight: 600; margin: 20px 0 6px;
+  }
+  .message.assistant .content h2 { font-size: 15px; }
+  .message.assistant .content h3 { font-size: 14px; }
+  .message.assistant .content strong { color: #2dd4bf; font-weight: 600; }
+  .message.assistant .content em { color: #71717a; }
+
+  .status-msg {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    color: #a1a1aa; padding: 6px 14px;
+    background: rgba(24,24,27,0.9);
+    border: 1px solid #3f3f46; border-radius: 8px;
+    margin-bottom: 12px; backdrop-filter: blur(8px);
+  }
+  .status-msg::before {
+    content: ''; width: 6px; height: 6px;
+    border-radius: 50%; background: #f97316;
+    animation: dot-flash 1s ease-in-out infinite;
+  }
+
+  .error-msg {
+    color: #fca5a5; font-size: 13px; padding: 10px 14px;
+    background: rgba(24,24,27,0.8);
+    border: 1px solid rgba(239,68,68,0.2); border-radius: 8px;
+  }
+
+  .typing { display: inline-flex; gap: 4px; padding: 8px 0; }
+  .typing span {
+    width: 5px; height: 5px; background: #f97316;
+    border-radius: 50%; animation: typing-pulse 1.4s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes fade-in-up {
+    from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}
+  }
+  @keyframes dot-flash {
+    0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}
+  }
+  @keyframes typing-pulse {
+    0%,80%,100%{opacity:.15;transform:translateY(0)}40%{opacity:1;transform:translateY(-5px)}
+  }
+
+  /* Code blocks */
+  .code-block {
+    background: rgba(24,24,27,0.9);
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #a1a1aa;
+    margin: 8px 0;
+  }
+  .code-block code { background: none; padding: 0; }
+  .inline-code {
+    background: rgba(39,39,42,0.8);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 12px;
+    color: #2dd4bf;
+  }
+
+  /* Lists */
+  .message.assistant ol,
+  .message.assistant ul {
+    margin: 6px 0;
+    padding-left: 0;
+    list-style: none;
+  }
+  .message.assistant li {
+    padding: 3px 0;
+    color: #a1a1aa;
+  }
+  .message.assistant li.bulleted::before {
+    content: '•';
+    color: #f97316;
+    margin-right: 8px;
+  }
+  .li-num {
+    color: #f97316;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+
+  /* Links */
+  .message.assistant a {
+    color: #2dd4bf;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(45,212,191,0.3);
+    transition: border-color 0.2s;
+  }
+  .message.assistant a:hover { border-color: #2dd4bf; }
+
+  /* HR */
+  .message.assistant hr {
+    border: none;
+    border-top: 1px solid #27272a;
+    margin: 12px 0;
+  }
+
+  @media (max-width: 640px) {
+    .brain-root header nav { padding: 8px 12px; }
+    .messages-inner { padding: 12px 10px; }
+    .message { max-width: 100%; }
+    .message.user { max-width: 85%; }
+    .message.assistant { max-width: 95%; }
+    .welcome-text h2 { font-size: 18px; }
+    .starters { max-width: 90vw; }
+    .starter { font-size: 11px; padding: 6px 10px; }
+    .input-bar { max-width: 95vw; }
+    .at-bottom .input-bar { padding: 8px 10px 16px; }
+    .input-bar textarea { font-size: 14px; padding: 10px 12px; }
+    .send-btn { padding: 0 14px; font-size: 12px; }
+    .code-block { font-size: 11px; padding: 8px 10px; }
+  }
+`;
+
+/* ── Particle type ── */
+interface Particle {
+  x: number; y: number;
+  vx: number; vy: number;
+  baseColor: { r: number; g: number; b: number };
+  size: number;
+  alpha: number;
+  pulseOffset: number;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Component                                                          */
-/* ------------------------------------------------------------------ */
+/* ── Message type ── */
+interface ChatMsg {
+  role: "user" | "assistant";
+  html: string; // rendered HTML for assistant, plain text for user
+}
 
 export default function BrainDeployPage() {
   const router = useRouter();
 
-  /* Auth state */
+  // Auth
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  /* Admin impersonation */
+  // Admin
   const [isAdmin, setIsAdmin] = useState(false);
-  const [impersonateEmail, setImpersonateEmail] = useState("");
-  const [impersonating, setImpersonating] = useState(false);
+  const [impersonateInput, setImpersonateInput] = useState("");
+  const [impersonating, setImpersonating] = useState("");
 
-  /* Chat state */
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // Chat
+  const [chatStarted, setChatStarted] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const [input, setInput] = useState("");
-  const [streaming, setStreaming] = useState(false);
-  const [started, setStarted] = useState(false);
+  const raiseIdRef = useRef<string | null>(
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("raise_id")
+      : null
+  );
+  const historyRef = useRef<{ role: string; content: string }[]>([]);
 
-  /* Canvas state */
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // DOM refs
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
+  const centerUiRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const messagesInnerRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const sendBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Canvas state (refs for animation loop)
   const particlesRef = useRef<Particle[]>([]);
-  const canvasStateRef = useRef<CanvasState>("idle");
-  const activeToolColorRef = useRef<{ r: number; g: number; b: number } | null>(null);
-  const animFrameRef = useRef<number>(0);
+  const brainStateRef = useRef<"idle" | "thinking" | "active">("idle");
+  const activeColorRef = useRef<{ r: number; g: number; b: number } | null>(null);
+  const stateIntensityRef = useRef(0);
+  const canvasDimsRef = useRef({ W: 0, H: 0, cx: 0, cy: 0 });
+  const animRef = useRef<number>(0);
 
-  /* Refs */
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const inputRef = useRef<HTMLTextAreaElement | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
+  // Auto-probe
+  const hasAutoProbed = useRef(false);
 
-  /* ---------------------------------------------------------------- */
-  /*  Auth                                                             */
-  /* ---------------------------------------------------------------- */
-
+  /* ── Auth ── */
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
-      if (!s) {
-        router.replace("/login");
-        return;
-      }
+      if (!s) { router.replace("/login"); return; }
       setSession(s);
       setIsAdmin(ADMIN_EMAILS.includes(s.user.email ?? ""));
       setLoading(false);
     });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_ev, s) => {
       setSession(s);
       if (!s) router.replace("/login");
     });
-
     return () => subscription.unsubscribe();
   }, [router]);
 
-  /* ---------------------------------------------------------------- */
-  /*  Particle canvas animation                                        */
-  /* ---------------------------------------------------------------- */
-
+  /* ── Canvas init + animation (exact port from chat.html) ── */
   useEffect(() => {
+    if (loading) return;
     const canvas = canvasRef.current;
-    if (!canvas) return;
-
+    const main = mainRef.current;
+    if (!canvas || !main) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      if (particlesRef.current.length === 0) {
-        particlesRef.current = createParticles(80, canvas.width, canvas.height);
+    const PARTICLE_COUNT = 80;
+    const CONNECTION_DIST = 140;
+    const PARTICLE_SPEED = 0.3;
+
+    function resize() {
+      const W = main!.offsetWidth;
+      const H = main!.offsetHeight;
+      canvas!.width = W * devicePixelRatio;
+      canvas!.height = H * devicePixelRatio;
+      canvas!.style.width = W + "px";
+      canvas!.style.height = H + "px";
+      ctx!.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+      canvasDimsRef.current = { W, H, cx: W / 2, cy: H / 2 };
+    }
+
+    function initParticles() {
+      const { W, H, cx, cy } = canvasDimsRef.current;
+      const ps: Particle[] = [];
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const colorKey = COLOR_KEYS[i % COLOR_KEYS.length];
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 60 + Math.random() * Math.min(W, H) * 0.45;
+        ps.push({
+          x: cx + Math.cos(angle) * dist,
+          y: cy + Math.sin(angle) * dist,
+          vx: (Math.random() - 0.5) * PARTICLE_SPEED * 2,
+          vy: (Math.random() - 0.5) * PARTICLE_SPEED * 2,
+          baseColor: COLORS[colorKey],
+          size: 1.2 + Math.random() * 1.8,
+          alpha: 0.15 + Math.random() * 0.35,
+          pulseOffset: Math.random() * Math.PI * 2,
+        });
       }
-    };
+      particlesRef.current = ps;
+    }
 
-    resize();
-    window.addEventListener("resize", resize);
-
-    const CONNECTION_DIST = 150;
-
-    const animate = () => {
-      const w = canvas.width;
-      const h = canvas.height;
-      const state = canvasStateRef.current;
-      const toolColor = activeToolColorRef.current;
-
-      ctx.clearRect(0, 0, w, h);
-
-      const cx = w / 2;
-      const cy = h / 2;
+    function tick(time: number) {
+      const { W, H, cx, cy } = canvasDimsRef.current;
       const particles = particlesRef.current;
+      const brainState = brainStateRef.current;
+      const activeColor = activeColorRef.current;
 
+      ctx!.clearRect(0, 0, W, H);
+
+      // Smooth state transitions
+      const targetIntensity = brainState === "idle" ? 0 : brainState === "thinking" ? 0.6 : 1;
+      stateIntensityRef.current += (targetIntensity - stateIntensityRef.current) * 0.03;
+      const si = stateIntensityRef.current;
+
+      // Update particles
       for (const p of particles) {
-        // Drift
         p.x += p.vx;
         p.y += p.vy;
-
-        // Bounce
-        if (p.x < 0 || p.x > w) p.vx *= -1;
-        if (p.y < 0 || p.y > h) p.vy *= -1;
-        p.x = Math.max(0, Math.min(w, p.x));
-        p.y = Math.max(0, Math.min(h, p.y));
-
-        // Pull toward center when thinking/active
-        if (state === "thinking" || state === "active") {
+        if (si > 0.05) {
           const dx = cx - p.x;
           const dy = cy - p.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          const pull = state === "active" ? 0.008 : 0.004;
-          p.vx += (dx / dist) * pull;
-          p.vy += (dy / dist) * pull;
-          // Dampen
-          p.vx *= 0.995;
-          p.vy *= 0.995;
-        } else {
-          // Return to base drift
-          const targetVx = (Math.random() - 0.5) * p.speed;
-          const targetVy = (Math.random() - 0.5) * p.speed;
-          p.vx += (targetVx - p.vx) * 0.01;
-          p.vy += (targetVy - p.vy) * 0.01;
+          if (dist > 80) {
+            p.vx += (dx / dist) * 0.008 * si;
+            p.vy += (dy / dist) * 0.008 * si;
+          }
         }
-
-        // Color blending
-        if (toolColor && (state === "thinking" || state === "active")) {
-          const blend = 0.04;
-          p.r += (toolColor.r - p.r) * blend;
-          p.g += (toolColor.g - p.g) * blend;
-          p.b += (toolColor.b - p.b) * blend;
-        } else {
-          const blend = 0.02;
-          p.r += (p.baseR - p.r) * blend;
-          p.g += (p.baseG - p.g) * blend;
-          p.b += (p.baseB - p.b) * blend;
-        }
-
-        // Draw particle
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${Math.round(p.r)},${Math.round(p.g)},${Math.round(p.b)},0.7)`;
-        ctx.fill();
+        const margin = 40;
+        if (p.x < -margin) p.x = W + margin;
+        if (p.x > W + margin) p.x = -margin;
+        if (p.y < -margin) p.y = H + margin;
+        if (p.y > H + margin) p.y = -margin;
+        p.vx *= 0.998;
+        p.vy *= 0.998;
+        p.vx += (Math.random() - 0.5) * 0.02;
+        p.vy += (Math.random() - 0.5) * 0.02;
       }
 
-      // Connection lines
+      // Draw connections
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
-          const a = particles[i];
-          const b = particles[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
+          const a = particles[i], b = particles[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < CONNECTION_DIST) {
-            const opacity = (1 - dist / CONNECTION_DIST) * 0.2;
-            const mr = Math.round((a.r + b.r) / 2);
-            const mg = Math.round((a.g + b.g) / 2);
-            const mb = Math.round((a.b + b.b) / 2);
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(${mr},${mg},${mb},${opacity})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
+          const maxDist = CONNECTION_DIST + si * 40;
+          if (dist < maxDist) {
+            const strength = 1 - dist / maxDist;
+            let r: number, g: number, bb: number;
+            if (activeColor && si > 0.1) {
+              const blend = si * 0.7;
+              r = a.baseColor.r * (1 - blend) + activeColor.r * blend;
+              g = a.baseColor.g * (1 - blend) + activeColor.g * blend;
+              bb = a.baseColor.b * (1 - blend) + activeColor.b * blend;
+            } else {
+              r = (a.baseColor.r + b.baseColor.r) / 2;
+              g = (a.baseColor.g + b.baseColor.g) / 2;
+              bb = (a.baseColor.b + b.baseColor.b) / 2;
+            }
+            const alpha = strength * (0.06 + si * 0.12);
+            ctx!.beginPath();
+            ctx!.moveTo(a.x, a.y);
+            ctx!.lineTo(b.x, b.y);
+            ctx!.strokeStyle = `rgba(${r | 0},${g | 0},${bb | 0},${alpha})`;
+            ctx!.lineWidth = 0.8 + si * 0.5;
+            ctx!.stroke();
           }
         }
       }
 
-      animFrameRef.current = requestAnimationFrame(animate);
-    };
+      // Draw particles
+      const pulse = Math.sin(time * 0.002) * 0.5 + 0.5;
+      for (const p of particles) {
+        let r = p.baseColor.r, g = p.baseColor.g, b = p.baseColor.b;
+        if (activeColor && si > 0.1) {
+          const blend = si * 0.6;
+          r = r * (1 - blend) + activeColor.r * blend;
+          g = g * (1 - blend) + activeColor.g * blend;
+          b = b * (1 - blend) + activeColor.b * blend;
+        }
+        const pPulse = Math.sin(time * 0.003 + p.pulseOffset) * 0.5 + 0.5;
+        const alpha = p.alpha * (0.6 + pPulse * 0.4) + si * 0.2;
+        const size = p.size * (1 + si * 0.3 + pPulse * 0.15);
+        // Glow
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, size * 3, 0, Math.PI * 2);
+        ctx!.fillStyle = `rgba(${r | 0},${g | 0},${b | 0},${alpha * 0.12})`;
+        ctx!.fill();
+        // Core
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, size, 0, Math.PI * 2);
+        ctx!.fillStyle = `rgba(${r | 0},${g | 0},${b | 0},${alpha})`;
+        ctx!.fill();
+      }
 
-    animFrameRef.current = requestAnimationFrame(animate);
+      // Center glow
+      const glowAlpha = 0.03 + si * 0.06;
+      const glowSize = 120 + si * 60 + pulse * 20;
+      const grad = ctx!.createRadialGradient(cx, cy, 0, cx, cy, glowSize);
+      if (activeColor) {
+        grad.addColorStop(0, `rgba(${activeColor.r},${activeColor.g},${activeColor.b},${glowAlpha * 1.5})`);
+      } else {
+        grad.addColorStop(0, `rgba(45,212,191,${glowAlpha})`);
+      }
+      grad.addColorStop(1, "transparent");
+      ctx!.fillStyle = grad;
+      ctx!.fillRect(cx - glowSize, cy - glowSize, glowSize * 2, glowSize * 2);
 
+      animRef.current = requestAnimationFrame(tick);
+    }
+
+    resize();
+    initParticles();
+    animRef.current = requestAnimationFrame(tick);
+
+    const onResize = () => { resize(); initParticles(); };
+    window.addEventListener("resize", onResize);
     return () => {
-      window.removeEventListener("resize", resize);
-      cancelAnimationFrame(animFrameRef.current);
+      window.removeEventListener("resize", onResize);
+      cancelAnimationFrame(animRef.current);
     };
   }, [loading]);
 
-  /* ---------------------------------------------------------------- */
-  /*  Auto-scroll                                                      */
-  /* ---------------------------------------------------------------- */
+  /* ── Send message (exact SSE logic from chat.html) ── */
+  const send = useCallback(async (message: string) => {
+    if (isStreaming || !session) return;
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    // Transition to chat mode
+    if (!chatStarted) {
+      setChatStarted(true);
+      centerUiRef.current?.classList.add("at-bottom");
+      messagesRef.current?.classList.add("active");
+    }
 
-  /* ---------------------------------------------------------------- */
-  /*  Send message                                                     */
-  /* ---------------------------------------------------------------- */
+    // Add user message to DOM
+    addMessageToDOM("user", message);
+    historyRef.current.push({ role: "user", content: message });
 
-  const sendMessage = useCallback(
-    async (text: string) => {
-      if (!text.trim() || !session) return;
+    // Add empty assistant message
+    const assistantEl = addMessageToDOM("assistant", "");
+    const contentEl = assistantEl.querySelector(".content") as HTMLElement;
 
-      if (!started) setStarted(true);
+    setIsStreaming(true);
+    if (sendBtnRef.current) sendBtnRef.current.disabled = true;
+    contentEl.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+    brainStateRef.current = "thinking";
+    activeColorRef.current = null;
 
-      const userMsg: ChatMessage = { role: "user", content: text.trim() };
-      setMessages((prev) => [...prev, userMsg]);
-      setInput("");
-      setStreaming(true);
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    };
+    if (impersonating) {
+      headers["X-Impersonate"] = impersonating;
+    }
 
-      canvasStateRef.current = "thinking";
-      activeToolColorRef.current = BRAND_COLORS[0]; // default teal
+    try {
+      const response = await fetch("/v1/brain/chat", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          message,
+          history: historyRef.current.slice(0, -1),
+          ...(raiseIdRef.current && { raise_id: raiseIdRef.current }),
+        }),
+      });
 
-      // Build history for the API
-      const history = messages
-        .filter((m) => m.role === "user" || m.role === "assistant")
-        .map((m) => ({ role: m.role, content: m.content }));
-
-      const controller = new AbortController();
-      abortRef.current = controller;
-
-      try {
-        const headers: Record<string, string> = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        };
-        if (impersonating && impersonateEmail) {
-          headers["X-Impersonate"] = impersonateEmail;
-        }
-
-        const res = await fetch(`${BRAIN_URL}/v1/brain/chat`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            message: text.trim(),
-            history,
-            raise_id: null,
-          }),
-          signal: controller.signal,
-        });
-
-        if (!res.ok) {
-          const errorText = await res.text().catch(() => "Unknown error");
-          setMessages((prev) => [
-            ...prev,
-            { role: "assistant", content: `Error: ${res.status} — ${errorText}` },
-          ]);
-          setStreaming(false);
-          canvasStateRef.current = "idle";
-          return;
-        }
-
-        const reader = res.body?.getReader();
-        if (!reader) throw new Error("No response body");
-
-        const decoder = new TextDecoder();
-        let assistantContent = "";
-        let buffer = "";
-
-        // Add an empty assistant message we will stream into
-        setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-          buffer = lines.pop() ?? "";
-
-          for (const line of lines) {
-            if (!line.startsWith("data: ")) continue;
-            const payload = line.slice(6).trim();
-            if (!payload || payload === "[DONE]") continue;
-
-            try {
-              const evt = JSON.parse(payload);
-
-              if (evt.type === "text" || evt.event === "text") {
-                const chunk = evt.data ?? evt.content ?? "";
-                assistantContent += chunk;
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  const last = updated[updated.length - 1];
-                  if (last && last.role === "assistant") {
-                    updated[updated.length - 1] = {
-                      ...last,
-                      content: assistantContent,
-                    };
-                  }
-                  return updated;
-                });
-                canvasStateRef.current = "active";
-              } else if (evt.type === "status" || evt.event === "status") {
-                const statusText = evt.data ?? evt.content ?? "";
-                // Detect tool from status text and set canvas color
-                const lower = statusText.toLowerCase();
-                for (const [key, color] of Object.entries(TOOL_COLORS)) {
-                  if (lower.includes(key.replace("_", " "))) {
-                    activeToolColorRef.current = color;
-                    break;
-                  }
-                }
-                canvasStateRef.current = "thinking";
-                // Insert status before the assistant message
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  // Find last assistant message index
-                  const lastAssistIdx = updated.length - 1;
-                  if (
-                    lastAssistIdx >= 0 &&
-                    updated[lastAssistIdx].role === "assistant"
-                  ) {
-                    updated.splice(lastAssistIdx, 0, {
-                      role: "status",
-                      content: statusText,
-                    });
-                  }
-                  return updated;
-                });
-              } else if (evt.type === "error" || evt.event === "error") {
-                const errorContent = evt.data ?? evt.content ?? "Unknown error";
-                assistantContent += `\n\nError: ${errorContent}`;
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  const last = updated[updated.length - 1];
-                  if (last && last.role === "assistant") {
-                    updated[updated.length - 1] = {
-                      ...last,
-                      content: assistantContent,
-                    };
-                  }
-                  return updated;
-                });
-              }
-            } catch {
-              // Non-JSON line, skip
-            }
-          }
-        }
-      } catch (err: unknown) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          // User cancelled
-        } else {
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: "assistant",
-              content: `Connection error: ${err instanceof Error ? err.message : "Unknown error"}`,
-            },
-          ]);
-        }
-      } finally {
-        setStreaming(false);
-        canvasStateRef.current = "idle";
-        activeToolColorRef.current = null;
-        abortRef.current = null;
+      if (!response.ok) {
+        const err = await response.text();
+        contentEl.innerHTML = `<div class="error-msg">Error ${response.status} — ${err}</div>`;
+        brainStateRef.current = "idle";
+        activeColorRef.current = null;
+        setIsStreaming(false);
+        if (sendBtnRef.current) sendBtnRef.current.disabled = false;
+        return;
       }
-    },
-    [session, messages, started, impersonating, impersonateEmail]
-  );
 
-  /* ---------------------------------------------------------------- */
-  /*  Auto-probe on first visit                                        */
-  /* ---------------------------------------------------------------- */
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "", buffer = "";
+      contentEl.innerHTML = "";
 
-  const hasAutoProbed = useRef(false);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
 
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const raw = line.slice(6).trim();
+          if (!raw) continue;
+          try {
+            const event = JSON.parse(raw);
+            if (event.type === "text") {
+              fullText += event.content;
+              contentEl.innerHTML = formatMarkdown(fullText);
+              scrollToBottom();
+            } else if (event.type === "status") {
+              activateNode(event.content);
+              const s = document.createElement("div");
+              s.className = "status-msg";
+              s.textContent = event.content;
+              contentEl.before(s);
+              scrollToBottom();
+            } else if (event.type === "error") {
+              const errDiv = document.createElement("div");
+              errDiv.className = "error-msg";
+              errDiv.textContent = event.content;
+              contentEl.appendChild(errDiv);
+            } else if (event.type === "done") {
+              if (event.raise_id) raiseIdRef.current = event.raise_id;
+              brainStateRef.current = "idle";
+              activeColorRef.current = null;
+            }
+          } catch { /* ignore parse errors */ }
+        }
+      }
+      if (fullText) historyRef.current.push({ role: "assistant", content: fullText });
+    } catch (e) {
+      const errDiv = document.createElement("div");
+      errDiv.className = "error-msg";
+      errDiv.textContent = "Connection error: " + (e instanceof Error ? e.message : "Unknown error");
+      contentEl.innerHTML = "";
+      contentEl.appendChild(errDiv);
+    }
+
+    brainStateRef.current = "idle";
+    activeColorRef.current = null;
+    setIsStreaming(false);
+    if (sendBtnRef.current) sendBtnRef.current.disabled = false;
+    textareaRef.current?.focus();
+  }, [isStreaming, session, chatStarted, impersonating]);
+
+  /* ── Auto-probe on first visit ── */
   useEffect(() => {
-    if (!session || loading || hasAutoProbed.current || messages.length > 0 || streaming) return;
+    if (!session || loading || hasAutoProbed.current || chatStarted || isStreaming) return;
     hasAutoProbed.current = true;
 
     const role = (session.user?.user_metadata?.role as string) || "founder";
     const name = (session.user?.user_metadata?.name as string) || session.user?.email?.split("@")[0] || "";
 
-    const ROLE_INTROS: Record<string, string> = {
-      founder: `Hi, I'm ${name}. I'm a founder — just got access.`,
+    const intros: Record<string, string> = {
+      founder:  `Hi, I'm ${name}. I'm a founder — just got access.`,
       investor: `Hi, I'm ${name}. I'm an investor — just got access.`,
-      builder: `Hi, I'm ${name}. I'm a builder — just got access.`,
+      builder:  `Hi, I'm ${name}. I'm a builder — just got access.`,
     };
+    send(intros[role] || intros.founder);
+  }, [session, loading, chatStarted, isStreaming, send]);
 
-    const intro = ROLE_INTROS[role] || ROLE_INTROS.founder;
-    sendMessage(intro);
-  }, [session, loading, messages.length, streaming, sendMessage]);
+  /* ── DOM helpers (imperative, like the original) ── */
+  function addMessageToDOM(role: string, content: string): HTMLDivElement {
+    const inner = messagesInnerRef.current!;
+    const div = document.createElement("div");
+    div.className = `message ${role}`;
+    if (role === "assistant") {
+      div.innerHTML = `<div class="content">${formatMarkdown(content)}</div>`;
+    } else {
+      div.textContent = content;
+    }
+    inner.appendChild(div);
+    scrollToBottom();
+    return div;
+  }
 
-  /* ---------------------------------------------------------------- */
-  /*  Handle submit                                                    */
-  /* ---------------------------------------------------------------- */
+  function scrollToBottom() {
+    const m = messagesRef.current;
+    if (m) m.scrollTop = m.scrollHeight;
+  }
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    sendMessage(input);
-  };
+  function activateNode(statusText: string) {
+    brainStateRef.current = "active";
+    for (const [label, colorKey] of Object.entries(TOOL_COLORS)) {
+      if (statusText.toLowerCase().includes(label)) {
+        activeColorRef.current = COLORS[colorKey];
+        return;
+      }
+    }
+  }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      sendMessage(input);
+      sendFromInput();
     }
-  };
+  }
 
-  /* ---------------------------------------------------------------- */
-  /*  Sign out                                                         */
-  /* ---------------------------------------------------------------- */
+  function sendFromInput() {
+    const msg = input.trim();
+    if (!msg || isStreaming) return;
+    setInput("");
+    if (textareaRef.current) textareaRef.current.style.height = "48px";
+    send(msg);
+  }
 
-  const handleSignOut = async () => {
+  function handleTextareaInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setInput(e.target.value);
+    const el = e.target;
+    el.style.height = "48px";
+    el.style.height = Math.min(el.scrollHeight, 120) + "px";
+  }
+
+  function switchClient(email: string) {
+    setImpersonating(email);
+    setImpersonateInput(email);
+    // Clear conversation
+    if (messagesInnerRef.current) messagesInnerRef.current.innerHTML = "";
+    historyRef.current = [];
+    raiseIdRef.current = null;
+    setChatStarted(false);
+    centerUiRef.current?.classList.remove("at-bottom");
+    messagesRef.current?.classList.remove("active");
+  }
+
+  async function handleSignOut() {
     await supabase.auth.signOut();
     router.replace("/login");
-  };
+  }
 
-  /* ---------------------------------------------------------------- */
-  /*  Loading / unauthenticated                                        */
-  /* ---------------------------------------------------------------- */
-
+  /* ── Loading ── */
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-zinc-950 text-zinc-500">
-        <div className="animate-pulse text-sm tracking-wide">Loading…</div>
+      <div className="brain-root" style={{ alignItems: "center", justifyContent: "center" }}>
+        <style>{BRAIN_CSS}</style>
+        <p style={{ color: "#52525b", fontSize: 13 }}>Loading...</p>
       </div>
     );
   }
 
   if (!session) return null;
 
-  /* ---------------------------------------------------------------- */
-  /*  Render                                                           */
-  /* ---------------------------------------------------------------- */
-
-  const userName =
-    session.user.user_metadata?.full_name ??
-    session.user.email?.split("@")[0] ??
-    "User";
+  const userName = session.user?.user_metadata?.name || session.user?.email?.split("@")[0] || "";
+  const displayName = impersonating ? `${impersonating} (via ${userName})` : userName;
 
   return (
-    <div className="relative flex flex-col h-full w-full bg-zinc-950 text-zinc-100">
-      {/* Neural particle canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ zIndex: 0 }}
-      />
+    <div className="brain-root">
+      <style>{BRAIN_CSS}</style>
 
       {/* Header */}
-      <header
-        className="relative z-10 flex items-center justify-between px-5 py-3 border-b border-zinc-800/60 bg-zinc-950/80 backdrop-blur-sm"
-        style={{ minHeight: 56 }}
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold tracking-tight text-zinc-100">
-            raise<span className="text-teal-400">(</span>fn
-            <span className="text-teal-400">)</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-zinc-400">{userName}</span>
-          <button
-            onClick={handleSignOut}
-            className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
-          >
-            Sign out
-          </button>
-        </div>
+      <header>
+        <nav>
+          <div className="brain-logo">
+            <span className="raise">raise</span>
+            <span className="fn">(fn)</span>
+          </div>
+          <div className="nav-right">
+            <span className="user-name">{displayName}</span>
+            <div className="key-dot" />
+            <button className="sign-out" onClick={handleSignOut}>Sign out</button>
+          </div>
+        </nav>
       </header>
 
       {/* Admin impersonation bar */}
       {isAdmin && (
-        <div className="relative z-10 flex items-center gap-3 px-5 py-2 bg-zinc-900/80 border-b border-zinc-800/40 backdrop-blur-sm">
-          <span className="text-xs font-medium text-orange-400 tracking-wide uppercase">
-            Acting as
-          </span>
-          <input
-            type="email"
-            value={impersonateEmail}
-            onChange={(e) => setImpersonateEmail(e.target.value)}
-            placeholder="client@example.com"
-            className="flex-1 max-w-xs px-3 py-1.5 text-sm bg-zinc-800/80 border border-zinc-700 rounded-md text-zinc-200 placeholder-zinc-500 outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all"
-          />
-          {impersonating ? (
-            <button
-              onClick={() => {
-                setImpersonating(false);
-                setImpersonateEmail("");
+        <div className="admin-bar">
+          <div className="admin-bar-inner">
+            <span className="admin-label">Acting as</span>
+            <input
+              type="email"
+              value={impersonateInput}
+              onChange={(e) => setImpersonateInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") switchClient(impersonateInput.trim().toLowerCase());
               }}
-              className="px-3 py-1.5 text-xs font-medium text-zinc-400 bg-zinc-800 border border-zinc-700 rounded-md hover:text-zinc-200 hover:border-zinc-600 transition-colors cursor-pointer"
-            >
-              Clear
-            </button>
-          ) : (
+              placeholder="client@email.com"
+              className="admin-input"
+            />
             <button
-              onClick={() => {
-                if (impersonateEmail.trim()) setImpersonating(true);
-              }}
-              className="px-3 py-1.5 text-xs font-medium text-orange-400 bg-orange-500/10 border border-orange-500/30 rounded-md hover:bg-orange-500/20 transition-colors cursor-pointer disabled:opacity-40"
-              disabled={!impersonateEmail.trim()}
+              onClick={() => switchClient(impersonateInput.trim().toLowerCase())}
+              disabled={!impersonateInput.trim()}
+              className="admin-btn"
             >
               Switch
             </button>
-          )}
-          {impersonating && (
-            <span className="text-xs text-zinc-500">
-              Impersonating{" "}
-              <span className="text-orange-300">{impersonateEmail}</span>
-            </span>
-          )}
+            {impersonating && (
+              <button
+                onClick={() => {
+                  setImpersonating("");
+                  setImpersonateInput("");
+                  if (messagesInnerRef.current) messagesInnerRef.current.innerHTML = "";
+                  historyRef.current = [];
+                  raiseIdRef.current = null;
+                  setChatStarted(false);
+                  centerUiRef.current?.classList.remove("at-bottom");
+                  messagesRef.current?.classList.remove("active");
+                }}
+                className="admin-clear"
+              >
+                Back to me
+              </button>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Main content area */}
-      <div className="relative z-10 flex-1 flex flex-col overflow-hidden">
-        {/* Welcome / centered state */}
-        {!started && (
-          <div className="flex-1 flex flex-col items-center justify-center px-6 animate-in fade-in duration-500">
-            <div className="mb-6">
-              <span className="inline-block px-3 py-1 text-[11px] font-semibold tracking-[0.2em] uppercase text-teal-400 bg-teal-400/10 border border-teal-400/20 rounded-full">
-                raise(fn) brain
-              </span>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-zinc-100 text-center mb-3 tracking-tight">
-              Ask a real question.
-              <br />
-              Get a real answer.
-            </h1>
-            <p className="text-zinc-500 text-center mb-10 max-w-md text-sm">
-              Your AI fundraising analyst — powered by live investor data,
-              market signals, and fundraising intelligence.
-            </p>
+      {/* Main */}
+      <div className="brain-main" ref={mainRef}>
+        <canvas className="brain-canvas" ref={canvasRef} />
 
-            {/* Starter buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl w-full mb-8">
-              {STARTER_PROMPTS.map((prompt) => (
-                <button
-                  key={prompt}
-                  onClick={() => sendMessage(prompt)}
-                  className="text-left px-4 py-3 text-sm text-zinc-400 bg-zinc-900/60 border border-zinc-800/60 rounded-xl hover:border-zinc-700 hover:text-zinc-200 hover:bg-zinc-800/60 transition-all cursor-pointer"
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
+        <div className="messages-container" ref={messagesRef}>
+          <div className="messages-inner" ref={messagesInnerRef} />
+        </div>
 
-            {/* Input bar (centered) */}
-            <form
-              onSubmit={handleSubmit}
-              className="w-full max-w-2xl"
-            >
-              <div className="flex items-end gap-2 bg-zinc-900/70 border border-zinc-800/60 rounded-2xl px-4 py-3 backdrop-blur-sm">
-                <textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ask the brain anything…"
-                  rows={1}
-                  className="flex-1 bg-transparent text-sm text-zinc-100 placeholder-zinc-600 outline-none resize-none max-h-32"
-                  style={{ minHeight: 24 }}
-                />
-                <button
-                  type="submit"
-                  disabled={streaming || !input.trim()}
-                  className="shrink-0 p-2 rounded-lg bg-teal-500 text-white hover:bg-teal-400 disabled:opacity-30 disabled:hover:bg-teal-500 transition-colors cursor-pointer"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="22" y1="2" x2="11" y2="13" />
-                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                  </svg>
-                </button>
-              </div>
-            </form>
+        <div className="center-ui" ref={centerUiRef}>
+          <div className="center-label">
+            <span className="o">raise</span><span className="t">(fn)</span> brain
           </div>
-        )}
-
-        {/* Chat state */}
-        {started && (
-          <>
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 md:px-0 py-6">
-              <div className="max-w-2xl mx-auto space-y-4">
-                {messages.map((msg, i) => {
-                  if (msg.role === "status") {
-                    return (
-                      <div key={i} className="flex items-center gap-2 py-1">
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500" />
-                        </span>
-                        <span className="text-xs text-zinc-500 italic">
-                          {msg.content}
-                        </span>
-                      </div>
-                    );
-                  }
-
-                  if (msg.role === "user") {
-                    return (
-                      <div key={i} className="flex justify-end">
-                        <div className="max-w-[80%] px-4 py-2.5 text-sm text-zinc-200 bg-zinc-900/40 border border-zinc-800/60 rounded-2xl rounded-br-md">
-                          {msg.content}
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  // Assistant message
-                  return (
-                    <div key={i} className="flex justify-start">
-                      <div className="max-w-[85%]">
-                        {msg.content ? (
-                          <div
-                            className="prose-brain text-sm leading-relaxed"
-                            dangerouslySetInnerHTML={{
-                              __html: renderMarkdown(msg.content),
-                            }}
-                          />
-                        ) : (
-                          /* Typing indicator */
-                          <div className="flex items-center gap-1 py-3 px-1">
-                            <span
-                              className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce"
-                              style={{ animationDelay: "0ms" }}
-                            />
-                            <span
-                              className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce"
-                              style={{ animationDelay: "150ms" }}
-                            />
-                            <span
-                              className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce"
-                              style={{ animationDelay: "300ms" }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-                <div ref={messagesEndRef} />
-              </div>
-            </div>
-
-            {/* Bottom input bar */}
-            <div className="border-t border-zinc-800/40 bg-zinc-950/80 backdrop-blur-sm px-4 py-3">
-              <form
-                onSubmit={handleSubmit}
-                className="max-w-2xl mx-auto"
-              >
-                <div className="flex items-end gap-2 bg-zinc-900/70 border border-zinc-800/60 rounded-2xl px-4 py-3">
-                  <textarea
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Ask the brain anything…"
-                    rows={1}
-                    className="flex-1 bg-transparent text-sm text-zinc-100 placeholder-zinc-600 outline-none resize-none max-h-32"
-                    style={{ minHeight: 24 }}
-                  />
-                  <button
-                    type="submit"
-                    disabled={streaming || !input.trim()}
-                    className="shrink-0 p-2 rounded-lg bg-teal-500 text-white hover:bg-teal-400 disabled:opacity-30 disabled:hover:bg-teal-500 transition-colors cursor-pointer"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="22" y1="2" x2="11" y2="13" />
-                      <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                    </svg>
-                  </button>
-                </div>
-              </form>
-            </div>
-          </>
-        )}
+          <div className="welcome-text">
+            <h2>Ask a real question. <span className="t">Get a real answer.</span></h2>
+            <p>{impersonating ? `Acting as ${impersonating}` : "You\u2019re inside the Brain."}</p>
+          </div>
+          <div className="starters">
+            {STARTERS.map((s) => (
+              <button key={s} className="starter" onClick={() => send(s)}>{s}</button>
+            ))}
+          </div>
+          <div className="input-bar">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={handleTextareaInput}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask the Brain..."
+              rows={1}
+            />
+            <button
+              ref={sendBtnRef}
+              className="send-btn"
+              onClick={sendFromInput}
+              disabled={isStreaming || !input.trim()}
+            >
+              Send
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
