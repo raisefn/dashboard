@@ -764,21 +764,17 @@ export default function BrainDeployPage() {
     textareaRef.current?.focus();
   }, [isStreaming, session, chatStarted, impersonating]);
 
-  /* ── Auto-probe on first visit ── */
+  /* ── Static welcome message (no API call — instant) ── */
   useEffect(() => {
-    if (!session || loading || hasAutoProbed.current || chatStarted || isStreaming) return;
+    if (!session || loading || hasAutoProbed.current || chatStarted) return;
     hasAutoProbed.current = true;
 
-    const role = (session.user?.user_metadata?.role as string) || "founder";
-    const name = (session.user?.user_metadata?.name as string) || session.user?.email?.split("@")[0] || "";
+    const firstName = (session.user?.user_metadata?.name as string)?.split(" ")[0]
+      || session.user?.email?.split("@")[0] || "";
 
-    const intros: Record<string, string> = {
-      founder:  `Hi, I'm ${name}. I'm a founder — just got access.`,
-      investor: `Hi, I'm ${name}. I'm an investor — just got access.`,
-      builder:  `Hi, I'm ${name}. I'm a builder — just got access.`,
-    };
-    send(intros[role] || intros.founder, { silent: true });
-  }, [session, loading, chatStarted, isStreaming, send]);
+    const welcome = `Welcome to raisefn, ${firstName}. What's your company? Already raising? Would love to know more so I can actually help.`;
+    addMessageToDOM("assistant", welcome);
+  }, [session, loading, chatStarted]);
 
   /* ── DOM helpers (imperative, like the original) ── */
   function addMessageToDOM(role: string, content: string): HTMLDivElement {
