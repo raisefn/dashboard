@@ -772,7 +772,13 @@ export default function BrainDeployPage() {
     const firstName = (session.user?.user_metadata?.name as string)?.split(" ")[0]
       || session.user?.email?.split("@")[0] || "";
 
-    const welcome = `Welcome to raise(fn), ${firstName}! Are you looking to raise? Tell me about the company and where you're at today.`;
+    const role = (session.user?.user_metadata?.role as string) || "founder";
+    const welcomes: Record<string, string> = {
+      founder:  `Welcome to raise(fn), ${firstName}! Are you looking to raise? Tell me about the company and where you're at today.`,
+      investor: `Welcome to raise(fn), ${firstName}! What's your fund and thesis? I can surface founders and deals that match what you're looking for.`,
+      builder:  `Welcome to raise(fn), ${firstName}! What are you working on? I can help with market intel, fundraising strategy, or whatever you need.`,
+    };
+    const welcome = welcomes[role] || welcomes.founder;
 
     // Transition to chat mode
     setChatStarted(true);
