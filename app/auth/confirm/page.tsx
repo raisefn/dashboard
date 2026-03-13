@@ -1,10 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 
 export default function AuthConfirmPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-[60vh] items-center justify-center"><p className="text-zinc-400 text-sm">Loading...</p></div>}>
+      <AuthConfirmInner />
+    </Suspense>
+  );
+}
+
+function AuthConfirmInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [error, setError] = useState("");
