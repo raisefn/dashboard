@@ -1,88 +1,75 @@
 # raisefn Dashboard
 
 ## What This Is
-raisefn is a fundraising intelligence platform. This repo is the frontend — a Next.js app deployed on Vercel at raisefn.com.
+raisefn is a fundraising intelligence platform. This repo is the frontend — a Next.js app deployed on Vercel.
+
+**raisefn.com is the PUBLIC landing page (early access only). The dashboard is on a separate Vercel deployment.**
 
 ## Architecture
 
 - **Framework**: Next.js (App Router), React, Tailwind CSS
-- **Deployment**: Vercel (auto-deploys from main)
+- **Deployment**: Vercel (auto-deploys from main), project "dashboard" under justinpetsches-projects
 - **Tracker API**: FastAPI on Railway at `api-production-5f7b.up.railway.app`
-  - Dashboard data pages (rounds, investors, projects, stats) use this
-  - Auth: `X-API-Key` header via `API_KEY` env var
 - **Brain API**: FastAPI on Railway at `brain-production-61da.up.railway.app`
   - Proxied through Vercel rewrites (see `next.config.ts`)
-  - Used for chat/intelligence features
-- **Database**: PostgreSQL on Railway (shared with tracker)
-- **API client**: `lib/api.ts` — typed fetch helpers for all endpoints
+- **Auth**: Supabase (ES256 JWT, magic link + password login)
+- **Database**: PostgreSQL on Railway (shared between tracker and brain)
 
 ## Key Pages
 
-### Landing (`app/page.tsx`)
-- Marketing homepage with animated hero, data sources graphic, pricing summary
-- Prominent "data foundation" statement about 290+ sources
+### Login (`app/login/page.tsx`)
+- Password or magic link via Supabase
+- Redirects to `/brain/deploy` on success
+
+### Brain Chat (`app/brain/deploy/page.tsx`) — THE MAIN UI
+- SSE streaming chat with particle canvas animation
+- Static welcome messages (role-specific: founder/investor/builder) with 800ms typing delay
+- Imperative DOM for messages (addMessageToDOM, not React state)
+- Admin bar: dropdown of users fetched from `/v1/brain/admin/users`, impersonation via X-Impersonate header
+- Client-side admin check: `ADMIN_EMAILS = ["justinpetsche@gmail.com"]`
+- Token refresh on 401: `supabase.auth.refreshSession()` then retry
+- Tool colors: teal (match), emerald (qualify), orange (narrative/signal/outreach), violet (terms)
+
+### Brain Marketing (`app/brain/page.tsx`)
+- Brain capabilities showcase (6 V1 + future capabilities)
+- Sub-pages: `agents/`, `entrepreneurs/`, `investors/`
 
 ### Tracker (`app/tracker/`)
-- `page.tsx` — data sources overview with animated graphic
-- `rounds/` — browse funding rounds (filterable by type, sector, chain, amount, date)
-- `projects/` — browse projects with enrichment data
-- `investors/` — browse investors with round counts
-- `feed/` — real-time funding feed
-- `pulse/` — market stats dashboard (overview, sector breakdown, top investors)
-- `layout.tsx` — shared tracker nav
+- `rounds/`, `projects/`, `investors/`, `feed/`, `pulse/`
 
-### Brain (`app/brain/`)
-- `page.tsx` — Brain capabilities showcase (6 V1 + future capabilities)
-- Sub-pages: `agents/`, `entrepreneurs/`, `investors/` — audience-specific pages
-- Chat UI is served from the Brain API itself at `/chat`
+### Landing (`app/page.tsx`)
+- Marketing homepage
 
 ### Pricing (`app/pricing/page.tsx`)
 - Three tiers: Explorer (free), Operator ($99/mo), Enterprise
-- Explorer = full tracker access + 1 free Brain query
-- Operator = unlimited Brain queries via API + chat
 
-### SDK (`app/sdk/page.tsx`)
-- Agent SDK documentation page
+## Next.js Rewrites (next.config.ts)
+- `/v1/brain/:path*` → brain Railway service
+- `/brain/api/:path*` → brain Railway service (legacy)
+- CORS allows: X-API-Key, Content-Type, Authorization, X-Impersonate
 
-## Shared Components
-
-- `components/nav.tsx` — top navigation bar
-- `components/early-access-modal.tsx` — email capture modal (writes to Supabase)
-- `components/fade-in-section.tsx` — intersection observer fade-in wrapper
-- `components/pagination.tsx` — paginated list controls
-- `components/stats-card.tsx` — metric display card
-- `components/tracker-coming-soon.tsx` — placeholder for unbuilt tracker pages
-
-## Data Flow
-
-```
-Railway Postgres ← tracker collectors fill data
-       ↓
-FastAPI API (Railway) ← serves /v1/projects, /v1/rounds, /v1/investors, /v1/stats/*
-       ↓ (proxied via Vercel rewrites)
-Next.js (this repo) ← lib/api.ts fetches with 5-min cache (revalidate: 300)
-```
-
-## In Progress / Planned
-
-- **User auth & sign-in**: Free tier users sign in to access the tracker (Explorer tier)
-- **Free tracker**: Authenticated users can browse rounds, projects, investors
-- **Brain chat**: Already live at the Brain API `/chat` endpoint, proxied through Vercel
+## Supabase Auth
+- **ES256 algorithm** (not HS256/RS256) — critical gotcha
+- Project: `kvjhdubbcwvebfmncqot.supabase.co`
+- Client: `lib/supabase-browser.ts`
 
 ## Environment Variables
-
-- `NEXT_PUBLIC_API_URL` — tracker API base URL (`https://api-production-5f7b.up.railway.app`)
-- `API_KEY` — server-side API key for tracker API requests
-- `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — for early access signups
+- `NEXT_PUBLIC_API_URL` — tracker API base URL
+- `NEXT_PUBLIC_BRAIN_URL` — brain API base URL
+- `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_URL`
+- `API_KEY` — server-side API key for tracker
 
 ## Backend (separate repos)
-
-- **raisefn/tracker** — data collection pipeline (Python, SQLAlchemy, 20+ collectors)
-- **raisefn/brain** — intelligence API (FastAPI, Claude-powered, 6 endpoints + chat)
+- **raisefn/tracker** — data pipeline (Python, FastAPI, 20+ collectors)
+- **raisefn/brain** — intelligence API (FastAPI, Claude-powered, 9 chat tools + 6 REST endpoints)
 
 ## Style
-
 - Dark theme (zinc-950 background)
 - Accent colors: teal-400 (primary), orange-500 (secondary)
-- Minimal, no unnecessary animations beyond fade-ins
 - Mobile responsive
+
+## Current State (2026-03-13)
+- Clean DB — fresh start, no test users
+- Working: auth, brain chat, admin panel with user dropdown, welcome messages
+- Old `/chat` route deleted (replaced by `/brain/deploy`)
