@@ -772,7 +772,7 @@ export default function BrainDeployPage() {
     const firstName = (session.user?.user_metadata?.name as string)?.split(" ")[0]
       || session.user?.email?.split("@")[0] || "";
 
-    const welcome = `Welcome to raisefn, ${firstName}. What's your company? Already raising? Would love to know more so I can actually help.`;
+    const welcome = `Welcome to raise(fn), ${firstName}! Are you looking to raise? Tell me about the company and where you're at today.`;
     addMessageToDOM("assistant", welcome);
   }, [session, loading, chatStarted]);
 
