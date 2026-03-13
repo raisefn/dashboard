@@ -4,6 +4,7 @@ import Link from "next/link";
 import FadeInSection from "@/components/fade-in-section";
 import { useEffect, useRef, useState } from "react";
 import { generatePositions } from "@/lib/galaxy";
+import type { CommunityStats } from "@/lib/api";
 
 // All data sources — active and planned
 const sources = [
@@ -63,6 +64,7 @@ const CY = 400;
 export default function TrackerLandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const [community, setCommunity] = useState<CommunityStats | null>(null);
 
   useEffect(() => {
     const update = () => {
@@ -73,6 +75,14 @@ export default function TrackerLandingPage() {
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
+  }, []);
+
+  useEffect(() => {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    fetch(`${apiBase}/v1/stats/community`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data) setCommunity(data); })
+      .catch(() => {});
   }, []);
 
   const sorted = sources
@@ -314,6 +324,42 @@ export default function TrackerLandingPage() {
           </div>
         </FadeInSection>
       </section>
+
+      {/* ── Community Teaser (renders only when any count >= 10) ── */}
+      {community && (community.founders >= 10 || community.investors >= 10 || community.builders >= 10) && (
+        <section className="relative py-24 px-4">
+          <FadeInSection>
+            <div className="mx-auto max-w-3xl text-center mb-12">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
+                Community
+              </p>
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">
+                Who&apos;s using raise(fn)
+              </h2>
+            </div>
+            <div className="mx-auto max-w-2xl grid grid-cols-3 gap-8 text-center">
+              {community.founders >= 10 && (
+                <div>
+                  <p className="text-3xl font-bold text-orange-400">{community.founders}</p>
+                  <p className="text-sm text-zinc-500 mt-1">Founders raising</p>
+                </div>
+              )}
+              {community.investors >= 10 && (
+                <div>
+                  <p className="text-3xl font-bold text-teal-400">{community.investors}</p>
+                  <p className="text-sm text-zinc-500 mt-1">Investors deploying</p>
+                </div>
+              )}
+              {community.builders >= 10 && (
+                <div>
+                  <p className="text-3xl font-bold text-purple-400">{community.builders}</p>
+                  <p className="text-sm text-zinc-500 mt-1">Builders shipping</p>
+                </div>
+              )}
+            </div>
+          </FadeInSection>
+        </section>
+      )}
 
       {/* ── Open Source ── */}
       <section className="relative py-24 px-4">

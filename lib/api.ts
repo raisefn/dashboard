@@ -345,6 +345,18 @@ export async function getStatsVelocity(limit = 20): Promise<InvestorVelocity[]> 
   return apiFetch<InvestorVelocity[]>("/stats/velocity", { limit: String(limit) });
 }
 
+// --- Community ---
+
+export interface CommunityStats {
+  founders: number;
+  investors: number;
+  builders: number;
+}
+
+export async function getCommunityStats(): Promise<CommunityStats> {
+  return apiFetch<CommunityStats>("/stats/community");
+}
+
 // --- Search ---
 
 export interface SearchResult {
