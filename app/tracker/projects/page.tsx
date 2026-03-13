@@ -97,12 +97,9 @@ export default async function ProjectsPage({ searchParams }: Props) {
               return (
                 <tr key={p.id} className="hover:bg-zinc-900/50 transition-colors">
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/tracker/projects/${p.slug}`}
-                      className="font-medium text-white hover:text-blue-400 transition-colors"
-                    >
+                    <span className="font-medium text-white">
                       {p.name}
-                    </Link>
+                    </span>
                     {p.token_symbol && (
                       <span className="ml-2 text-xs text-zinc-500">{p.token_symbol}</span>
                     )}

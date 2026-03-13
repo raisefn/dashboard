@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getRounds } from "@/lib/api";
 import { formatUSD } from "@/lib/format";
 import { typeColors, sourceColors } from "@/lib/colors";
@@ -59,12 +58,9 @@ export default async function FeedPage() {
             {/* Project + type + sector */}
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <Link
-                  href={`/tracker/projects/${r.project.slug}`}
-                  className="font-medium text-white hover:text-blue-400 transition-colors truncate"
-                >
+                <span className="font-medium text-white truncate">
                   {r.project.name}
-                </Link>
+                </span>
                 {r.round_type && (
                   <span
                     className={`rounded px-2 py-0.5 text-xs font-medium ${
@@ -75,12 +71,9 @@ export default async function FeedPage() {
                   </span>
                 )}
                 {r.sector && (
-                  <Link
-                    href={`/tracker/sectors/${encodeURIComponent(r.sector)}`}
-                    className="rounded-full border border-zinc-700/50 px-2 py-0.5 text-[10px] text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 transition-colors capitalize"
-                  >
+                  <span className="rounded-full border border-zinc-700/50 px-2 py-0.5 text-[10px] text-zinc-500 capitalize">
                     {r.sector.replace(/_/g, " ")}
-                  </Link>
+                  </span>
                 )}
               </div>
               {r.investors.length > 0 && (
