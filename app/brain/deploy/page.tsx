@@ -283,7 +283,7 @@ const BRAIN_CSS = `
     color: #d4d4d8;
   }
   .message.assistant { align-self: flex-start; max-width: 65%; padding: 4px 0; }
-  .message.assistant .content { color: #a1a1aa; }
+  .message.assistant .content { color: #e4e4e7; }
   .message.assistant .content h1,
   .message.assistant .content h2,
   .message.assistant .content h3 {
@@ -779,7 +779,14 @@ export default function BrainDeployPage() {
     centerUiRef.current?.classList.add("at-bottom");
     messagesRef.current?.classList.add("active");
 
-    addMessageToDOM("assistant", welcome);
+    // Show typing indicator briefly so it feels natural
+    const typingEl = addMessageToDOM("assistant", "");
+    const typingContent = typingEl.querySelector(".content") as HTMLElement;
+    typingContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+
+    setTimeout(() => {
+      typingContent.innerHTML = formatMarkdown(welcome);
+    }, 800);
   }, [session, loading, chatStarted]);
 
   /* ── DOM helpers (imperative, like the original) ── */
