@@ -652,8 +652,9 @@ export default function BrainDeployPage() {
   }, [loading]);
 
   /* ── Send message (exact SSE logic from chat.html) ── */
-  const send = useCallback(async (message: string) => {
+  const send = useCallback(async (message: string, opts?: { silent?: boolean }) => {
     if (isStreaming || !session) return;
+    const silent = opts?.silent ?? false;
 
     // Transition to chat mode
     if (!chatStarted) {
@@ -662,8 +663,8 @@ export default function BrainDeployPage() {
       messagesRef.current?.classList.add("active");
     }
 
-    // Add user message to DOM
-    addMessageToDOM("user", message);
+    // Add user message to DOM (skip if silent — auto-probe)
+    if (!silent) addMessageToDOM("user", message);
     historyRef.current.push({ role: "user", content: message });
 
     // Add empty assistant message
@@ -776,7 +777,7 @@ export default function BrainDeployPage() {
       investor: `Hi, I'm ${name}. I'm an investor — just got access.`,
       builder:  `Hi, I'm ${name}. I'm a builder — just got access.`,
     };
-    send(intros[role] || intros.founder);
+    send(intros[role] || intros.founder, { silent: true });
   }, [session, loading, chatStarted, isStreaming, send]);
 
   /* ── DOM helpers (imperative, like the original) ── */
