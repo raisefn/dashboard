@@ -574,6 +574,29 @@ export default function BrainDeployPage() {
   );
 
   /* ---------------------------------------------------------------- */
+  /*  Auto-probe on first visit                                        */
+  /* ---------------------------------------------------------------- */
+
+  const hasAutoProbed = useRef(false);
+
+  useEffect(() => {
+    if (!session || loading || hasAutoProbed.current || messages.length > 0 || streaming) return;
+    hasAutoProbed.current = true;
+
+    const role = (session.user?.user_metadata?.role as string) || "founder";
+    const name = (session.user?.user_metadata?.name as string) || session.user?.email?.split("@")[0] || "";
+
+    const ROLE_INTROS: Record<string, string> = {
+      founder: `Hi, I'm ${name}. I'm a founder — just got access.`,
+      investor: `Hi, I'm ${name}. I'm an investor — just got access.`,
+      builder: `Hi, I'm ${name}. I'm a builder — just got access.`,
+    };
+
+    const intro = ROLE_INTROS[role] || ROLE_INTROS.founder;
+    sendMessage(intro);
+  }, [session, loading, messages.length, streaming, sendMessage]);
+
+  /* ---------------------------------------------------------------- */
   /*  Handle submit                                                    */
   /* ---------------------------------------------------------------- */
 
