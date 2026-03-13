@@ -52,7 +52,7 @@ function AuthConfirmInner() {
       }
       const hasSetPassword = user.user_metadata?.password_set;
       if (hasSetPassword) {
-        router.replace("/chat");
+        router.replace("/brain/deploy");
       } else {
         setUserName((user.user_metadata?.name as string) || user.email?.split("@")[0] || "");
         setShowPasswordSetup(true);
@@ -88,7 +88,7 @@ function AuthConfirmInner() {
       return;
     }
 
-    router.replace("/chat");
+    router.replace("/brain/deploy");
   }
 
   if (showPasswordSetup) {

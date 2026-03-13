@@ -26,7 +26,7 @@ export default function AuthRedirect() {
 
       const hasSetPassword = session.user?.user_metadata?.password_set;
       if (hasSetPassword) {
-        router.replace("/chat");
+        router.replace("/brain/deploy");
       } else {
         router.replace("/auth/confirm");
       }

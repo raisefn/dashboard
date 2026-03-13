@@ -38,7 +38,7 @@ function LoginInner() {
       return;
     }
 
-    router.replace("/chat");
+    router.replace("/brain/deploy");
   }
 
   async function handleMagicLink(e: React.FormEvent) {
