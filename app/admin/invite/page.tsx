@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface InviteResult {
   success?: boolean;
@@ -10,9 +10,11 @@ interface InviteResult {
 }
 
 export default function AdminInvitePage() {
-  const [secret, setSecret] = useState(() =>
-    typeof window !== "undefined" ? localStorage.getItem("rfn_admin_secret") || "" : ""
-  );
+  const [secret, setSecret] = useState("");
+
+  useEffect(() => {
+    setSecret(localStorage.getItem("rfn_admin_secret") || "");
+  }, []);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState<"founder" | "investor" | "builder">("founder");
