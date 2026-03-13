@@ -833,7 +833,8 @@ export default function BrainDeployPage() {
     setTimeout(() => {
       typingContent.innerHTML = formatMarkdown(welcome);
     }, 800);
-  }, [session, loading, chatStarted]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, loading]);
 
   /* ── DOM helpers (imperative, like the original) ── */
   function addMessageToDOM(role: string, content: string): HTMLDivElement {
