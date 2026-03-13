@@ -23,37 +23,43 @@ function AuthConfirmInner() {
   const [userName, setUserName] = useState("");
 
   useEffect(() => {
-    const code = searchParams.get("code");
-    if (!code) {
-      setError("Missing authentication code.");
-      return;
-    }
+    async function init() {
+      const code = searchParams.get("code");
 
-    supabase.auth
-      .exchangeCodeForSession(code)
-      .then(({ data, error: authError }) => {
+      if (code) {
+        // PKCE flow (magic link login)
+        const { data, error: authError } = await supabase.auth.exchangeCodeForSession(code);
         if (authError) {
           setError(authError.message);
           return;
         }
-
-        // Check if this is a new user (invited, no password set yet)
-        // Supabase sets the identity provider — invited users who haven't
-        // set a password will have no confirmed_at on their identity,
-        // or we can check user_metadata for a flag we set after password setup.
-        const user = data.session?.user;
-        const hasSetPassword = user?.user_metadata?.password_set;
-
-        if (hasSetPassword) {
-          // Returning user — go straight to chat
-          router.replace("/chat");
+        handleSession(data.session?.user);
+      } else {
+        // Implicit flow (invite link — session already set from hash token)
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          handleSession(session.user);
         } else {
-          // First time — show password setup
-          setUserName(user?.user_metadata?.name || user?.email?.split("@")[0] || "");
-          setShowPasswordSetup(true);
+          setError("No active session. Please try the invite link again.");
         }
-      })
-      .catch(() => setError("Authentication failed."));
+      }
+    }
+
+    function handleSession(user: { user_metadata?: Record<string, unknown>; email?: string } | undefined) {
+      if (!user) {
+        setError("Authentication failed.");
+        return;
+      }
+      const hasSetPassword = user.user_metadata?.password_set;
+      if (hasSetPassword) {
+        router.replace("/chat");
+      } else {
+        setUserName((user.user_metadata?.name as string) || user.email?.split("@")[0] || "");
+        setShowPasswordSetup(true);
+      }
+    }
+
+    init();
   }, [searchParams, router]);
 
   async function handleSetPassword(e: React.FormEvent) {
