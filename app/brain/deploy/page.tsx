@@ -773,6 +773,12 @@ export default function BrainDeployPage() {
       || session.user?.email?.split("@")[0] || "";
 
     const welcome = `Welcome to raise(fn), ${firstName}! Are you looking to raise? Tell me about the company and where you're at today.`;
+
+    // Transition to chat mode
+    setChatStarted(true);
+    centerUiRef.current?.classList.add("at-bottom");
+    messagesRef.current?.classList.add("active");
+
     addMessageToDOM("assistant", welcome);
   }, [session, loading, chatStarted]);
 
