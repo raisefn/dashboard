@@ -686,19 +686,29 @@ export default function BrainDeployPage() {
     }
 
     try {
-      const response = await fetch("/v1/brain/chat", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          message,
-          history: historyRef.current.slice(0, -1),
-          ...(raiseIdRef.current && { raise_id: raiseIdRef.current }),
-        }),
+      const reqBody = JSON.stringify({
+        message,
+        history: historyRef.current.slice(0, -1),
+        ...(raiseIdRef.current && { raise_id: raiseIdRef.current }),
       });
 
+      let response = await fetch("/v1/brain/chat", { method: "POST", headers, body: reqBody });
+
+      // Token expired — refresh and retry once
+      if (response.status === 401) {
+        const { data: { session: fresh } } = await supabase.auth.refreshSession();
+        if (fresh) {
+          setSession(fresh);
+          headers.Authorization = `Bearer ${fresh.access_token}`;
+          response = await fetch("/v1/brain/chat", { method: "POST", headers, body: reqBody });
+        }
+      }
+
       if (!response.ok) {
-        const err = await response.text();
-        contentEl.innerHTML = `<div class="error-msg">Error ${response.status} — ${err}</div>`;
+        const errorMsg = response.status === 401
+          ? `Session expired. <a href="/login" style="color:#2dd4bf;text-decoration:underline">Sign in again</a>`
+          : `Something went wrong (${response.status}). Try again.`;
+        contentEl.innerHTML = `<div class="error-msg">${errorMsg}</div>`;
         brainStateRef.current = "idle";
         activeColorRef.current = null;
         setIsStreaming(false);
