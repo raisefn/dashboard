@@ -13,13 +13,14 @@ export default function EntrepreneursPage() {
             Brain for Founders
           </p>
           <h1 className="text-4xl font-bold text-white sm:text-5xl mb-6">
-            Your raise is too important{" "}
-            <span className="text-teal-400">for guesswork</span>
+            You have AI for everything.{" "}
+            <span className="text-teal-400">Except your raise.</span>
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            Most founders raise blind. They pitch the wrong investors, at the wrong
-            time, with the wrong narrative — and burn months figuring it out. The
-            brain changes that.
+            Your engineers have Copilot. Your designers have Figma AI. Your sales
+            team has Gong. But the single most consequential thing you do as a
+            founder — raising capital — you still do with a spreadsheet, warm
+            intros, and gut feel. That&apos;s over.
           </p>
         </div>
       </section>
@@ -207,16 +208,16 @@ export default function EntrepreneursPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center mb-12">
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              What the raise looks like without this
+              Every other function has intelligence. Yours doesn&apos;t.
             </h2>
           </div>
           <div className="mx-auto max-w-2xl space-y-6">
             {[
-              "You pitch 40 investors. 30 were never going to invest in your sector.",
-              "You go out in Q4 when your target investors just closed their fund.",
-              "You accept terms that look standard but cost you millions at the next round.",
-              "You spend 6 months raising when it should have taken 3.",
-              "You burn your best relationships before your metrics were ready.",
+              "Your CRM tracks pipeline. It doesn't tell you who to pitch or when.",
+              "Your advisors raised 5 years ago. The market moved.",
+              "ChatGPT knows what fundraising is. It doesn't know who's deploying right now.",
+              "You spend 6 months raising when it should have taken 3 — because no one told you the timing was wrong.",
+              "You accept terms that look standard but cost you millions at the next round — because you had no comp data.",
             ].map((text, i) => (
               <p key={i} className="text-sm text-zinc-400 flex items-start gap-3">
                 <span className="text-zinc-500 mt-0.5 shrink-0">—</span>
@@ -232,10 +233,10 @@ export default function EntrepreneursPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
-              Raise with intelligence
+              Your raise deserves the same edge as the rest of your stack.
             </h2>
             <p className="text-zinc-500 mb-8">
-              The brain is in early access. Get in before it opens.
+              The brain is in early access.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
