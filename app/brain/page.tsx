@@ -271,7 +271,7 @@ export default function BrainPage() {
               { title: "Live Tracker Data", desc: "Rounds, investors, and companies — cross-referenced from SEC filings, accelerator data, investor registries, and traction signals. Updated continuously.", color: "#2dd4bf" },
               { title: "Behavioral Patterns", desc: "What investors actually do — response timing, deal flow patterns, co-investment networks.", color: "#fb923c" },
               { title: "Outcome Calibration", desc: "Every recommendation calibrated against real raise outcomes. The brain gets smarter with every raise that runs through it.", color: "#fbbf24" },
-              { title: "Persistent Context", desc: "Remembers your project, metrics, and raise history. Every query builds on the last.", color: "#a78bfa" },
+              { title: "Conversational Memory", desc: "Remembers every investor interaction, meeting note, objection, and follow-up. Query your entire pipeline history through conversation — no CRM interface needed.", color: "#a78bfa" },
             ].map((item) => (
               <div key={item.title} className="text-center">
                 <p className="text-sm font-semibold mb-1" style={{ color: item.color }}>{item.title}</p>

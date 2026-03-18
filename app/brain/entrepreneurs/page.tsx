@@ -113,6 +113,11 @@ export default function EntrepreneursPage() {
                     color: "#f87171",
                   },
                   {
+                    title: "Pipeline memory",
+                    desc: "Tell the brain about every meeting, every objection, every follow-up — and ask about it later. 'What did Sequoia say about our metrics?' 'Who passed and why?' 'Who should I follow up with?' Your raise history, instantly recalled. No spreadsheet required.",
+                    color: "#2dd4bf",
+                  },
+                  {
                     title: "Competitive raise intel",
                     desc: "Who else in your sector is raising right now, at what valuation, with what traction. Information that changes your strategy in real time.",
                     color: "#fbbf24",

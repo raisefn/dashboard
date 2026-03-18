@@ -83,6 +83,11 @@ export default function InvestorsPage() {
                 color: "#a78bfa",
               },
               {
+                title: "Deal flow memory",
+                desc: "Track every founder conversation, every pass reason, every follow-up — through natural conversation. Ask 'what did that DeFi team say about their Series A timeline?' or 'who am I waiting to hear back from?' and get instant recall across your entire pipeline.",
+                color: "#34d399",
+              },
+              {
                 title: "Portfolio value-add",
                 desc: "When your portfolio companies raise their next round, give them an unfair advantage. Investor matching, readiness evaluation, narrative calibration, and outreach strategy — built into the platform. The best value-add an investor can offer.",
                 color: "#f87171",
