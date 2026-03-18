@@ -74,10 +74,11 @@ export default async function InvestorsPage({ searchParams }: Props) {
               <th className="px-4 py-3 text-left font-medium text-zinc-400">
                 <Link href={sortLink("name")}>Name{sortArrow("name")}</Link>
               </th>
-              <th className="px-4 py-3 text-left font-medium text-zinc-400">Type</th>
-              <th className="px-4 py-3 text-left font-medium text-zinc-400">Location</th>
               <th className="px-4 py-3 text-right font-medium text-zinc-400">
                 <Link href={sortLink("rounds_count")}>Rounds{sortArrow("rounds_count")}</Link>
+              </th>
+              <th className="px-4 py-3 text-right font-medium text-zinc-400">
+                <Link href={sortLink("last_active")}>Last Active{sortArrow("last_active")}</Link>
               </th>
             </tr>
           </thead>
@@ -92,18 +93,13 @@ export default async function InvestorsPage({ searchParams }: Props) {
                     {inv.name}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-zinc-400">
-                  {inv.type && (
-                    <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs">
-                      {inv.type}
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-zinc-500 text-sm">
-                  {inv.hq_location || ""}
-                </td>
                 <td className="px-4 py-3 text-right font-mono text-zinc-300">
                   {formatNumber(inv.rounds_count)}
+                </td>
+                <td className="px-4 py-3 text-right text-sm text-zinc-500">
+                  {inv.last_active
+                    ? new Date(inv.last_active).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+                    : "—"}
                 </td>
               </tr>
             ))}

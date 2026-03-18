@@ -111,6 +111,7 @@ export interface Investor {
   description: string | null;
   hq_location: string | null;
   rounds_count: number;
+  last_active: string | null;
   created_at: string;
 }
 
