@@ -3,7 +3,7 @@ import { formatUSD } from "@/lib/format";
 import { typeColors, sourceColors } from "@/lib/colors";
 import TrackerComingSoon from "@/components/tracker-coming-soon";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 function confidenceDot(confidence: number) {
   if (confidence >= 0.8) return "bg-emerald-400";

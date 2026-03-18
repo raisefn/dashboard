@@ -15,7 +15,7 @@ import StatsCard from "@/components/stats-card";
 import TrackerComingSoon from "@/components/tracker-coming-soon";
 import { typeColorsText } from "@/lib/colors";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 const PERIODS = [
   { value: "30d", label: "30 days" },
