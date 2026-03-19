@@ -93,13 +93,19 @@ export default function PricingPage() {
                 </span>
               </div>
               <p className="text-xs text-zinc-500 mb-4">
-                Core intelligence for your raise
+                Full Brain access for the duration of your raise
               </p>
               <div className="space-y-2">
                 {[
                   "Investor matching — ranked by fit, stage, sector, and check size",
                   "Readiness evaluation — how fundable you are right now",
                   "Narrative analysis — what story your data tells investors",
+                  "Signal reading — what investors are actually doing, not just saying",
+                  "Outreach guidance — who to contact, how, and when",
+                  "Term sheet intelligence — comp data and negotiation context",
+                  "Meeting ingestion — paste a transcript, the Brain captures everything",
+                  "Persistent context — the Brain remembers your entire raise",
+                  "Unlimited queries for the duration of your raise",
                   "Live data — calibrated against current market conditions",
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-3">
@@ -125,12 +131,9 @@ export default function PricingPage() {
               </p>
               <div className="space-y-2">
                 {[
-                  "Signal reading — what investors are actually doing, not just saying",
-                  "Outreach guidance — who to contact, how, and when",
-                  "Term sheet intelligence — comp data and negotiation context",
-                  "Persistent context — the Brain remembers your entire raise",
-                  "Unlimited queries for the duration of your raise",
-                  "Dramatically cheaper than a placement agent (3–5% of round)",
+                  "Everything in Starter — full Brain access, all intelligence, unlimited queries",
+                  "Professional fundraising consulting from someone who\u2019s been there",
+                  "Dramatically cheaper than a placement agent (3\u20135% of round)",
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-3">
                     <span className="text-orange-400 mt-0.5 shrink-0">—</span>
