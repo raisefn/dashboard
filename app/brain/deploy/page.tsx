@@ -487,8 +487,9 @@ export default function BrainDeployPage() {
   const canvasDimsRef = useRef({ W: 0, H: 0, cx: 0, cy: 0 });
   const animRef = useRef<number>(0);
 
-  // Auto-probe
+  // Session restore
   const hasAutoProbed = useRef(false);
+  const [profileName, setProfileName] = useState<string | null>(null);
 
   /* ── Auth ── */
   useEffect(() => {
@@ -820,35 +821,89 @@ export default function BrainDeployPage() {
     textareaRef.current?.focus();
   }, [isStreaming, session, chatStarted, impersonating]);
 
-  /* ── Static welcome message (no API call — instant) ── */
+  /* ── Session restore: load previous conversation or show welcome ── */
   useEffect(() => {
     if (!session || loading || hasAutoProbed.current || chatStarted) return;
     hasAutoProbed.current = true;
 
-    const firstName = (session.user?.user_metadata?.name as string)?.split(" ")[0]
-      || session.user?.email?.split("@")[0] || "";
-
-    const role = (session.user?.user_metadata?.role as string) || "founder";
-    const welcomes: Record<string, string> = {
-      founder:  `Welcome to raise(fn), ${firstName}! Are you looking to raise? Tell me about the company and where you're at today.`,
-      investor: `Welcome to raise(fn), ${firstName}! Are you currently deploying? What kinds of companies? Check size?\n\nI can help analyze deals, surface new companies, and quite a few other things. Just let me know how I can help.`,
-      builder:  `Welcome to raise(fn), ${firstName}! What are we working on? How can raise(fn) help?`,
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${session.access_token}`,
     };
-    const welcome = welcomes[role] || welcomes.founder;
+    if (impersonating) {
+      headers["X-Impersonate"] = impersonating;
+    }
 
-    // Transition to chat mode
-    setChatStarted(true);
-    centerUiRef.current?.classList.add("at-bottom");
-    messagesRef.current?.classList.add("active");
+    fetch("/v1/brain/session", { headers })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data) return;
 
-    // Show typing indicator briefly so it feels natural
-    const typingEl = addMessageToDOM("assistant", "");
-    const typingContent = typingEl.querySelector(".content") as HTMLElement;
-    typingContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+        // Store profile name
+        if (data.name) setProfileName(data.name);
 
-    setTimeout(() => {
-      typingContent.innerHTML = formatMarkdown(welcome);
-    }, 800);
+        const firstName = data.name?.split(" ")[0]
+          || (session.user?.user_metadata?.name as string)?.split(" ")[0]
+          || session.user?.email?.split("@")[0] || "";
+
+        // Transition to chat mode
+        setChatStarted(true);
+        centerUiRef.current?.classList.add("at-bottom");
+        messagesRef.current?.classList.add("active");
+
+        // If there's an existing conversation, restore it
+        if (data.conversation && data.conversation.message_count > 0) {
+          conversationIdRef.current = data.conversation.id;
+          if (data.conversation.campaign_id) {
+            raiseIdRef.current = data.conversation.campaign_id;
+          }
+
+          // Render previous messages
+          for (const msg of data.conversation.messages) {
+            addMessageToDOM(msg.role, msg.content);
+            historyRef.current.push({ role: msg.role, content: msg.content });
+          }
+
+          // Add a welcome-back message
+          const welcomeBack = `Welcome back, ${firstName}. Pick up where you left off, or ask me anything.`;
+          const welcomeEl = addMessageToDOM("assistant", "");
+          const welcomeContent = welcomeEl.querySelector(".content") as HTMLElement;
+          welcomeContent.innerHTML = formatMarkdown(welcomeBack);
+          scrollToBottom();
+          return;
+        }
+
+        // No previous conversation — show first-time welcome
+        const role = (session.user?.user_metadata?.role as string) || "founder";
+        const welcomes: Record<string, string> = {
+          founder:  `Welcome to raise(fn), ${firstName}! Are you looking to raise? Tell me about the company and where you're at today.`,
+          investor: `Welcome to raise(fn), ${firstName}! Are you currently deploying? What kinds of companies? Check size?\n\nI can help analyze deals, surface new companies, and quite a few other things. Just let me know how I can help.`,
+          builder:  `Welcome to raise(fn), ${firstName}! What are we working on? How can raise(fn) help?`,
+        };
+        const welcome = welcomes[role] || welcomes.founder;
+
+        const typingEl = addMessageToDOM("assistant", "");
+        const typingContent = typingEl.querySelector(".content") as HTMLElement;
+        typingContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+        setTimeout(() => {
+          typingContent.innerHTML = formatMarkdown(welcome);
+        }, 800);
+      })
+      .catch(() => {
+        // Fallback: show basic welcome if session endpoint fails
+        setChatStarted(true);
+        centerUiRef.current?.classList.add("at-bottom");
+        messagesRef.current?.classList.add("active");
+
+        const firstName = session.user?.email?.split("@")[0] || "";
+        const typingEl = addMessageToDOM("assistant", "");
+        const typingContent = typingEl.querySelector(".content") as HTMLElement;
+        typingContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+        setTimeout(() => {
+          typingContent.innerHTML = formatMarkdown(
+            `Welcome to raise(fn), ${firstName}! Are you looking to raise? Tell me about the company and where you're at today.`
+          );
+        }, 800);
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, loading]);
 
@@ -944,7 +999,7 @@ export default function BrainDeployPage() {
 
   if (!session) return null;
 
-  const userName = session.user?.user_metadata?.name || session.user?.email?.split("@")[0] || "";
+  const userName = profileName || session.user?.user_metadata?.name || session.user?.email?.split("@")[0] || "";
   const displayName = impersonating ? `${impersonating} (via ${userName})` : userName;
 
   return (
