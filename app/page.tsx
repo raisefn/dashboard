@@ -716,6 +716,18 @@ export default function LandingPage() {
           </div>
         </FadeInSection>
       </section>
+
+      {/* ── Footer ── */}
+      <footer className="border-t border-zinc-800/30 py-6 px-4">
+        <div className="mx-auto max-w-3xl flex justify-center">
+          <Link
+            href="/privacy"
+            className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+          >
+            Privacy
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 }
