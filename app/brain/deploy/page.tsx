@@ -467,6 +467,7 @@ export default function BrainDeployPage() {
       ? new URLSearchParams(window.location.search).get("raise_id")
       : null
   );
+  const conversationIdRef = useRef<string | null>(null);
   const historyRef = useRef<{ role: string; content: string }[]>([]);
 
   // DOM refs
@@ -720,6 +721,7 @@ export default function BrainDeployPage() {
         message,
         history: historyRef.current.slice(0, -1),
         ...(raiseIdRef.current && { raise_id: raiseIdRef.current }),
+        ...(conversationIdRef.current && { conversation_id: conversationIdRef.current }),
       });
 
       let response = await fetch("/v1/brain/chat", { method: "POST", headers, body: reqBody });
@@ -782,6 +784,7 @@ export default function BrainDeployPage() {
               contentEl.appendChild(errDiv);
             } else if (event.type === "done") {
               if (event.raise_id) raiseIdRef.current = event.raise_id;
+              if (event.conversation_id) conversationIdRef.current = event.conversation_id;
               brainStateRef.current = "idle";
               activeColorRef.current = null;
             }
@@ -895,6 +898,7 @@ export default function BrainDeployPage() {
     if (messagesInnerRef.current) messagesInnerRef.current.innerHTML = "";
     historyRef.current = [];
     raiseIdRef.current = null;
+    conversationIdRef.current = null;
     setChatStarted(false);
     centerUiRef.current?.classList.remove("at-bottom");
     messagesRef.current?.classList.remove("active");
@@ -956,6 +960,7 @@ export default function BrainDeployPage() {
                     if (messagesInnerRef.current) messagesInnerRef.current.innerHTML = "";
                     historyRef.current = [];
                     raiseIdRef.current = null;
+                    conversationIdRef.current = null;
                     setChatStarted(false);
                     hasAutoProbed.current = false;
                     centerUiRef.current?.classList.remove("at-bottom");
@@ -1000,6 +1005,7 @@ export default function BrainDeployPage() {
                   if (messagesInnerRef.current) messagesInnerRef.current.innerHTML = "";
                   historyRef.current = [];
                   raiseIdRef.current = null;
+                  conversationIdRef.current = null;
                   setChatStarted(false);
                   hasAutoProbed.current = false;
                   centerUiRef.current?.classList.remove("at-bottom");
