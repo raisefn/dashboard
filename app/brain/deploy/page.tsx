@@ -704,9 +704,10 @@ export default function BrainDeployPage() {
 
     setIsStreaming(true);
     if (sendBtnRef.current) sendBtnRef.current.disabled = true;
-    contentEl.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+    contentEl.innerHTML = '<div class="status-msg">Thinking...</div>';
     brainStateRef.current = "thinking";
     activeColorRef.current = null;
+    scrollToBottom();
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -751,6 +752,7 @@ export default function BrainDeployPage() {
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();
       let fullText = "", buffer = "";
+      let hasScrolledToResponse = false;
       contentEl.innerHTML = "";
 
       while (true) {
@@ -769,7 +771,18 @@ export default function BrainDeployPage() {
             if (event.type === "text") {
               fullText += event.content;
               contentEl.innerHTML = formatMarkdown(fullText);
-              scrollToBottom();
+              // On first text chunk, scroll to the top of the response
+              if (!hasScrolledToResponse) {
+                hasScrolledToResponse = true;
+                scrollToElement(assistantEl);
+              } else {
+                // For subsequent chunks, only scroll down if user is near the bottom
+                const m = messagesRef.current;
+                if (m) {
+                  const nearBottom = m.scrollHeight - m.scrollTop - m.clientHeight < 150;
+                  if (nearBottom) scrollToBottom();
+                }
+              }
             } else if (event.type === "status") {
               activateNode(event.content);
               const s = document.createElement("div");
@@ -857,6 +870,16 @@ export default function BrainDeployPage() {
   function scrollToBottom() {
     const m = messagesRef.current;
     if (m) m.scrollTop = m.scrollHeight;
+  }
+
+  function scrollToElement(el: HTMLElement) {
+    const m = messagesRef.current;
+    if (m) {
+      const containerRect = m.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const offset = elRect.top - containerRect.top + m.scrollTop - 20;
+      m.scrollTo({ top: offset, behavior: "smooth" });
+    }
   }
 
   function activateNode(statusText: string) {
