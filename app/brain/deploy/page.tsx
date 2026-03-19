@@ -838,7 +838,7 @@ export default function BrainDeployPage() {
       centerUiRef.current?.classList.add("at-bottom");
       messagesRef.current?.classList.add("active");
 
-      const role = (session.user?.user_metadata?.role as string) || "founder";
+      const role = (session?.user?.user_metadata?.role as string) || "founder";
       const welcomes: Record<string, string> = {
         founder:  `Welcome to raise(fn), ${firstName}! Are you looking to raise? Tell me about the company and where you're at today.`,
         investor: `Welcome to raise(fn), ${firstName}! Are you currently deploying? What kinds of companies? Check size?\n\nI can help analyze deals, surface new companies, and quite a few other things. Just let me know how I can help.`,
