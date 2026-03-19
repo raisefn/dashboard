@@ -833,25 +833,50 @@ export default function BrainDeployPage() {
       headers["X-Impersonate"] = impersonating;
     }
 
+    function showWelcome(firstName: string) {
+      setChatStarted(true);
+      centerUiRef.current?.classList.add("at-bottom");
+      messagesRef.current?.classList.add("active");
+
+      const role = (session.user?.user_metadata?.role as string) || "founder";
+      const welcomes: Record<string, string> = {
+        founder:  `Welcome to raise(fn), ${firstName}! Are you looking to raise? Tell me about the company and where you're at today.`,
+        investor: `Welcome to raise(fn), ${firstName}! Are you currently deploying? What kinds of companies? Check size?\n\nI can help analyze deals, surface new companies, and quite a few other things. Just let me know how I can help.`,
+        builder:  `Welcome to raise(fn), ${firstName}! What are we working on? How can raise(fn) help?`,
+      };
+      const welcome = welcomes[role] || welcomes.founder;
+
+      const typingEl = addMessageToDOM("assistant", "");
+      const typingContent = typingEl.querySelector(".content") as HTMLElement;
+      typingContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+      setTimeout(() => {
+        typingContent.innerHTML = formatMarkdown(welcome);
+      }, 800);
+    }
+
+    const fallbackName = (session.user?.user_metadata?.name as string)?.split(" ")[0]
+      || session.user?.email?.split("@")[0] || "";
+
     fetch("/v1/brain/session", { headers })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (!data) return;
+        // Session endpoint unavailable or errored — show normal welcome
+        if (!data) {
+          showWelcome(fallbackName);
+          return;
+        }
 
         // Store profile name
         if (data.name) setProfileName(data.name);
 
-        const firstName = data.name?.split(" ")[0]
-          || (session.user?.user_metadata?.name as string)?.split(" ")[0]
-          || session.user?.email?.split("@")[0] || "";
-
-        // Transition to chat mode
-        setChatStarted(true);
-        centerUiRef.current?.classList.add("at-bottom");
-        messagesRef.current?.classList.add("active");
+        const firstName = data.name?.split(" ")[0] || fallbackName;
 
         // If there's an existing conversation, restore it
         if (data.conversation && data.conversation.message_count > 0) {
+          setChatStarted(true);
+          centerUiRef.current?.classList.add("at-bottom");
+          messagesRef.current?.classList.add("active");
+
           conversationIdRef.current = data.conversation.id;
           if (data.conversation.campaign_id) {
             raiseIdRef.current = data.conversation.campaign_id;
@@ -873,36 +898,10 @@ export default function BrainDeployPage() {
         }
 
         // No previous conversation — show first-time welcome
-        const role = (session.user?.user_metadata?.role as string) || "founder";
-        const welcomes: Record<string, string> = {
-          founder:  `Welcome to raise(fn), ${firstName}! Are you looking to raise? Tell me about the company and where you're at today.`,
-          investor: `Welcome to raise(fn), ${firstName}! Are you currently deploying? What kinds of companies? Check size?\n\nI can help analyze deals, surface new companies, and quite a few other things. Just let me know how I can help.`,
-          builder:  `Welcome to raise(fn), ${firstName}! What are we working on? How can raise(fn) help?`,
-        };
-        const welcome = welcomes[role] || welcomes.founder;
-
-        const typingEl = addMessageToDOM("assistant", "");
-        const typingContent = typingEl.querySelector(".content") as HTMLElement;
-        typingContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-        setTimeout(() => {
-          typingContent.innerHTML = formatMarkdown(welcome);
-        }, 800);
+        showWelcome(firstName);
       })
       .catch(() => {
-        // Fallback: show basic welcome if session endpoint fails
-        setChatStarted(true);
-        centerUiRef.current?.classList.add("at-bottom");
-        messagesRef.current?.classList.add("active");
-
-        const firstName = session.user?.email?.split("@")[0] || "";
-        const typingEl = addMessageToDOM("assistant", "");
-        const typingContent = typingEl.querySelector(".content") as HTMLElement;
-        typingContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-        setTimeout(() => {
-          typingContent.innerHTML = formatMarkdown(
-            `Welcome to raise(fn), ${firstName}! Are you looking to raise? Tell me about the company and where you're at today.`
-          );
-        }, 800);
+        showWelcome(fallbackName);
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, loading]);
