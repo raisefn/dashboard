@@ -85,10 +85,10 @@ export default function PrivacyPage() {
             <li>
               Questions:{" "}
               <a
-                href="mailto:privacy@raisefn.com"
+                href="mailto:team@raisefn.com"
                 className="text-teal-400 hover:text-teal-300 transition-colors"
               >
-                privacy@raisefn.com
+                team@raisefn.com
               </a>
             </li>
           </ul>

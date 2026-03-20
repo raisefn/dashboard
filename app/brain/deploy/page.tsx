@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 import type { Session } from "@supabase/supabase-js";
 
-const ADMIN_EMAILS = ["justinpetsche@gmail.com"];
+const ADMIN_EMAILS = ["justin@raisefn.com", "justinpetsche@gmail.com"];
 
 const STARTERS = [
   "Who should I pitch?",
