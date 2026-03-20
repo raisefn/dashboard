@@ -490,6 +490,7 @@ export default function BrainDeployPage() {
   // Session restore
   const hasAutoProbed = useRef(false);
   const [profileName, setProfileName] = useState<string | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
 
   /* ── Auth ── */
   useEffect(() => {
@@ -835,6 +836,7 @@ export default function BrainDeployPage() {
 
     function showWelcome(firstName: string) {
       setChatStarted(true);
+      setSessionReady(true);
       centerUiRef.current?.classList.add("at-bottom");
       messagesRef.current?.classList.add("active");
 
@@ -874,6 +876,7 @@ export default function BrainDeployPage() {
         // If there's an existing conversation, restore it
         if (data.conversation && data.conversation.message_count > 0) {
           setChatStarted(true);
+          setSessionReady(true);
           centerUiRef.current?.classList.add("at-bottom");
           messagesRef.current?.classList.add("active");
 
@@ -1105,7 +1108,7 @@ export default function BrainDeployPage() {
           <div className="messages-inner" ref={messagesInnerRef} />
         </div>
 
-        <div className="center-ui" ref={centerUiRef}>
+        <div className="center-ui" ref={centerUiRef} style={{ opacity: sessionReady ? 1 : 0 }}>
           <div className="center-label">
             <span className="o">raise</span><span className="t">(fn)</span> brain
           </div>
