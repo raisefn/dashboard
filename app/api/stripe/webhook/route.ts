@@ -30,27 +30,29 @@ export async function POST(req: Request) {
 
     // Derive tier from metadata or from the price ID
     let tier = session.metadata?.tier;
-    if (!tier && session.line_items?.data?.[0]?.price?.id) {
-      tier = TIER_FROM_PRICE[session.line_items.data[0].price.id];
-    }
+    console.log("Webhook: metadata tier =", tier);
+    console.log("Webhook: TIER_FROM_PRICE map =", JSON.stringify(TIER_FROM_PRICE));
 
-    // If still no tier, try to fetch line items from Stripe
+    // Line items aren't included in webhook payload — fetch them
     if (!tier) {
       try {
         const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
         const priceId = lineItems.data[0]?.price?.id;
+        console.log("Webhook: price ID from line items =", priceId);
         if (priceId) {
           tier = TIER_FROM_PRICE[priceId];
         }
-      } catch {
-        console.error("Could not fetch line items for session:", session.id);
+      } catch (err) {
+        console.error("Could not fetch line items for session:", session.id, err);
       }
     }
 
     if (!tier) {
-      console.error("Could not determine tier for checkout session:", session.id);
+      console.error("Could not determine tier for session:", session.id);
       return NextResponse.json({ received: true });
     }
+
+    console.log("Webhook: resolved tier =", tier);
 
     try {
       const supabase = getSupabase();
@@ -72,16 +74,18 @@ export async function POST(req: Request) {
       }
 
       // Update the api_keys table in Railway Postgres
-      // The brain reads tier from api_keys — we need to update it there
-      // Using the shared database connection
       const dbUrl = process.env.DATABASE_URL;
+      console.log("Webhook: DATABASE_URL set =", !!dbUrl);
+      console.log("Webhook: updating email =", customerEmail?.toLowerCase(), "to tier =", tier);
+
       if (dbUrl) {
         const { Pool } = await import("pg");
         const pool = new Pool({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
-        await pool.query(
+        const result = await pool.query(
           "UPDATE api_keys SET tier = $1, stripe_customer_id = $2 WHERE email = $3",
           [tier, session.customer as string, customerEmail?.toLowerCase()]
         );
+        console.log("Webhook: DB update rows affected =", result.rowCount);
         await pool.end();
       }
 
