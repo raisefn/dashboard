@@ -184,7 +184,7 @@ export default function RoadmapPage() {
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm text-zinc-600 leading-relaxed">
             This roadmap is a living document. Priorities shift as we learn from our users.
-            If something here matters to you, <a href="mailto:justin@raisefn.com" className="text-zinc-400 hover:text-white transition-colors">let us know</a> — it helps us decide what to build next.
+            If something here matters to you, <a href="mailto:team@raisefn.com" className="text-zinc-400 hover:text-white transition-colors">let us know</a> — it helps us decide what to build next.
           </p>
         </div>
       </section>
