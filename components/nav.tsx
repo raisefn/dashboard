@@ -11,6 +11,7 @@ const topLinks = [
   { href: "/tracker", label: "Eyes & Ears", prefix: "/tracker" },
   { href: "/sdk", label: "Developer SDK", prefix: "/sdk" },
   { href: "/pricing", label: "Pricing", prefix: "/pricing" },
+  { href: "/roadmap", label: "Roadmap", prefix: "/roadmap" },
 ];
 
 const trackerLinks = [
