@@ -107,9 +107,9 @@ export default function EarlyAccessModal({ open, onClose }: Props) {
           </div>
         ) : (
           <>
-            <h3 className="text-xl font-bold text-white mb-2">Entrepreneurs change the world.</h3>
+            <h3 className="text-xl font-bold text-white mb-2">Entrepreneurs change the world!</h3>
             <p className="text-sm text-zinc-400 leading-relaxed mb-6">
-              We&apos;ve got heavy demand, so we&apos;re working invite only. If you&apos;re interested in learning more and potentially working together, tell us a little about yourself.
+              We&apos;re a small team building a big technology. Tell us a bit more about yourself so we can make sure we can provide you value! Demand is high (awesome problem to have), but we promise to get back to you.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
