@@ -27,19 +27,34 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const tier = session.metadata?.tier;
-    const supabaseUserId = session.metadata?.supabase_user_id;
 
-    if (!tier || !supabaseUserId) {
-      console.error("Missing metadata on checkout session:", session.id);
+    // Derive tier from metadata or from the price ID
+    let tier = session.metadata?.tier;
+    if (!tier && session.line_items?.data?.[0]?.price?.id) {
+      tier = TIER_FROM_PRICE[session.line_items.data[0].price.id];
+    }
+
+    // If still no tier, try to fetch line items from Stripe
+    if (!tier) {
+      try {
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
+        const priceId = lineItems.data[0]?.price?.id;
+        if (priceId) {
+          tier = TIER_FROM_PRICE[priceId];
+        }
+      } catch {
+        console.error("Could not fetch line items for session:", session.id);
+      }
+    }
+
+    if (!tier) {
+      console.error("Could not determine tier for checkout session:", session.id);
       return NextResponse.json({ received: true });
     }
 
     try {
       const supabase = getSupabase();
 
-      // Update the early_access record or create a payment record
-      // The brain's api_keys table uses email as the lookup key
       const customerEmail = session.customer_details?.email || session.customer_email;
 
       if (customerEmail) {
