@@ -23,11 +23,12 @@ const capabilities: { label: string; oneliner: string; status: Status; audience:
   { label: "Tracker — Rounds", oneliner: "Live funding rounds from SEC filings and 290+ sources", status: "live", audience: "everyone", color: "#2dd4bf" },
   { label: "Tracker — Investors", oneliner: "Investor profiles cross-referenced across data sources", status: "live", audience: "everyone", color: "#fb923c" },
   { label: "Tracker — Projects", oneliner: "Companies tracked with traction signals and team data", status: "live", audience: "everyone", color: "#34d399" },
+  { label: "Deal CRM", oneliner: "Track every deal through conversation — no data entry", status: "live", audience: "everyone", color: "#fb923c" },
+  { label: "Pitch Deck Analysis", oneliner: "Paste your deck, get calibrated feedback on narrative and positioning", status: "live", audience: "founders", color: "#fbbf24" },
+  { label: "Email Notifications", oneliner: "Follow-up reminders and stale pipeline alerts via email", status: "live", audience: "everyone", color: "#34d399" },
+  { label: "Outreach Drafting", oneliner: "Cold emails, warm intro requests, and follow-ups — tailored per investor", status: "live", audience: "founders", color: "#f87171" },
   // Building
   { label: "Deal Flow Matching", oneliner: "Companies matching your thesis, surfaced before they're public", status: "building", audience: "investors", color: "#f97316" },
-  { label: "Deal CRM", oneliner: "Track every deal through conversation — no data entry", status: "building", audience: "everyone", color: "#fb923c" },
-  { label: "Pitch Deck Analysis", oneliner: "Upload your deck, get calibrated feedback", status: "building", audience: "founders", color: "#2dd4bf" },
-  { label: "Email Notifications", oneliner: "Weekly raise summaries and follow-up reminders", status: "building", audience: "everyone", color: "#fbbf24" },
   // Planned
   { label: "Valuation Calibration", oneliner: "What the data says your company is worth right now", status: "planned", audience: "founders", color: "#fbbf24" },
   { label: "Raise Timing", oneliner: "Should you raise now or wait?", status: "planned", audience: "founders", color: "#34d399" },
