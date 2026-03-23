@@ -4,6 +4,7 @@ import "./globals.css";
 import Nav from "@/components/nav";
 import ScrollToTop from "@/components/scroll-to-top";
 import AuthRedirect from "@/components/auth-redirect";
+import { PostHogProvider } from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,12 +32,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-950 text-zinc-100 min-h-screen overflow-x-hidden`}
       >
-        <Nav />
-        <ScrollToTop />
-        <AuthRedirect />
-        <div className="warm-glow" />
-        <div className="teal-glow" />
-        {children}
+        <PostHogProvider>
+          <Nav />
+          <ScrollToTop />
+          <AuthRedirect />
+          <div className="warm-glow" />
+          <div className="teal-glow" />
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );
