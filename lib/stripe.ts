@@ -12,14 +12,18 @@ export function getStripe(): Stripe {
   return _stripe;
 }
 
-export const PRICE_MAP: Record<string, string | undefined> = {
-  launchpad: process.env.STRIPE_LAUNCHPAD_PRICE_ID,
-  catalyst: process.env.STRIPE_CATALYST_PRICE_ID,
-  edge: process.env.STRIPE_EDGE_PRICE_ID,
-};
+export function getPriceMap(): Record<string, string | undefined> {
+  return {
+    launchpad: process.env.STRIPE_LAUNCHPAD_PRICE_ID,
+    catalyst: process.env.STRIPE_CATALYST_PRICE_ID,
+    edge: process.env.STRIPE_EDGE_PRICE_ID,
+  };
+}
 
-export const TIER_FROM_PRICE: Record<string, string> = Object.fromEntries(
-  Object.entries(PRICE_MAP)
-    .filter(([, v]) => v)
-    .map(([k, v]) => [v!, k])
-);
+export function getTierFromPrice(priceId: string): string | undefined {
+  const map = getPriceMap();
+  for (const [tier, id] of Object.entries(map)) {
+    if (id === priceId) return tier;
+  }
+  return undefined;
+}

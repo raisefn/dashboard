@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStripe, PRICE_MAP } from "@/lib/stripe";
+import { getStripe, getPriceMap } from "@/lib/stripe";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     const stripe = getStripe();
     const { tier } = await req.json();
 
-    const priceId = PRICE_MAP[tier];
+    const priceId = getPriceMap()[tier];
     if (!priceId) {
       return NextResponse.json(
         { error: "Invalid tier." },

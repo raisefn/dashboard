@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStripe, TIER_FROM_PRICE } from "@/lib/stripe";
+import { getStripe, getTierFromPrice } from "@/lib/stripe";
 import { getSupabase } from "@/lib/supabase";
 import Stripe from "stripe";
 
@@ -30,17 +30,15 @@ export async function POST(req: Request) {
 
     // Derive tier from metadata or from the price ID
     let tier = session.metadata?.tier;
-    console.log("Webhook: metadata tier =", tier);
-    console.log("Webhook: TIER_FROM_PRICE map =", JSON.stringify(TIER_FROM_PRICE));
 
-    // Line items aren't included in webhook payload — fetch them
+    // Fetch line items from Stripe to determine tier from price ID
     if (!tier) {
       try {
         const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
         const priceId = lineItems.data[0]?.price?.id;
-        console.log("Webhook: price ID from line items =", priceId);
+        console.log("Webhook: price ID =", priceId);
         if (priceId) {
-          tier = TIER_FROM_PRICE[priceId];
+          tier = getTierFromPrice(priceId);
         }
       } catch (err) {
         console.error("Could not fetch line items for session:", session.id, err);
