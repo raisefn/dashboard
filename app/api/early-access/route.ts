@@ -6,7 +6,7 @@ export async function POST(req: Request) {
   try {
     const supabase = getSupabase();
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const { name, email, company, role } = await req.json();
+    const { name, email, company, role, message } = await req.json();
 
     if (!name?.trim() || !email?.trim() || !company?.trim() || !role?.trim()) {
       return NextResponse.json(
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
       // Re-send verification for unverified signup
       await supabase
         .from("early_access")
-        .update({ name: name.trim(), company: company.trim(), role, token })
+        .update({ name: name.trim(), company: company.trim(), role, message: message?.trim() || null, token })
         .eq("id", existing.id);
     } else {
       const { error: insertError } = await supabase
@@ -64,6 +64,7 @@ export async function POST(req: Request) {
           email: email.toLowerCase().trim(),
           company: company.trim(),
           role,
+          message: message?.trim() || null,
           token,
           verified: false,
         });

@@ -12,6 +12,7 @@ export default function EarlyAccessModal({ open, onClose }: Props) {
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [role, setRole] = useState<"" | "investor" | "founder" | "builder">("");
+  const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -51,7 +52,7 @@ export default function EarlyAccessModal({ open, onClose }: Props) {
       const res = await fetch("/api/early-access", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, company, role }),
+        body: JSON.stringify({ name, email, company, role, message }),
       });
 
       const data = await res.json();
@@ -106,12 +107,39 @@ export default function EarlyAccessModal({ open, onClose }: Props) {
           </div>
         ) : (
           <>
-            <h3 className="text-xl font-bold text-white mb-1">Early Access</h3>
-            <p className="text-sm text-zinc-500 mb-6">
-              Get notified when raise(fn) launches.
+            <h3 className="text-xl font-bold text-white mb-2">Entrepreneurs change the world.</h3>
+            <p className="text-sm text-zinc-400 leading-relaxed mb-6">
+              We&apos;ve got heavy demand, so we&apos;re working invite only. If you&apos;re interested in learning more and potentially working together, tell us a little about yourself.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs text-zinc-500 mb-2">I am a...</label>
+                <div className="flex gap-2">
+                  {([
+                    { value: "founder", label: "Founder" },
+                    { value: "investor", label: "Investor" },
+                    { value: "builder", label: "Builder" },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setRole(opt.value)}
+                      className={`flex-1 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
+                        role === opt.value
+                          ? "border-teal-600 bg-teal-950/40 text-teal-300"
+                          : "border-zinc-800 bg-zinc-900/50 text-zinc-500 hover:border-zinc-700 hover:text-zinc-400"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                {!role && status === "error" && !errorMsg && (
+                  <p className="text-sm text-red-400 mt-2">Please select a role.</p>
+                )}
+              </div>
+
               <div>
                 <label htmlFor="ea-name" className="block text-xs text-zinc-500 mb-1.5">Name</label>
                 <input
@@ -150,32 +178,16 @@ export default function EarlyAccessModal({ open, onClose }: Props) {
               </div>
 
               <div>
-                <label className="block text-xs text-zinc-500 mb-2">I am a...</label>
-                <div className="flex gap-2">
-                  {([
-                    { value: "investor", label: "Investor" },
-                    { value: "founder", label: "Founder" },
-                    { value: "builder", label: "Builder" },
-                  ] as const).map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setRole(opt.value)}
-                      className={`flex-1 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
-                        role === opt.value
-                          ? "border-teal-600 bg-teal-950/40 text-teal-300"
-                          : "border-zinc-800 bg-zinc-900/50 text-zinc-500 hover:border-zinc-700 hover:text-zinc-400"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
+                <label htmlFor="ea-message" className="block text-xs text-zinc-500 mb-1.5">Tell us more</label>
+                <textarea
+                  id="ea-message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-teal-700 transition-colors resize-none"
+                  placeholder="What are you working on? What brings you here?"
+                />
               </div>
-
-              {!role && status === "error" && !errorMsg && (
-                <p className="text-sm text-red-400">Please select a role.</p>
-              )}
 
               {status === "error" && errorMsg && (
                 <p className="text-sm text-red-400">{errorMsg}</p>
@@ -186,7 +198,7 @@ export default function EarlyAccessModal({ open, onClose }: Props) {
                 disabled={status === "submitting"}
                 className="w-full rounded-full border border-orange-700/50 bg-orange-950/30 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {status === "submitting" ? "Submitting..." : "Request Early Access"}
+                {status === "submitting" ? "Submitting..." : "Request Access"}
               </button>
             </form>
           </>
