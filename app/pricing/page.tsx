@@ -116,11 +116,11 @@ export default function PricingPage() {
               </div>
             </div>
 
-            {/* Full Service */}
+            {/* Catalyst */}
             <div className="mb-10">
               <div className="flex items-baseline gap-3 mb-1">
                 <span className="text-lg font-bold text-orange-300">
-                  Full Service
+                  Catalyst
                 </span>
                 <span className="text-lg font-bold text-orange-400">
                   $7,500
