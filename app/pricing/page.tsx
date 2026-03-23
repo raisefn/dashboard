@@ -132,7 +132,7 @@ export default function PricingPage() {
               <div className="space-y-2">
                 {[
                   "Everything in Launchpad — full Brain access, all intelligence, unlimited queries",
-                  "Professional fundraising consulting from someone who\u2019s been there",
+                  "Edge fundraising consulting from someone who\u2019s been there",
                   "Dramatically cheaper than a placement agent (3\u20135% of round)",
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-3">
@@ -157,13 +157,13 @@ export default function PricingPage() {
         <div className="border-t border-zinc-800/50" />
       </div>
 
-      {/* ── Professional (Consultants + Investors) ── */}
+      {/* ── Edge (Consultants + Investors) ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">
             <div className="flex items-baseline gap-4 mb-2">
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Professional
+                Edge
               </h2>
               <span className="text-2xl font-bold text-orange-400">
                 $1,000
@@ -307,7 +307,7 @@ export default function PricingPage() {
               <div className="space-y-4">
                 {[
                   "Founder raise: $2.5K–$7.5K flat",
-                  "Professional: $1K/mo",
+                  "Edge: $1K/mo",
                   "Live intelligence, not raw data",
                   "Answers, not spreadsheets",
                   "Gets smarter with every raise",
