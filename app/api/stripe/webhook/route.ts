@@ -36,7 +36,6 @@ export async function POST(req: Request) {
       try {
         const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
         const priceId = lineItems.data[0]?.price?.id;
-        console.log("Webhook: price ID =", priceId);
         if (priceId) {
           tier = getTierFromPrice(priceId);
         }
@@ -49,8 +48,6 @@ export async function POST(req: Request) {
       console.error("Could not determine tier for session:", session.id);
       return NextResponse.json({ received: true });
     }
-
-    console.log("Webhook: resolved tier =", tier);
 
     try {
       const supabase = getSupabase();
@@ -73,17 +70,13 @@ export async function POST(req: Request) {
 
       // Update the api_keys table in Railway Postgres
       const dbUrl = process.env.DATABASE_URL;
-      console.log("Webhook: DATABASE_URL set =", !!dbUrl);
-      console.log("Webhook: updating email =", customerEmail?.toLowerCase(), "to tier =", tier);
-
       if (dbUrl) {
         const { Pool } = await import("pg");
         const pool = new Pool({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
-        const result = await pool.query(
+        await pool.query(
           "UPDATE api_keys SET tier = $1, stripe_customer_id = $2 WHERE email = $3",
           [tier, session.customer as string, customerEmail?.toLowerCase()]
         );
-        console.log("Webhook: DB update rows affected =", result.rowCount);
         await pool.end();
       }
 
