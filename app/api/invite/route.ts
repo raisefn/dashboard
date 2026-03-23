@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { email, name, role } = await req.json();
+  const { email, name, role, company, message } = await req.json();
 
   if (!email?.trim()) {
     return NextResponse.json({ error: "Email required" }, { status: 400 });
@@ -35,6 +35,8 @@ export async function POST(req: Request) {
       data: {
         name: name?.trim() || email.split("@")[0],
         role: userRole,
+        company: company?.trim() || null,
+        onboarding_message: message?.trim() || null,
       },
       redirectTo: `${baseUrl}/auth/callback`,
     }
