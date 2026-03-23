@@ -29,13 +29,13 @@ const capabilities: { label: string; oneliner: string; status: Status; audience:
   { label: "Outreach Drafting", oneliner: "Cold emails, warm intro requests, and follow-ups — tailored per investor", status: "live", audience: "founders", color: "#f87171" },
   // Building
   { label: "Deal Flow Matching", oneliner: "Companies matching your thesis, surfaced before they're public", status: "building", audience: "investors", color: "#f97316" },
+  { label: "Valuation Calibration", oneliner: "What the data says your company is worth right now", status: "building", audience: "founders", color: "#fbbf24" },
+  { label: "Portfolio Monitoring", oneliner: "Track portfolio company health from public signals", status: "building", audience: "investors", color: "#fb923c" },
   // Planned
-  { label: "Valuation Calibration", oneliner: "What the data says your company is worth right now", status: "planned", audience: "founders", color: "#fbbf24" },
   { label: "Raise Timing", oneliner: "Should you raise now or wait?", status: "planned", audience: "founders", color: "#34d399" },
   { label: "Co-investor Sequencing", oneliner: "Who to bring in first to unlock the next investor", status: "planned", audience: "founders", color: "#a78bfa" },
   { label: "Competitive Raise Intel", oneliner: "Who else is raising in your space right now", status: "planned", audience: "founders", color: "#f87171" },
   { label: "Behavioral Intelligence", oneliner: "How investors actually behave — from real raise data", status: "planned", audience: "investors", color: "#f97316" },
-  { label: "Portfolio Monitoring", oneliner: "Track portfolio company health from public signals", status: "planned", audience: "investors", color: "#fb923c" },
   { label: "Post-raise Intelligence", oneliner: "Prepare for your next round before you need it", status: "planned", audience: "founders", color: "#2dd4bf" },
   { label: "Sector Analysis", oneliner: "Market-level trends, activity, and momentum by sector", status: "planned", audience: "investors", color: "#fbbf24" },
   { label: "Developer SDK", oneliner: "REST API and native integrations for LangChain, CrewAI, Claude", status: "planned", audience: "developers", color: "#a78bfa" },
