@@ -82,11 +82,11 @@ export default function PricingPage() {
               needs.
             </p>
 
-            {/* Starter */}
+            {/* Launchpad */}
             <div className="mb-10">
               <div className="flex items-baseline gap-3 mb-1">
                 <span className="text-lg font-bold text-orange-300">
-                  Starter
+                  Launchpad
                 </span>
                 <span className="text-lg font-bold text-orange-400">
                   $2,500
@@ -127,11 +127,11 @@ export default function PricingPage() {
                 </span>
               </div>
               <p className="text-xs text-zinc-500 mb-4">
-                Everything in Starter, plus
+                Everything in Launchpad, plus
               </p>
               <div className="space-y-2">
                 {[
-                  "Everything in Starter — full Brain access, all intelligence, unlimited queries",
+                  "Everything in Launchpad — full Brain access, all intelligence, unlimited queries",
                   "Professional fundraising consulting from someone who\u2019s been there",
                   "Dramatically cheaper than a placement agent (3\u20135% of round)",
                 ].map((item) => (
