@@ -751,11 +751,11 @@ export default function BrainDeployPage() {
         return;
       }
 
+      // Read entire SSE stream (Vercel buffers it, so events arrive in batches)
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();
       let fullText = "", buffer = "";
-      let hasScrolledToResponse = false;
-      let hasCleared = false;
+      const toolsUsed: string[] = [];
 
       while (true) {
         const { done, value } = await reader.read();
@@ -774,13 +774,9 @@ export default function BrainDeployPage() {
               fullText += event.content;
             } else if (event.type === "status") {
               activateNode(event.content);
-              contentEl.innerHTML = `<div class="status-msg">${event.content}</div>`;
-              scrollToBottom();
+              toolsUsed.push(event.content);
             } else if (event.type === "error") {
-              const errDiv = document.createElement("div");
-              errDiv.className = "error-msg";
-              errDiv.textContent = event.content;
-              contentEl.appendChild(errDiv);
+              contentEl.innerHTML = `<div class="error-msg">${event.content}</div>`;
             } else if (event.type === "done") {
               if (event.raise_id) raiseIdRef.current = event.raise_id;
               if (event.conversation_id) conversationIdRef.current = event.conversation_id;
@@ -790,36 +786,41 @@ export default function BrainDeployPage() {
           } catch { /* ignore parse errors */ }
         }
       }
-      // Type out the response word by word using setTimeout for reliable rendering
+
+      // Show which tools were used before typing starts
+      if (toolsUsed.length > 0) {
+        const toolList = toolsUsed.map(t => `<div class="status-msg">${t}</div>`).join("");
+        contentEl.innerHTML = toolList;
+        scrollToBottom();
+        await new Promise(r => setTimeout(r, 600));
+      }
+
+      // Type out the response using requestAnimationFrame
       if (fullText) {
         historyRef.current.push({ role: "assistant", content: fullText });
         contentEl.innerHTML = "";
         scrollToElement(assistantEl);
 
+        const chars = fullText.length;
+        const charsPerFrame = Math.max(2, Math.ceil(chars / 150)); // Aim for ~2.5 seconds total
+        let pos = 0;
+
         await new Promise<void>((resolve) => {
-          const words = fullText.split(/(\s+)/);
-          let idx = 0;
-          let revealed = "";
-
-          function tick() {
-            // Reveal 3 words per tick
-            const end = Math.min(idx + 3, words.length);
-            for (let i = idx; i < end; i++) {
-              revealed += words[i];
-            }
-            idx = end;
-            contentEl.innerHTML = formatMarkdown(revealed);
+          function frame() {
+            pos = Math.min(pos + charsPerFrame, chars);
+            // Find the next word boundary to avoid cutting mid-word
+            while (pos < chars && fullText[pos] !== " " && fullText[pos] !== "\n") pos++;
+            contentEl.innerHTML = formatMarkdown(fullText.slice(0, pos));
             scrollToBottom();
-
-            if (idx < words.length) {
-              setTimeout(tick, 20);
+            if (pos < chars) {
+              requestAnimationFrame(frame);
             } else {
               contentEl.innerHTML = formatMarkdown(fullText);
               scrollToBottom();
               resolve();
             }
           }
-          tick();
+          requestAnimationFrame(frame);
         });
       }
     } catch (e) {
