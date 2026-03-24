@@ -751,11 +751,10 @@ export default function BrainDeployPage() {
         return;
       }
 
-      // Read entire SSE stream (Vercel buffers it, so events arrive in batches)
+      // Read SSE stream — show status messages live as they arrive
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();
       let fullText = "", buffer = "";
-      const toolsUsed: string[] = [];
 
       while (true) {
         const { done, value } = await reader.read();
@@ -774,7 +773,9 @@ export default function BrainDeployPage() {
               fullText += event.content;
             } else if (event.type === "status") {
               activateNode(event.content);
-              toolsUsed.push(event.content);
+              // Show tool status live — replaces typing dots
+              contentEl.innerHTML = `<div class="status-msg">${event.content}</div>`;
+              scrollToBottom();
             } else if (event.type === "error") {
               contentEl.innerHTML = `<div class="error-msg">${event.content}</div>`;
             } else if (event.type === "done") {
@@ -787,48 +788,11 @@ export default function BrainDeployPage() {
         }
       }
 
-      // Debug: check what we got from the stream
-      const debugInfo = `Stream done. fullText length: ${fullText.length}, tools: ${toolsUsed.length}, events parsed: ${fullText ? 'yes' : 'no'}`;
-      console.log(debugInfo);
-      console.log("toolsUsed:", toolsUsed);
-      console.log("fullText preview:", fullText.slice(0, 100));
-
-      // Re-query the content element
-      const liveContentEl = assistantEl.querySelector(".content") as HTMLElement;
-      const target = liveContentEl || contentEl;
-      console.log("target element:", target ? "found" : "NULL", "in DOM:", target?.isConnected);
-
-      // Show which tools were used
-      if (toolsUsed.length > 0) {
-        target.innerHTML = toolsUsed.map(t => `<div class="status-msg">${t}</div>`).join("");
-        scrollToBottom();
-        await new Promise(r => setTimeout(r, 800));
-      }
-
+      // Show response — clean, no typewriter, just render and scroll
       if (fullText) {
         historyRef.current.push({ role: "assistant", content: fullText });
-        target.innerHTML = "";
-        scrollToElement(assistantEl);
-
-        // Typewriter: reveal word by word using setInterval
-        const words = fullText.split(/(\s+)/);
-        await new Promise<void>((resolve) => {
-          let idx = 0;
-          let revealed = "";
-          const timer = setInterval(() => {
-            const end = Math.min(idx + 2, words.length);
-            for (let i = idx; i < end; i++) revealed += words[i];
-            idx = end;
-            target.innerHTML = formatMarkdown(revealed);
-            if (idx % 8 === 0 || idx >= words.length) scrollToBottom();
-            if (idx >= words.length) {
-              clearInterval(timer);
-              target.innerHTML = formatMarkdown(fullText);
-              scrollToBottom();
-              resolve();
-            }
-          }, 30);
-        });
+        contentEl.innerHTML = formatMarkdown(fullText);
+        scrollToBottom();
       }
     } catch (e) {
       const errDiv = document.createElement("div");
