@@ -270,7 +270,7 @@ const BRAIN_CSS = `
     overflow-y: auto;
     z-index: 8;
   }
-  .messages-container.active { display: flex; flex-direction: column; }
+  .messages-container.active { display: block; }
   .messages-container::-webkit-scrollbar { width: 4px; }
   .messages-container::-webkit-scrollbar-track { background: transparent; }
   .messages-container::-webkit-scrollbar-thumb { background: #27272a; border-radius: 2px; }
@@ -755,7 +755,7 @@ export default function BrainDeployPage() {
       const decoder = new TextDecoder();
       let fullText = "", buffer = "";
       let hasScrolledToResponse = false;
-      contentEl.innerHTML = "";
+      let hasCleared = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -771,6 +771,7 @@ export default function BrainDeployPage() {
           try {
             const event = JSON.parse(raw);
             if (event.type === "text") {
+              if (!hasCleared) { contentEl.innerHTML = ""; hasCleared = true; }
               fullText += event.content;
               contentEl.innerHTML = formatMarkdown(fullText);
               // On first text chunk, scroll to show the response
@@ -941,25 +942,14 @@ export default function BrainDeployPage() {
   }
 
   function scrollToBottom() {
-    const m = messagesRef.current;
-    if (m) {
-      m.scrollTop = m.scrollHeight;
+    const inner = messagesInnerRef.current;
+    if (inner && inner.lastElementChild) {
+      (inner.lastElementChild as HTMLElement).scrollIntoView({ block: "end" });
     }
   }
 
   function scrollToElement(el: HTMLElement) {
-    const m = messagesRef.current;
-    if (m) {
-      // Use double rAF to ensure layout is complete
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const containerRect = m.getBoundingClientRect();
-          const elRect = el.getBoundingClientRect();
-          const offset = elRect.top - containerRect.top + m.scrollTop - 20;
-          m.scrollTop = offset;
-        });
-      });
-    }
+    el.scrollIntoView({ block: "start" });
   }
 
   function activateNode(statusText: string) {
