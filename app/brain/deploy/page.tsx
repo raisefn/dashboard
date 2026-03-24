@@ -788,11 +788,71 @@ export default function BrainDeployPage() {
         }
       }
 
-      // Show response — clean, no typewriter, just render and scroll
+      // Show response with typewriter effect
       if (fullText) {
         historyRef.current.push({ role: "assistant", content: fullText });
-        contentEl.innerHTML = formatMarkdown(fullText);
-        scrollToBottom();
+
+        // Render markdown once into a temp container
+        const temp = document.createElement("div");
+        temp.innerHTML = formatMarkdown(fullText);
+
+        // Collect all text nodes and their parent elements
+        contentEl.innerHTML = "";
+        const nodes = Array.from(temp.childNodes);
+
+        // Clone the structure but empty all text
+        for (const node of nodes) {
+          contentEl.appendChild(node.cloneNode(true));
+        }
+
+        // Get all text nodes in the rendered content
+        const walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT);
+        const textNodes: Text[] = [];
+        let tn: Text | null;
+        while ((tn = walker.nextNode() as Text | null)) textNodes.push(tn);
+
+        // Store original text and blank them
+        const originals = textNodes.map(t => t.textContent || "");
+        textNodes.forEach(t => { t.textContent = ""; });
+
+        // Scroll to TOP of the response
+        scrollToElement(assistantEl);
+
+        // Reveal text character by character across all text nodes
+        const totalChars = originals.reduce((sum, s) => sum + s.length, 0);
+        const msPerChar = Math.max(8, Math.min(25, 3000 / totalChars));
+        let nodeIdx = 0;
+        let charIdx = 0;
+
+        await new Promise<void>((resolve) => {
+          const timer = setInterval(() => {
+            // Reveal a few characters per tick
+            const charsPerTick = Math.max(1, Math.round(15 / msPerChar));
+            for (let c = 0; c < charsPerTick; c++) {
+              if (nodeIdx >= textNodes.length) {
+                clearInterval(timer);
+                // Ensure final state is perfect
+                contentEl.innerHTML = formatMarkdown(fullText);
+                resolve();
+                return;
+              }
+              const orig = originals[nodeIdx];
+              charIdx++;
+              textNodes[nodeIdx].textContent = orig.slice(0, charIdx);
+              if (charIdx >= orig.length) {
+                nodeIdx++;
+                charIdx = 0;
+              }
+            }
+
+            // Scroll to keep latest text visible — scroll container, not to bottom
+            const m = messagesRef.current;
+            if (m) {
+              const nearBottom = m.scrollHeight - m.scrollTop - m.clientHeight < 200;
+              if (nearBottom) m.scrollTop = m.scrollHeight;
+            }
+          }, msPerChar);
+        });
       }
     } catch (e) {
       const errDiv = document.createElement("div");
