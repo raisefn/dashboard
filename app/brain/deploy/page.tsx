@@ -700,16 +700,16 @@ export default function BrainDeployPage() {
     if (!silent) addMessageToDOM("user", message);
     historyRef.current.push({ role: "user", content: message });
 
-    // Add empty assistant message
+    // Add assistant message with typing dots immediately
     const assistantEl = addMessageToDOM("assistant", "");
     const contentEl = assistantEl.querySelector(".content") as HTMLElement;
-
-    setIsStreaming(true);
-    if (sendBtnRef.current) sendBtnRef.current.disabled = true;
-    contentEl.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+    if (contentEl) {
+      contentEl.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+    }
     brainStateRef.current = "thinking";
     activeColorRef.current = null;
-    requestAnimationFrame(() => scrollToBottom());
+    if (sendBtnRef.current) sendBtnRef.current.disabled = true;
+    setIsStreaming(true);
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -934,22 +934,31 @@ export default function BrainDeployPage() {
       div.textContent = content;
     }
     inner.appendChild(div);
-    scrollToBottom();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => scrollToBottom());
+    });
     return div;
   }
 
   function scrollToBottom() {
     const m = messagesRef.current;
-    if (m) m.scrollTop = m.scrollHeight;
+    if (m) {
+      m.scrollTop = m.scrollHeight;
+    }
   }
 
   function scrollToElement(el: HTMLElement) {
     const m = messagesRef.current;
     if (m) {
-      const containerRect = m.getBoundingClientRect();
-      const elRect = el.getBoundingClientRect();
-      const offset = elRect.top - containerRect.top + m.scrollTop - 20;
-      m.scrollTo({ top: offset, behavior: "smooth" });
+      // Use double rAF to ensure layout is complete
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const containerRect = m.getBoundingClientRect();
+          const elRect = el.getBoundingClientRect();
+          const offset = elRect.top - containerRect.top + m.scrollTop - 20;
+          m.scrollTop = offset;
+        });
+      });
     }
   }
 
