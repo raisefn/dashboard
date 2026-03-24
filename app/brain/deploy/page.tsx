@@ -706,10 +706,10 @@ export default function BrainDeployPage() {
 
     setIsStreaming(true);
     if (sendBtnRef.current) sendBtnRef.current.disabled = true;
-    contentEl.innerHTML = '<div class="status-msg">Thinking...</div>';
+    contentEl.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
     brainStateRef.current = "thinking";
     activeColorRef.current = null;
-    scrollToBottom();
+    requestAnimationFrame(() => scrollToBottom());
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -773,10 +773,10 @@ export default function BrainDeployPage() {
             if (event.type === "text") {
               fullText += event.content;
               contentEl.innerHTML = formatMarkdown(fullText);
-              // On first text chunk, scroll to the top of the response
+              // On first text chunk, scroll to show the response
               if (!hasScrolledToResponse) {
                 hasScrolledToResponse = true;
-                scrollToElement(assistantEl);
+                requestAnimationFrame(() => scrollToElement(assistantEl));
               } else {
                 // For subsequent chunks, only scroll down if user is near the bottom
                 const m = messagesRef.current;
@@ -787,11 +787,9 @@ export default function BrainDeployPage() {
               }
             } else if (event.type === "status") {
               activateNode(event.content);
-              const s = document.createElement("div");
-              s.className = "status-msg";
-              s.textContent = event.content;
-              contentEl.before(s);
-              scrollToBottom();
+              // Replace typing dots with status message
+              contentEl.innerHTML = `<div class="status-msg">${event.content}</div>`;
+              requestAnimationFrame(() => scrollToBottom());
             } else if (event.type === "error") {
               const errDiv = document.createElement("div");
               errDiv.className = "error-msg";
@@ -901,12 +899,18 @@ export default function BrainDeployPage() {
             historyRef.current.push({ role: msg.role, content: msg.content });
           }
 
-          // Add a welcome-back message
-          const welcomeBack = `Welcome back, ${firstName}. Pick up where you left off, or ask me anything.`;
+          // Add a welcome-back message with typing dots
+          const welcomeBack = `Welcome back, ${firstName}! I remember where we left off. What would you like to work on?`;
           const welcomeEl = addMessageToDOM("assistant", "");
           const welcomeContent = welcomeEl.querySelector(".content") as HTMLElement;
-          welcomeContent.innerHTML = formatMarkdown(welcomeBack);
-          scrollToBottom();
+          if (welcomeContent) {
+            welcomeContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+            requestAnimationFrame(() => scrollToBottom());
+            setTimeout(() => {
+              welcomeContent.innerHTML = formatMarkdown(welcomeBack);
+              requestAnimationFrame(() => scrollToBottom());
+            }, 800);
+          }
           return;
         }
 
