@@ -771,14 +771,11 @@ export default function BrainDeployPage() {
           try {
             const event = JSON.parse(raw);
             if (event.type === "text") {
-              if (!hasCleared) { contentEl.innerHTML = ""; hasCleared = true; }
               fullText += event.content;
-              // Don't render yet — we'll type it out after stream ends
             } else if (event.type === "status") {
               activateNode(event.content);
-              // Replace typing dots with status message
               contentEl.innerHTML = `<div class="status-msg">${event.content}</div>`;
-              requestAnimationFrame(() => scrollToBottom());
+              scrollToBottom();
             } else if (event.type === "error") {
               const errDiv = document.createElement("div");
               errDiv.className = "error-msg";
@@ -793,24 +790,37 @@ export default function BrainDeployPage() {
           } catch { /* ignore parse errors */ }
         }
       }
-      // Type out the response word by word
+      // Type out the response word by word using setTimeout for reliable rendering
       if (fullText) {
         historyRef.current.push({ role: "assistant", content: fullText });
         contentEl.innerHTML = "";
         scrollToElement(assistantEl);
 
-        const words = fullText.split(/(\s+)/);
-        let revealed = "";
-        for (let i = 0; i < words.length; i++) {
-          revealed += words[i];
-          contentEl.innerHTML = formatMarkdown(revealed);
-          if (i % 3 === 0) {
+        await new Promise<void>((resolve) => {
+          const words = fullText.split(/(\s+)/);
+          let idx = 0;
+          let revealed = "";
+
+          function tick() {
+            // Reveal 3 words per tick
+            const end = Math.min(idx + 3, words.length);
+            for (let i = idx; i < end; i++) {
+              revealed += words[i];
+            }
+            idx = end;
+            contentEl.innerHTML = formatMarkdown(revealed);
             scrollToBottom();
-            await new Promise(r => setTimeout(r, 15));
+
+            if (idx < words.length) {
+              setTimeout(tick, 20);
+            } else {
+              contentEl.innerHTML = formatMarkdown(fullText);
+              scrollToBottom();
+              resolve();
+            }
           }
-        }
-        contentEl.innerHTML = formatMarkdown(fullText);
-        scrollToBottom();
+          tick();
+        });
       }
     } catch (e) {
       const errDiv = document.createElement("div");
