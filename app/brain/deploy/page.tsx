@@ -787,44 +787,28 @@ export default function BrainDeployPage() {
         }
       }
 
-      // Show which tools were used before typing starts
+      // Show response — re-query the DOM element in case React re-rendered
+      const liveContentEl = assistantEl.querySelector(".content") as HTMLElement;
+      const target = liveContentEl || contentEl;
+
+      // Show which tools were used
       if (toolsUsed.length > 0) {
-        const toolList = toolsUsed.map(t => `<div class="status-msg">${t}</div>`).join("");
-        contentEl.innerHTML = toolList;
+        target.innerHTML = toolsUsed.map(t => `<div class="status-msg">${t}</div>`).join("");
         scrollToBottom();
         await new Promise(r => setTimeout(r, 800));
       }
 
-      // Type out the response word by word
       if (fullText) {
         historyRef.current.push({ role: "assistant", content: fullText });
-        contentEl.innerHTML = "";
+        // Fade in the full response
+        target.style.opacity = "0";
+        target.innerHTML = formatMarkdown(fullText);
         scrollToElement(assistantEl);
-
-        const words = fullText.split(/(\s+)/);
-        let idx = 0;
-        let revealed = "";
-        const WORDS_PER_TICK = 2;
-        const MS_PER_TICK = 30;
-
-        await new Promise<void>((resolve) => {
-          const timer = setInterval(() => {
-            const end = Math.min(idx + WORDS_PER_TICK, words.length);
-            for (let i = idx; i < end; i++) revealed += words[i];
-            idx = end;
-
-            contentEl.innerHTML = formatMarkdown(revealed);
-
-            // Scroll every few ticks to avoid jank
-            if (idx % 10 === 0 || idx >= words.length) scrollToBottom();
-
-            if (idx >= words.length) {
-              clearInterval(timer);
-              contentEl.innerHTML = formatMarkdown(fullText);
-              scrollToBottom();
-              resolve();
-            }
-          }, MS_PER_TICK);
+        // Trigger fade
+        requestAnimationFrame(() => {
+          target.style.transition = "opacity 0.5s ease-in";
+          target.style.opacity = "1";
+          scrollToBottom();
         });
       }
     } catch (e) {
