@@ -820,14 +820,13 @@ export default function BrainDeployPage() {
 
         // Reveal text character by character across all text nodes
         const totalChars = originals.reduce((sum, s) => sum + s.length, 0);
-        const msPerChar = Math.max(8, Math.min(25, 3000 / totalChars));
+        const TICK_MS = 15;
+        const charsPerTick = Math.max(1, Math.ceil(totalChars / 400));
         let nodeIdx = 0;
         let charIdx = 0;
 
         await new Promise<void>((resolve) => {
           const timer = setInterval(() => {
-            // Reveal a few characters per tick
-            const charsPerTick = Math.max(1, Math.round(15 / msPerChar));
             for (let c = 0; c < charsPerTick; c++) {
               if (nodeIdx >= textNodes.length) {
                 clearInterval(timer);
@@ -851,7 +850,7 @@ export default function BrainDeployPage() {
               const nearBottom = m.scrollHeight - m.scrollTop - m.clientHeight < 200;
               if (nearBottom) m.scrollTop = m.scrollHeight;
             }
-          }, msPerChar);
+          }, TICK_MS);
         });
       }
     } catch (e) {
