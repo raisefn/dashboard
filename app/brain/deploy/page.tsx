@@ -704,7 +704,7 @@ export default function BrainDeployPage() {
     const assistantEl = addMessageToDOM("assistant", "");
     const contentEl = assistantEl.querySelector(".content") as HTMLElement;
     if (contentEl) {
-      contentEl.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+      contentEl.innerHTML = '<div class="status-msg">Searching brain intelligence...</div>';
     }
     brainStateRef.current = "thinking";
     activeColorRef.current = null;
