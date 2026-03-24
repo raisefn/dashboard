@@ -751,22 +751,6 @@ export default function BrainDeployPage() {
         return;
       }
 
-      // Show rotating status messages while waiting
-      const thinkingMessages = [
-        "Analyzing your question...",
-        "Pulling live data...",
-        "Cross-referencing sources...",
-        "Building your answer...",
-      ];
-      let thinkingIdx = 0;
-      const thinkingTimer = setInterval(() => {
-        if (contentEl && contentEl.querySelector(".typing, .status-msg")) {
-          contentEl.innerHTML = `<div class="status-msg">${thinkingMessages[thinkingIdx % thinkingMessages.length]}</div>`;
-          scrollToBottom();
-          thinkingIdx++;
-        }
-      }, 3000);
-
       // Read SSE stream — show status messages live as they arrive
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();
@@ -803,8 +787,6 @@ export default function BrainDeployPage() {
           } catch { /* ignore parse errors */ }
         }
       }
-
-      clearInterval(thinkingTimer);
 
       // Show response with typewriter effect
       if (fullText) {
