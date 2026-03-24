@@ -773,19 +773,7 @@ export default function BrainDeployPage() {
             if (event.type === "text") {
               if (!hasCleared) { contentEl.innerHTML = ""; hasCleared = true; }
               fullText += event.content;
-              contentEl.innerHTML = formatMarkdown(fullText);
-              // On first text chunk, scroll to show the response
-              if (!hasScrolledToResponse) {
-                hasScrolledToResponse = true;
-                requestAnimationFrame(() => scrollToElement(assistantEl));
-              } else {
-                // For subsequent chunks, only scroll down if user is near the bottom
-                const m = messagesRef.current;
-                if (m) {
-                  const nearBottom = m.scrollHeight - m.scrollTop - m.clientHeight < 150;
-                  if (nearBottom) scrollToBottom();
-                }
-              }
+              // Don't render yet — we'll type it out after stream ends
             } else if (event.type === "status") {
               activateNode(event.content);
               // Replace typing dots with status message
@@ -805,7 +793,25 @@ export default function BrainDeployPage() {
           } catch { /* ignore parse errors */ }
         }
       }
-      if (fullText) historyRef.current.push({ role: "assistant", content: fullText });
+      // Type out the response word by word
+      if (fullText) {
+        historyRef.current.push({ role: "assistant", content: fullText });
+        contentEl.innerHTML = "";
+        scrollToElement(assistantEl);
+
+        const words = fullText.split(/(\s+)/);
+        let revealed = "";
+        for (let i = 0; i < words.length; i++) {
+          revealed += words[i];
+          contentEl.innerHTML = formatMarkdown(revealed);
+          if (i % 3 === 0) {
+            scrollToBottom();
+            await new Promise(r => setTimeout(r, 15));
+          }
+        }
+        contentEl.innerHTML = formatMarkdown(fullText);
+        scrollToBottom();
+      }
     } catch (e) {
       const errDiv = document.createElement("div");
       errDiv.className = "error-msg";
