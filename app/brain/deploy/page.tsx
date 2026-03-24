@@ -792,35 +792,39 @@ export default function BrainDeployPage() {
         const toolList = toolsUsed.map(t => `<div class="status-msg">${t}</div>`).join("");
         contentEl.innerHTML = toolList;
         scrollToBottom();
-        await new Promise(r => setTimeout(r, 600));
+        await new Promise(r => setTimeout(r, 800));
       }
 
-      // Type out the response using requestAnimationFrame
+      // Type out the response word by word
       if (fullText) {
         historyRef.current.push({ role: "assistant", content: fullText });
         contentEl.innerHTML = "";
         scrollToElement(assistantEl);
 
-        const chars = fullText.length;
-        const charsPerFrame = Math.max(2, Math.ceil(chars / 150)); // Aim for ~2.5 seconds total
-        let pos = 0;
+        const words = fullText.split(/(\s+)/);
+        let idx = 0;
+        let revealed = "";
+        const WORDS_PER_TICK = 2;
+        const MS_PER_TICK = 30;
 
         await new Promise<void>((resolve) => {
-          function frame() {
-            pos = Math.min(pos + charsPerFrame, chars);
-            // Find the next word boundary to avoid cutting mid-word
-            while (pos < chars && fullText[pos] !== " " && fullText[pos] !== "\n") pos++;
-            contentEl.innerHTML = formatMarkdown(fullText.slice(0, pos));
-            scrollToBottom();
-            if (pos < chars) {
-              requestAnimationFrame(frame);
-            } else {
+          const timer = setInterval(() => {
+            const end = Math.min(idx + WORDS_PER_TICK, words.length);
+            for (let i = idx; i < end; i++) revealed += words[i];
+            idx = end;
+
+            contentEl.innerHTML = formatMarkdown(revealed);
+
+            // Scroll every few ticks to avoid jank
+            if (idx % 10 === 0 || idx >= words.length) scrollToBottom();
+
+            if (idx >= words.length) {
+              clearInterval(timer);
               contentEl.innerHTML = formatMarkdown(fullText);
               scrollToBottom();
               resolve();
             }
-          }
-          requestAnimationFrame(frame);
+          }, MS_PER_TICK);
         });
       }
     } catch (e) {
