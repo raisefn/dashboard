@@ -38,6 +38,7 @@ const capabilities: { label: string; oneliner: string; status: Status; audience:
   { label: "Behavioral Intelligence", oneliner: "How investors actually behave — from real raise data", status: "planned", audience: "investors", color: "#f97316" },
   { label: "Post-raise Intelligence", oneliner: "Prepare for your next round before you need it", status: "planned", audience: "founders", color: "#2dd4bf" },
   { label: "Sector Analysis", oneliner: "Market-level trends, activity, and momentum by sector", status: "planned", audience: "investors", color: "#fbbf24" },
+  { label: "Match Scores", oneliner: "Quantified fit between founders and investors — sector, stage, check size, activity, thesis alignment", status: "planned", audience: "everyone", color: "#2dd4bf" },
   { label: "Calendar Integration", oneliner: "Connect your calendar — meetings auto-captured without manual logging", status: "planned", audience: "everyone", color: "#34d399" },
   { label: "Meeting Tool Integration", oneliner: "Otter, Fireflies, Fathom — transcripts flow in automatically", status: "planned", audience: "everyone", color: "#2dd4bf" },
   { label: "Data Freshness Layer", oneliner: "Every data point timestamped and scored — stale intel surfaced transparently", status: "planned", audience: "everyone", color: "#fb923c" },
