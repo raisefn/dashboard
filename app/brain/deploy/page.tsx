@@ -722,7 +722,7 @@ export default function BrainDeployPage() {
     try {
       const reqBody = JSON.stringify({
         message,
-        history: historyRef.current.slice(0, -1),
+        history: historyRef.current.slice(-101, -1),
         ...(raiseIdRef.current && { raise_id: raiseIdRef.current }),
         ...(conversationIdRef.current && { conversation_id: conversationIdRef.current }),
       });
