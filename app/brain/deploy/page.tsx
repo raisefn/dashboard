@@ -807,8 +807,28 @@ export default function BrainDeployPage() {
 
       if (fullText) {
         historyRef.current.push({ role: "assistant", content: fullText });
-        target.innerHTML = formatMarkdown(fullText);
-        scrollToBottom();
+        target.innerHTML = "";
+        scrollToElement(assistantEl);
+
+        // Typewriter: reveal word by word using setInterval
+        const words = fullText.split(/(\s+)/);
+        await new Promise<void>((resolve) => {
+          let idx = 0;
+          let revealed = "";
+          const timer = setInterval(() => {
+            const end = Math.min(idx + 2, words.length);
+            for (let i = idx; i < end; i++) revealed += words[i];
+            idx = end;
+            target.innerHTML = formatMarkdown(revealed);
+            if (idx % 8 === 0 || idx >= words.length) scrollToBottom();
+            if (idx >= words.length) {
+              clearInterval(timer);
+              target.innerHTML = formatMarkdown(fullText);
+              scrollToBottom();
+              resolve();
+            }
+          }, 30);
+        });
       }
     } catch (e) {
       const errDiv = document.createElement("div");
@@ -946,14 +966,17 @@ export default function BrainDeployPage() {
   }
 
   function scrollToBottom() {
-    const inner = messagesInnerRef.current;
-    if (inner && inner.lastElementChild) {
-      (inner.lastElementChild as HTMLElement).scrollIntoView({ block: "end" });
-    }
+    const m = messagesRef.current;
+    if (m) m.scrollTop = m.scrollHeight + 200;
   }
 
   function scrollToElement(el: HTMLElement) {
-    el.scrollIntoView({ block: "start" });
+    const m = messagesRef.current;
+    if (m && el) {
+      const containerRect = m.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      m.scrollTop = m.scrollTop + (elRect.top - containerRect.top) - 20;
+    }
   }
 
   function activateNode(statusText: string) {
