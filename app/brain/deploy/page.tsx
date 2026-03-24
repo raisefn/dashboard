@@ -787,9 +787,16 @@ export default function BrainDeployPage() {
         }
       }
 
-      // Show response — re-query the DOM element in case React re-rendered
+      // Debug: check what we got from the stream
+      const debugInfo = `Stream done. fullText length: ${fullText.length}, tools: ${toolsUsed.length}, events parsed: ${fullText ? 'yes' : 'no'}`;
+      console.log(debugInfo);
+      console.log("toolsUsed:", toolsUsed);
+      console.log("fullText preview:", fullText.slice(0, 100));
+
+      // Re-query the content element
       const liveContentEl = assistantEl.querySelector(".content") as HTMLElement;
       const target = liveContentEl || contentEl;
+      console.log("target element:", target ? "found" : "NULL", "in DOM:", target?.isConnected);
 
       // Show which tools were used
       if (toolsUsed.length > 0) {
@@ -800,16 +807,8 @@ export default function BrainDeployPage() {
 
       if (fullText) {
         historyRef.current.push({ role: "assistant", content: fullText });
-        // Fade in the full response
-        target.style.opacity = "0";
         target.innerHTML = formatMarkdown(fullText);
-        scrollToElement(assistantEl);
-        // Trigger fade
-        requestAnimationFrame(() => {
-          target.style.transition = "opacity 0.5s ease-in";
-          target.style.opacity = "1";
-          scrollToBottom();
-        });
+        scrollToBottom();
       }
     } catch (e) {
       const errDiv = document.createElement("div");
