@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
+import { Resend } from "resend";
 
 function escapeHtml(str: string): string {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -21,7 +22,7 @@ export async function GET(req: Request) {
     .from("early_access")
     .update({ verified: true, token: null })
     .eq("token", token)
-    .select("name")
+    .select("name, email, company, role, message")
     .single();
 
   if (error || !data) {
@@ -29,6 +30,27 @@ export async function GET(req: Request) {
       errorPage("Invalid or expired verification link."),
       { status: 400, headers: { "Content-Type": "text/html" } }
     );
+  }
+
+  // Notify admin of verified signup
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: "raise(fn) <noreply@raisefn.com>",
+      to: "justin@raisefn.com",
+      subject: `New early access signup: ${data.name} (${data.role})`,
+      text: [
+        `New verified early access signup:`,
+        ``,
+        `Name: ${data.name}`,
+        `Email: ${data.email}`,
+        `Company: ${data.company}`,
+        `Role: ${data.role}`,
+        data.message ? `Message: ${data.message}` : null,
+      ].filter(Boolean).join("\n"),
+    });
+  } catch (e) {
+    console.error("Failed to send admin notification:", e);
   }
 
   return new NextResponse(successPage(escapeHtml(data.name)), {
