@@ -46,6 +46,9 @@ const capabilities: { label: string; oneliner: string; status: Status; audience:
   { label: "Investor Profile Management", oneliner: "Investors claim and manage their own profiles — correct the record, signal thesis changes", status: "planned", audience: "investors", color: "#f97316" },
   { label: "Developer SDK", oneliner: "REST API and native integrations for LangChain, CrewAI, Claude", status: "planned", audience: "developers", color: "#a78bfa" },
   { label: "x402 Payments", oneliner: "Agents discover and pay autonomously — no API key required", status: "planned", audience: "developers", color: "#a78bfa" },
+  { label: "Crowdfunding Intelligence", oneliner: "Evaluate and plan equity crowdfunding alongside traditional raises", status: "planned", audience: "founders", color: "#fbbf24" },
+  { label: "Revenue-Based Financing", oneliner: "Explore non-dilutive funding options based on your metrics", status: "planned", audience: "founders", color: "#34d399" },
+  { label: "Grant Discovery", oneliner: "Find and qualify for grants matched to your company and sector", status: "planned", audience: "founders", color: "#2dd4bf" },
 ];
 
 const statusColor: Record<Status, string> = {
