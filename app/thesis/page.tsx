@@ -71,7 +71,7 @@ const slides = [
 
 function DownArrow() {
   return (
-    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 animate-bounce z-50">
       <svg
         width="24"
         height="24"
@@ -91,14 +91,16 @@ function DownArrow() {
 
 export default function ThesisPage() {
   const [visible, setVisible] = useState<Set<number>>(new Set());
+  const [currentIdx, setCurrentIdx] = useState(0);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const idx = Number(entry.target.getAttribute("data-idx"));
           if (entry.isIntersecting) {
-            const idx = Number(entry.target.getAttribute("data-idx"));
             setVisible((prev) => new Set(prev).add(idx));
+            setCurrentIdx(idx);
           }
         });
       },
@@ -152,9 +154,10 @@ export default function ThesisPage() {
             )}
           </div>
 
-          {i < slides.length - 1 && <DownArrow />}
         </section>
       ))}
+
+      {currentIdx < slides.length - 1 && <DownArrow />}
 
       {/* Final CTA */}
       <section className="min-h-[50vh] flex items-center justify-center px-6">
