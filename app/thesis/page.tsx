@@ -120,11 +120,7 @@ export default function ThesisPage() {
           className="relative min-h-screen flex items-center justify-center px-6 md:px-12"
         >
           <div
-            className={`max-w-3xl transition-all duration-700 ${
-              visible.has(i)
-                ? "opacity-100"
-                : "opacity-0"
-            }`}
+            className="max-w-3xl"
           >
             {slide.type === "cover" ? (
               <div className="text-center">
