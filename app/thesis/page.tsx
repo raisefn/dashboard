@@ -112,7 +112,7 @@ export default function ThesisPage() {
   }, []);
 
   return (
-    <div className="bg-zinc-950">
+    <div className="bg-zinc-950" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
       {slides.map((slide, i) => (
         <section
           key={i}
