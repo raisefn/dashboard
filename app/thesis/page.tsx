@@ -112,7 +112,7 @@ export default function ThesisPage() {
   }, []);
 
   return (
-    <div className="bg-zinc-950" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
+    <div className="bg-zinc-950">
       {slides.map((slide, i) => (
         <section
           key={i}
@@ -128,7 +128,7 @@ export default function ThesisPage() {
                   <span className="text-orange-500">raise</span>
                   <span className="text-teal-400">(fn)</span>
                 </div>
-                <p className="text-2xl md:text-3xl text-zinc-300 font-normal">
+                <p className="text-2xl md:text-3xl text-white font-bold">
                   {slide.text}
                 </p>
               </div>
@@ -137,14 +137,14 @@ export default function ThesisPage() {
                 {slide.text.split("\n").map((line, j) => (
                   <p
                     key={j}
-                    className="text-2xl md:text-4xl text-zinc-200 font-normal leading-relaxed"
+                    className="text-2xl md:text-4xl text-white font-bold leading-relaxed"
                   >
                     {line}
                   </p>
                 ))}
               </div>
             ) : (
-              <p className="text-2xl md:text-4xl text-zinc-200 font-normal leading-relaxed">
+              <p className="text-2xl md:text-4xl text-white font-bold leading-relaxed">
                 {slide.text}
               </p>
             )}
