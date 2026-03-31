@@ -722,12 +722,18 @@ export default function LandingPage() {
 
       {/* ── Footer ── */}
       <footer className="border-t border-zinc-800/30 py-6 px-4">
-        <div className="mx-auto max-w-3xl flex justify-center">
+        <div className="mx-auto max-w-3xl flex justify-center gap-6">
           <Link
             href="/privacy"
             className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
           >
             Privacy
+          </Link>
+          <Link
+            href="/thesis"
+            className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+          >
+            Our thesis
           </Link>
         </div>
       </footer>
