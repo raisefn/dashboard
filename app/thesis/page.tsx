@@ -132,7 +132,7 @@ export default function ThesisPage() {
                   <span className="text-orange-500">raise</span>
                   <span className="text-teal-400">(fn)</span>
                 </div>
-                <p className="text-2xl md:text-3xl text-zinc-300 font-light">
+                <p className="text-2xl md:text-3xl text-zinc-300 font-normal">
                   {slide.text}
                 </p>
               </div>
@@ -141,14 +141,14 @@ export default function ThesisPage() {
                 {slide.text.split("\n").map((line, j) => (
                   <p
                     key={j}
-                    className="text-2xl md:text-4xl text-zinc-200 font-light leading-relaxed"
+                    className="text-2xl md:text-4xl text-zinc-200 font-normal leading-relaxed"
                   >
                     {line}
                   </p>
                 ))}
               </div>
             ) : (
-              <p className="text-2xl md:text-4xl text-zinc-200 font-light leading-relaxed">
+              <p className="text-2xl md:text-4xl text-zinc-200 font-normal leading-relaxed">
                 {slide.text}
               </p>
             )}
