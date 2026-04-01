@@ -688,7 +688,7 @@ export default function BrainDeployPage() {
   }, [loading]);
 
   /* ── Send message (exact SSE logic from chat.html) ── */
-  const send = useCallback(async (message: string, opts?: { silent?: boolean }) => {
+  const send = useCallback(async (message: string, opts?: { silent?: boolean; displayMessage?: string }) => {
     if (isStreaming || !session) return;
     const silent = opts?.silent ?? false;
 
@@ -700,7 +700,7 @@ export default function BrainDeployPage() {
     }
 
     // Add user message to DOM (skip if silent — auto-probe)
-    if (!silent) addMessageToDOM("user", message);
+    if (!silent) addMessageToDOM("user", opts?.displayMessage || message);
     historyRef.current.push({ role: "user", content: message });
 
     // Add assistant message with typing dots immediately
@@ -1047,16 +1047,20 @@ export default function BrainDeployPage() {
     const userText = input.trim();
     if ((!userText && !attachedFile) || isStreaming) return;
 
-    let msg = userText;
+    // Build display message (what the user sees) and brain message (what gets sent)
+    let displayMsg = userText;
+    let brainMsg = userText;
+
     if (attachedFile) {
-      const prefix = `[Attached file: ${attachedFile.name}]\n\n${attachedFile.text}\n\n`;
-      msg = prefix + (userText || "Please analyze this document.");
+      const instruction = userText || "Please analyze this document.";
+      displayMsg = `📎 ${attachedFile.name}${userText ? "\n" + userText : ""}`;
+      brainMsg = `[Attached file: ${attachedFile.name}]\n\n${attachedFile.text}\n\n${instruction}`;
       setAttachedFile(null);
     }
 
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "48px";
-    send(msg);
+    send(brainMsg, { displayMessage: displayMsg });
   }
 
   function handleTextareaInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
