@@ -462,6 +462,9 @@ export default function BrainDeployPage() {
   const [chatStarted, setChatStarted] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [input, setInput] = useState("");
+  const [attachedFile, setAttachedFile] = useState<{ name: string; text: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const raiseIdRef = useRef<string | null>(
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search).get("raise_id")
@@ -1018,9 +1021,39 @@ export default function BrainDeployPage() {
     }
   }
 
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to upload file.");
+        return;
+      }
+      setAttachedFile({ name: data.filename, text: data.text });
+    } catch {
+      alert("Failed to upload file.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
   function sendFromInput() {
-    const msg = input.trim();
-    if (!msg || isStreaming) return;
+    const userText = input.trim();
+    if ((!userText && !attachedFile) || isStreaming) return;
+
+    let msg = userText;
+    if (attachedFile) {
+      const prefix = `[Attached file: ${attachedFile.name}]\n\n${attachedFile.text}\n\n`;
+      msg = prefix + (userText || "Please analyze this document.");
+      setAttachedFile(null);
+    }
+
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "48px";
     send(msg);
@@ -1184,22 +1217,54 @@ export default function BrainDeployPage() {
             ))}
           </div>
           <div className="input-bar">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={handleTextareaInput}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask the Brain..."
-              rows={1}
-            />
-            <button
-              ref={sendBtnRef}
-              className="send-btn"
-              onClick={sendFromInput}
-              disabled={isStreaming || !input.trim()}
-            >
-              Send
-            </button>
+            {attachedFile && (
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 12px", fontSize: "12px", color: "#2dd4bf", borderBottom: "1px solid #27272a" }}>
+                <span>📎 {attachedFile.name}</span>
+                <button onClick={() => setAttachedFile(null)} style={{ background: "none", border: "none", color: "#71717a", cursor: "pointer", fontSize: "14px" }}>✕</button>
+              </div>
+            )}
+            <div style={{ display: "flex", alignItems: "flex-end", gap: "0" }}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.docx,.txt,.md"
+                onChange={handleFileUpload}
+                style={{ display: "none" }}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading || isStreaming}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: uploading ? "#52525b" : "#71717a",
+                  cursor: uploading ? "wait" : "pointer",
+                  padding: "12px",
+                  fontSize: "18px",
+                  lineHeight: 1,
+                }}
+                title="Upload a file (PDF, DOCX, TXT)"
+              >
+                {uploading ? "⏳" : "📎"}
+              </button>
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={handleTextareaInput}
+                onKeyDown={handleKeyDown}
+                placeholder={attachedFile ? "Add a message or just hit Send..." : "Ask the Brain..."}
+                rows={1}
+                style={{ flex: 1 }}
+              />
+              <button
+                ref={sendBtnRef}
+                className="send-btn"
+                onClick={sendFromInput}
+                disabled={isStreaming || (!input.trim() && !attachedFile)}
+              >
+                Send
+              </button>
+            </div>
           </div>
         </div>
       </div>
