@@ -700,7 +700,10 @@ export default function BrainDeployPage() {
     }
 
     // Add user message to DOM (skip if silent — auto-probe)
-    if (!silent) addMessageToDOM("user", opts?.displayMessage || message);
+    const displayText = opts?.displayMessage || message;
+    if (!silent) addMessageToDOM("user", displayText);
+    // Store full message for brain context, but mark file uploads so we can
+    // display them cleanly on restore
     historyRef.current.push({ role: "user", content: message });
 
     // Add assistant message with typing dots immediately
@@ -943,9 +946,19 @@ export default function BrainDeployPage() {
             raiseIdRef.current = data.conversation.campaign_id;
           }
 
-          // Render previous messages
+          // Render previous messages — clean up file uploads for display
           for (const msg of data.conversation.messages) {
-            addMessageToDOM(msg.role, msg.content);
+            let displayContent = msg.content;
+            // If this is a user message with an uploaded file, show just the filename
+            if (msg.role === "user" && typeof msg.content === "string" && msg.content.startsWith("[Attached file:")) {
+              const fnMatch = msg.content.match(/\[Attached file: (.+?)\]/);
+              const filename = fnMatch ? fnMatch[1] : "document";
+              // Extract any user text after the file content
+              const parts = msg.content.split("\n\n");
+              const userText = parts.length > 2 ? parts[parts.length - 1] : "";
+              displayContent = `📎 ${filename}${userText ? "\n" + userText : ""}`;
+            }
+            addMessageToDOM(msg.role, displayContent);
             historyRef.current.push({ role: msg.role, content: msg.content });
           }
 
