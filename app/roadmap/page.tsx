@@ -33,6 +33,7 @@ const capabilities: { label: string; oneliner: string; status: Status; audience:
   { label: "Competitive Raise Intel", oneliner: "Who else is raising in your space right now", status: "building", audience: "founders", color: "#f87171" },
   { label: "Co-investor Sequencing", oneliner: "Who to bring in first to unlock the next investor", status: "building", audience: "founders", color: "#a78bfa" },
   { label: "Calendar Integration", oneliner: "Connect your calendar — meetings auto-captured without manual logging", status: "building", audience: "everyone", color: "#34d399" },
+  { label: "Stay in Touch Agent", oneliner: "Automatically keep investors warm between raises — updates, milestones, no effort", status: "building", audience: "founders", color: "#fbbf24" },
   // Planned
   { label: "Deal Flow Matching", oneliner: "Companies matching your thesis, surfaced before they're public", status: "planned", audience: "investors", color: "#f97316" },
   { label: "Portfolio Monitoring", oneliner: "Track portfolio company health from public signals", status: "planned", audience: "investors", color: "#fb923c" },
