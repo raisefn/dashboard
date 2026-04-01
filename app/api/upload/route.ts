@@ -18,10 +18,9 @@ export async function POST(req: Request) {
     let text = "";
 
     if (name.endsWith(".pdf")) {
-      const pdfModule = await import("pdf-parse");
-      const pdfParse = (pdfModule as any).default || pdfModule;
-      const data = await pdfParse(buffer);
-      text = data.text;
+      const { extractText } = await import("unpdf");
+      const result = await extractText(new Uint8Array(bytes));
+      text = Array.isArray(result.text) ? result.text.join("\n") : result.text;
     } else if (name.endsWith(".txt") || name.endsWith(".md")) {
       text = buffer.toString("utf-8");
     } else if (name.endsWith(".docx")) {
