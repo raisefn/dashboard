@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { Resend } from "resend";
+import { notifySlack } from "@/lib/slack";
 
 function escapeHtml(str: string): string {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -52,6 +53,12 @@ export async function GET(req: Request) {
   } catch (e) {
     console.error("Failed to send admin notification:", e);
   }
+
+  // Slack notification
+  await notifySlack(
+    "earlyAccess",
+    `New verified signup: *${data.name}* (${data.role})\n${data.email} — ${data.company}${data.message ? `\n> ${data.message}` : ""}`
+  );
 
   return new NextResponse(successPage(escapeHtml(data.name)), {
     status: 200,

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getStripe, getTierFromPrice } from "@/lib/stripe";
 import { getSupabase } from "@/lib/supabase";
 import Stripe from "stripe";
+import { notifySlack } from "@/lib/slack";
 
 export async function POST(req: Request) {
   const stripe = getStripe();
@@ -81,6 +82,11 @@ export async function POST(req: Request) {
       }
 
       console.log(`Payment completed: ${customerEmail} → ${tier}`);
+
+      await notifySlack(
+        "stripePayments",
+        `💰 Payment completed: *${customerEmail}* → ${tier}`
+      );
     } catch (err) {
       console.error("Error processing checkout webhook:", err);
     }
