@@ -368,9 +368,6 @@ export default function LandingPage() {
           <p className="mx-auto mt-6 max-w-lg text-lg text-zinc-400">
             Fundraising intelligence that gets smarter with every raise.
           </p>
-          <p className="mx-auto mt-3 text-sm text-zinc-500 tracking-wide">
-            For founders, investors, and agents.
-          </p>
           <div className="mt-16 flex justify-center animate-fade-in" style={{ animationDelay: "1s" }}>
             <svg
               className="text-zinc-600 animate-bounce"
