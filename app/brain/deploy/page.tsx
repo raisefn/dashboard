@@ -885,11 +885,49 @@ export default function BrainDeployPage() {
       headers["X-Impersonate"] = impersonating;
     }
 
-    function showWelcome(_firstName: string) {
-      // Let the brain generate the welcome message — it has all the context
-      // (profile, role, company, quality signals) to produce the right opening.
+    // Build welcome message from signup metadata — no API call, no fake conversation
+    function buildWelcomeMessage(firstName: string): string {
+      const meta = session?.user?.user_metadata || {};
+      const role = (meta.role as string) || "founder";
+      const company = meta.company as string | undefined;
+      const email = session?.user?.email || "";
+      const isPersonalEmail = /gmail|yahoo|hotmail|proton|outlook|icloud|aol/i.test(email);
+      const looksReal = company && company.length > 2
+        && !/^test|asdf|none|n\/a$/i.test(company)
+        && !email.split("@")[0].toLowerCase().includes(company.toLowerCase());
+
+      if (role === "investor") {
+        return `Hey ${firstName}! Tell me about your investment focus — what sectors and stages are you looking at?`;
+      }
+      if (role === "builder") {
+        return `Hey ${firstName}! Welcome to raise(fn). What are you working on?`;
+      }
+      // Founder path
+      if (looksReal && !isPersonalEmail) {
+        return `Hey ${firstName}! Tell me about ${company} — what does the company do and who's the customer?`;
+      }
+      if (looksReal) {
+        return `Hey ${firstName}! Tell me about ${company} — what are you building and what problem are you solving?`;
+      }
+      return `Hey ${firstName}! What are you working on — tell me about the company and what problem you're solving.`;
+    }
+
+    function showWelcome(firstName: string) {
+      setChatStarted(true);
       setSessionReady(true);
-      send("__init__", { silent: true });
+      centerUiRef.current?.classList.add("at-bottom");
+      messagesRef.current?.classList.add("active");
+
+      const welcome = buildWelcomeMessage(firstName);
+      const typingEl = addMessageToDOM("assistant", "");
+      const typingContent = typingEl.querySelector(".content") as HTMLElement;
+      if (typingContent) {
+        typingContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+        setTimeout(() => {
+          typingContent.innerHTML = formatMarkdown(welcome);
+          requestAnimationFrame(() => scrollToBottom());
+        }, 800);
+      }
     }
 
     const fallbackName = (session.user?.user_metadata?.name as string)?.split(" ")[0]
@@ -898,7 +936,7 @@ export default function BrainDeployPage() {
     fetch("/v1/brain/session", { headers })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        // Session endpoint unavailable or errored — show normal welcome
+        // Session endpoint unavailable or errored — show welcome
         if (!data) {
           showWelcome(fallbackName);
           return;
@@ -909,8 +947,20 @@ export default function BrainDeployPage() {
 
         const firstName = data.name?.split(" ")[0] || fallbackName;
 
-        // If there's an existing conversation, restore it
+        // If there's an existing conversation with REAL messages, restore it
+        // Filter out any __init__ or empty messages from old buggy sessions
         if (data.conversation && data.conversation.message_count > 0) {
+          const realMessages = (data.conversation.messages || []).filter(
+            (msg: { role: string; content: string }) =>
+              msg.content && msg.content.trim() !== "" && msg.content !== "__init__"
+          );
+
+          // If no real messages after filtering, treat as new user
+          if (realMessages.length === 0) {
+            showWelcome(firstName);
+            return;
+          }
+
           setChatStarted(true);
           setSessionReady(true);
           centerUiRef.current?.classList.add("at-bottom");
@@ -921,23 +971,12 @@ export default function BrainDeployPage() {
             raiseIdRef.current = data.conversation.campaign_id;
           }
 
-          // Render previous messages — clean up file uploads and skip __init__ for display
-          for (const msg of data.conversation.messages) {
-            // Skip __init__ system trigger messages
-            if (msg.role === "user" && msg.content === "__init__") {
-              historyRef.current.push({ role: msg.role, content: msg.content });
-              continue;
-            }
-            // Skip empty user messages (from __init__ saves)
-            if (msg.role === "user" && (!msg.content || msg.content.trim() === "")) {
-              continue;
-            }
+          // Render previous messages
+          for (const msg of realMessages) {
             let displayContent = msg.content;
-            // If this is a user message with an uploaded file, show just the filename
             if (msg.role === "user" && typeof msg.content === "string" && msg.content.startsWith("[Attached file:")) {
               const fnMatch = msg.content.match(/\[Attached file: (.+?)\]/);
               const filename = fnMatch ? fnMatch[1] : "document";
-              // Extract any user text after the file content
               const parts = msg.content.split("\n\n");
               const userText = parts.length > 2 ? parts[parts.length - 1] : "";
               displayContent = `📎 ${filename}${userText ? "\n" + userText : ""}`;
@@ -946,8 +985,8 @@ export default function BrainDeployPage() {
             historyRef.current.push({ role: msg.role, content: msg.content });
           }
 
-          // Add a welcome-back message with typing dots
-          const welcomeBack = `Welcome back, ${firstName}! I remember where we left off. What would you like to work on?`;
+          // Welcome back message
+          const welcomeBack = `Welcome back, ${firstName}! Pick up where we left off, or where should we focus today?`;
           const welcomeEl = addMessageToDOM("assistant", "");
           const welcomeContent = welcomeEl.querySelector(".content") as HTMLElement;
           if (welcomeContent) {
