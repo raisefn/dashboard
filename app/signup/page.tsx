@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { supabase } from "@/lib/supabase-browser";
 import Link from "next/link";
 
 type Role = "founder" | "investor" | "builder";
@@ -28,30 +29,40 @@ export default function SignupPage() {
     setStatus("sending");
     setErrorMsg("");
 
-    try {
-      const res = await fetch("/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-          password,
+    // Create account via Supabase client (proper password flow)
+    const { error } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password,
+      options: {
+        data: {
           name: name.trim(),
           company: company.trim(),
           role,
           raising_status: raisingStatus,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setStatus("error");
-        setErrorMsg(data.error || "Something went wrong.");
-        return;
-      }
-      setStatus("sent");
-    } catch {
+        },
+      },
+    });
+
+    if (error) {
       setStatus("error");
-      setErrorMsg("Network error. Please try again.");
+      setErrorMsg(error.message);
+      return;
     }
+
+    // Send Slack notification (fire and forget — don't block signup)
+    fetch("/api/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        company: company.trim(),
+        role,
+        raising_status: raisingStatus,
+      }),
+    }).catch(() => {});
+
+    setStatus("sent");
   }
 
   const inputClass =
