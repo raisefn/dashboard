@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import EarlyAccessModal from "@/components/early-access-modal";
+
 import TrackerSearch from "@/components/tracker-search";
 
 const topLinks = [
@@ -32,7 +32,6 @@ export default function Nav() {
   const pathname = usePathname();
   const isTracker = pathname.startsWith("/tracker");
   const isBrain = pathname.startsWith("/brain");
-  const [showEarlyAccess, setShowEarlyAccess] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const subLinks = isTracker ? trackerLinks : isBrain ? brainLinks : null;
@@ -69,14 +68,14 @@ export default function Nav() {
             })}
           </div>
 
-          {/* Right side: Early Access + hamburger */}
+          {/* Right side: Get Started + hamburger */}
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowEarlyAccess(true)}
+            <Link
+              href="/signup"
               className="rounded-full bg-orange-600 px-5 py-1.5 text-xs font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
             >
-              Early Access
-            </button>
+              Get Started
+            </Link>
 
             {/* Mobile hamburger */}
             <button
@@ -145,7 +144,6 @@ export default function Nav() {
         </nav>
       )}
     </header>
-    <EarlyAccessModal open={showEarlyAccess} onClose={() => setShowEarlyAccess(false)} />
     </>
   );
 }

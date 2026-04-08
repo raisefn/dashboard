@@ -697,11 +697,11 @@ export default function LandingPage() {
               Ready to raise?
             </h2>
             <p className="text-zinc-500 mb-10">
-              The Brain is in early access. Get in before it opens.
+              Get a free raise readiness assessment. No credit card required.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
-                href="/brain/entrepreneurs"
+                href="/signup"
                 className="rounded-full border border-orange-700/50 bg-orange-950/30 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/40 hover:text-orange-200"
               >
                 Start Your Raise
