@@ -921,8 +921,17 @@ export default function BrainDeployPage() {
             raiseIdRef.current = data.conversation.campaign_id;
           }
 
-          // Render previous messages — clean up file uploads for display
+          // Render previous messages — clean up file uploads and skip __init__ for display
           for (const msg of data.conversation.messages) {
+            // Skip __init__ system trigger messages
+            if (msg.role === "user" && msg.content === "__init__") {
+              historyRef.current.push({ role: msg.role, content: msg.content });
+              continue;
+            }
+            // Skip empty user messages (from __init__ saves)
+            if (msg.role === "user" && (!msg.content || msg.content.trim() === "")) {
+              continue;
+            }
             let displayContent = msg.content;
             // If this is a user message with an uploaded file, show just the filename
             if (msg.role === "user" && typeof msg.content === "string" && msg.content.startsWith("[Attached file:")) {
