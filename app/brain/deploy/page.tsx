@@ -888,6 +888,7 @@ export default function BrainDeployPage() {
     function showWelcome(_firstName: string) {
       // Let the brain generate the welcome message — it has all the context
       // (profile, role, company, quality signals) to produce the right opening.
+      setSessionReady(true);
       send("__init__", { silent: true });
     }
 
