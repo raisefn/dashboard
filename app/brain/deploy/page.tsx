@@ -885,36 +885,10 @@ export default function BrainDeployPage() {
       headers["X-Impersonate"] = impersonating;
     }
 
-    function showWelcome(firstName: string) {
-      setChatStarted(true);
-      setSessionReady(true);
-      centerUiRef.current?.classList.add("at-bottom");
-      messagesRef.current?.classList.add("active");
-
-      const role = (session?.user?.user_metadata?.role as string) || "founder";
-      const company = session?.user?.user_metadata?.company as string | undefined;
-
-      let welcome: string;
-      if (role === "founder" && company) {
-        welcome = `Hey ${firstName}! I see you're building ${company}. Tell me more — what stage are you at and how much are you looking to raise?`;
-      } else if (role === "founder") {
-        welcome = `Hey ${firstName}! Are you looking to raise? Tell me about the company and where you're at today.`;
-      } else if (role === "investor" && company) {
-        welcome = `Hey ${firstName}! Welcome to raise(fn). I'm here to help you track deals, evaluate companies, and stay on top of your pipeline. What are you working on?`;
-      } else if (role === "investor") {
-        welcome = `Hey ${firstName}! Are you currently deploying? What kinds of companies? Check size?\n\nI can help analyze deals, surface new companies, and track your deal flow. Just let me know how I can help.`;
-      } else {
-        welcome = `Hey ${firstName}! Welcome to raise(fn). What are we working on?`;
-      }
-
-      const typingEl = addMessageToDOM("assistant", "");
-      const typingContent = typingEl.querySelector(".content") as HTMLElement;
-      if (typingContent) {
-        typingContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-        setTimeout(() => {
-          typingContent.innerHTML = formatMarkdown(welcome);
-        }, 800);
-      }
+    function showWelcome(_firstName: string) {
+      // Let the brain generate the welcome message — it has all the context
+      // (profile, role, company, quality signals) to produce the right opening.
+      send("__init__", { silent: true });
     }
 
     const fallbackName = (session.user?.user_metadata?.name as string)?.split(" ")[0]
