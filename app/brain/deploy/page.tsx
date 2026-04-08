@@ -890,6 +890,7 @@ export default function BrainDeployPage() {
       const meta = session?.user?.user_metadata || {};
       const role = (meta.role as string) || "founder";
       const company = meta.company as string | undefined;
+      const raisingStatus = meta.raising_status as string | undefined;
       const email = session?.user?.email || "";
       const isPersonalEmail = /gmail|yahoo|hotmail|proton|outlook|icloud|aol/i.test(email);
       const looksReal = company && company.length > 2
@@ -897,19 +898,39 @@ export default function BrainDeployPage() {
         && !email.split("@")[0].toLowerCase().includes(company.toLowerCase());
 
       if (role === "investor") {
-        return `Hey ${firstName}! Tell me about your investment focus — what sectors and stages are you looking at?`;
+        if (raisingStatus === "deploying") {
+          return `Hey ${firstName}! Tell me about your fund — what sectors and stages are you deploying into right now?`;
+        }
+        if (raisingStatus === "planning") {
+          return `Hey ${firstName}! Tell me about your investment focus — what are you looking to deploy into?`;
+        }
+        return `Hey ${firstName}! Tell me about your investment focus — what sectors and stages interest you?`;
       }
       if (role === "builder") {
         return `Hey ${firstName}! Welcome to raise(fn). What are you working on?`;
       }
-      // Founder path
-      if (looksReal && !isPersonalEmail) {
-        return `Hey ${firstName}! Tell me about ${company} — what does the company do and who's the customer?`;
+      // Founder — actively raising
+      if (raisingStatus === "active") {
+        if (looksReal && !isPersonalEmail) {
+          return `Hey ${firstName}! Tell me about ${company} — what does the company do and who's the customer?`;
+        }
+        if (looksReal) {
+          return `Hey ${firstName}! Tell me about ${company} — what are you building and what problem are you solving?`;
+        }
+        return `Hey ${firstName}! Tell me about what you're building — what's the company and who's the customer?`;
       }
+      // Founder — planning to raise
+      if (raisingStatus === "planning") {
+        if (looksReal) {
+          return `Hey ${firstName}! Tell me about ${company} — I'll help you figure out where you stand and what to nail before you raise.`;
+        }
+        return `Hey ${firstName}! Tell me about what you're building — I'll help you figure out where you stand before you start raising.`;
+      }
+      // Founder — just exploring (or unknown)
       if (looksReal) {
-        return `Hey ${firstName}! Tell me about ${company} — what are you building and what problem are you solving?`;
+        return `Hey ${firstName}! What's ${company} about? Tell me what you're working on and I'll give you an honest read.`;
       }
-      return `Hey ${firstName}! What are you working on — tell me about the company and what problem you're solving.`;
+      return `Hey ${firstName}! What brings you to raise(fn)? Tell me a bit about what you're working on.`;
     }
 
     function showWelcome(firstName: string) {
