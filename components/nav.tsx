@@ -68,8 +68,14 @@ export default function Nav() {
             })}
           </div>
 
-          {/* Right side: Get Started + hamburger */}
+          {/* Right side: Log in + Get Started + hamburger */}
           <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
+            >
+              Log in
+            </Link>
             <Link
               href="/signup"
               className="rounded-full bg-orange-600 px-5 py-1.5 text-xs font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
