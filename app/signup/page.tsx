@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase-browser";
 import Link from "next/link";
 
 type Role = "founder" | "investor" | "builder";
@@ -29,26 +28,30 @@ export default function SignupPage() {
     setStatus("sending");
     setErrorMsg("");
 
-    const { error } = await supabase.auth.signUp({
-      email: email.trim().toLowerCase(),
-      password,
-      options: {
-        data: {
+    try {
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password,
           name: name.trim(),
           company: company.trim(),
           role,
           raising_status: raisingStatus,
-        },
-      },
-    });
-
-    if (error) {
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setStatus("error");
+        setErrorMsg(data.error || "Something went wrong.");
+        return;
+      }
+      setStatus("sent");
+    } catch {
       setStatus("error");
-      setErrorMsg(error.message);
-      return;
+      setErrorMsg("Network error. Please try again.");
     }
-
-    setStatus("sent");
   }
 
   const inputClass =
