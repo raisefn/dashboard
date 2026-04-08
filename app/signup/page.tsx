@@ -79,6 +79,12 @@ export default function SignupPage() {
               We sent a verification link to <span className="text-zinc-200">{email}</span>.
               Click it to get started.
             </p>
+            <button
+              onClick={() => { setStatus("idle"); setEmail(""); setPassword(""); setName(""); setCompany(""); setRole(""); setRaisingStatus(""); }}
+              className="mt-6 text-sm text-zinc-600 hover:text-zinc-400 transition-colors"
+            >
+              Sign up with a different email
+            </button>
           </div>
         ) : (
         <>
