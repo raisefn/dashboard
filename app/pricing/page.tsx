@@ -201,7 +201,7 @@ export default function PricingPage() {
             </div>
             <p className="text-sm text-zinc-400 mb-8 max-w-xl">
               Market intelligence and deal management built for how investors
-              actually work. Sign up to get early access.
+              actually work.
             </p>
             <div className="space-y-3 mb-8">
               {[
@@ -222,7 +222,7 @@ export default function PricingPage() {
               onClick={() => router.push("/signup")}
               className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30"
             >
-              Get early access
+              Get started
             </button>
           </div>
         </FadeInSection>
