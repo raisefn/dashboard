@@ -50,6 +50,12 @@ export async function POST(req: Request) {
         supabase_user_id: user.id,
         tier,
       },
+      subscription_data: {
+        metadata: {
+          email: user.email,
+          tier,
+        },
+      },
       success_url: `${baseUrl}/brain/deploy?checkout=success`,
       cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
     });

@@ -1,11 +1,45 @@
 "use client";
 
-import FadeInSection from "@/components/fade-in-section";
-import EarlyAccessModal from "@/components/early-access-modal";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase-browser";
+import FadeInSection from "@/components/fade-in-section";
 
 export default function PricingPage() {
-  const [showEarlyAccess, setShowEarlyAccess] = useState(false);
+  const router = useRouter();
+  const [loading, setLoading] = useState<string | null>(null);
+
+  async function handleCheckout(tier: string) {
+    setLoading(tier);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push(`/login?redirect=/pricing&tier=${tier}`);
+        return;
+      }
+
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ tier }),
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("Checkout error:", data.error);
+      }
+    } catch (err) {
+      console.error("Checkout error:", err);
+    } finally {
+      setLoading(null);
+    }
+  }
+
   return (
     <div className="relative">
       <div className="grid-bg" />
@@ -14,35 +48,31 @@ export default function PricingPage() {
       <section className="relative pt-24 pb-16 px-4">
         <div className="mx-auto max-w-3xl text-center animate-fade-in">
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            The data is free. The intelligence is not. Pick the model that
-            matches how you work.
+            Start free. Upgrade when the Brain proves its value.
           </p>
         </div>
       </section>
 
-      {/* ── Explorer (Free) ── */}
+      {/* ── Free ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">
             <div className="flex items-baseline gap-4 mb-6">
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Explorer
+                Free
               </h2>
-              <span className="text-2xl font-bold text-teal-400">Free</span>
+              <span className="text-2xl font-bold text-teal-400">$0</span>
             </div>
             <p className="text-sm text-zinc-400 mb-8 max-w-xl">
-              Full access to the tracker &mdash; companies, rounds,
-              and investors cross-referenced from SEC filings, accelerator directories, and traction signals. Browse, search, and export.
-              Plus one free Brain query to see what the intelligence can
-              do.
+              Discovery conversation and a raise readiness assessment grounded
+              in real data. See how you stack up before you spend a dollar.
             </p>
             <div className="space-y-3 mb-8">
               {[
-                "Live tracker data — projects, rounds, investors",
-                "Search and filter across the full dataset",
-                "One free investor match query",
-                "One free readiness snapshot",
-                "Open source — run it yourself if you want",
+                "Raise readiness assessment — benchmarked against real rounds",
+                "Raise intelligence briefing for active raisers — comps, market context, investor teaser",
+                "General fundraising conversation — strategy, timing, structure",
+                "Honest, data-grounded advice you can't get from ChatGPT",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
                   <span className="text-teal-400 mt-0.5 shrink-0">—</span>
@@ -51,10 +81,10 @@ export default function PricingPage() {
               ))}
             </div>
             <button
-              onClick={() => setShowEarlyAccess(true)}
+              onClick={() => router.push("/signup")}
               className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30"
             >
-              Request Early Access
+              Get started
             </button>
           </div>
         </FadeInSection>
@@ -64,128 +94,89 @@ export default function PricingPage() {
         <div className="border-t border-zinc-800/50" />
       </div>
 
-      {/* ── Founder (Per-raise) ── */}
+      {/* ── Launchpad ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">
             <div className="flex items-baseline gap-4 mb-2">
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Founder
+                Launchpad
               </h2>
-              <span className="text-2xl font-bold text-orange-400">
-                Per raise
-              </span>
-            </div>
-            <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              Brain access for the duration of your raise. Pay once, raise with
-              intelligence until you close. Pick the tier that matches your
-              needs.
-            </p>
-
-            {/* Launchpad */}
-            <div className="mb-10">
-              <div className="flex items-baseline gap-3 mb-1">
-                <span className="text-lg font-bold text-orange-300">
-                  Launchpad
-                </span>
-                <span className="text-lg font-bold text-orange-400">
-                  $2,500
-                </span>
-              </div>
-              <p className="text-xs text-zinc-500 mb-4">
-                Full Brain access for the duration of your raise
-              </p>
-              <div className="space-y-2">
-                {[
-                  "Investor matching — ranked by fit, stage, sector, and check size",
-                  "Readiness evaluation — how fundable you are right now",
-                  "Narrative analysis — what story your data tells investors",
-                  "Signal reading — what investors are actually doing, not just saying",
-                  "Outreach guidance — who to contact, how, and when",
-                  "Term sheet intelligence — comp data and negotiation context",
-                  "Meeting ingestion — paste a transcript, the Brain captures everything",
-                  "Persistent context — the Brain remembers your entire raise",
-                  "Unlimited queries for the duration of your raise",
-                  "Live data — calibrated against current market conditions",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <span className="text-orange-400 mt-0.5 shrink-0">—</span>
-                    <span className="text-sm text-zinc-300">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Catalyst */}
-            <div className="mb-10">
-              <div className="flex items-baseline gap-3 mb-1">
-                <span className="text-lg font-bold text-orange-300">
-                  Catalyst
-                </span>
-                <span className="text-lg font-bold text-orange-400">
-                  $7,500
-                </span>
-              </div>
-              <p className="text-xs text-zinc-500 mb-4">
-                Everything in Launchpad, plus
-              </p>
-              <div className="space-y-2">
-                {[
-                  "Everything in Launchpad — full Brain access, all intelligence, unlimited queries",
-                  "Edge fundraising consulting from someone who\u2019s been there",
-                  "Dramatically cheaper than a placement agent (3\u20135% of round)",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <span className="text-orange-400 mt-0.5 shrink-0">—</span>
-                    <span className="text-sm text-zinc-300">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowEarlyAccess(true)}
-              className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30"
-            >
-              Request Early Access
-            </button>
-          </div>
-        </FadeInSection>
-      </section>
-
-      <div className="mx-auto max-w-3xl px-4">
-        <div className="border-t border-zinc-800/50" />
-      </div>
-
-      {/* ── Edge (Consultants + Investors) ── */}
-      <section className="relative py-16 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl">
-            <div className="flex items-baseline gap-4 mb-2">
-              <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Edge
-              </h2>
-              <span className="text-2xl font-bold text-orange-400">
-                $1,000
-              </span>
+              <span className="text-2xl font-bold text-orange-400">$500</span>
               <span className="text-sm text-zinc-500">/month</span>
             </div>
+            <p className="text-xs text-zinc-500 mb-1">or $3,000/year (save $3K)</p>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              For fundraising consultants and investors who use the Brain as
-              a daily tool. Continuous intelligence across multiple deals,
-              persistent context, and the ability to run multiple raises or
-              evaluations simultaneously.
+              The full Brain runs your raise. Investor matching, pipeline
+              tracking, meeting ingestion, outreach strategy — all from
+              conversation. No forms, no dashboards. Cancel anytime.
             </p>
 
             <div className="space-y-2 mb-10">
               {[
-                "Full Brain access — all six intelligence capabilities",
-                "Multiple concurrent raises or deal evaluations",
-                "Live deal flow matching and investor activity monitoring",
-                "Sector trend analysis and valuation benchmarking",
-                "Term sheet intelligence with comp data",
-                "Persistent context — the Brain remembers your portfolio and thesis",
-                "Unlimited queries",
+                "Investor matching — ranked by fit from 24,000+ rounds of real data",
+                "Pipeline CRM — the Brain tracks every investor interaction automatically",
+                "Meeting ingestion — paste a transcript, the Brain captures everything",
+                "Outreach strategy — who to contact, how, and when",
+                "Signal reading — what investors are actually doing, not just saying",
+                "Term sheet intelligence — comp data and negotiation context",
+                "Narrative analysis — how your story lands with target investors",
+                "Persistent memory — the Brain remembers your entire raise across sessions",
+                "Unlimited queries for the duration of your raise",
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-3">
+                  <span className="text-orange-400 mt-0.5 shrink-0">—</span>
+                  <span className="text-sm text-zinc-300">{item}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleCheckout("launchpad")}
+                disabled={loading === "launchpad"}
+                className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30 disabled:opacity-50"
+              >
+                {loading === "launchpad" ? "Loading..." : "$500/month"}
+              </button>
+              <button
+                onClick={() => handleCheckout("launchpad_annual")}
+                disabled={loading === "launchpad_annual"}
+                className="rounded-full border border-zinc-700/50 bg-zinc-900/20 px-8 py-3 text-sm font-medium text-zinc-400 transition-all hover:border-zinc-600 hover:bg-zinc-800/30 disabled:opacity-50"
+              >
+                {loading === "launchpad_annual" ? "Loading..." : "$3,000/year"}
+              </button>
+            </div>
+          </div>
+        </FadeInSection>
+      </section>
+
+      <div className="mx-auto max-w-3xl px-4">
+        <div className="border-t border-zinc-800/50" />
+      </div>
+
+      {/* ── Catalyst ── */}
+      <section className="relative py-16 px-4">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl">
+            <div className="flex items-baseline gap-4 mb-2">
+              <h2 className="text-2xl font-bold text-white sm:text-3xl">
+                Catalyst
+              </h2>
+              <span className="text-2xl font-bold text-orange-400">$2,500</span>
+              <span className="text-sm text-zinc-500">/month</span>
+            </div>
+            <p className="text-sm text-zinc-400 mb-10 max-w-xl">
+              Everything in Launchpad, plus hands-on fundraising consulting from
+              someone who's been there. Dramatically cheaper than a placement
+              agent.
+            </p>
+
+            <div className="space-y-2 mb-10">
+              {[
+                "Everything in Launchpad — full Brain access, all tools, unlimited queries",
+                "Hands-on fundraising consulting",
+                "Dramatically cheaper than a placement agent (3–5% of round)",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
                   <span className="text-orange-400 mt-0.5 shrink-0">—</span>
@@ -195,61 +186,17 @@ export default function PricingPage() {
             </div>
 
             <button
-              onClick={() => setShowEarlyAccess(true)}
-              className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30"
+              onClick={() => handleCheckout("catalyst")}
+              disabled={loading === "catalyst"}
+              className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30 disabled:opacity-50"
             >
-              Request Early Access
+              {loading === "catalyst" ? "Loading..." : "$2,500/month"}
             </button>
           </div>
         </FadeInSection>
       </section>
 
-      <div className="mx-auto max-w-3xl px-4">
-        <div className="border-t border-zinc-800/50" />
-      </div>
-
-      {/* ── Developer (API) ── */}
-      <section className="relative py-16 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl">
-            <div className="flex items-baseline gap-4 mb-6">
-              <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Developer
-              </h2>
-              <span className="text-2xl font-bold text-violet-400">
-                API pricing
-              </span>
-            </div>
-            <p className="text-sm text-zinc-400 mb-8 max-w-xl">
-              Per-call pricing for developers embedding fundraising intelligence
-              in their products. Each endpoint has a defined cost. The marginal
-              cost is low. The volume potential is enormous.
-            </p>
-            <div className="space-y-3 mb-8">
-              {[
-                "Per-call pricing — investor match, readiness score, signal read, term analysis",
-                "x402 compatible — agents pay per call in USDC, no API key required",
-                "LangChain, CrewAI, Claude/MCP, and REST integrations",
-                "Build fundraising tools on top of raisefn intelligence",
-                "Scales non-linearly — one integration, thousands of calls",
-              ].map((item) => (
-                <div key={item} className="flex items-start gap-3">
-                  <span className="text-violet-400 mt-0.5 shrink-0">—</span>
-                  <span className="text-sm text-zinc-300">{item}</span>
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={() => setShowEarlyAccess(true)}
-              className="rounded-full border border-violet-700/50 bg-violet-950/20 px-8 py-3 text-sm font-medium text-violet-300 transition-all hover:border-violet-500 hover:bg-violet-900/30"
-            >
-              Request Early Access
-            </button>
-          </div>
-        </FadeInSection>
-      </section>
-
-      {/* ── Comparison anchor ── */}
+      {/* ── Comparison ── */}
       <section className="relative py-24 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center mb-12">
@@ -269,10 +216,7 @@ export default function PricingPage() {
                   "Months of manual research",
                   "Stale data, static reports",
                 ].map((text) => (
-                  <p
-                    key={text}
-                    className="text-sm text-zinc-500 flex items-start gap-2"
-                  >
+                  <p key={text} className="text-sm text-zinc-500 flex items-start gap-2">
                     <span className="text-zinc-600 mt-0.5">—</span>
                     {text}
                   </p>
@@ -290,10 +234,7 @@ export default function PricingPage() {
                   "Raw data, no intelligence",
                   "You do the analysis yourself",
                 ].map((text) => (
-                  <p
-                    key={text}
-                    className="text-sm text-zinc-500 flex items-start gap-2"
-                  >
+                  <p key={text} className="text-sm text-zinc-500 flex items-start gap-2">
                     <span className="text-zinc-500 mt-0.5">—</span>
                     {text}
                   </p>
@@ -306,16 +247,13 @@ export default function PricingPage() {
               </p>
               <div className="space-y-4">
                 {[
-                  "Founder raise: $2.5K–$7.5K flat",
-                  "Edge: $1K/mo",
+                  "Full Brain: $500/mo",
+                  "Brain + consulting: $2,500/mo",
                   "Live intelligence, not raw data",
                   "Answers, not spreadsheets",
                   "Gets smarter with every raise",
                 ].map((text) => (
-                  <p
-                    key={text}
-                    className="text-sm text-zinc-300 flex items-start gap-2"
-                  >
+                  <p key={text} className="text-sm text-zinc-300 flex items-start gap-2">
                     <span className="text-teal-400 mt-0.5">—</span>
                     {text}
                   </p>
@@ -331,23 +269,20 @@ export default function PricingPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
-              Start with the data. Raise with the Brain.
+              Start with the assessment. Raise with the Brain.
             </h2>
             <p className="text-zinc-500 mb-8">
-              The tracker is free and open source. The Brain is where the value
-              lives.
+              The assessment is free. The Brain is where the value lives.
             </p>
             <button
-              onClick={() => setShowEarlyAccess(true)}
+              onClick={() => router.push("/signup")}
               className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
             >
-              Request Early Access
+              Get started free
             </button>
           </div>
         </FadeInSection>
       </section>
-
-      <EarlyAccessModal open={showEarlyAccess} onClose={() => setShowEarlyAccess(false)} />
     </div>
   );
 }

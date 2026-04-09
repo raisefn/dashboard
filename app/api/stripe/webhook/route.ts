@@ -94,7 +94,19 @@ export async function POST(req: Request) {
 
   if (event.type === "customer.subscription.deleted") {
     const subscription = event.data.object as Stripe.Subscription;
-    const customerEmail = subscription.metadata?.email;
+    let customerEmail = subscription.metadata?.email;
+
+    // Fallback: look up email from Stripe customer if not in metadata
+    if (!customerEmail && subscription.customer) {
+      try {
+        const customer = await stripe.customers.retrieve(subscription.customer as string);
+        if ("email" in customer && customer.email) {
+          customerEmail = customer.email;
+        }
+      } catch (err) {
+        console.error("Could not fetch customer for cancellation:", err);
+      }
+    }
 
     if (customerEmail) {
       try {

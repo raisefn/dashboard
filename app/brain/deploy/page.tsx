@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 import type { Session } from "@supabase/supabase-js";
 
@@ -442,10 +442,12 @@ interface ChatMsg {
 
 export default function BrainDeployPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Auth
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false);
 
   // Admin
   const [isAdmin, setIsAdmin] = useState(false);
@@ -509,6 +511,17 @@ export default function BrainDeployPage() {
     });
     return () => subscription.unsubscribe();
   }, [router]);
+
+  /* ── Checkout success detection ── */
+  useEffect(() => {
+    if (searchParams.get("checkout") === "success") {
+      setCheckoutSuccess(true);
+      // Clean URL without reload
+      window.history.replaceState({}, "", "/brain/deploy");
+      // Auto-dismiss after 5 seconds
+      setTimeout(() => setCheckoutSuccess(false), 5000);
+    }
+  }, [searchParams]);
 
   /* ── Fetch admin user list ── */
   useEffect(() => {
@@ -1163,6 +1176,13 @@ export default function BrainDeployPage() {
   return (
     <div className="brain-root">
       <style>{BRAIN_CSS}</style>
+
+      {/* Checkout success banner */}
+      {checkoutSuccess && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-lg border border-teal-700/50 bg-teal-950/90 px-6 py-3 text-sm text-teal-300 shadow-lg backdrop-blur-sm">
+          You're upgraded! All tools are now unlocked.
+        </div>
+      )}
 
       {/* Header */}
       <header>

@@ -15,8 +15,8 @@ export function getStripe(): Stripe {
 export function getPriceMap(): Record<string, string | undefined> {
   return {
     launchpad: process.env.STRIPE_LAUNCHPAD_PRICE_ID,
+    launchpad_annual: process.env.STRIPE_LAUNCHPAD_ANNUAL_PRICE_ID,
     catalyst: process.env.STRIPE_CATALYST_PRICE_ID,
-    edge: process.env.STRIPE_EDGE_PRICE_ID,
   };
 }
 
