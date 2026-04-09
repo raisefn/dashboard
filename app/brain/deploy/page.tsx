@@ -1153,8 +1153,12 @@ function BrainDeployInner() {
             historyRef.current.push({ role: msg.role, content: msg.content });
           }
 
-          // Welcome back message
-          const welcomeBack = `Welcome back, ${firstName}! Pick up where we left off, or where should we focus today?`;
+          // Welcome back message — upgrade celebration or normal return
+          const isCheckoutSuccess = new URLSearchParams(window.location.search).get("checkout") === "success";
+          const welcomeBack = isCheckoutSuccess
+            ? `${firstName}, hell yeah, let's do this. All tools unlocked. How can I help?`
+            : `Welcome back, ${firstName}! Pick up where we left off, or where should we focus today?`;
+          if (isCheckoutSuccess) window.history.replaceState({}, "", "/brain/deploy");
           const welcomeEl = addMessageToDOM("assistant", "");
           const welcomeContent = welcomeEl.querySelector(".content") as HTMLElement;
           if (welcomeContent) {
