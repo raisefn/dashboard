@@ -262,46 +262,29 @@ export default function PricingPage() {
         </FadeInSection>
       </section>
 
-      {/* ── Comparison ── */}
+      {/* ── The Difference ── */}
       <section className="relative py-24 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center mb-12">
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              For context
+              The Difference
             </h2>
           </div>
-          <div className="mx-auto max-w-3xl grid grid-cols-1 sm:grid-cols-3 gap-8">
+          <div className="mx-auto max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-12">
             <div>
               <p className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-6">
-                Traditional
+                Raising capital today
               </p>
               <div className="space-y-4">
                 {[
-                  "Placement agent: 3–5% of round",
-                  "Fundraising advisor: $500–$1K/hr",
-                  "Months of manual research",
-                  "Stale data, static reports",
+                  "Investor conversations tracked in spreadsheets, CRMs, or your head",
+                  "Weeks of research to find who's actually writing checks",
+                  "No way to know if an investor is serious or stringing you along",
+                  "Every founder starts from scratch — no one shares what worked",
+                  "The best intel lives in private networks you're not in",
                 ].map((text) => (
                   <p key={text} className="text-sm text-zinc-500 flex items-start gap-2">
                     <span className="text-zinc-600 mt-0.5">—</span>
-                    {text}
-                  </p>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-6">
-                Data platforms
-              </p>
-              <div className="space-y-4">
-                {[
-                  "Crunchbase Pro: $49–$99/mo",
-                  "PitchBook: $20K–$50K/yr",
-                  "Raw data, no intelligence",
-                  "You do the analysis yourself",
-                ].map((text) => (
-                  <p key={text} className="text-sm text-zinc-500 flex items-start gap-2">
-                    <span className="text-zinc-500 mt-0.5">—</span>
                     {text}
                   </p>
                 ))}
@@ -313,11 +296,11 @@ export default function PricingPage() {
               </p>
               <div className="space-y-4">
                 {[
-                  "Full Brain: $500/mo",
-                  "Brain + consulting: $2,500/mo",
                   "Live intelligence, not raw data",
                   "Answers, not spreadsheets",
                   "Gets smarter with every raise",
+                  "Remembers everything — you don't have to",
+                  "The intel founders never share, available to everyone",
                 ].map((text) => (
                   <p key={text} className="text-sm text-zinc-300 flex items-start gap-2">
                     <span className="text-teal-400 mt-0.5">—</span>
