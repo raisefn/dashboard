@@ -14,7 +14,7 @@ export default function PricingPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        router.push(`/login?redirect=/pricing&tier=${tier}`);
+        router.push("/signup");
         return;
       }
 

@@ -422,6 +422,23 @@ const BRAIN_CSS = `
     .send-btn { padding: 0 14px; font-size: 12px; }
     .code-block { font-size: 11px; padding: 8px 10px; }
   }
+
+  .upgrade-cta { margin-top: 12px; }
+  .upgrade-btn {
+    background: linear-gradient(135deg, rgba(234, 88, 12, 0.15), rgba(234, 88, 12, 0.05));
+    border: 1px solid rgba(234, 88, 12, 0.4);
+    color: #fb923c;
+    padding: 10px 24px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .upgrade-btn:hover {
+    border-color: rgba(234, 88, 12, 0.7);
+    background: linear-gradient(135deg, rgba(234, 88, 12, 0.25), rgba(234, 88, 12, 0.1));
+  }
 `;
 
 /* ── Particle type ── */
@@ -519,6 +536,28 @@ function BrainDeployInner() {
     });
     return () => subscription.unsubscribe();
   }, [router]);
+
+  /* ── Expose checkout for upgrade buttons ── */
+  useEffect(() => {
+    (window as unknown as Record<string, unknown>).__raisefnCheckout = async (tier: string) => {
+      if (!session) return;
+      try {
+        const res = await fetch("/api/stripe/checkout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ tier }),
+        });
+        const data = await res.json();
+        if (data.url) window.location.href = data.url;
+      } catch (err) {
+        console.error("Checkout error:", err);
+      }
+    };
+    return () => { delete (window as unknown as Record<string, unknown>).__raisefnCheckout; };
+  }, [session]);
 
   /* ── Checkout success detection ── */
   useEffect(() => {
@@ -805,6 +844,12 @@ function BrainDeployInner() {
               scrollToBottom();
             } else if (event.type === "error") {
               contentEl.innerHTML = `<div class="error-msg">${event.content}</div>`;
+            } else if (event.type === "upgrade") {
+              // Brain hit a tool gate — show checkout button after response renders
+              const upgradeBtn = document.createElement("div");
+              upgradeBtn.className = "upgrade-cta";
+              upgradeBtn.innerHTML = `<button onclick="window.__raisefnCheckout && window.__raisefnCheckout('${event.tier || "launchpad"}')" class="upgrade-btn">Upgrade to Launchpad — $500/month</button>`;
+              contentEl.parentElement?.appendChild(upgradeBtn);
             } else if (event.type === "done") {
               if (event.raise_id) raiseIdRef.current = event.raise_id;
               if (event.conversation_id) conversationIdRef.current = event.conversation_id;
