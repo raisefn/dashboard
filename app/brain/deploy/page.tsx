@@ -91,8 +91,8 @@ const BRAIN_CSS = `
   .brain-logo .raise { color: #f97316; }
   .brain-logo .fn { color: #2dd4bf; }
   .nav-right { display: flex; align-items: center; gap: 12px; }
-  .nav-link { font-size: 12px; color: #52525b; text-decoration: none; transition: color 0.2s; }
-  .nav-link:hover { color: #a1a1aa; }
+  .nav-link, .nav-link-btn { font-size: 12px; color: #52525b; text-decoration: none; transition: color 0.2s; background: none; border: none; cursor: pointer; font-family: inherit; }
+  .nav-link:hover, .nav-link-btn:hover { color: #a1a1aa; }
   .nav-right .user-name { font-size: 13px; color: #a1a1aa; }
   .nav-right .sign-out {
     font-size: 12px; color: #52525b; cursor: pointer;
@@ -573,6 +573,7 @@ function BrainDeployInner() {
   // Session restore
   const hasAutoProbed = useRef(false);
   const [profileName, setProfileName] = useState<string | null>(null);
+  const [userTier, setUserTier] = useState<string>("free");
   const [sessionReady, setSessionReady] = useState(false);
 
   /* ── Auth ── */
@@ -594,6 +595,11 @@ function BrainDeployInner() {
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__raisefnCheckout = async (tier: string) => {
       if (!session) return;
+      // Save last user message for auto-retry after upgrade
+      const lastUserMsg = historyRef.current.filter(m => m.role === "user").pop();
+      if (lastUserMsg) {
+        try { sessionStorage.setItem("raisefn_retry_msg", lastUserMsg.content); } catch {}
+      }
       try {
         const res = await fetch("/api/stripe/checkout", {
           method: "POST",
@@ -1112,8 +1118,9 @@ function BrainDeployInner() {
           return;
         }
 
-        // Store profile name
+        // Store profile name and tier
         if (data.name) setProfileName(data.name);
+        if (data.tier) setUserTier(data.tier);
 
         const firstName = data.name?.split(" ")[0] || fallbackName;
 
@@ -1169,6 +1176,17 @@ function BrainDeployInner() {
             setTimeout(() => {
               welcomeContent.innerHTML = formatMarkdown(welcomeBack);
               requestAnimationFrame(() => scrollToBottom());
+
+              // Auto-retry the message that was blocked before upgrade
+              if (isCheckoutSuccess) {
+                try {
+                  const retryMsg = sessionStorage.getItem("raisefn_retry_msg");
+                  if (retryMsg) {
+                    sessionStorage.removeItem("raisefn_retry_msg");
+                    setTimeout(() => send(retryMsg), 1200);
+                  }
+                } catch {}
+              }
             }, 800);
           }
           return;
@@ -1293,6 +1311,23 @@ function BrainDeployInner() {
     messagesRef.current?.classList.remove("active");
   }
 
+  async function handleManagePlan() {
+    if (!session) return;
+    try {
+      const res = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch (err) {
+      console.error("Portal error:", err);
+    }
+  }
+
   async function handleSignOut() {
     await supabase.auth.signOut();
     router.replace("/login");
@@ -1332,7 +1367,11 @@ function BrainDeployInner() {
             <span className="fn">(fn)</span>
           </a>
           <div className="nav-right">
-            <a href="/pricing" className="nav-link">Pricing</a>
+            {userTier !== "free" ? (
+              <button className="nav-link-btn" onClick={handleManagePlan}>Manage plan</button>
+            ) : (
+              <a href="/pricing" className="nav-link">Pricing</a>
+            )}
             <span className="user-name">{displayName}</span>
             <div className="key-dot" />
             <button className="sign-out" onClick={handleSignOut}>Sign out</button>

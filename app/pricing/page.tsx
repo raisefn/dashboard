@@ -196,6 +196,76 @@ export default function PricingPage() {
         </FadeInSection>
       </section>
 
+      <div className="mx-auto max-w-3xl px-4">
+        <div className="border-t border-zinc-800/50" />
+      </div>
+
+      {/* ── Investors ── */}
+      <section className="relative py-16 px-4">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl">
+            <div className="flex items-baseline gap-4 mb-6">
+              <h2 className="text-2xl font-bold text-white sm:text-3xl">
+                Investors
+              </h2>
+              <span className="text-2xl font-bold text-teal-400">Coming soon</span>
+            </div>
+            <p className="text-sm text-zinc-400 mb-8 max-w-xl">
+              We're building for founders first, but the investor experience is
+              next. Sign up and tell the Brain about your thesis, sectors, and
+              check size — you'll shape what we build and be first in line.
+            </p>
+            <div className="space-y-3 mb-8">
+              {[
+                "Tell the Brain your investment thesis — we'll capture everything",
+                "Deal flow matching, portfolio monitoring, and market intel are coming",
+                "Your profile helps founders find the right investors faster",
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-3">
+                  <span className="text-teal-400 mt-0.5 shrink-0">—</span>
+                  <span className="text-sm text-zinc-300">{item}</span>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => router.push("/signup")}
+              className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30"
+            >
+              Sign up as an investor
+            </button>
+          </div>
+        </FadeInSection>
+      </section>
+
+      <div className="mx-auto max-w-3xl px-4">
+        <div className="border-t border-zinc-800/50" />
+      </div>
+
+      {/* ── Builders ── */}
+      <section className="relative py-16 px-4">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl">
+            <div className="flex items-baseline gap-4 mb-6">
+              <h2 className="text-2xl font-bold text-white sm:text-3xl">
+                Builders
+              </h2>
+              <span className="text-2xl font-bold text-teal-400">Coming soon</span>
+            </div>
+            <p className="text-sm text-zinc-400 mb-8 max-w-xl">
+              SDKs, APIs, and integrations for developers embedding fundraising
+              intelligence in their products. We're building for founders first —
+              sign up and we'll reach out when the builder tools are ready.
+            </p>
+            <button
+              onClick={() => router.push("/signup")}
+              className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30"
+            >
+              Join the waitlist
+            </button>
+          </div>
+        </FadeInSection>
+      </section>
+
       {/* ── Comparison ── */}
       <section className="relative py-24 px-4">
         <FadeInSection>
