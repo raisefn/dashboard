@@ -91,6 +91,8 @@ const BRAIN_CSS = `
   .brain-logo .raise { color: #f97316; }
   .brain-logo .fn { color: #2dd4bf; }
   .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-link { font-size: 12px; color: #52525b; text-decoration: none; transition: color 0.2s; }
+  .nav-link:hover { color: #a1a1aa; }
   .nav-right .user-name { font-size: 13px; color: #a1a1aa; }
   .nav-right .sign-out {
     font-size: 12px; color: #52525b; cursor: pointer;
@@ -1325,11 +1327,12 @@ function BrainDeployInner() {
       {/* Header */}
       <header>
         <nav>
-          <div className="brain-logo">
+          <a href="/" className="brain-logo" style={{ textDecoration: "none" }}>
             <span className="raise">raise</span>
             <span className="fn">(fn)</span>
-          </div>
+          </a>
           <div className="nav-right">
+            <a href="/pricing" className="nav-link">Pricing</a>
             <span className="user-name">{displayName}</span>
             <div className="key-dot" />
             <button className="sign-out" onClick={handleSignOut}>Sign out</button>
