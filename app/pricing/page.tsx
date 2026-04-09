@@ -43,14 +43,6 @@ export default function PricingPage() {
       <div className="grid-bg" />
 
       {/* ── Hero ── */}
-      <section className="relative pt-24 pb-16 px-4">
-        <div className="mx-auto max-w-3xl text-center animate-fade-in">
-          <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            Start free. Upgrade when the Brain proves its value.
-          </p>
-        </div>
-      </section>
-
       {/* ── Free ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
