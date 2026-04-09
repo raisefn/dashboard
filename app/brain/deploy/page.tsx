@@ -423,14 +423,15 @@ const BRAIN_CSS = `
     .code-block { font-size: 11px; padding: 8px 10px; }
   }
 
-  .upgrade-cta { margin-top: 12px; }
+  .upgrade-cta { margin-top: 16px; }
+  .upgrade-options { display: flex; gap: 8px; flex-wrap: wrap; }
   .upgrade-btn {
     background: linear-gradient(135deg, rgba(234, 88, 12, 0.15), rgba(234, 88, 12, 0.05));
     border: 1px solid rgba(234, 88, 12, 0.4);
     color: #fb923c;
-    padding: 10px 24px;
+    padding: 10px 20px;
     border-radius: 999px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -438,6 +439,21 @@ const BRAIN_CSS = `
   .upgrade-btn:hover {
     border-color: rgba(234, 88, 12, 0.7);
     background: linear-gradient(135deg, rgba(234, 88, 12, 0.25), rgba(234, 88, 12, 0.1));
+  }
+  .upgrade-btn-alt {
+    background: rgba(39, 39, 42, 0.5);
+    border-color: rgba(63, 63, 70, 0.5);
+    color: #a1a1aa;
+  }
+  .upgrade-btn-alt:hover {
+    border-color: rgba(113, 113, 122, 0.7);
+    background: rgba(39, 39, 42, 0.8);
+    color: #d4d4d8;
+  }
+  .upgrade-hint {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #71717a;
   }
 `;
 
@@ -845,11 +861,18 @@ function BrainDeployInner() {
             } else if (event.type === "error") {
               contentEl.innerHTML = `<div class="error-msg">${event.content}</div>`;
             } else if (event.type === "upgrade") {
-              // Brain hit a tool gate — show checkout button after response renders
-              const upgradeBtn = document.createElement("div");
-              upgradeBtn.className = "upgrade-cta";
-              upgradeBtn.innerHTML = `<button onclick="window.__raisefnCheckout && window.__raisefnCheckout('${event.tier || "launchpad"}')" class="upgrade-btn">Upgrade to Launchpad — $500/month</button>`;
-              contentEl.parentElement?.appendChild(upgradeBtn);
+              // Brain hit a tool gate — show all checkout options
+              const upgradeDiv = document.createElement("div");
+              upgradeDiv.className = "upgrade-cta";
+              upgradeDiv.innerHTML = `
+                <div class="upgrade-options">
+                  <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad')" class="upgrade-btn">Launchpad — $500/mo</button>
+                  <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad_annual')" class="upgrade-btn upgrade-btn-alt">Launchpad — $3,000/yr</button>
+                  <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('catalyst')" class="upgrade-btn upgrade-btn-alt">Catalyst — $2,500/mo</button>
+                </div>
+                <div class="upgrade-hint">Catalyst includes hands-on fundraising consulting</div>
+              `;
+              contentEl.parentElement?.appendChild(upgradeDiv);
             } else if (event.type === "done") {
               if (event.raise_id) raiseIdRef.current = event.raise_id;
               if (event.conversation_id) conversationIdRef.current = event.conversation_id;
