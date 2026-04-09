@@ -423,8 +423,43 @@ const BRAIN_CSS = `
     .code-block { font-size: 11px; padding: 8px 10px; }
   }
 
-  .upgrade-cta { margin-top: 16px; }
-  .upgrade-options { display: flex; gap: 8px; flex-wrap: wrap; }
+  .upgrade-card {
+    margin-top: 20px;
+    border: 1px solid rgba(234, 88, 12, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(234, 88, 12, 0.04), rgba(0, 0, 0, 0.2));
+  }
+  .upgrade-card-header {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fb923c;
+    margin-bottom: 16px;
+  }
+  .upgrade-capabilities { margin-bottom: 20px; }
+  .upgrade-cap-section { margin-bottom: 12px; }
+  .upgrade-cap-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #a1a1aa;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .upgrade-cap-item {
+    font-size: 13px;
+    color: #d4d4d8;
+    padding: 3px 0;
+    padding-left: 12px;
+    position: relative;
+  }
+  .upgrade-cap-item::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: rgba(234, 88, 12, 0.5);
+  }
+  .upgrade-options { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
   .upgrade-btn {
     background: linear-gradient(135deg, rgba(234, 88, 12, 0.15), rgba(234, 88, 12, 0.05));
     border: 1px solid rgba(234, 88, 12, 0.4);
@@ -451,7 +486,7 @@ const BRAIN_CSS = `
     color: #d4d4d8;
   }
   .upgrade-hint {
-    margin-top: 6px;
+    margin-top: 8px;
     font-size: 11px;
     color: #71717a;
   }
@@ -861,16 +896,39 @@ function BrainDeployInner() {
             } else if (event.type === "error") {
               contentEl.innerHTML = `<div class="error-msg">${event.content}</div>`;
             } else if (event.type === "upgrade") {
-              // Brain hit a tool gate — show all checkout options
+              // Brain hit a tool gate — show upgrade card with capabilities
               const upgradeDiv = document.createElement("div");
-              upgradeDiv.className = "upgrade-cta";
+              upgradeDiv.className = "upgrade-card";
               upgradeDiv.innerHTML = `
+                <div class="upgrade-card-header">What the Brain does during your raise</div>
+                <div class="upgrade-capabilities">
+                  <div class="upgrade-cap-section">
+                    <div class="upgrade-cap-label">Intelligence</div>
+                    <div class="upgrade-cap-item">Match investors — who's actually funding your stage and sector right now</div>
+                    <div class="upgrade-cap-item">Plan outreach — tailored approach for each investor based on their portfolio</div>
+                    <div class="upgrade-cap-item">Analyze terms — benchmark any term sheet against real comparable deals</div>
+                    <div class="upgrade-cap-item">Analyze narrative — how your pitch positions against the competition</div>
+                    <div class="upgrade-cap-item">Read signals — is that investor interested or being polite?</div>
+                    <div class="upgrade-cap-item">Analyze deck — specific feedback, not generic tips</div>
+                  </div>
+                  <div class="upgrade-cap-section">
+                    <div class="upgrade-cap-label">Pipeline CRM — no forms, just talk</div>
+                    <div class="upgrade-cap-item">Track every investor conversation automatically</div>
+                    <div class="upgrade-cap-item">Paste a meeting transcript — the Brain captures everything</div>
+                    <div class="upgrade-cap-item">"Who passed and why?" "Who should I follow up with?" — instant answers</div>
+                    <div class="upgrade-cap-item">Every interaction makes the next one smarter</div>
+                  </div>
+                  <div class="upgrade-cap-section">
+                    <div class="upgrade-cap-label">Memory</div>
+                    <div class="upgrade-cap-item">The Brain remembers your entire raise across sessions — every detail, every conversation</div>
+                  </div>
+                </div>
                 <div class="upgrade-options">
                   <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad')" class="upgrade-btn">Launchpad — $500/mo</button>
                   <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad_annual')" class="upgrade-btn upgrade-btn-alt">Launchpad — $3,000/yr</button>
                   <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('catalyst')" class="upgrade-btn upgrade-btn-alt">Catalyst — $2,500/mo</button>
                 </div>
-                <div class="upgrade-hint">Catalyst includes hands-on fundraising consulting</div>
+                <div class="upgrade-hint">Catalyst includes everything above + hands-on fundraising consulting</div>
               `;
               contentEl.parentElement?.appendChild(upgradeDiv);
             } else if (event.type === "done") {
