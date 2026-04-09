@@ -56,9 +56,11 @@ export async function POST(req: Request) {
       const customerEmail = session.customer_details?.email || session.customer_email;
 
       if (customerEmail) {
+        const emailLower = customerEmail.toLowerCase();
+
         // Insert payment record
         await supabase.from("payments").insert({
-          email: customerEmail.toLowerCase(),
+          email: emailLower,
           stripe_session_id: session.id,
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: session.subscription as string,
@@ -67,17 +69,59 @@ export async function POST(req: Request) {
           currency: session.currency,
           status: "active",
         });
+
+        // Check if Supabase user exists — if not, create one
+        const { data: existingUsers } = await supabase.auth.admin.listUsers();
+        const userExists = existingUsers?.users?.some(
+          (u) => u.email?.toLowerCase() === emailLower
+        );
+
+        if (!userExists) {
+          // Create Supabase account — user will set password via email
+          const { error: createError } = await supabase.auth.admin.createUser({
+            email: emailLower,
+            email_confirm: true,
+            user_metadata: {
+              name: session.customer_details?.name || emailLower.split("@")[0],
+              role: "founder",
+              raising_status: "active",
+              paid_signup: true,
+            },
+          });
+
+          if (createError) {
+            console.error("Failed to create Supabase user:", createError);
+          } else {
+            console.log(`Created Supabase user for paid signup: ${emailLower}`);
+
+            // Send password setup email
+            await supabase.auth.admin.generateLink({
+              type: "recovery",
+              email: emailLower,
+              options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://raisefn.com"}/auth/confirm` },
+            });
+          }
+        }
       }
 
-      // Update the api_keys table in Railway Postgres
+      // Update or create api_key in Railway Postgres
       const dbUrl = process.env.DATABASE_URL;
-      if (dbUrl) {
+      if (dbUrl && customerEmail) {
         const { Pool } = await import("pg");
         const pool = new Pool({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
-        await pool.query(
+
+        // Try update first
+        const updateResult = await pool.query(
           "UPDATE api_keys SET tier = $1, stripe_customer_id = $2 WHERE email = $3",
-          [tier, session.customer as string, customerEmail?.toLowerCase()]
+          [tier, session.customer as string, customerEmail.toLowerCase()]
         );
+
+        // If no row updated, user signed up via Stripe without going through brain first
+        // The api_key will be auto-created on their first brain request via JWT auth
+        if (updateResult.rowCount === 0) {
+          console.log(`No api_key found for ${customerEmail} — will be created on first login`);
+        }
+
         await pool.end();
       }
 

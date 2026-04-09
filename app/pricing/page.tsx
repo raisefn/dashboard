@@ -12,18 +12,16 @@ export default function PricingPage() {
   async function handleCheckout(tier: string) {
     setLoading(tier);
     try {
+      // Build headers — include auth if logged in, works without it too
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push("/signup");
-        return;
+      if (session) {
+        headers.Authorization = `Bearer ${session.access_token}`;
       }
 
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers,
         body: JSON.stringify({ tier }),
       });
 
