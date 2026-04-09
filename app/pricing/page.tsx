@@ -12,16 +12,21 @@ export default function PricingPage() {
   async function handleCheckout(tier: string) {
     setLoading(tier);
     try {
-      // Build headers — include auth if logged in, works without it too
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        headers.Authorization = `Bearer ${session.access_token}`;
+
+      if (!session) {
+        // Not logged in — send to signup, store plan for after
+        try { localStorage.setItem("raisefn_checkout_plan", tier); } catch {}
+        router.push("/signup");
+        return;
       }
 
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({ tier }),
       });
 

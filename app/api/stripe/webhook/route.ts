@@ -70,59 +70,17 @@ export async function POST(req: Request) {
           status: "active",
         });
 
-        // Check if Supabase user exists — if not, create one
-        const { data: existingUsers } = await supabase.auth.admin.listUsers();
-        const userExists = existingUsers?.users?.some(
-          (u) => u.email?.toLowerCase() === emailLower
-        );
-
-        if (!userExists) {
-          // Create Supabase account — user will set password via email
-          const { error: createError } = await supabase.auth.admin.createUser({
-            email: emailLower,
-            email_confirm: true,
-            user_metadata: {
-              name: session.customer_details?.name || emailLower.split("@")[0],
-              role: "founder",
-              raising_status: "active",
-              paid_signup: true,
-            },
-          });
-
-          if (createError) {
-            console.error("Failed to create Supabase user:", createError);
-          } else {
-            console.log(`Created Supabase user for paid signup: ${emailLower}`);
-
-            // Send password setup email
-            await supabase.auth.admin.generateLink({
-              type: "recovery",
-              email: emailLower,
-              options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://raisefn.com"}/auth/confirm` },
-            });
-          }
+        // Update api_key tier in Railway Postgres
+        const dbUrl = process.env.DATABASE_URL;
+        if (dbUrl) {
+          const { Pool } = await import("pg");
+          const pool = new Pool({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
+          await pool.query(
+            "UPDATE api_keys SET tier = $1, stripe_customer_id = $2 WHERE email = $3",
+            [tier, session.customer as string, emailLower]
+          );
+          await pool.end();
         }
-      }
-
-      // Update or create api_key in Railway Postgres
-      const dbUrl = process.env.DATABASE_URL;
-      if (dbUrl && customerEmail) {
-        const { Pool } = await import("pg");
-        const pool = new Pool({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
-
-        // Try update first
-        const updateResult = await pool.query(
-          "UPDATE api_keys SET tier = $1, stripe_customer_id = $2 WHERE email = $3",
-          [tier, session.customer as string, customerEmail.toLowerCase()]
-        );
-
-        // If no row updated, user signed up via Stripe without going through brain first
-        // The api_key will be auto-created on their first brain request via JWT auth
-        if (updateResult.rowCount === 0) {
-          console.log(`No api_key found for ${customerEmail} — will be created on first login`);
-        }
-
-        await pool.end();
       }
 
       console.log(`Payment completed: ${customerEmail} → ${tier}`);

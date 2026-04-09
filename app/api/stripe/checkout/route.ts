@@ -15,41 +15,45 @@ export async function POST(req: Request) {
       );
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://raisefn.com";
-
-    // Try to get user email from JWT if authenticated (optional)
-    let userEmail: string | undefined;
-    let userId: string | undefined;
+    // Auth required — user must have an account
     const authHeader = req.headers.get("authorization");
-
-    if (authHeader?.startsWith("Bearer ")) {
-      try {
-        const supabase = createClient(
-          process.env.SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
-        const { data: { user } } = await supabase.auth.getUser(
-          authHeader.replace("Bearer ", "")
-        );
-        if (user?.email) {
-          userEmail = user.email;
-          userId = user.id;
-        }
-      } catch {}
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json(
+        { error: "Not authenticated." },
+        { status: 401 }
+      );
     }
+
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace("Bearer ", "")
+    );
+
+    if (authError || !user?.email) {
+      return NextResponse.json(
+        { error: "Invalid session." },
+        { status: 401 }
+      );
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://raisefn.com";
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
-      ...(userEmail ? { customer_email: userEmail } : {}),
+      customer_email: user.email,
       metadata: {
+        supabase_user_id: user.id,
         tier,
-        ...(userId ? { supabase_user_id: userId } : {}),
       },
       subscription_data: {
         metadata: {
+          email: user.email,
           tier,
-          ...(userEmail ? { email: userEmail } : {}),
         },
       },
       success_url: `${baseUrl}/brain/deploy?checkout=success`,

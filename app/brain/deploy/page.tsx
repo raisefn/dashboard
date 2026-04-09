@@ -629,6 +629,31 @@ function BrainDeployInner() {
     }
   }, [searchParams]);
 
+  /* ── Auto-checkout if user came from pricing page ── */
+  useEffect(() => {
+    if (!session || loading) return;
+    try {
+      const pendingPlan = localStorage.getItem("raisefn_checkout_plan");
+      if (!pendingPlan) return;
+      localStorage.removeItem("raisefn_checkout_plan");
+
+      // Trigger checkout immediately
+      fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ tier: pendingPlan }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.url) window.location.href = data.url;
+        })
+        .catch((err) => console.error("Auto-checkout error:", err));
+    } catch {}
+  }, [session, loading]);
+
   /* ── Fetch admin user list ── */
   useEffect(() => {
     if (!isAdmin || !session) return;
