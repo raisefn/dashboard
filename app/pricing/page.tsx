@@ -208,18 +208,19 @@ export default function PricingPage() {
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
                 Investors
               </h2>
-              <span className="text-2xl font-bold text-teal-400">Coming soon</span>
             </div>
             <p className="text-sm text-zinc-400 mb-8 max-w-xl">
-              We're building for founders first, but the investor experience is
-              next. Sign up and tell the Brain about your thesis, sectors, and
-              check size — you'll shape what we build and be first in line.
+              Market intelligence and deal management built for how investors
+              actually work. Sign up to get early access.
             </p>
             <div className="space-y-3 mb-8">
               {[
-                "Tell the Brain your investment thesis — we'll capture everything",
-                "Deal flow matching, portfolio monitoring, and market intel are coming",
-                "Your profile helps founders find the right investors faster",
+                "Deal flow matching — active raises matched to your thesis, sectors, and check size",
+                "Market intelligence — sector trends, valuation benchmarking, and funding activity from 24,000+ rounds",
+                "Deal pipeline CRM — track every company you're evaluating, from conversation",
+                "Portfolio monitoring — stay on top of your existing companies",
+                "Term sheet benchmarking — comp data for evaluating deals",
+                "Valuation comps — where any deal sits relative to the market",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
                   <span className="text-teal-400 mt-0.5 shrink-0">—</span>
@@ -231,7 +232,7 @@ export default function PricingPage() {
               onClick={() => router.push("/signup")}
               className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30"
             >
-              Sign up as an investor
+              Get early access
             </button>
           </div>
         </FadeInSection>
