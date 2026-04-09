@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { Suspense, useEffect, useRef, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 import type { Session } from "@supabase/supabase-js";
@@ -441,6 +441,14 @@ interface ChatMsg {
 }
 
 export default function BrainDeployPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><p className="text-zinc-400 text-sm">Loading...</p></div>}>
+      <BrainDeployInner />
+    </Suspense>
+  );
+}
+
+function BrainDeployInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
