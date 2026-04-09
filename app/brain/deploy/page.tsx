@@ -1224,7 +1224,7 @@ function BrainDeployInner() {
         const isNewPaidUser = new URLSearchParams(window.location.search).get("checkout") === "success";
         if (isNewPaidUser) {
           window.history.replaceState({}, "", "/brain/deploy");
-          showWelcomeWithMessage(firstName, `${firstName}, hell yeah, let's do this. Tell me about your company and what you're raising — let's get to work.`);
+          showWelcomeWithMessage(firstName, `${firstName}, hell yeah. Let's get to work! What are you building? How much are we raising? Anything else that'll help us hit the ground running?`);
         } else {
           showWelcome(firstName);
         }
