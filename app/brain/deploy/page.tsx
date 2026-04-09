@@ -1114,18 +1114,21 @@ function BrainDeployInner() {
     }
 
     function showWelcome(firstName: string) {
+      showWelcomeWithMessage(firstName, buildWelcomeMessage(firstName));
+    }
+
+    function showWelcomeWithMessage(firstName: string, message: string) {
       setChatStarted(true);
       setSessionReady(true);
       centerUiRef.current?.classList.add("at-bottom");
       messagesRef.current?.classList.add("active");
 
-      const welcome = buildWelcomeMessage(firstName);
       const typingEl = addMessageToDOM("assistant", "");
       const typingContent = typingEl.querySelector(".content") as HTMLElement;
       if (typingContent) {
         typingContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
         setTimeout(() => {
-          typingContent.innerHTML = formatMarkdown(welcome);
+          typingContent.innerHTML = formatMarkdown(message);
           requestAnimationFrame(() => scrollToBottom());
         }, 800);
       }
@@ -1217,8 +1220,14 @@ function BrainDeployInner() {
           return;
         }
 
-        // No previous conversation — show first-time welcome
-        showWelcome(firstName);
+        // No previous conversation — check if this is a new paid user from checkout
+        const isNewPaidUser = new URLSearchParams(window.location.search).get("checkout") === "success";
+        if (isNewPaidUser) {
+          window.history.replaceState({}, "", "/brain/deploy");
+          showWelcomeWithMessage(firstName, `${firstName}, hell yeah, let's do this. Tell me about your company and what you're raising — let's get to work.`);
+        } else {
+          showWelcome(firstName);
+        }
       })
       .catch(() => {
         showWelcome(fallbackName);
