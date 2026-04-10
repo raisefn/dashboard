@@ -487,10 +487,16 @@ const BRAIN_CSS = `
     background: rgba(39, 39, 42, 0.8);
     color: #d4d4d8;
   }
-  .upgrade-hint {
-    margin-top: 8px;
-    font-size: 11px;
-    color: #71717a;
+  .upgrade-catalyst-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(63, 63, 70, 0.3);
+  }
+  .upgrade-catalyst-pitch {
+    font-size: 12px;
+    color: #a1a1aa;
+    margin-bottom: 10px;
+    line-height: 1.5;
   }
 `;
 
@@ -959,9 +965,11 @@ function BrainDeployInner() {
                 <div class="upgrade-options">
                   <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad')" class="upgrade-btn">Launchpad — $500/mo</button>
                   <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad_annual')" class="upgrade-btn upgrade-btn-alt">Launchpad — $3,000/yr</button>
+                </div>
+                <div class="upgrade-catalyst-section">
+                  <div class="upgrade-catalyst-pitch">Looking for hands-on guidance from someone who's been there? Catalyst includes everything in Launchpad PLUS hands-on fundraising consulting.</div>
                   <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('catalyst')" class="upgrade-btn upgrade-btn-alt">Catalyst — $2,500/mo</button>
                 </div>
-                <div class="upgrade-hint">Catalyst includes everything above + hands-on fundraising consulting</div>
               `;
               contentEl.parentElement?.appendChild(upgradeDiv);
             } else if (event.type === "done") {
