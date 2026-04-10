@@ -935,43 +935,8 @@ function BrainDeployInner() {
             } else if (event.type === "error") {
               contentEl.innerHTML = `<div class="error-msg">${event.content}</div>`;
             } else if (event.type === "upgrade") {
-              // Brain hit a tool gate — show upgrade card with capabilities
-              const upgradeDiv = document.createElement("div");
-              upgradeDiv.className = "upgrade-card";
-              upgradeDiv.innerHTML = `
-                <div class="upgrade-card-header">Ready to raise? Let's go!!</div>
-                <div class="upgrade-capabilities">
-                  <div class="upgrade-cap-section">
-                    <div class="upgrade-cap-label">Intelligence</div>
-                    <div class="upgrade-cap-item">Match investors — who's actually funding your stage and sector right now</div>
-                    <div class="upgrade-cap-item">Plan outreach — tailored approach for each investor based on their portfolio</div>
-                    <div class="upgrade-cap-item">Analyze terms — benchmark any term sheet against real comparable deals</div>
-                    <div class="upgrade-cap-item">Analyze narrative — how your pitch positions against the competition</div>
-                    <div class="upgrade-cap-item">Read signals — is that investor interested or being polite?</div>
-                    <div class="upgrade-cap-item">Analyze deck — specific feedback, not generic tips</div>
-                  </div>
-                  <div class="upgrade-cap-section">
-                    <div class="upgrade-cap-label">Pipeline CRM — no forms, just talk</div>
-                    <div class="upgrade-cap-item">Track every investor conversation automatically</div>
-                    <div class="upgrade-cap-item">Paste a meeting transcript — the Brain captures everything</div>
-                    <div class="upgrade-cap-item">"Who passed and why?" "Who should I follow up with?" — instant answers</div>
-                    <div class="upgrade-cap-item">Every interaction makes the next one smarter</div>
-                  </div>
-                  <div class="upgrade-cap-section">
-                    <div class="upgrade-cap-label">Memory</div>
-                    <div class="upgrade-cap-item">The Brain remembers your entire raise across sessions — every detail, every conversation</div>
-                  </div>
-                </div>
-                <div class="upgrade-options">
-                  <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad')" class="upgrade-btn">Launchpad — $500/mo</button>
-                  <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad_annual')" class="upgrade-btn upgrade-btn-alt">Launchpad — $3,000/yr</button>
-                </div>
-                <div class="upgrade-catalyst-section">
-                  <div class="upgrade-catalyst-pitch">Looking for hands-on guidance from someone who's been there? Catalyst includes everything in Launchpad PLUS hands-on fundraising consulting.</div>
-                  <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('catalyst')" class="upgrade-btn upgrade-btn-alt">Catalyst — $2,500/mo</button>
-                </div>
-              `;
-              contentEl.parentElement?.appendChild(upgradeDiv);
+              // Store flag — render after typewriter effect completes
+              (window as unknown as Record<string, boolean>).__raisefnShowUpgrade = true;
             } else if (event.type === "done") {
               if (event.raise_id) raiseIdRef.current = event.raise_id;
               if (event.conversation_id) conversationIdRef.current = event.conversation_id;
@@ -1052,6 +1017,48 @@ function BrainDeployInner() {
       errDiv.textContent = "Connection error: " + (e instanceof Error ? e.message : "Unknown error");
       contentEl.innerHTML = "";
       contentEl.appendChild(errDiv);
+    }
+
+    // Render upgrade card AFTER typewriter effect completes
+    if ((window as unknown as Record<string, boolean>).__raisefnShowUpgrade) {
+      delete (window as unknown as Record<string, boolean>).__raisefnShowUpgrade;
+      const upgradeDiv = document.createElement("div");
+      upgradeDiv.className = "upgrade-card";
+      upgradeDiv.innerHTML = `
+        <div class="upgrade-card-header">Ready to raise? Let's go!!</div>
+        <div class="upgrade-capabilities">
+          <div class="upgrade-cap-section">
+            <div class="upgrade-cap-label">Intelligence</div>
+            <div class="upgrade-cap-item">Match investors — who's actually funding your stage and sector right now</div>
+            <div class="upgrade-cap-item">Plan outreach — tailored approach for each investor based on their portfolio</div>
+            <div class="upgrade-cap-item">Analyze terms — benchmark any term sheet against real comparable deals</div>
+            <div class="upgrade-cap-item">Analyze narrative — how your pitch positions against the competition</div>
+            <div class="upgrade-cap-item">Read signals — is that investor interested or being polite?</div>
+            <div class="upgrade-cap-item">Analyze deck — specific feedback, not generic tips</div>
+          </div>
+          <div class="upgrade-cap-section">
+            <div class="upgrade-cap-label">Pipeline CRM — no forms, just talk</div>
+            <div class="upgrade-cap-item">Track every investor conversation automatically</div>
+            <div class="upgrade-cap-item">Paste a meeting transcript — the Brain captures everything</div>
+            <div class="upgrade-cap-item">"Who passed and why?" "Who should I follow up with?" — instant answers</div>
+            <div class="upgrade-cap-item">Every interaction makes the next one smarter</div>
+          </div>
+          <div class="upgrade-cap-section">
+            <div class="upgrade-cap-label">Memory</div>
+            <div class="upgrade-cap-item">The Brain remembers your entire raise across sessions — every detail, every conversation</div>
+          </div>
+        </div>
+        <div class="upgrade-options">
+          <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad')" class="upgrade-btn">Launchpad — $500/mo</button>
+          <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad_annual')" class="upgrade-btn upgrade-btn-alt">Launchpad — $3,000/yr</button>
+        </div>
+        <div class="upgrade-catalyst-section">
+          <div class="upgrade-catalyst-pitch">Looking for hands-on guidance from someone who's been there? Catalyst includes everything in Launchpad PLUS hands-on fundraising consulting.</div>
+          <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('catalyst')" class="upgrade-btn upgrade-btn-alt">Catalyst — $2,500/mo</button>
+        </div>
+      `;
+      contentEl.parentElement?.appendChild(upgradeDiv);
+      requestAnimationFrame(() => scrollToBottom());
     }
 
     brainStateRef.current = "idle";
