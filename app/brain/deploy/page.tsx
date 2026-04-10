@@ -933,7 +933,7 @@ function BrainDeployInner() {
               const upgradeDiv = document.createElement("div");
               upgradeDiv.className = "upgrade-card";
               upgradeDiv.innerHTML = `
-                <div class="upgrade-card-header">What the Brain does during your raise</div>
+                <div class="upgrade-card-header">Ready to raise? Let's go!!</div>
                 <div class="upgrade-capabilities">
                   <div class="upgrade-cap-section">
                     <div class="upgrade-cap-label">Intelligence</div>
