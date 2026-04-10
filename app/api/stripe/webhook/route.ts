@@ -70,15 +70,45 @@ export async function POST(req: Request) {
           status: "active",
         });
 
-        // Update api_key tier in Railway Postgres
+        // Update or create api_key in Railway Postgres
         const dbUrl = process.env.DATABASE_URL;
         if (dbUrl) {
           const { Pool } = await import("pg");
+          const crypto = await import("crypto");
           const pool = new Pool({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
-          await pool.query(
-            "UPDATE api_keys SET tier = $1, stripe_customer_id = $2 WHERE email = $3",
-            [tier, session.customer as string, emailLower]
+
+          // Check if api_key exists for this email
+          const existing = await pool.query(
+            "SELECT id FROM api_keys WHERE email = $1 AND is_active = true LIMIT 1",
+            [emailLower]
           );
+
+          if (existing.rowCount && existing.rowCount > 0) {
+            // Row exists — update tier
+            await pool.query(
+              "UPDATE api_keys SET tier = $1, stripe_customer_id = $2 WHERE email = $3",
+              [tier, session.customer as string, emailLower]
+            );
+          } else {
+            // Row doesn't exist — pre-create so brain finds it with correct tier
+            const rawKey = `rfn_${crypto.randomBytes(32).toString("hex")}`;
+            const keyHash = crypto.createHash("sha256").update(rawKey).digest("hex");
+            await pool.query(
+              `INSERT INTO api_keys (id, key_hash, key_prefix, owner, email, role, tier, stripe_customer_id, is_active)
+               VALUES ($1, $2, $3, $4, $5, 'founder', $6, $7, true)`,
+              [
+                crypto.randomUUID(),
+                keyHash,
+                rawKey.slice(0, 8),
+                session.customer_details?.name || emailLower.split("@")[0],
+                emailLower,
+                tier,
+                session.customer as string,
+              ]
+            );
+            console.log(`Pre-created api_key for ${emailLower} with tier ${tier}`);
+          }
+
           await pool.end();
         }
       }
