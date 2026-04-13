@@ -426,66 +426,74 @@ const BRAIN_CSS = `
   }
 
   .upgrade-card {
-    margin-top: 20px;
-    border: 1px solid rgba(234, 88, 12, 0.2);
-    border-radius: 12px;
-    padding: 20px;
-    background: linear-gradient(135deg, rgba(234, 88, 12, 0.04), rgba(0, 0, 0, 0.2));
+    margin-top: 24px;
+    border: 1px solid rgba(234, 88, 12, 0.15);
+    border-radius: 16px;
+    padding: 28px;
+    background: linear-gradient(135deg, rgba(234, 88, 12, 0.03), rgba(0, 0, 0, 0.15));
   }
   .upgrade-card-header {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 700;
     color: #fb923c;
-    margin-bottom: 16px;
+    margin-bottom: 24px;
   }
-  .upgrade-capabilities { margin-bottom: 20px; }
-  .upgrade-cap-section { margin-bottom: 12px; }
+  .upgrade-capabilities { margin-bottom: 28px; }
+  .upgrade-cap-section { margin-bottom: 20px; }
   .upgrade-cap-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #a1a1aa;
+    font-size: 10px;
+    font-weight: 700;
+    color: #71717a;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 6px;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
   }
-  .upgrade-cap-item {
-    font-size: 13px;
-    color: #d4d4d8;
-    padding: 3px 0;
-    padding-left: 12px;
-    position: relative;
+  .upgrade-cap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
-  .upgrade-cap-item::before {
-    content: "—";
-    position: absolute;
-    left: 0;
-    color: rgba(234, 88, 12, 0.5);
+  .upgrade-cap-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
   }
-  .upgrade-options { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .cap-icon { font-size: 14px; flex-shrink: 0; }
+  .cap-text { font-size: 12px; color: #d4d4d8; }
+  .upgrade-options { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
   .upgrade-btn {
-    background: linear-gradient(135deg, rgba(234, 88, 12, 0.15), rgba(234, 88, 12, 0.05));
-    border: 1px solid rgba(234, 88, 12, 0.4);
-    color: #fb923c;
-    padding: 10px 20px;
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    border: none;
+    color: #fff;
+    padding: 12px 28px;
     border-radius: 999px;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
   }
   .upgrade-btn:hover {
-    border-color: rgba(234, 88, 12, 0.7);
-    background: linear-gradient(135deg, rgba(234, 88, 12, 0.25), rgba(234, 88, 12, 0.1));
+    background: linear-gradient(135deg, #fb923c, #f97316);
+    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
+    transform: translateY(-1px);
   }
   .upgrade-btn-alt {
-    background: rgba(39, 39, 42, 0.5);
-    border-color: rgba(63, 63, 70, 0.5);
+    background: rgba(39, 39, 42, 0.8);
+    border: 1px solid rgba(63, 63, 70, 0.5);
     color: #a1a1aa;
+    box-shadow: none;
   }
   .upgrade-btn-alt:hover {
     border-color: rgba(113, 113, 122, 0.7);
-    background: rgba(39, 39, 42, 0.8);
+    background: rgba(39, 39, 42, 1);
     color: #d4d4d8;
+    box-shadow: none;
+    transform: none;
   }
   .upgrade-catalyst-section {
     margin-top: 16px;
@@ -1054,23 +1062,29 @@ function BrainDeployInner() {
         <div class="upgrade-capabilities">
           <div class="upgrade-cap-section">
             <div class="upgrade-cap-label">Intelligence</div>
-            <div class="upgrade-cap-item">Match investors — who's actually funding your stage and sector right now</div>
-            <div class="upgrade-cap-item">Plan outreach — tailored approach for each investor based on their portfolio</div>
-            <div class="upgrade-cap-item">Analyze terms — benchmark any term sheet against real comparable deals</div>
-            <div class="upgrade-cap-item">Analyze narrative — how your pitch positions against the competition</div>
-            <div class="upgrade-cap-item">Read signals — is that investor interested or being polite?</div>
-            <div class="upgrade-cap-item">Analyze deck — specific feedback, not generic tips</div>
+            <div class="upgrade-cap-grid">
+              <div class="upgrade-cap-cell"><span class="cap-icon">🎯</span><span class="cap-text">Investor matching</span></div>
+              <div class="upgrade-cap-cell"><span class="cap-icon">✉️</span><span class="cap-text">Outreach strategy</span></div>
+              <div class="upgrade-cap-cell"><span class="cap-icon">📊</span><span class="cap-text">Term sheet analysis</span></div>
+              <div class="upgrade-cap-cell"><span class="cap-icon">💬</span><span class="cap-text">Pitch positioning</span></div>
+              <div class="upgrade-cap-cell"><span class="cap-icon">📡</span><span class="cap-text">Signal reading</span></div>
+              <div class="upgrade-cap-cell"><span class="cap-icon">📄</span><span class="cap-text">Deck analysis</span></div>
+            </div>
           </div>
           <div class="upgrade-cap-section">
-            <div class="upgrade-cap-label">Pipeline CRM — no forms, just talk</div>
-            <div class="upgrade-cap-item">Track every investor conversation automatically</div>
-            <div class="upgrade-cap-item">Paste a meeting transcript — the Brain captures everything</div>
-            <div class="upgrade-cap-item">"Who passed and why?" "Who should I follow up with?" — instant answers</div>
-            <div class="upgrade-cap-item">Every interaction makes the next one smarter</div>
+            <div class="upgrade-cap-label">Pipeline CRM</div>
+            <div class="upgrade-cap-grid">
+              <div class="upgrade-cap-cell"><span class="cap-icon">🔄</span><span class="cap-text">Auto-track conversations</span></div>
+              <div class="upgrade-cap-cell"><span class="cap-icon">📋</span><span class="cap-text">Meeting ingestion</span></div>
+              <div class="upgrade-cap-cell"><span class="cap-icon">🔍</span><span class="cap-text">Instant pipeline recall</span></div>
+              <div class="upgrade-cap-cell"><span class="cap-icon">🧠</span><span class="cap-text">Gets smarter every interaction</span></div>
+            </div>
           </div>
           <div class="upgrade-cap-section">
             <div class="upgrade-cap-label">Memory</div>
-            <div class="upgrade-cap-item">The Brain remembers your entire raise across sessions — every detail, every conversation</div>
+            <div class="upgrade-cap-grid">
+              <div class="upgrade-cap-cell"><span class="cap-icon">💾</span><span class="cap-text">Remembers your entire raise across sessions</span></div>
+            </div>
           </div>
         </div>
         <div class="upgrade-options">
