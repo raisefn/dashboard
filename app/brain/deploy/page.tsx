@@ -506,6 +506,10 @@ const BRAIN_CSS = `
     margin-bottom: 10px;
     line-height: 1.5;
   }
+  .briefing-share {
+    margin-top: 12px;
+    margin-bottom: 8px;
+  }
   .upgrade-share-section {
     margin-top: 16px;
     padding-top: 16px;
@@ -962,6 +966,9 @@ function BrainDeployInner() {
               scrollToBottom();
             } else if (event.type === "error") {
               contentEl.innerHTML = `<div class="error-msg">${event.content}</div>`;
+            } else if (event.type === "share") {
+              // Store share info — render button after typewriter
+              (window as unknown as Record<string, unknown>).__raisefnShareId = event.assessment_id;
             } else if (event.type === "upgrade") {
               // Store flag — render after typewriter effect completes
               (window as unknown as Record<string, unknown>).__raisefnShowUpgrade = true;
@@ -1050,6 +1057,16 @@ function BrainDeployInner() {
       contentEl.appendChild(errDiv);
     }
 
+    // Render share button after briefing
+    const shareId = (window as unknown as Record<string, unknown>).__raisefnShareId as string | undefined;
+    if (shareId) {
+      delete (window as unknown as Record<string, unknown>).__raisefnShareId;
+      const shareDiv = document.createElement("div");
+      shareDiv.className = "briefing-share";
+      shareDiv.innerHTML = `<button onclick="navigator.clipboard.writeText('https://www.raisefn.com/assessment/${shareId}').then(() => this.textContent = 'Link copied!')" class="share-btn">Share this briefing</button>`;
+      contentEl.parentElement?.appendChild(shareDiv);
+    }
+
     // Render upgrade card AFTER typewriter effect completes
     if ((window as unknown as Record<string, unknown>).__raisefnShowUpgrade) {
       delete (window as unknown as Record<string, unknown>).__raisefnShowUpgrade;
@@ -1095,11 +1112,6 @@ function BrainDeployInner() {
           <div class="upgrade-catalyst-pitch">Looking for hands-on guidance from someone who's been there? Catalyst includes everything in Launchpad PLUS hands-on fundraising consulting.</div>
           <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('catalyst')" class="upgrade-btn upgrade-btn-alt">Catalyst — $2,500/mo</button>
         </div>
-        ${assessmentId ? `
-        <div class="upgrade-share-section">
-          <button onclick="navigator.clipboard.writeText('https://www.raisefn.com/assessment/${assessmentId}').then(() => this.textContent = 'Link copied!')" class="share-btn">Share this assessment</button>
-        </div>
-        ` : ""}
       `;
       contentEl.parentElement?.appendChild(upgradeDiv);
       requestAnimationFrame(() => scrollToBottom());
