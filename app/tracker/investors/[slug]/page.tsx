@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getInvestor, getInvestorRounds } from "@/lib/api";
 import { formatUSD, formatDate } from "@/lib/format";
 import TrackerComingSoon from "@/components/tracker-coming-soon";
+import BrainCTAInline from "@/components/brain-cta-inline";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -115,6 +116,10 @@ export default async function InvestorDetailPage({ params }: Props) {
       ) : (
         <p className="text-zinc-500">No rounds found for this investor.</p>
       )}
+
+      <BrainCTAInline
+        text={`Want to know if ${investor.name} is the right fit for your raise? The Brain can tell you — for free.`}
+      />
     </div>
   );
 }

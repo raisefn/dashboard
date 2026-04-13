@@ -3,6 +3,7 @@ import { getRounds, getStatsSectors } from "@/lib/api";
 import { formatUSD, formatDate } from "@/lib/format";
 import TrackerComingSoon from "@/components/tracker-coming-soon";
 import StatsCard from "@/components/stats-card";
+import BrainCTAInline from "@/components/brain-cta-inline";
 
 const typeColors: Record<string, string> = {
   seed: "bg-emerald-900/60 text-emerald-300",
@@ -161,6 +162,10 @@ export default async function SectorDetailPage({ params }: Props) {
           </div>
         </div>
       )}
+
+      <BrainCTAInline
+        text={`Building in ${displayName}? Get a free readiness assessment with real benchmarks from this sector.`}
+      />
     </div>
   );
 }
