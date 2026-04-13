@@ -498,6 +498,26 @@ const BRAIN_CSS = `
     margin-bottom: 10px;
     line-height: 1.5;
   }
+  .upgrade-share-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(63, 63, 70, 0.3);
+  }
+  .share-btn {
+    background: none;
+    border: 1px solid rgba(45, 212, 191, 0.3);
+    color: #2dd4bf;
+    padding: 8px 20px;
+    border-radius: 999px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .share-btn:hover {
+    border-color: rgba(45, 212, 191, 0.6);
+    background: rgba(45, 212, 191, 0.05);
+  }
 `;
 
 /* ── Particle type ── */
@@ -936,7 +956,10 @@ function BrainDeployInner() {
               contentEl.innerHTML = `<div class="error-msg">${event.content}</div>`;
             } else if (event.type === "upgrade") {
               // Store flag — render after typewriter effect completes
-              (window as unknown as Record<string, boolean>).__raisefnShowUpgrade = true;
+              (window as unknown as Record<string, unknown>).__raisefnShowUpgrade = true;
+              if (event.assessment_id) {
+                (window as unknown as Record<string, unknown>).__raisefnAssessmentId = event.assessment_id;
+              }
             } else if (event.type === "done") {
               if (event.raise_id) raiseIdRef.current = event.raise_id;
               if (event.conversation_id) conversationIdRef.current = event.conversation_id;
@@ -1020,8 +1043,10 @@ function BrainDeployInner() {
     }
 
     // Render upgrade card AFTER typewriter effect completes
-    if ((window as unknown as Record<string, boolean>).__raisefnShowUpgrade) {
-      delete (window as unknown as Record<string, boolean>).__raisefnShowUpgrade;
+    if ((window as unknown as Record<string, unknown>).__raisefnShowUpgrade) {
+      delete (window as unknown as Record<string, unknown>).__raisefnShowUpgrade;
+      const assessmentId = (window as unknown as Record<string, unknown>).__raisefnAssessmentId as string | undefined;
+      delete (window as unknown as Record<string, unknown>).__raisefnAssessmentId;
       const upgradeDiv = document.createElement("div");
       upgradeDiv.className = "upgrade-card";
       upgradeDiv.innerHTML = `
@@ -1056,6 +1081,11 @@ function BrainDeployInner() {
           <div class="upgrade-catalyst-pitch">Looking for hands-on guidance from someone who's been there? Catalyst includes everything in Launchpad PLUS hands-on fundraising consulting.</div>
           <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('catalyst')" class="upgrade-btn upgrade-btn-alt">Catalyst — $2,500/mo</button>
         </div>
+        ${assessmentId ? `
+        <div class="upgrade-share-section">
+          <button onclick="navigator.clipboard.writeText('https://www.raisefn.com/assessment/${assessmentId}').then(() => this.textContent = 'Link copied!')" class="share-btn">Share this assessment</button>
+        </div>
+        ` : ""}
       `;
       contentEl.parentElement?.appendChild(upgradeDiv);
       requestAnimationFrame(() => scrollToBottom());
