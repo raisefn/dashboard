@@ -506,30 +506,6 @@ const BRAIN_CSS = `
     margin-bottom: 10px;
     line-height: 1.5;
   }
-  .briefing-share {
-    margin-top: 12px;
-    margin-bottom: 8px;
-  }
-  .upgrade-share-section {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(63, 63, 70, 0.3);
-  }
-  .share-btn {
-    background: none;
-    border: 1px solid rgba(45, 212, 191, 0.3);
-    color: #2dd4bf;
-    padding: 8px 20px;
-    border-radius: 999px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: inherit;
-  }
-  .share-btn:hover {
-    border-color: rgba(45, 212, 191, 0.6);
-    background: rgba(45, 212, 191, 0.05);
-  }
 `;
 
 /* ── Particle type ── */
@@ -966,9 +942,6 @@ function BrainDeployInner() {
               scrollToBottom();
             } else if (event.type === "error") {
               contentEl.innerHTML = `<div class="error-msg">${event.content}</div>`;
-            } else if (event.type === "share") {
-              // Store share info — render button after typewriter
-              (window as unknown as Record<string, unknown>).__raisefnShareId = event.assessment_id;
             } else if (event.type === "upgrade") {
               // Store flag — render after typewriter effect completes
               (window as unknown as Record<string, unknown>).__raisefnShowUpgrade = true;
@@ -1055,16 +1028,6 @@ function BrainDeployInner() {
       errDiv.textContent = "Connection error: " + (e instanceof Error ? e.message : "Unknown error");
       contentEl.innerHTML = "";
       contentEl.appendChild(errDiv);
-    }
-
-    // Render share button after briefing
-    const shareId = (window as unknown as Record<string, unknown>).__raisefnShareId as string | undefined;
-    if (shareId) {
-      delete (window as unknown as Record<string, unknown>).__raisefnShareId;
-      const shareDiv = document.createElement("div");
-      shareDiv.className = "briefing-share";
-      shareDiv.innerHTML = `<button onclick="navigator.clipboard.writeText('https://www.raisefn.com/assessment/${shareId}').then(() => this.textContent = 'Link copied!')" class="share-btn">Share this briefing</button>`;
-      contentEl.parentElement?.appendChild(shareDiv);
     }
 
     // Render upgrade card AFTER typewriter effect completes
