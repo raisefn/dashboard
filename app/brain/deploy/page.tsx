@@ -1149,13 +1149,7 @@ function BrainDeployInner() {
         && !email.split("@")[0].toLowerCase().includes(company.toLowerCase());
 
       if (role === "investor") {
-        if (raisingStatus === "deploying") {
-          return `Hey ${firstName}! Tell me about your fund — what sectors and stages are you deploying into right now?`;
-        }
-        if (raisingStatus === "planning") {
-          return `Hey ${firstName}! Tell me about your investment focus — what are you looking to deploy into?`;
-        }
-        return `Hey ${firstName}! Tell me about your investment focus — what sectors and stages interest you?`;
+        return `Hey ${firstName}! I'd love to learn about your investment focus — a few quick questions so I can be as useful as possible.`;
       }
       if (role === "builder") {
         return `Hey ${firstName}! Welcome to raise(fn). What are you working on?`;
