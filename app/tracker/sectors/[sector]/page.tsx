@@ -164,7 +164,7 @@ export default async function SectorDetailPage({ params }: Props) {
       )}
 
       <BrainCTAInline
-        text={`Building in ${displayName}? Get a free readiness assessment with real benchmarks from this sector.`}
+        text={`Building in ${displayName}? Get matched with investors active in this sector.`}
       />
     </div>
   );

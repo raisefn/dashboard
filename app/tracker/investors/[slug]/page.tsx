@@ -118,7 +118,7 @@ export default async function InvestorDetailPage({ params }: Props) {
       )}
 
       <BrainCTAInline
-        text={`Want to know if ${investor.name} is the right fit for your raise? The Brain can tell you — for free.`}
+        text={`Want to know if ${investor.name} is the right fit for your raise? Get matched with the right investors.`}
       />
     </div>
   );

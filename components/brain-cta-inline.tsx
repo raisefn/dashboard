@@ -5,7 +5,7 @@ interface BrainCTAInlineProps {
   buttonText?: string;
 }
 
-export default function BrainCTAInline({ text, buttonText = "Get your free assessment" }: BrainCTAInlineProps) {
+export default function BrainCTAInline({ text, buttonText = "Get matched with investors" }: BrainCTAInlineProps) {
   return (
     <div className="mt-8 rounded-xl border border-orange-900/20 bg-orange-950/10 p-6">
       <p className="text-sm text-zinc-300 mb-3">{text}</p>

@@ -195,9 +195,9 @@ export default async function AssessmentPage({ params }: { params: Promise<{ id:
           <div className="relative overflow-hidden rounded-2xl p-10 text-center">
             <div className="absolute inset-0 bg-gradient-to-br from-orange-950/30 via-zinc-950 to-teal-950/20" />
             <div className="relative">
-              <h2 className="text-2xl font-bold text-white mb-3">Get your own briefing</h2>
+              <h2 className="text-2xl font-bold text-white mb-3">Get matched with investors</h2>
               <p className="text-zinc-500 mb-6 max-w-md mx-auto text-sm">
-                Free. Data-grounded. Five minutes of conversation — the brain does the rest.
+                Fundraising intelligence grounded in 24,000+ real rounds. Sign up free.
               </p>
               <a href="/signup" className="inline-block rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/20">
                 Get started free

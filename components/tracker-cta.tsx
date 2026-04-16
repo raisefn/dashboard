@@ -13,14 +13,14 @@ export default function TrackerCTA() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <p className="text-sm text-zinc-300">
           <span className="text-orange-400 font-medium">Raising capital?</span>{" "}
-          Get a free readiness assessment grounded in this data.
+          Get matched with the right investors for your raise.
         </p>
         <div className="flex items-center gap-3">
           <Link
             href="/signup"
             className="rounded-full bg-orange-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-orange-500"
           >
-            Get your free assessment
+            Get matched with investors
           </Link>
           <button
             onClick={() => setDismissed(true)}
