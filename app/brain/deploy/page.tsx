@@ -1179,7 +1179,18 @@ function BrainDeployInner() {
     }
 
     function showWelcome(firstName: string) {
-      showWelcomeWithMessage(firstName, buildWelcomeMessage(firstName));
+      const meta = session?.user?.user_metadata || {};
+      const role = (meta.role as string) || "founder";
+
+      if (role === "investor") {
+        showWelcomeTwoBubbles(
+          firstName,
+          buildWelcomeMessage(firstName),
+          "Tell me about your investment thesis — companies you love to invest in, stages, etc."
+        );
+      } else {
+        showWelcomeWithMessage(firstName, buildWelcomeMessage(firstName));
+      }
     }
 
     function showWelcomeWithMessage(firstName: string, message: string) {
@@ -1195,6 +1206,37 @@ function BrainDeployInner() {
         setTimeout(() => {
           typingContent.innerHTML = formatMarkdown(message);
           requestAnimationFrame(() => scrollToBottom());
+        }, 800);
+      }
+    }
+
+    function showWelcomeTwoBubbles(firstName: string, greeting: string, question: string) {
+      setChatStarted(true);
+      setSessionReady(true);
+      centerUiRef.current?.classList.add("at-bottom");
+      messagesRef.current?.classList.add("active");
+
+      // First bubble — greeting
+      const greetEl = addMessageToDOM("assistant", "");
+      const greetContent = greetEl.querySelector(".content") as HTMLElement;
+      if (greetContent) {
+        greetContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+        setTimeout(() => {
+          greetContent.innerHTML = formatMarkdown(greeting);
+          requestAnimationFrame(() => scrollToBottom());
+
+          // Second bubble — question, after a pause
+          setTimeout(() => {
+            const questionEl = addMessageToDOM("assistant", "");
+            const questionContent = questionEl.querySelector(".content") as HTMLElement;
+            if (questionContent) {
+              questionContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+              setTimeout(() => {
+                questionContent.innerHTML = formatMarkdown(question);
+                requestAnimationFrame(() => scrollToBottom());
+              }, 600);
+            }
+          }, 1000);
         }, 800);
       }
     }
