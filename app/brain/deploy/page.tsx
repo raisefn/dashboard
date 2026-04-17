@@ -1079,7 +1079,13 @@ function BrainDeployInner() {
           <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('catalyst')" class="upgrade-btn upgrade-btn-alt">Catalyst — $2,500/mo</button>
         </div>
       `;
-      contentEl.parentElement?.appendChild(upgradeDiv);
+      // Render outside the message bubble for full width
+      const messagesInner = document.querySelector(".messages-inner");
+      if (messagesInner) {
+        messagesInner.appendChild(upgradeDiv);
+      } else {
+        contentEl.parentElement?.appendChild(upgradeDiv);
+      }
       requestAnimationFrame(() => scrollToBottom());
     }
 
