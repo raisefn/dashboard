@@ -893,7 +893,8 @@ function BrainDeployInner() {
         ...(conversationIdRef.current && { conversation_id: conversationIdRef.current }),
       });
 
-      let response = await fetch("/v1/brain/chat", { method: "POST", headers, body: reqBody });
+      const brainUrl = "https://brain-production-61da.up.railway.app/v1/brain/chat";
+      let response = await fetch(brainUrl, { method: "POST", headers, body: reqBody });
 
       // Token expired — refresh and retry once
       if (response.status === 401) {
@@ -901,7 +902,7 @@ function BrainDeployInner() {
         if (fresh) {
           setSession(fresh);
           headers.Authorization = `Bearer ${fresh.access_token}`;
-          response = await fetch("/v1/brain/chat", { method: "POST", headers, body: reqBody });
+          response = await fetch(brainUrl, { method: "POST", headers, body: reqBody });
         }
       }
 
