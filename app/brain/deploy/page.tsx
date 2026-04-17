@@ -1032,8 +1032,9 @@ function BrainDeployInner() {
       contentEl.appendChild(errDiv);
     }
 
-    // Render upgrade card AFTER typewriter effect completes
+    // Render upgrade card AFTER typewriter effect completes + digest delay
     if ((window as unknown as Record<string, unknown>).__raisefnShowUpgrade) {
+      await new Promise(r => setTimeout(r, 2000));
       delete (window as unknown as Record<string, unknown>).__raisefnShowUpgrade;
       const assessmentId = (window as unknown as Record<string, unknown>).__raisefnAssessmentId as string | undefined;
       delete (window as unknown as Record<string, unknown>).__raisefnAssessmentId;
