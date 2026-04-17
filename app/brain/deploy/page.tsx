@@ -431,6 +431,8 @@ const BRAIN_CSS = `
     border-radius: 16px;
     padding: 28px;
     background: linear-gradient(135deg, rgba(234, 88, 12, 0.03), rgba(0, 0, 0, 0.15));
+    max-width: 560px;
+    width: 100%;
   }
   .upgrade-card-header {
     font-size: 18px;
