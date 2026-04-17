@@ -1117,28 +1117,8 @@ function BrainDeployInner() {
       if (role === "builder") {
         return `Hey ${firstName}! Welcome to raise(fn). What are you working on?`;
       }
-      // Founder — actively raising
-      if (raisingStatus === "active") {
-        if (looksReal && !isPersonalEmail) {
-          return `Hey ${firstName}! Tell me about ${company} — what does the company do and who's the customer?`;
-        }
-        if (looksReal) {
-          return `Hey ${firstName}! Tell me about ${company} — what are you building and what problem are you solving?`;
-        }
-        return `Hey ${firstName}! Tell me about what you're building — what's the company and who's the customer?`;
-      }
-      // Founder — planning to raise
-      if (raisingStatus === "planning") {
-        if (looksReal) {
-          return `Hey ${firstName}! Tell me about ${company} — I'll help you figure out where you stand and what to nail before you raise.`;
-        }
-        return `Hey ${firstName}! Tell me about what you're building — I'll help you figure out where you stand before you start raising.`;
-      }
-      // Founder — just exploring (or unknown)
-      if (looksReal) {
-        return `Hey ${firstName}! What's ${company} about? Tell me what you're working on and I'll give you an honest read.`;
-      }
-      return `Hey ${firstName}! What brings you to raise(fn)? Tell me a bit about what you're working on.`;
+      // Founder — two-bubble welcome (second bubble set in showWelcome)
+      return `Hey ${firstName}! A few questions to help me understand more about ${company || "what you're building"} and provide the best possible guidance.`;
     }
 
     function showWelcome(firstName: string) {
@@ -1150,6 +1130,12 @@ function BrainDeployInner() {
           firstName,
           buildWelcomeMessage(firstName),
           "Tell me about your investment thesis — companies you love to invest in, stages, etc."
+        );
+      } else if (role === "founder" || !role) {
+        showWelcomeTwoBubbles(
+          firstName,
+          buildWelcomeMessage(firstName),
+          "What problem are you solving? Any traction yet?"
         );
       } else {
         showWelcomeWithMessage(firstName, buildWelcomeMessage(firstName));
