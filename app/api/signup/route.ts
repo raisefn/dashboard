@@ -4,12 +4,13 @@ import { getSupabase } from "@/lib/supabase";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, company, role, raising_status } = await req.json();
+    const { name, email, company, role, raising_status, phone } = await req.json();
 
     // Slack notification for all signups
+    const phoneLine = phone && phone !== "—" ? `\nPhone: ${phone}` : "";
     await notifySlack(
       "earlyAccess",
-      `New signup: *${name}* (${role})\n${email} — ${company}\nStatus: ${raising_status}`
+      `New signup: *${name}* (${role})\n${email} — ${company}\nStatus: ${raising_status}${phoneLine}`
     );
 
     // Save builders to early_access table for future follow-up

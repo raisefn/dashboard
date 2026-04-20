@@ -16,6 +16,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [company, setCompany] = useState("");
+  const [phone, setPhone] = useState("");
   const [role, setRole] = useState<Role | "">("");
   const [roleSpecific, setRoleSpecific] = useState("");
 
@@ -99,6 +100,7 @@ export default function SignupPage() {
           company: company.trim() || "—",
           role: "builder",
           raising_status: roleSpecific,
+          phone: phone.trim() || "—",
         }),
       }).catch(() => {});
 
@@ -116,6 +118,7 @@ export default function SignupPage() {
           company: company.trim(),
           role,
           raising_status: roleSpecific,
+          phone: phone.trim() || null,
         },
       },
     });
@@ -136,6 +139,7 @@ export default function SignupPage() {
         company: company.trim(),
         role,
         raising_status: roleSpecific,
+        phone: phone.trim() || "—",
       }),
     }).catch(() => {});
 
@@ -148,6 +152,7 @@ export default function SignupPage() {
     setEmail("");
     setPassword("");
     setCompany("");
+    setPhone("");
     setRole("");
     setRoleSpecific("");
     setErrorMsg("");
@@ -284,6 +289,21 @@ export default function SignupPage() {
               onChange={(e) => setCompany(e.target.value)}
               className={inputClass}
               placeholder={isBuilder ? "Company name (if applicable)" : "Company name"}
+            />
+          </div>
+
+          {/* Phone — optional */}
+          <div>
+            <label htmlFor="su-phone" className="block text-xs text-zinc-500 mb-1.5">
+              Phone (optional)
+            </label>
+            <input
+              id="su-phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className={inputClass}
+              placeholder="+1 (555) 000-0000"
             />
           </div>
 
