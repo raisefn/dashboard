@@ -1121,7 +1121,7 @@ function BrainDeployInner() {
         && !email.split("@")[0].toLowerCase().includes(company.toLowerCase());
 
       if (role === "investor") {
-        return `Hey ${firstName}! I'd love to learn about your investment focus — a few quick questions so I can be as useful as possible.`;
+        return `Hey ${firstName}! A few quick questions to help me understand your investment focus.`;
       }
       if (role === "builder") {
         return `Hey ${firstName}! Welcome to raise(fn). What are you working on?`;
@@ -1138,7 +1138,7 @@ function BrainDeployInner() {
         showWelcomeTwoBubbles(
           firstName,
           buildWelcomeMessage(firstName),
-          "Tell me about your investment thesis — companies you love to invest in, stages, etc."
+          "Tell me about your investment thesis — sectors, stages, and the types of companies you back."
         );
       } else if (role === "founder" || !role) {
         showWelcomeTwoBubbles(
