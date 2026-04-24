@@ -129,14 +129,26 @@ async function apiFetch<T>(path: string, params?: Record<string, string>): Promi
       if (v) url.searchParams.set(k, v);
     });
   }
-  const res = await fetch(url.toString(), {
-    headers: { "X-API-Key": API_KEY },
-    next: { revalidate: 300 }, // cache 5 min
-  });
-  if (!res.ok) {
-    throw new Error(`API error: ${res.status} ${res.statusText}`);
+
+  // Retry once on failure (handles Railway cold starts, momentary blips)
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url.toString(), {
+        headers: { "X-API-Key": API_KEY },
+        next: { revalidate: 300 }, // cache 5 min
+      });
+      if (!res.ok) {
+        if (attempt === 0) continue; // retry once
+        throw new Error(`API error: ${res.status} ${res.statusText}`);
+      }
+      return res.json();
+    } catch (e) {
+      if (attempt === 0) continue; // retry once
+      throw e;
+    }
   }
-  return res.json();
+
+  throw new Error("API fetch failed after retries");
 }
 
 export async function getProjects(params?: {
