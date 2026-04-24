@@ -156,21 +156,23 @@ export default function PricingPage() {
           <div className="mx-auto max-w-3xl">
             <div className="flex items-baseline gap-4 mb-2">
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Catalyst
+                Concierge
               </h2>
-              <span className="text-2xl font-bold text-orange-400">$2,500</span>
-              <span className="text-sm text-zinc-500">/month</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              Everything in Launchpad, plus hands-on fundraising consulting from
-              someone who's been there. Dramatically cheaper than a placement
-              agent.
+              Hands-on fundraising support from a team that&apos;s collectively raised
+              over $21M across 1,100+ investor meetings. We work alongside you
+              for the duration of your raise.
             </p>
 
             <div className="space-y-2 mb-10">
               {[
                 "Everything in Launchpad — full Brain access, all tools, unlimited queries",
-                "Hands-on fundraising consulting",
+                "Investor matching + warm introductions from our network",
+                "Pitch positioning — how to land the narrative with each investor",
+                "Outreach strategy — who to contact, in what order, and what to lead with",
+                "Meeting prep and debrief — before and after every investor conversation",
+                "Term sheet review — comp data, red flags, and negotiation strategy",
                 "Dramatically cheaper than a placement agent (3–5% of round)",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
@@ -180,13 +182,12 @@ export default function PricingPage() {
               ))}
             </div>
 
-            <button
-              onClick={() => handleCheckout("catalyst")}
-              disabled={loading === "catalyst"}
-              className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30 disabled:opacity-50"
+            <a
+              href="mailto:team@raisefn.com?subject=Concierge%20inquiry"
+              className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30 inline-block"
             >
-              {loading === "catalyst" ? "Loading..." : "$2,500/month"}
-            </button>
+              Contact us
+            </a>
           </div>
         </FadeInSection>
       </section>
