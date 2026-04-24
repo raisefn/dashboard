@@ -319,16 +319,16 @@ export default function PricingPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
-              Start with the assessment. Raise with the Brain.
+              Ready to raise smarter?
             </h2>
             <p className="text-zinc-500 mb-8">
-              The assessment is free. The Brain is where the value lives.
+              Sign up free. Tell us about your raise. We&apos;ll take it from there.
             </p>
             <button
               onClick={() => router.push("/signup")}
               className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
             >
-              Get started free
+              Get started
             </button>
           </div>
         </FadeInSection>
