@@ -1071,8 +1071,8 @@ function BrainDeployInner() {
           </div>
         </div>
         <div class="upgrade-options">
-          <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad')" class="upgrade-btn">Launchpad — $500/mo</button>
-          <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad_annual')" class="upgrade-btn upgrade-btn-alt">Launchpad — $3,000/yr</button>
+          <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad')" class="upgrade-btn">Launchpad — $200/mo</button>
+          <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad_annual')" class="upgrade-btn upgrade-btn-alt">Launchpad — $1,200/yr</button>
         </div>
         <div class="upgrade-catalyst-section">
           <div class="upgrade-catalyst-pitch">Looking for hands-on guidance from someone who's been there? Catalyst includes everything in Launchpad PLUS hands-on fundraising consulting.</div>

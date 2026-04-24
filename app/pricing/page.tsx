@@ -97,10 +97,10 @@ export default function PricingPage() {
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
                 Launchpad
               </h2>
-              <span className="text-2xl font-bold text-orange-400">$500</span>
+              <span className="text-2xl font-bold text-orange-400">$200</span>
               <span className="text-sm text-zinc-500">/month</span>
             </div>
-            <p className="text-xs text-zinc-500 mb-1">or $3,000/year (save $3K)</p>
+            <p className="text-xs text-zinc-500 mb-1">or $1,200/year (save $1,200)</p>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
               The full Brain runs your raise. Investor matching, pipeline
               tracking, meeting ingestion, outreach strategy — all from
@@ -132,14 +132,14 @@ export default function PricingPage() {
                 disabled={loading === "launchpad"}
                 className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30 disabled:opacity-50"
               >
-                {loading === "launchpad" ? "Loading..." : "$500/month"}
+                {loading === "launchpad" ? "Loading..." : "$200/month"}
               </button>
               <button
                 onClick={() => handleCheckout("launchpad_annual")}
                 disabled={loading === "launchpad_annual"}
                 className="rounded-full border border-zinc-700/50 bg-zinc-900/20 px-8 py-3 text-sm font-medium text-zinc-400 transition-all hover:border-zinc-600 hover:bg-zinc-800/30 disabled:opacity-50"
               >
-                {loading === "launchpad_annual" ? "Loading..." : "$3,000/year"}
+                {loading === "launchpad_annual" ? "Loading..." : "$1,200/year"}
               </button>
             </div>
           </div>
