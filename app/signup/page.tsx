@@ -19,6 +19,7 @@ export default function SignupPage() {
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<Role | "">("");
   const [roleSpecific, setRoleSpecific] = useState("");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const inputClass =
     "w-full rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-teal-700 transition-colors";
@@ -75,6 +76,7 @@ export default function SignupPage() {
     if (!name.trim() || !email.trim()) return false;
     if (needsPassword && password.length < 6) return false;
     if (companyRequired && !company.trim()) return false;
+    if (!agreedToTerms) return false;
     return true;
   }
 
@@ -155,6 +157,7 @@ export default function SignupPage() {
     setPhone("");
     setRole("");
     setRoleSpecific("");
+    setAgreedToTerms(false);
     setErrorMsg("");
   }
 
@@ -325,6 +328,26 @@ export default function SignupPage() {
               </div>
             </div>
           )}
+
+          {/* Terms agreement */}
+          <label className="flex items-start gap-2 text-xs text-zinc-500 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="mt-0.5 h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-900 text-teal-500 focus:ring-teal-700 focus:ring-offset-0 cursor-pointer"
+            />
+            <span>
+              I agree to the{" "}
+              <Link href="/terms" target="_blank" className="text-teal-400 hover:text-teal-300">
+                Terms of Service
+              </Link>
+              {" "}and{" "}
+              <Link href="/privacy" target="_blank" className="text-teal-400 hover:text-teal-300">
+                Privacy Policy
+              </Link>
+            </span>
+          </label>
 
           {status === "error" && errorMsg && (
             <p className="text-sm text-red-400">{errorMsg}</p>
