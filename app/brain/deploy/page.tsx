@@ -1505,7 +1505,14 @@ function BrainDeployInner() {
                 className="admin-input"
               >
                 <option value="">Myself</option>
-                {adminUsers.map((u) => (
+                {adminUsers
+                  .filter((u) => {
+                    const e = (u.email || "").toLowerCase();
+                    if (e.startsWith("demo+")) return false;
+                    if (e === "service@raisefn.com") return false;
+                    return true;
+                  })
+                  .map((u) => (
                   <option key={u.email} value={u.email}>
                     {u.name || u.email} — {u.role}{u.campaign ? ` — ${u.campaign.company || "no company"}` : ""} ({u.events} events)
                   </option>
