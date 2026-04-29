@@ -425,6 +425,54 @@ const BRAIN_CSS = `
     .code-block { font-size: 11px; padding: 8px 10px; }
   }
 
+  .draft-email-panel {
+    margin-top: 16px;
+    border: 1px solid rgba(45, 212, 191, 0.2);
+    border-radius: 12px;
+    padding: 18px 20px;
+    background: linear-gradient(135deg, rgba(45, 212, 191, 0.04), rgba(0, 0, 0, 0.15));
+    width: 100%;
+  }
+  .draft-header { margin-bottom: 12px; }
+  .draft-label { font-size: 12px; font-weight: 600; color: #5eead4; letter-spacing: 0.02em; }
+  .draft-subject { font-size: 13px; color: #d4d4d8; margin-bottom: 10px; }
+  .draft-subject strong { color: #71717a; font-weight: 500; margin-right: 6px; }
+  .draft-body {
+    font-size: 13px;
+    color: #a1a1aa;
+    line-height: 1.6;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    margin-bottom: 14px;
+    white-space: pre-wrap;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .draft-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .draft-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #d4d4d8;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .draft-btn:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.18); }
+  .draft-btn-primary {
+    background: rgba(45, 212, 191, 0.12);
+    border-color: rgba(45, 212, 191, 0.35);
+    color: #5eead4;
+  }
+  .draft-btn-primary:hover {
+    background: rgba(45, 212, 191, 0.18);
+    border-color: rgba(45, 212, 191, 0.55);
+  }
+  .draft-warning { font-size: 11px; color: #fbbf24; margin-left: 4px; }
   .upgrade-card {
     margin-top: 24px;
     border: 1px solid rgba(234, 88, 12, 0.15);
@@ -950,6 +998,14 @@ function BrainDeployInner() {
               if (event.assessment_id) {
                 (window as unknown as Record<string, unknown>).__raisefnAssessmentId = event.assessment_id;
               }
+            } else if (event.type === "draft_email") {
+              // Store draft — render the "Open in Gmail" panel after typewriter completes
+              (window as unknown as Record<string, unknown>).__raisefnDraftEmail = {
+                outreach_attempt_id: event.outreach_attempt_id,
+                to: event.to || "",
+                subject: event.subject || "",
+                body: event.body || "",
+              };
             } else if (event.type === "done") {
               if (event.raise_id) raiseIdRef.current = event.raise_id;
               if (event.conversation_id) conversationIdRef.current = event.conversation_id;
@@ -1086,6 +1142,87 @@ function BrainDeployInner() {
       } else {
         contentEl.parentElement?.appendChild(upgradeDiv);
       }
+      requestAnimationFrame(() => scrollToBottom());
+    }
+
+    // Render draft email panel (Gmail Draft Compose) AFTER typewriter completes
+    const draft = (window as unknown as Record<string, unknown>).__raisefnDraftEmail as
+      | { outreach_attempt_id: string; to: string; subject: string; body: string }
+      | undefined;
+    if (draft) {
+      delete (window as unknown as Record<string, unknown>).__raisefnDraftEmail;
+      await new Promise((r) => setTimeout(r, 400));
+
+      const { gmailComposeUrl, bodyExceedsUrlLimit } = await import("@/lib/gmail");
+      const tooLong = bodyExceedsUrlLimit(draft.body);
+
+      const panel = document.createElement("div");
+      panel.className = "draft-email-panel";
+      // Escape HTML in subject + body for safe inline display.
+      const esc = (s: string) =>
+        s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const bodyPreview = esc(draft.body).replace(/\n/g, "<br>");
+
+      panel.innerHTML = `
+        <div class="draft-header">
+          <span class="draft-label">📧 Draft email${draft.to ? ` to ${esc(draft.to)}` : ""}</span>
+        </div>
+        <div class="draft-subject"><strong>Subject:</strong> ${esc(draft.subject)}</div>
+        <div class="draft-body">${bodyPreview}</div>
+        <div class="draft-actions">
+          <button class="draft-btn draft-btn-primary" data-action="open-gmail">Open in Gmail</button>
+          <button class="draft-btn" data-action="copy">Copy email</button>
+          ${tooLong ? '<span class="draft-warning">Body too long for Gmail URL — use Copy</span>' : ""}
+        </div>
+      `;
+
+      const messagesInnerInline = document.querySelector(".messages-inner");
+      if (messagesInnerInline) {
+        messagesInnerInline.appendChild(panel);
+      } else {
+        contentEl.parentElement?.appendChild(panel);
+      }
+
+      const openBtn = panel.querySelector('[data-action="open-gmail"]') as HTMLButtonElement | null;
+      const copyBtn = panel.querySelector('[data-action="copy"]') as HTMLButtonElement | null;
+      const fireMarkSent = async () => {
+        if (!session) return;
+        try {
+          await fetch("/v1/brain/email/mark-sent", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ outreach_attempt_id: draft.outreach_attempt_id }),
+          });
+        } catch { /* fire-and-forget */ }
+      };
+      openBtn?.addEventListener("click", () => {
+        if (!tooLong) {
+          window.open(gmailComposeUrl(draft.to, draft.subject, draft.body), "_blank");
+        } else {
+          // Body too long → open Gmail compose with subject + recipient only,
+          // copy body to clipboard, prompt user to paste.
+          navigator.clipboard.writeText(draft.body).catch(() => {});
+          window.open(gmailComposeUrl(draft.to, draft.subject, ""), "_blank");
+        }
+        fireMarkSent();
+      });
+      copyBtn?.addEventListener("click", () => {
+        const fullEmail =
+          (draft.to ? `To: ${draft.to}\n` : "") +
+          `Subject: ${draft.subject}\n\n` +
+          draft.body;
+        navigator.clipboard.writeText(fullEmail).catch(() => {});
+        if (copyBtn) {
+          copyBtn.textContent = "Copied ✓";
+          setTimeout(() => {
+            if (copyBtn) copyBtn.textContent = "Copy email";
+          }, 2000);
+        }
+      });
+
       requestAnimationFrame(() => scrollToBottom());
     }
 
