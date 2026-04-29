@@ -10,24 +10,40 @@ export default function PricingPage() {
     <div className="relative">
       <div className="grid-bg" />
 
-      {/* ── Free ── */}
+      {/* ── Hero ── */}
+      <section className="relative py-24 px-4">
+        <div className="mx-auto max-w-3xl text-center animate-fade-in">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
+            Pricing
+          </p>
+          <h1 className="text-4xl font-bold text-white sm:text-5xl mb-6">
+            Tools are free. Time is paid.
+          </h1>
+          <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+            Verified founders get the full AI fundraising platform — no credit
+            card needed. When you want hands-on support running your raise,
+            our team steps in.
+          </p>
+        </div>
+      </section>
+
+      {/* ── Technology ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">
             <div className="flex items-baseline gap-4 mb-2">
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Free
+                Technology
               </h2>
-              <span className="text-sm text-zinc-500">verify to unlock</span>
+              <span className="text-sm text-zinc-500">No credit card needed</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              The full Brain. Investor matching, pipeline tracking, meeting
-              ingestion, outreach strategy — all from conversation. No forms,
-              no dashboards. Verify your LinkedIn + company website to
-              unlock — takes about a minute.
+              The full Brain — every tool a founder needs to run a raise, all
+              from natural conversation. No forms, no dashboards. Verify your
+              LinkedIn and company website to unlock; takes about a minute.
             </p>
 
-            <div className="space-y-2 mb-10">
+            <ul className="space-y-2 mb-10 list-none">
               {[
                 "Investor matching — ranked by fit from 24,000+ rounds of real data",
                 "Pipeline CRM — the Brain tracks every investor interaction automatically",
@@ -36,21 +52,22 @@ export default function PricingPage() {
                 "Signal reading — what investors are actually doing, not just saying",
                 "Term sheet intelligence — comp data and negotiation context",
                 "Narrative analysis — how your story lands with target investors",
+                "Deck analysis — calibrated feedback on positioning and structure",
                 "Persistent memory — the Brain remembers your entire raise across sessions",
                 "Unlimited queries for the duration of your raise",
               ].map((item) => (
-                <div key={item} className="flex items-start gap-3">
-                  <span className="text-teal-400 mt-0.5 shrink-0">—</span>
+                <li key={item} className="flex items-start gap-3">
+                  <span className="text-teal-400 mt-1 shrink-0 leading-none">•</span>
                   <span className="text-sm text-zinc-300">{item}</span>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
 
             <a
               href="/signup"
               className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30 inline-block"
             >
-              Get started
+              Get Verified
             </a>
           </div>
         </FadeInSection>
@@ -60,7 +77,7 @@ export default function PricingPage() {
         <div className="border-t border-zinc-800/50" />
       </div>
 
-      {/* ── Catalyst (Concierge) ── */}
+      {/* ── Concierge ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">
@@ -69,28 +86,35 @@ export default function PricingPage() {
                 Concierge
               </h2>
             </div>
+            <p className="text-sm text-zinc-400 mb-4 max-w-xl">
+              Hands-on fundraising support from a team that&apos;s been there.
+              Together we&apos;ve raised over $21M across 1,100+ investor
+              meetings — and we&apos;ve watched every kind of &ldquo;no&rdquo;
+              and &ldquo;yes.&rdquo; We bring that pattern recognition to
+              your raise.
+            </p>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              Hands-on fundraising support from a team that&apos;s collectively raised
-              over $21M across 1,100+ investor meetings. We work alongside you
-              for the duration of your raise.
+              We work alongside you for the duration of your raise — pitch
+              positioning, investor matching, warm intros, meeting prep, term
+              sheet review. Whatever the raise needs.
             </p>
 
-            <div className="space-y-2 mb-10">
+            <ul className="space-y-2 mb-10 list-none">
               {[
-                "Everything in Launchpad — full Brain access, all tools, unlimited queries",
-                "Investor matching + warm introductions from our network",
                 "Pitch positioning — how to land the narrative with each investor",
-                "Outreach strategy — who to contact, in what order, and what to lead with",
+                "Investor matching + warm introductions from our network",
+                "Outreach strategy — who to contact, in what order, what to lead with",
                 "Meeting prep and debrief — before and after every investor conversation",
                 "Term sheet review — comp data, red flags, and negotiation strategy",
+                "Full Brain access throughout — all tools, unlimited queries",
                 "Dramatically cheaper than a placement agent (3–5% of round)",
               ].map((item) => (
-                <div key={item} className="flex items-start gap-3">
-                  <span className="text-orange-400 mt-0.5 shrink-0">—</span>
+                <li key={item} className="flex items-start gap-3">
+                  <span className="text-orange-400 mt-1 shrink-0 leading-none">•</span>
                   <span className="text-sm text-zinc-300">{item}</span>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
 
             <a
               href="mailto:team@raisefn.com?subject=Concierge%20inquiry"
@@ -98,77 +122,6 @@ export default function PricingPage() {
             >
               Contact us
             </a>
-          </div>
-        </FadeInSection>
-      </section>
-
-      <div className="mx-auto max-w-3xl px-4">
-        <div className="border-t border-zinc-800/50" />
-      </div>
-
-      {/* ── Investors ── */}
-      <section className="relative py-16 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl">
-            <div className="flex items-baseline gap-4 mb-6">
-              <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Investors
-              </h2>
-            </div>
-            <p className="text-sm text-zinc-400 mb-8 max-w-xl">
-              Market intelligence and deal management built for how investors
-              actually work.
-            </p>
-            <div className="space-y-3 mb-8">
-              {[
-                "Deal flow matching — active raises matched to your thesis, sectors, and check size",
-                "Market intelligence — sector trends, valuation benchmarking, and funding activity from 24,000+ rounds",
-                "Deal pipeline CRM — track every company you're evaluating, from conversation",
-                "Portfolio monitoring — stay on top of your existing companies",
-                "Term sheet benchmarking — comp data for evaluating deals",
-                "Valuation comps — where any deal sits relative to the market",
-              ].map((item) => (
-                <div key={item} className="flex items-start gap-3">
-                  <span className="text-teal-400 mt-0.5 shrink-0">—</span>
-                  <span className="text-sm text-zinc-300">{item}</span>
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={() => router.push("/signup")}
-              className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30"
-            >
-              Get started
-            </button>
-          </div>
-        </FadeInSection>
-      </section>
-
-      <div className="mx-auto max-w-3xl px-4">
-        <div className="border-t border-zinc-800/50" />
-      </div>
-
-      {/* ── Builders ── */}
-      <section className="relative py-16 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl">
-            <div className="flex items-baseline gap-4 mb-6">
-              <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Builders
-              </h2>
-              <span className="text-2xl font-bold text-teal-400">Coming soon</span>
-            </div>
-            <p className="text-sm text-zinc-400 mb-8 max-w-xl">
-              SDKs, APIs, and integrations for developers embedding fundraising
-              intelligence in their products. We're building for founders first —
-              sign up and we'll reach out when the builder tools are ready.
-            </p>
-            <button
-              onClick={() => router.push("/signup")}
-              className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30"
-            >
-              Join the waitlist
-            </button>
           </div>
         </FadeInSection>
       </section>
@@ -195,7 +148,7 @@ export default function PricingPage() {
                   "The best intel lives in private networks you're not in",
                 ].map((text) => (
                   <p key={text} className="text-sm text-zinc-500 flex items-start gap-2">
-                    <span className="text-zinc-600 mt-0.5">—</span>
+                    <span className="text-zinc-600 mt-1 leading-none">•</span>
                     {text}
                   </p>
                 ))}
@@ -214,7 +167,7 @@ export default function PricingPage() {
                   "The intel founders never share, available to everyone",
                 ].map((text) => (
                   <p key={text} className="text-sm text-zinc-300 flex items-start gap-2">
-                    <span className="text-teal-400 mt-0.5">—</span>
+                    <span className="text-teal-400 mt-1 leading-none">•</span>
                     {text}
                   </p>
                 ))}
