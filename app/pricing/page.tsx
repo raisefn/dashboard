@@ -110,7 +110,6 @@ export default function PricingPage() {
                 ["Meeting prep and debrief", "before and after every investor conversation"],
                 ["Term sheet review", "comp data, red flags, and negotiation strategy"],
                 ["Full Brain access", "all tools, unlimited queries throughout"],
-                ["Dramatically cheaper", "than a placement agent (3–5% of round)"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
                   <span className="text-orange-400 text-lg leading-snug shrink-0">•</span>
