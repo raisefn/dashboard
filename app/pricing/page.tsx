@@ -43,22 +43,25 @@ export default function PricingPage() {
               LinkedIn and company website to unlock; takes about a minute.
             </p>
 
-            <ul className="space-y-2 mb-10 list-none">
+            <ul className="space-y-4 mb-10 list-none">
               {[
-                "Investor matching — ranked by fit from 24,000+ rounds of real data",
-                "Pipeline CRM — the Brain tracks every investor interaction automatically",
-                "Meeting ingestion — paste a transcript, the Brain captures everything",
-                "Outreach strategy — who to contact, how, and when",
-                "Signal reading — what investors are actually doing, not just saying",
-                "Term sheet intelligence — comp data and negotiation context",
-                "Narrative analysis — how your story lands with target investors",
-                "Deck analysis — calibrated feedback on positioning and structure",
-                "Persistent memory — the Brain remembers your entire raise across sessions",
-                "Unlimited queries for the duration of your raise",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span className="text-teal-400 mt-1 shrink-0 leading-none">•</span>
-                  <span className="text-sm text-zinc-300">{item}</span>
+                ["Investor matching", "ranked by fit from 24,000+ rounds of real data"],
+                ["Pipeline CRM", "the Brain tracks every investor interaction automatically"],
+                ["Meeting ingestion", "paste a transcript, the Brain captures everything"],
+                ["Outreach strategy", "who to contact, how, and when"],
+                ["Signal reading", "what investors are actually doing, not just saying"],
+                ["Term sheet intelligence", "comp data and negotiation context"],
+                ["Narrative analysis", "how your story lands with target investors"],
+                ["Deck analysis", "calibrated feedback on positioning and structure"],
+                ["Persistent memory", "the Brain remembers your entire raise across sessions"],
+                ["Unlimited queries", "for the duration of your raise"],
+              ].map(([name, desc]) => (
+                <li key={name} className="flex items-start gap-3">
+                  <span className="text-teal-400 text-lg leading-snug shrink-0">•</span>
+                  <span className="text-sm leading-relaxed">
+                    <strong className="text-zinc-100 font-semibold">{name}</strong>
+                    <span className="text-zinc-400"> — {desc}</span>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -99,19 +102,22 @@ export default function PricingPage() {
               sheet review. Whatever the raise needs.
             </p>
 
-            <ul className="space-y-2 mb-10 list-none">
+            <ul className="space-y-4 mb-10 list-none">
               {[
-                "Pitch positioning — how to land the narrative with each investor",
-                "Investor matching + warm introductions from our network",
-                "Outreach strategy — who to contact, in what order, what to lead with",
-                "Meeting prep and debrief — before and after every investor conversation",
-                "Term sheet review — comp data, red flags, and negotiation strategy",
-                "Full Brain access throughout — all tools, unlimited queries",
-                "Dramatically cheaper than a placement agent (3–5% of round)",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span className="text-orange-400 mt-1 shrink-0 leading-none">•</span>
-                  <span className="text-sm text-zinc-300">{item}</span>
+                ["Pitch positioning", "how to land the narrative with each investor"],
+                ["Investor matching", "warm introductions from our network"],
+                ["Outreach strategy", "who to contact, in what order, what to lead with"],
+                ["Meeting prep and debrief", "before and after every investor conversation"],
+                ["Term sheet review", "comp data, red flags, and negotiation strategy"],
+                ["Full Brain access", "all tools, unlimited queries throughout"],
+                ["Dramatically cheaper", "than a placement agent (3–5% of round)"],
+              ].map(([name, desc]) => (
+                <li key={name} className="flex items-start gap-3">
+                  <span className="text-orange-400 text-lg leading-snug shrink-0">•</span>
+                  <span className="text-sm leading-relaxed">
+                    <strong className="text-zinc-100 font-semibold">{name}</strong>
+                    <span className="text-zinc-400"> — {desc}</span>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -147,9 +153,9 @@ export default function PricingPage() {
                   "Every founder starts from scratch — no one shares what worked",
                   "The best intel lives in private networks you're not in",
                 ].map((text) => (
-                  <p key={text} className="text-sm text-zinc-500 flex items-start gap-2">
-                    <span className="text-zinc-600 mt-1 leading-none">•</span>
-                    {text}
+                  <p key={text} className="text-sm text-zinc-500 flex items-start gap-3 leading-relaxed">
+                    <span className="text-zinc-600 text-lg leading-snug shrink-0">•</span>
+                    <span>{text}</span>
                   </p>
                 ))}
               </div>
@@ -166,9 +172,9 @@ export default function PricingPage() {
                   "Remembers everything — you don't have to",
                   "The intel founders never share, available to everyone",
                 ].map((text) => (
-                  <p key={text} className="text-sm text-zinc-300 flex items-start gap-2">
-                    <span className="text-teal-400 mt-1 leading-none">•</span>
-                    {text}
+                  <p key={text} className="text-sm text-zinc-300 flex items-start gap-3 leading-relaxed">
+                    <span className="text-teal-400 text-lg leading-snug shrink-0">•</span>
+                    <span>{text}</span>
                   </p>
                 ))}
               </div>
