@@ -1,110 +1,30 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase-browser";
 import FadeInSection from "@/components/fade-in-section";
 
 export default function PricingPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState<string | null>(null);
-
-  async function handleCheckout(tier: string) {
-    setLoading(tier);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session) {
-        // Not logged in — send to signup, store plan for after
-        try { localStorage.setItem("raisefn_checkout_plan", tier); } catch {}
-        router.push("/signup");
-        return;
-      }
-
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ tier }),
-      });
-
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        console.error("Checkout error:", data.error);
-      }
-    } catch (err) {
-      console.error("Checkout error:", err);
-    } finally {
-      setLoading(null);
-    }
-  }
 
   return (
     <div className="relative">
       <div className="grid-bg" />
 
-      {/* ── Hero ── */}
       {/* ── Free ── */}
-      <section className="relative py-16 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl">
-            <div className="flex items-baseline gap-4 mb-6">
-              <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Free
-              </h2>
-              <span className="text-2xl font-bold text-teal-400">$0</span>
-            </div>
-            <p className="text-sm text-zinc-400 mb-8 max-w-xl">
-              Discovery conversation and a raise readiness assessment grounded
-              in real data. See how you stack up before you spend a dollar.
-            </p>
-            <div className="space-y-3 mb-8">
-              {[
-                "Raise readiness assessment — benchmarked against real rounds",
-                "Raise intelligence briefing for active raisers — comps, market context, investor teaser",
-                "General fundraising conversation — strategy, timing, structure",
-                "Honest, data-grounded advice you can't get from ChatGPT",
-              ].map((item) => (
-                <div key={item} className="flex items-start gap-3">
-                  <span className="text-teal-400 mt-0.5 shrink-0">—</span>
-                  <span className="text-sm text-zinc-300">{item}</span>
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={() => router.push("/signup")}
-              className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30"
-            >
-              Get started
-            </button>
-          </div>
-        </FadeInSection>
-      </section>
-
-      <div className="mx-auto max-w-3xl px-4">
-        <div className="border-t border-zinc-800/50" />
-      </div>
-
-      {/* ── Launchpad ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">
             <div className="flex items-baseline gap-4 mb-2">
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Launchpad
+                Free
               </h2>
-              <span className="text-2xl font-bold text-orange-400">$200</span>
-              <span className="text-sm text-zinc-500">/month</span>
+              <span className="text-sm text-zinc-500">verify to unlock</span>
             </div>
-            <p className="text-xs text-zinc-500 mb-1">or $1,200/year (save $1,200)</p>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              The full Brain runs your raise. Investor matching, pipeline
-              tracking, meeting ingestion, outreach strategy — all from
-              conversation. No forms, no dashboards. Cancel anytime.
+              The full Brain. Investor matching, pipeline tracking, meeting
+              ingestion, outreach strategy — all from conversation. No forms,
+              no dashboards. Verify your LinkedIn + company website to
+              unlock — takes about a minute.
             </p>
 
             <div className="space-y-2 mb-10">
@@ -120,28 +40,18 @@ export default function PricingPage() {
                 "Unlimited queries for the duration of your raise",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
-                  <span className="text-orange-400 mt-0.5 shrink-0">—</span>
+                  <span className="text-teal-400 mt-0.5 shrink-0">—</span>
                   <span className="text-sm text-zinc-300">{item}</span>
                 </div>
               ))}
             </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleCheckout("launchpad")}
-                disabled={loading === "launchpad"}
-                className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30 disabled:opacity-50"
-              >
-                {loading === "launchpad" ? "Loading..." : "$200/month"}
-              </button>
-              <button
-                onClick={() => handleCheckout("launchpad_annual")}
-                disabled={loading === "launchpad_annual"}
-                className="rounded-full border border-zinc-700/50 bg-zinc-900/20 px-8 py-3 text-sm font-medium text-zinc-400 transition-all hover:border-zinc-600 hover:bg-zinc-800/30 disabled:opacity-50"
-              >
-                {loading === "launchpad_annual" ? "Loading..." : "$1,200/year"}
-              </button>
-            </div>
+            <a
+              href="/signup"
+              className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30 inline-block"
+            >
+              Get started
+            </a>
           </div>
         </FadeInSection>
       </section>
@@ -150,7 +60,7 @@ export default function PricingPage() {
         <div className="border-t border-zinc-800/50" />
       </div>
 
-      {/* ── Catalyst ── */}
+      {/* ── Catalyst (Concierge) ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">

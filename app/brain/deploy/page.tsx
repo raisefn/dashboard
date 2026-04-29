@@ -606,33 +606,6 @@ function BrainDeployInner() {
     return () => subscription.unsubscribe();
   }, [router]);
 
-  /* ── Expose checkout for upgrade buttons ── */
-  useEffect(() => {
-    (window as unknown as Record<string, unknown>).__raisefnCheckout = async (tier: string) => {
-      if (!session) return;
-      // Save last user message for auto-retry after upgrade
-      const lastUserMsg = historyRef.current.filter(m => m.role === "user").pop();
-      if (lastUserMsg) {
-        try { sessionStorage.setItem("raisefn_retry_msg", lastUserMsg.content); } catch {}
-      }
-      try {
-        const res = await fetch("/api/stripe/checkout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ tier }),
-        });
-        const data = await res.json();
-        if (data.url) window.location.href = data.url;
-      } catch (err) {
-        console.error("Checkout error:", err);
-      }
-    };
-    return () => { delete (window as unknown as Record<string, unknown>).__raisefnCheckout; };
-  }, [session]);
-
   /* ── Checkout success detection ── */
   useEffect(() => {
     if (searchParams.get("checkout") === "success") {
@@ -944,12 +917,6 @@ function BrainDeployInner() {
               scrollToBottom();
             } else if (event.type === "error") {
               contentEl.innerHTML = `<div class="error-msg">${event.content}</div>`;
-            } else if (event.type === "upgrade") {
-              // Store flag — render after typewriter effect completes
-              (window as unknown as Record<string, unknown>).__raisefnShowUpgrade = true;
-              if (event.assessment_id) {
-                (window as unknown as Record<string, unknown>).__raisefnAssessmentId = event.assessment_id;
-              }
             } else if (event.type === "done") {
               if (event.raise_id) raiseIdRef.current = event.raise_id;
               if (event.conversation_id) conversationIdRef.current = event.conversation_id;
@@ -1032,63 +999,6 @@ function BrainDeployInner() {
       contentEl.appendChild(errDiv);
     }
 
-    // Render upgrade card AFTER typewriter effect completes + digest delay
-    if ((window as unknown as Record<string, unknown>).__raisefnShowUpgrade) {
-      await new Promise(r => setTimeout(r, 500));
-      delete (window as unknown as Record<string, unknown>).__raisefnShowUpgrade;
-      const assessmentId = (window as unknown as Record<string, unknown>).__raisefnAssessmentId as string | undefined;
-      delete (window as unknown as Record<string, unknown>).__raisefnAssessmentId;
-      const upgradeDiv = document.createElement("div");
-      upgradeDiv.className = "upgrade-card";
-      upgradeDiv.innerHTML = `
-        <div class="upgrade-card-header">Ready to raise? Let's go!!</div>
-        <div class="upgrade-capabilities">
-          <div class="upgrade-cap-section">
-            <div class="upgrade-cap-label">Intelligence</div>
-            <div class="upgrade-cap-grid">
-              <div class="upgrade-cap-cell"><span class="cap-icon">🎯</span><span class="cap-text">Investor matching</span></div>
-              <div class="upgrade-cap-cell"><span class="cap-icon">✉️</span><span class="cap-text">Outreach strategy</span></div>
-              <div class="upgrade-cap-cell"><span class="cap-icon">📊</span><span class="cap-text">Term sheet analysis</span></div>
-              <div class="upgrade-cap-cell"><span class="cap-icon">💬</span><span class="cap-text">Pitch positioning</span></div>
-              <div class="upgrade-cap-cell"><span class="cap-icon">📡</span><span class="cap-text">Signal reading</span></div>
-              <div class="upgrade-cap-cell"><span class="cap-icon">📄</span><span class="cap-text">Deck analysis</span></div>
-            </div>
-          </div>
-          <div class="upgrade-cap-section">
-            <div class="upgrade-cap-label">Pipeline CRM</div>
-            <div class="upgrade-cap-grid">
-              <div class="upgrade-cap-cell"><span class="cap-icon">🔄</span><span class="cap-text">Auto-track conversations</span></div>
-              <div class="upgrade-cap-cell"><span class="cap-icon">📋</span><span class="cap-text">Meeting ingestion</span></div>
-              <div class="upgrade-cap-cell"><span class="cap-icon">🔍</span><span class="cap-text">Instant pipeline recall</span></div>
-              <div class="upgrade-cap-cell"><span class="cap-icon">🧠</span><span class="cap-text">Gets smarter every interaction</span></div>
-            </div>
-          </div>
-          <div class="upgrade-cap-section">
-            <div class="upgrade-cap-label">Memory</div>
-            <div class="upgrade-cap-grid">
-              <div class="upgrade-cap-cell"><span class="cap-icon">💾</span><span class="cap-text">Remembers your entire raise across sessions</span></div>
-            </div>
-          </div>
-        </div>
-        <div class="upgrade-options">
-          <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad')" class="upgrade-btn">Launchpad — $200/mo</button>
-          <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('launchpad_annual')" class="upgrade-btn upgrade-btn-alt">Launchpad — $1,200/yr</button>
-        </div>
-        <div class="upgrade-catalyst-section">
-          <div class="upgrade-catalyst-pitch">Looking for hands-on guidance from someone who's been there? Catalyst includes everything in Launchpad PLUS hands-on fundraising consulting.</div>
-          <button onclick="window.__raisefnCheckout && window.__raisefnCheckout('catalyst')" class="upgrade-btn upgrade-btn-alt">Catalyst — $2,500/mo</button>
-        </div>
-      `;
-      // Render outside the message bubble for full width
-      const messagesInner = document.querySelector(".messages-inner");
-      if (messagesInner) {
-        messagesInner.appendChild(upgradeDiv);
-      } else {
-        contentEl.parentElement?.appendChild(upgradeDiv);
-      }
-      requestAnimationFrame(() => scrollToBottom());
-    }
-
     brainStateRef.current = "idle";
     activeColorRef.current = null;
     setIsStreaming(false);
@@ -1112,13 +1022,6 @@ function BrainDeployInner() {
     function buildWelcomeMessage(firstName: string): string {
       const meta = session?.user?.user_metadata || {};
       const role = (meta.role as string) || "founder";
-      const company = meta.company as string | undefined;
-      const raisingStatus = meta.raising_status as string | undefined;
-      const email = session?.user?.email || "";
-      const isPersonalEmail = /gmail|yahoo|hotmail|proton|outlook|icloud|aol/i.test(email);
-      const looksReal = company && company.length > 2
-        && !/^test|asdf|none|n\/a$/i.test(company)
-        && !email.split("@")[0].toLowerCase().includes(company.toLowerCase());
 
       if (role === "investor") {
         return `Hey ${firstName}! A few quick questions to help me understand your investment focus.`;
@@ -1126,8 +1029,15 @@ function BrainDeployInner() {
       if (role === "builder") {
         return `Hey ${firstName}! Welcome to raise(fn). What are you working on?`;
       }
-      // Founder — two-bubble welcome (second bubble set in showWelcome)
-      return `Hey ${firstName}! A few questions to help me understand more about ${company || "what you're building"} and provide the best possible guidance.`;
+      // Founder — two-bubble welcome (second bubble set in showWelcome).
+      // Names the unlock concretely so the founder knows the bargain:
+      // walk through discovery → tools + matching unlock.
+      return (
+        `Hey ${firstName}! Quick walk-through to get your profile set up. ` +
+        `Once we wrap, all the AI tools unlock — investor matching, outreach drafting, ` +
+        `deck analysis, term sheet review, pipeline tracking — and we start surfacing ` +
+        `you to investors raising at your stage.`
+      );
     }
 
     function showWelcome(firstName: string) {
