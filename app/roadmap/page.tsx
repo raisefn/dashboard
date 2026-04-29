@@ -27,14 +27,21 @@ const capabilities: { label: string; oneliner: string; status: Status; audience:
   { label: "Pitch Deck Analysis", oneliner: "Paste your deck, get calibrated feedback on narrative and positioning", status: "live", audience: "founders", color: "#fbbf24" },
   { label: "Email Notifications", oneliner: "Follow-up reminders and stale pipeline alerts via email", status: "live", audience: "everyone", color: "#34d399" },
   { label: "Outreach Drafting", oneliner: "Cold emails, warm intro requests, and follow-ups — tailored per investor", status: "live", audience: "founders", color: "#f87171" },
-  // Building
+  // Building — top three are code-complete on branches, awaiting deploy
+  { label: "Verified MRR", oneliner: "Real revenue verified live from Stripe — not a number you typed in a form", status: "building", audience: "founders", color: "#2dd4bf" },
+  { label: "Founder Pattern Library", oneliner: "Cross-founder patterns for cold emails, decks, pitches, and diligence — privacy-preserving aggregation", status: "building", audience: "founders", color: "#a78bfa" },
+  { label: "Cross-Raise Memory", oneliner: "Your seed round teaches your Series A — emails, decks, positioning, and diligence carry forward", status: "building", audience: "founders", color: "#34d399" },
+  { label: "Stay in Touch Agent", oneliner: "Automatically keep investors warm between raises — updates, milestones, no effort", status: "building", audience: "founders", color: "#fbbf24" },
+  { label: "Calendar Integration", oneliner: "Connect your calendar — meetings auto-captured without manual logging", status: "building", audience: "everyone", color: "#34d399" },
   { label: "Valuation Calibration", oneliner: "What the data says your company is worth right now", status: "building", audience: "founders", color: "#fbbf24" },
   { label: "Raise Timing", oneliner: "Should you raise now or wait?", status: "building", audience: "founders", color: "#34d399" },
   { label: "Competitive Raise Intel", oneliner: "Who else is raising in your space right now", status: "building", audience: "founders", color: "#f87171" },
   { label: "Co-investor Sequencing", oneliner: "Who to bring in first to unlock the next investor", status: "building", audience: "founders", color: "#a78bfa" },
-  { label: "Calendar Integration", oneliner: "Connect your calendar — meetings auto-captured without manual logging", status: "building", audience: "everyone", color: "#34d399" },
-  { label: "Stay in Touch Agent", oneliner: "Automatically keep investors warm between raises — updates, milestones, no effort", status: "building", audience: "founders", color: "#fbbf24" },
   // Planned
+  { label: "Gmail Draft Compose", oneliner: "Brain drafts your outreach, opens in Gmail with everything filled — you review and send", status: "planned", audience: "founders", color: "#f87171" },
+  { label: "Cap Table", oneliner: "Living cap table — captured conversationally, updates as new rounds close, ready for your Series A", status: "planned", audience: "founders", color: "#a78bfa" },
+  { label: "Term Sheet Comparison", oneliner: "Two offers, side-by-side — dilution, board seats, pro-rata, prefs, with a verdict", status: "planned", audience: "founders", color: "#fbbf24" },
+  { label: "Reference Call Prep", oneliner: "When investors check your references — auto-prep your refs, brief them, follow up", status: "planned", audience: "founders", color: "#34d399" },
   { label: "Deal Flow Matching", oneliner: "Companies matching your thesis, surfaced before they're public", status: "planned", audience: "investors", color: "#f97316" },
   { label: "Portfolio Monitoring", oneliner: "Track portfolio company health from public signals", status: "planned", audience: "investors", color: "#fb923c" },
   { label: "Behavioral Intelligence", oneliner: "How investors actually behave — from real raise data", status: "planned", audience: "investors", color: "#f97316" },
@@ -52,18 +59,6 @@ const capabilities: { label: string; oneliner: string; status: Status; audience:
   { label: "Revenue-Based Financing", oneliner: "Explore non-dilutive funding options based on your metrics", status: "planned", audience: "founders", color: "#34d399" },
   { label: "Grant Discovery", oneliner: "Find and qualify for grants matched to your company and sector", status: "planned", audience: "founders", color: "#2dd4bf" },
 ];
-
-const statusColor: Record<Status, string> = {
-  live: "#2dd4bf",
-  building: "#f97316",
-  planned: "#52525b",
-};
-
-const statusLabel: Record<Status, string> = {
-  live: "Live",
-  building: "In progress",
-  planned: "Planned",
-};
 
 const audienceLabel: Record<string, string> = {
   founders: "Founders",
