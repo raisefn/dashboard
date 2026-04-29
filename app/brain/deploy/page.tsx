@@ -542,6 +542,15 @@ function BrainDeployInner() {
   const [loading, setLoading] = useState(true);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
 
+  // Stripe MRR verification
+  const [stripeStatus, setStripeStatus] = useState<{
+    connected: boolean;
+    verified_mrr_usd: number | null;
+    verified_mrr_updated_at: string | null;
+    verified_mrr_error: string | null;
+  } | null>(null);
+  const [stripeConnected, setStripeConnected] = useState(false);
+
   // Admin
   const [isAdmin, setIsAdmin] = useState(false);
   const [impersonateInput, setImpersonateInput] = useState("");
@@ -642,7 +651,59 @@ function BrainDeployInner() {
       // Auto-dismiss after 5 seconds
       setTimeout(() => setCheckoutSuccess(false), 5000);
     }
+    if (searchParams.get("stripe") === "connected") {
+      setStripeConnected(true);
+      window.history.replaceState({}, "", "/brain/deploy");
+      setTimeout(() => setStripeConnected(false), 5000);
+    }
   }, [searchParams]);
+
+  /* ── Stripe connection status ── */
+  useEffect(() => {
+    if (!session) return;
+    fetch("/v1/brain/integrations/stripe/status", {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && typeof data.connected === "boolean") setStripeStatus(data);
+      })
+      .catch(() => {});
+  }, [session, stripeConnected]);
+
+  function startStripeConnect() {
+    const clientId = process.env.NEXT_PUBLIC_STRIPE_CONNECT_CLIENT_ID;
+    if (!clientId) {
+      alert("Stripe Connect is not configured yet. Please reach out to team@raisefn.com.");
+      return;
+    }
+    // CSRF-safe state token
+    const state = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    sessionStorage.setItem("raisefn.stripeConnectState", state);
+
+    const redirectUri = `${window.location.origin}/integrations/stripe/callback`;
+    const url =
+      `https://connect.stripe.com/oauth/authorize?` +
+      `response_type=code&client_id=${encodeURIComponent(clientId)}` +
+      `&scope=read_only` +
+      `&state=${encodeURIComponent(state)}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    window.location.href = url;
+  }
+
+  async function disconnectStripe() {
+    if (!session) return;
+    if (!confirm("Disconnect Stripe? Your verified MRR will stay frozen at the last known value.")) return;
+    const resp = await fetch("/v1/brain/integrations/stripe/disconnect", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    if (resp.ok) {
+      setStripeStatus((s) => (s ? { ...s, connected: false } : null));
+    }
+  }
 
   /* ── Auto-checkout if user came from pricing page ── */
   useEffect(() => {
@@ -1458,6 +1519,13 @@ function BrainDeployInner() {
         </div>
       )}
 
+      {/* Stripe connected banner */}
+      {stripeConnected && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-lg border border-teal-700/50 bg-teal-950/90 px-6 py-3 text-sm text-teal-300 shadow-lg backdrop-blur-sm">
+          Stripe connected. Your MRR will be verified shortly.
+        </div>
+      )}
+
       {/* Header */}
       <header>
         <nav>
@@ -1466,6 +1534,20 @@ function BrainDeployInner() {
             <span className="fn">(fn)</span>
           </a>
           <div className="nav-right">
+            {stripeStatus?.connected && stripeStatus.verified_mrr_usd !== null ? (
+              <button
+                className="nav-link-btn"
+                onClick={disconnectStripe}
+                title="Click to disconnect Stripe"
+                style={{ color: "#5eead4" }}
+              >
+                ✓ ${stripeStatus.verified_mrr_usd.toLocaleString()} MRR verified
+              </button>
+            ) : (
+              <button className="nav-link-btn" onClick={startStripeConnect}>
+                Verify MRR
+              </button>
+            )}
             {userTier !== "free" ? (
               <button className="nav-link-btn" onClick={handleManagePlan}>Manage plan</button>
             ) : (
