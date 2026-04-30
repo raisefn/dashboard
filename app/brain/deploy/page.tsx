@@ -1044,73 +1044,126 @@ function BrainDeployInner() {
         // Render the upgrade card below the response when the cap was hit.
         if (limitReachedRef.current) {
           const lr = limitReachedRef.current;
+          const isFreeVerified = lr.tier === "free_verified";
           const card = document.createElement("div");
           card.className =
-            "mt-4 rounded-lg border border-orange-700/40 bg-orange-950/20 p-4 text-sm text-zinc-200";
-          const isFreeVerified = lr.tier === "free_verified";
-          const heading = isFreeVerified ? "Ready to run a real raise?" : "Time for hands-on support?";
-          const ctaLabel = isFreeVerified
-            ? "Upgrade to Advisor — $200/mo"
-            : "Contact us about Concierge";
-          const capDetail = lr.cap ? `${lr.cap} messages a month` : "your monthly allotment";
-          const description = isFreeVerified
-            ? `You've used ${capDetail} on Launchpad. Advisor ($200/mo) gives you full access to every tool throughout your raise — investor matching, outreach drafting, deck analysis, pipeline tracking, the works.`
-            : "Concierge brings hands-on support to your raise — pitch positioning, warm intros, meeting prep, term sheet review. Reach out and we'll set it up.";
+            "mt-5 rounded-xl border border-orange-700/20 p-5 text-sm text-zinc-200 " +
+            "bg-gradient-to-br from-orange-900/[0.04] to-black/20";
 
-          card.innerHTML = `
-            <div class="font-semibold text-orange-200 mb-1">${heading}</div>
-            <div class="text-zinc-400 mb-3 text-xs leading-relaxed">${description}</div>
-            <button data-cta="${isFreeVerified ? "launchpad" : "concierge"}"
-                    class="cta-btn inline-block rounded-full border border-orange-600/60 bg-orange-900/30 px-5 py-2 text-xs font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50 disabled:opacity-50">
-              ${ctaLabel}
-            </button>
-            <div class="cta-error mt-2 text-xs text-red-400" style="display:none"></div>
-          `;
+          if (isFreeVerified) {
+            // Free verified → upgrade to Advisor (Stripe checkout)
+            const usageDetail = lr.cap
+              ? `You've used your ${lr.cap} Launchpad messages this month`
+              : "You've used your monthly Launchpad allotment";
+            const resetDetail = lr.reset_label ? ` — resets ${lr.reset_label}` : "";
+
+            card.innerHTML = `
+              <div class="text-[15px] font-semibold text-orange-400 mb-1">Ready to run a real raise?</div>
+              <div class="text-xs text-zinc-400 mb-5 leading-relaxed">${usageDetail}${resetDetail}.</div>
+
+              <div class="mb-5">
+                <div class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">Intelligence</div>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[13px] text-zinc-300">
+                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Investor matching</div>
+                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Outreach strategy</div>
+                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Term sheet analysis</div>
+                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Pitch positioning</div>
+                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Signal reading</div>
+                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Deck analysis</div>
+                </div>
+              </div>
+
+              <div class="mb-5">
+                <div class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">Pipeline CRM</div>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[13px] text-zinc-300">
+                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Auto-track conversations</div>
+                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Meeting ingestion</div>
+                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Instant pipeline recall</div>
+                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Smarter every interaction</div>
+                </div>
+              </div>
+
+              <div class="mb-6">
+                <div class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">Memory</div>
+                <div class="text-[13px] text-zinc-300 flex items-start gap-2">
+                  <span class="text-orange-500/60">—</span>Remembers your entire raise across sessions
+                </div>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-3">
+                <button class="cta-btn rounded-full border border-orange-600/40 px-6 py-2.5 text-sm font-medium text-orange-400 transition-all hover:border-orange-500/70 disabled:opacity-50
+                               bg-gradient-to-br from-orange-700/[0.15] to-orange-700/[0.05]
+                               hover:bg-gradient-to-br hover:from-orange-700/25 hover:to-orange-700/10">
+                  Upgrade to Advisor — $200/mo
+                </button>
+                <a href="mailto:team@raisefn.com?subject=Concierge%20inquiry"
+                   class="text-xs text-zinc-400 underline-offset-2 hover:text-zinc-200 hover:underline">
+                  Need hands-on guidance? Reach out about Concierge.
+                </a>
+              </div>
+              <div class="cta-error mt-3 text-xs text-red-400" style="display:none"></div>
+            `;
+          } else {
+            // Paid tier hit a cap → mailto to Concierge
+            card.innerHTML = `
+              <div class="text-[15px] font-semibold text-orange-400 mb-1">Time for hands-on support?</div>
+              <div class="text-xs text-zinc-400 mb-5 leading-relaxed">
+                You've hit your monthly Advisor allotment${lr.reset_label ? ` — resets ${lr.reset_label}` : ""}.
+                Concierge brings hands-on support to your raise — pitch positioning, warm intros,
+                meeting prep, term sheet review.
+              </div>
+              <a href="mailto:team@raisefn.com?subject=Concierge%20inquiry"
+                 class="inline-block rounded-full border border-orange-600/40 px-6 py-2.5 text-sm font-medium text-orange-400 transition-all hover:border-orange-500/70
+                        bg-gradient-to-br from-orange-700/[0.15] to-orange-700/[0.05]
+                        hover:bg-gradient-to-br hover:from-orange-700/25 hover:to-orange-700/10">
+                Contact us about Concierge
+              </a>
+            `;
+          }
+
           contentEl.appendChild(card);
 
-          // Wire the CTA — Launchpad → Stripe checkout, Concierge → mailto.
-          const btn = card.querySelector(".cta-btn") as HTMLButtonElement | null;
-          const errDiv = card.querySelector(".cta-error") as HTMLDivElement | null;
-          btn?.addEventListener("click", async () => {
-            if (btn.dataset.cta === "concierge") {
-              window.location.href = "mailto:team@raisefn.com?subject=Concierge%20inquiry";
-              return;
-            }
-            // Launchpad → POST /api/stripe/checkout, redirect to session.url
-            if (!session?.access_token) {
-              if (errDiv) {
-                errDiv.style.display = "block";
-                errDiv.textContent = "Session expired — refresh and try again.";
+          // Wire the upgrade CTA → Stripe checkout (only for free_verified).
+          if (isFreeVerified) {
+            const btn = card.querySelector(".cta-btn") as HTMLButtonElement | null;
+            const errDiv = card.querySelector(".cta-error") as HTMLDivElement | null;
+            const originalLabel = btn?.textContent || "";
+            btn?.addEventListener("click", async () => {
+              if (!session?.access_token) {
+                if (errDiv) {
+                  errDiv.style.display = "block";
+                  errDiv.textContent = "Session expired — refresh and try again.";
+                }
+                return;
               }
-              return;
-            }
-            btn.disabled = true;
-            btn.textContent = "Opening checkout…";
-            try {
-              const res = await fetch("/api/stripe/checkout", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${session.access_token}`,
-                },
-                body: JSON.stringify({ tier: "launchpad" }),
-              });
-              const data = await res.json();
-              if (!res.ok || !data.url) {
-                throw new Error(data.error || "Checkout failed");
+              btn.disabled = true;
+              btn.textContent = "Opening checkout…";
+              try {
+                const res = await fetch("/api/stripe/checkout", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${session.access_token}`,
+                  },
+                  body: JSON.stringify({ tier: "launchpad" }),
+                });
+                const data = await res.json();
+                if (!res.ok || !data.url) {
+                  throw new Error(data.error || "Checkout failed");
+                }
+                window.location.href = data.url;
+              } catch (e) {
+                btn.disabled = false;
+                btn.textContent = originalLabel;
+                if (errDiv) {
+                  errDiv.style.display = "block";
+                  errDiv.textContent =
+                    "Couldn't start checkout — try again or email team@raisefn.com.";
+                }
+                console.error("Stripe checkout error:", e);
               }
-              window.location.href = data.url;
-            } catch (e) {
-              btn.disabled = false;
-              btn.textContent = ctaLabel;
-              if (errDiv) {
-                errDiv.style.display = "block";
-                errDiv.textContent =
-                  "Couldn't start checkout — try again or email team@raisefn.com.";
-              }
-              console.error("Stripe checkout error:", e);
-            }
-          });
+            });
+          }
 
           limitReachedRef.current = null;
         }
