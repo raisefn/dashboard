@@ -573,6 +573,7 @@ function BrainDeployInner() {
     reason: string | null;
     cap: number | null;
     next_reset: string | null;
+    reset_label: string | null;
   }>(null);
   const limitWarningRef = useRef<null | {
     tier: string;
@@ -580,6 +581,7 @@ function BrainDeployInner() {
     remaining: number;
     cap: number;
     next_reset: string | null;
+    reset_label: string | null;
   }>(null);
 
   // DOM refs
@@ -942,6 +944,7 @@ function BrainDeployInner() {
                 reason: event.reason ?? null,
                 cap: event.cap ?? null,
                 next_reset: event.next_reset ?? null,
+                reset_label: event.reset_label ?? null,
               };
             } else if (event.type === "limit_warning") {
               limitWarningRef.current = {
@@ -950,6 +953,7 @@ function BrainDeployInner() {
                 remaining: event.remaining,
                 cap: event.cap,
                 next_reset: event.next_reset ?? null,
+                reset_label: event.reset_label ?? null,
               };
             }
           } catch { /* ignore parse errors */ }
@@ -1027,9 +1031,9 @@ function BrainDeployInner() {
           const chip = document.createElement("div");
           chip.className =
             "mb-3 flex items-center gap-2 rounded-md border border-amber-700/40 bg-amber-950/20 px-3 py-2 text-xs text-amber-200";
-          const resetLabel = w.next_reset
-            ? new Date(w.next_reset).toLocaleDateString(undefined, { month: "short", day: "numeric" })
-            : "soon";
+          // reset_label is server-formatted, timezone-stable ("May 1",
+          // "tomorrow", "in under an hour"). Don't try to localize.
+          const resetLabel = w.reset_label || "soon";
           chip.textContent =
             `${w.remaining} message${w.remaining === 1 ? "" : "s"} left this ${w.window === "monthly" ? "month" : w.window === "daily" ? "day" : "hour"}. ` +
             `Resets ${resetLabel}.`;
