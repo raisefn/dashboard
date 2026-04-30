@@ -1042,91 +1042,88 @@ function BrainDeployInner() {
         }
 
         // Render the upgrade card below the response when the cap was hit.
+        // Styling lives in globals.css (.upgrade-card and friends) — Tailwind
+        // JIT can't see classes inside this innerHTML at build time.
         if (limitReachedRef.current) {
           const lr = limitReachedRef.current;
           const isFreeVerified = lr.tier === "free_verified";
           const card = document.createElement("div");
-          card.className =
-            "mt-5 rounded-xl border border-orange-700/20 p-5 text-sm text-zinc-200 " +
-            "bg-gradient-to-br from-orange-900/[0.04] to-black/20";
+          card.className = "upgrade-card";
+
+          // Subhead text — minimal, since the streamed message above the card
+          // already says "you've hit the wall." Don't repeat it.
+          const resetCopy = lr.reset_label ? `Resets ${lr.reset_label}.` : "";
 
           if (isFreeVerified) {
-            // Free verified → upgrade to Advisor (Stripe checkout)
-            const usageDetail = lr.cap
-              ? `You've used your ${lr.cap} Launchpad messages this month`
-              : "You've used your monthly Launchpad allotment";
-            const resetDetail = lr.reset_label ? ` — resets ${lr.reset_label}` : "";
-
             card.innerHTML = `
-              <div class="text-[15px] font-semibold text-orange-400 mb-1">Ready to run a real raise?</div>
-              <div class="text-xs text-zinc-400 mb-5 leading-relaxed">${usageDetail}${resetDetail}.</div>
+              <div class="upgrade-card-header">Ready to run a real raise?</div>
+              <div class="upgrade-card-subhead">
+                Advisor unlocks the full platform for an active raise. ${resetCopy}
+              </div>
 
-              <div class="mb-5">
-                <div class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">Intelligence</div>
-                <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[13px] text-zinc-300">
-                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Investor matching</div>
-                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Outreach strategy</div>
-                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Term sheet analysis</div>
-                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Pitch positioning</div>
-                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Signal reading</div>
-                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Deck analysis</div>
+              <div class="upgrade-card-section">
+                <div class="upgrade-card-section-label">Intelligence</div>
+                <div class="upgrade-card-grid">
+                  <div class="upgrade-card-grid-item">Investor matching</div>
+                  <div class="upgrade-card-grid-item">Outreach strategy</div>
+                  <div class="upgrade-card-grid-item">Term sheet analysis</div>
+                  <div class="upgrade-card-grid-item">Pitch positioning</div>
+                  <div class="upgrade-card-grid-item">Signal reading</div>
+                  <div class="upgrade-card-grid-item">Deck analysis</div>
                 </div>
               </div>
 
-              <div class="mb-5">
-                <div class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">Pipeline CRM</div>
-                <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[13px] text-zinc-300">
-                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Auto-track conversations</div>
-                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Meeting ingestion</div>
-                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Instant pipeline recall</div>
-                  <div class="flex items-start gap-2"><span class="text-orange-500/60">—</span>Smarter every interaction</div>
+              <div class="upgrade-card-section">
+                <div class="upgrade-card-section-label">Pipeline CRM</div>
+                <div class="upgrade-card-grid">
+                  <div class="upgrade-card-grid-item">Auto-track conversations</div>
+                  <div class="upgrade-card-grid-item">Meeting ingestion</div>
+                  <div class="upgrade-card-grid-item">Instant pipeline recall</div>
+                  <div class="upgrade-card-grid-item">Smarter every interaction</div>
                 </div>
               </div>
 
-              <div class="mb-6">
-                <div class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">Memory</div>
-                <div class="text-[13px] text-zinc-300 flex items-start gap-2">
-                  <span class="text-orange-500/60">—</span>Remembers your entire raise across sessions
-                </div>
+              <div class="upgrade-card-section">
+                <div class="upgrade-card-section-label">Memory</div>
+                <div class="upgrade-card-grid-item">Remembers your entire raise across sessions</div>
               </div>
 
-              <div class="flex flex-wrap items-center gap-3">
-                <button class="cta-btn rounded-full border border-orange-600/40 px-6 py-2.5 text-sm font-medium text-orange-400 transition-all hover:border-orange-500/70 disabled:opacity-50
-                               bg-gradient-to-br from-orange-700/[0.15] to-orange-700/[0.05]
-                               hover:bg-gradient-to-br hover:from-orange-700/25 hover:to-orange-700/10">
+              <div class="upgrade-card-cta-row">
+                <button class="upgrade-card-btn" data-cta="launchpad">
                   Upgrade to Advisor — $200/mo
                 </button>
                 <a href="mailto:team@raisefn.com?subject=Concierge%20inquiry"
-                   class="text-xs text-zinc-400 underline-offset-2 hover:text-zinc-200 hover:underline">
-                  Need hands-on guidance? Reach out about Concierge.
+                   class="upgrade-card-secondary">
+                  Need hands-on guidance? Reach out about Concierge →
                 </a>
+                <div class="upgrade-card-error" style="display:none"></div>
               </div>
-              <div class="cta-error mt-3 text-xs text-red-400" style="display:none"></div>
             `;
           } else {
-            // Paid tier hit a cap → mailto to Concierge
+            // Paid tier hit a cap → Concierge mailto only (no Stripe button).
             card.innerHTML = `
-              <div class="text-[15px] font-semibold text-orange-400 mb-1">Time for hands-on support?</div>
-              <div class="text-xs text-zinc-400 mb-5 leading-relaxed">
-                You've hit your monthly Advisor allotment${lr.reset_label ? ` — resets ${lr.reset_label}` : ""}.
-                Concierge brings hands-on support to your raise — pitch positioning, warm intros,
-                meeting prep, term sheet review.
+              <div class="upgrade-card-header">Time for hands-on support?</div>
+              <div class="upgrade-card-subhead">
+                You've hit this month's Advisor allotment. ${resetCopy}
+                Concierge brings pitch positioning, warm intros, meeting prep, and
+                term sheet review to your raise.
               </div>
-              <a href="mailto:team@raisefn.com?subject=Concierge%20inquiry"
-                 class="inline-block rounded-full border border-orange-600/40 px-6 py-2.5 text-sm font-medium text-orange-400 transition-all hover:border-orange-500/70
-                        bg-gradient-to-br from-orange-700/[0.15] to-orange-700/[0.05]
-                        hover:bg-gradient-to-br hover:from-orange-700/25 hover:to-orange-700/10">
-                Contact us about Concierge
-              </a>
+              <div class="upgrade-card-cta-row">
+                <a href="mailto:team@raisefn.com?subject=Concierge%20inquiry"
+                   class="upgrade-card-btn"
+                   style="text-decoration:none">
+                  Contact us about Concierge
+                </a>
+              </div>
             `;
           }
 
           contentEl.appendChild(card);
 
-          // Wire the upgrade CTA → Stripe checkout (only for free_verified).
+          // Wire the upgrade CTA → Stripe checkout (free_verified only).
           if (isFreeVerified) {
-            const btn = card.querySelector(".cta-btn") as HTMLButtonElement | null;
-            const errDiv = card.querySelector(".cta-error") as HTMLDivElement | null;
+            const btn = card.querySelector(".upgrade-card-btn") as HTMLButtonElement | null;
+            const errDiv = card.querySelector(".upgrade-card-error") as HTMLDivElement | null;
             const originalLabel = btn?.textContent || "";
             btn?.addEventListener("click", async () => {
               if (!session?.access_token) {
