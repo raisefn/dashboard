@@ -1118,7 +1118,15 @@ function BrainDeployInner() {
             `;
           }
 
-          contentEl.appendChild(card);
+          // Append to the chat container (a sibling of the message bubbles)
+          // instead of inside contentEl — that lets the card span the full
+          // chat width instead of being capped at 65% by .message.assistant.
+          const cardParent = messagesInnerRef.current ?? contentEl;
+          cardParent.appendChild(card);
+          // Make sure the user actually SEES the card — scroll it into view.
+          requestAnimationFrame(() => {
+            card.scrollIntoView({ behavior: "smooth", block: "center" });
+          });
 
           // Wire the upgrade CTA → Stripe checkout (free_verified only).
           if (isFreeVerified) {
