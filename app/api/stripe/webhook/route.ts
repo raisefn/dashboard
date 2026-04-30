@@ -115,9 +115,25 @@ export async function POST(req: Request) {
 
       console.log(`Payment completed: ${customerEmail} → ${tier}`);
 
+      // Public display names — internal tier codes stay the same.
+      const TIER_DISPLAY: Record<string, string> = {
+        launchpad: "Advisor",
+        launchpad_annual: "Advisor (annual)",
+        catalyst: "Concierge",
+      };
+      const displayName = TIER_DISPLAY[tier] ?? tier;
+
+      // amount_total is in minor units (cents).
+      let amountText = "";
+      if (session.amount_total != null) {
+        const major = (session.amount_total / 100).toFixed(2);
+        const currency = (session.currency ?? "usd").toUpperCase();
+        amountText = ` — $${major} ${currency}`;
+      }
+
       await notifySlack(
         "stripePayments",
-        `💰 Payment completed: *${customerEmail}* → ${tier}`
+        `💰 Payment completed: *${customerEmail}* → ${displayName}${amountText}`
       );
     } catch (err) {
       console.error("Error processing checkout webhook:", err);
