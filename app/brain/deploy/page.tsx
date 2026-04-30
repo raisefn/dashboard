@@ -1041,23 +1041,27 @@ function BrainDeployInner() {
           limitWarningRef.current = null;
         }
 
-        // Render the upgrade card below the response when the cap was hit.
-        // Styling lives in globals.css (.upgrade-card and friends) — Tailwind
-        // JIT can't see classes inside this innerHTML at build time.
-        if (limitReachedRef.current) {
-          const lr = limitReachedRef.current;
-          const isFreeVerified = lr.tier === "free_verified";
+        // (limit_reached card render moved OUT of this if-fullText block —
+        // see below. It runs whether or not text was streamed.)
+      }
 
-          // The card IS the response — no empty assistant bubble above it.
-          // Brain stops streaming text on limit_reached; the bubble that
-          // addMessageToDOM created at the start of the request would just
-          // sit empty, so remove it.
-          assistantEl.remove();
+      // Render the upgrade card whenever the cap was hit. Has to live
+      // OUTSIDE the if (fullText) block above because brain doesn't stream
+      // any text on limit_reached — fullText is empty, the typewriter block
+      // is skipped, but we still need to show the card.
+      if (limitReachedRef.current) {
+        const lr = limitReachedRef.current;
+        const isFreeVerified = lr.tier === "free_verified";
 
-          const card = document.createElement("div");
-          card.className = "upgrade-card";
+        // The card IS the response — no empty assistant bubble above it.
+        // Brain stops streaming text on limit_reached; the placeholder
+        // bubble would just sit empty, so remove it.
+        assistantEl.remove();
 
-          if (isFreeVerified) {
+        const card = document.createElement("div");
+        card.className = "upgrade-card";
+
+        if (isFreeVerified) {
             card.innerHTML = `
               <div class="upgrade-card-leadin">
                 Looks like you've gotten through your Launchpad trial — nice work.
@@ -1180,8 +1184,7 @@ function BrainDeployInner() {
             });
           }
 
-          limitReachedRef.current = null;
-        }
+        limitReachedRef.current = null;
       }
     } catch (e) {
       const errDiv = document.createElement("div");
