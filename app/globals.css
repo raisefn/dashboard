@@ -142,6 +142,15 @@ html {
   animation: upgrade-card-in 320ms ease-out both;
 }
 
+.upgrade-card-leadin {
+  font-size: 14px;
+  color: #d4d4d8;
+  line-height: 1.55;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(63, 63, 70, 0.4);
+}
+
 .upgrade-card-header {
   font-size: 17px;
   font-weight: 600;

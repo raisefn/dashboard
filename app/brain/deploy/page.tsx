@@ -1047,18 +1047,25 @@ function BrainDeployInner() {
         if (limitReachedRef.current) {
           const lr = limitReachedRef.current;
           const isFreeVerified = lr.tier === "free_verified";
+
+          // The card IS the response — no empty assistant bubble above it.
+          // Brain stops streaming text on limit_reached; the bubble that
+          // addMessageToDOM created at the start of the request would just
+          // sit empty, so remove it.
+          assistantEl.remove();
+
           const card = document.createElement("div");
           card.className = "upgrade-card";
 
-          // Subhead text — minimal, since the streamed message above the card
-          // already says "you've hit the wall." Don't repeat it.
-          const resetCopy = lr.reset_label ? `Resets ${lr.reset_label}.` : "";
-
           if (isFreeVerified) {
             card.innerHTML = `
+              <div class="upgrade-card-leadin">
+                Looks like you've gotten through your Launchpad trial — nice work.
+                If you're running an active raise, take a look at Advisor:
+              </div>
               <div class="upgrade-card-header">Ready to run a real raise?</div>
               <div class="upgrade-card-subhead">
-                Advisor unlocks the full platform for an active raise. ${resetCopy}
+                Advisor unlocks the full platform for an active raise.
               </div>
 
               <div class="upgrade-card-section">
@@ -1102,9 +1109,12 @@ function BrainDeployInner() {
           } else {
             // Paid tier hit a cap → Concierge mailto only (no Stripe button).
             card.innerHTML = `
+              <div class="upgrade-card-leadin">
+                Heavy month — you've hit your Advisor allotment.
+                If you want hands-on support to keep the raise moving, Concierge is the next step.
+              </div>
               <div class="upgrade-card-header">Time for hands-on support?</div>
               <div class="upgrade-card-subhead">
-                You've hit this month's Advisor allotment. ${resetCopy}
                 Concierge brings pitch positioning, warm intros, meeting prep, and
                 term sheet review to your raise.
               </div>
