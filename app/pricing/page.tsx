@@ -88,17 +88,18 @@ export default function PricingPage() {
               <span className="text-sm text-zinc-500">$0 — verification required</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              Guidance to start your raise, backed by real data. Verify your
-              LinkedIn and company website to unlock the AI tools — investor
-              matching, deck analysis, outreach drafting, all of it.
+              Guidance to start your raise, backed by real founder knowledge
+              and live market data. Verify your LinkedIn and company website
+              to unlock the AI tools — investor matching, deck analysis,
+              outreach drafting, all of it.
             </p>
 
             <ul className="space-y-4 mb-10 list-none">
               {[
-                ["Full tool access", "investor matching, deck analysis, outreach drafting, all of it"],
-                ["Real fundraising data", "24,000+ rounds of activity behind every recommendation"],
-                ["Verification required", "LinkedIn + company website + commitment to use raisefn honestly"],
-                ["Match notifications", "we surface you to investors deploying at your stage"],
+                ["Readiness check", "where you stand, what to work on before you pitch"],
+                ["Investor research", "who's writing checks at your stage and sector"],
+                ["Deck and narrative review", "calibrated feedback before you go out"],
+                ["First outreach drafts", "your initial cold and warm intros"],
                 ["Persistent memory", "the Brain remembers your raise across sessions"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
@@ -144,11 +145,11 @@ export default function PricingPage() {
 
             <ul className="space-y-4 mb-10 list-none">
               {[
-                ["Run your entire raise", "no caps to think about during an active raise"],
-                ["Full tool access", "every tool, every model — no feature gating"],
-                ["Match notifications", "we surface you to investors deploying at your stage"],
-                ["Pipeline tracking", "every interaction logged automatically"],
-                ["Priority on intros", "verified raisers move faster through the network"],
+                ["Run your entire raise", "no caps during an active raise"],
+                ["Pipeline CRM", "every investor interaction tracked automatically"],
+                ["Sustained outreach", "drafts, follow-ups, replies across your full pipeline"],
+                ["Term sheet intelligence", "comp data and negotiation strategy when offers land"],
+                ["Priority on warm intros", "verified raisers move first through the match queue"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
                   <span className="text-orange-400 text-lg leading-snug shrink-0">•</span>
