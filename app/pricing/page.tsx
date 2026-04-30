@@ -67,37 +67,36 @@ export default function PricingPage() {
             Pricing
           </p>
           <h1 className="text-4xl font-bold text-white sm:text-5xl mb-6">
-            Try free. Upgrade to run your raise.
+            Fundraising intelligence built for founders
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            Verified founders get a real trial of the AI platform. When
-            you&apos;re ready to run a real raise, Launchpad unlocks the
-            volume. Concierge is for hands-on support from a team that&apos;s
-            done it.
+            Investor matching, deck analysis, outreach strategy — grounded in
+            24,000+ rounds of fundraising activity. Free for verified founders.
+            Advisor when you&apos;re running the full raise.
           </p>
         </div>
       </section>
 
-      {/* ── Free ── */}
+      {/* ── Launchpad (free, verified) ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">
             <div className="flex items-baseline gap-4 mb-2">
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Free
+                Launchpad
               </h2>
               <span className="text-sm text-zinc-500">$0 — verification required</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              Test the platform with a real trial. Verify your LinkedIn and
-              company website to unlock — takes about a minute. Twenty messages
-              per month is enough to feel how the AI handles a real raise.
+              Guidance to start your raise, backed by real data. Verify your
+              LinkedIn and company website to unlock the AI tools — investor
+              matching, deck analysis, outreach drafting, all of it.
             </p>
 
             <ul className="space-y-4 mb-10 list-none">
               {[
-                ["20 messages per month", "resets on the 1st"],
                 ["Full tool access", "investor matching, deck analysis, outreach drafting, all of it"],
+                ["Real fundraising data", "24,000+ rounds of activity behind every recommendation"],
                 ["Verification required", "LinkedIn + company website + commitment to use raisefn honestly"],
                 ["Match notifications", "we surface you to investors deploying at your stage"],
                 ["Persistent memory", "the Brain remembers your raise across sessions"],
@@ -126,26 +125,26 @@ export default function PricingPage() {
         <div className="border-t border-zinc-800/50" />
       </div>
 
-      {/* ── Launchpad ── */}
+      {/* ── Advisor (paid, runs a full raise) ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">
             <div className="flex items-baseline gap-4 mb-2">
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Launchpad
+                Advisor
               </h2>
               <span className="text-sm text-zinc-500">$200 / month</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              For founders running an active raise. Eight hundred messages
-              per month covers heavy weeks of deck iteration, investor
-              outreach, and pipeline management without thinking about the
-              meter.
+              For founders running an active raise. Run your entire raise on
+              the platform — every tool, every conversation, end-to-end. Pipeline
+              tracking, deck iteration, investor matching, outreach drafting,
+              term sheet review.
             </p>
 
             <ul className="space-y-4 mb-10 list-none">
               {[
-                ["800 messages per month", "fifty per day, resets on the 1st"],
+                ["Run your entire raise", "no caps to think about during an active raise"],
                 ["Full tool access", "every tool, every model — no feature gating"],
                 ["Match notifications", "we surface you to investors deploying at your stage"],
                 ["Pipeline tracking", "every interaction logged automatically"],
@@ -166,7 +165,7 @@ export default function PricingPage() {
               disabled={checkoutLoading}
               className="rounded-full border border-orange-600/60 bg-orange-900/30 px-8 py-3 text-sm font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50 disabled:opacity-50"
             >
-              {checkoutLoading ? "Opening checkout…" : "Upgrade to Launchpad"}
+              {checkoutLoading ? "Opening checkout…" : "Upgrade to Advisor"}
             </button>
             {checkoutError && (
               <div className="mt-3 text-xs text-red-400 max-w-xl">{checkoutError}</div>
@@ -209,7 +208,7 @@ export default function PricingPage() {
                 ["Outreach strategy", "who to contact, in what order, what to lead with"],
                 ["Meeting prep and debrief", "before and after every investor conversation"],
                 ["Term sheet review", "comp data, red flags, and negotiation strategy"],
-                ["Uncapped Brain access", "all tools, no message cap, throughout the raise"],
+                ["Full Brain access", "every tool, throughout the raise, no friction"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
                   <span className="text-purple-400 text-lg leading-snug shrink-0">•</span>

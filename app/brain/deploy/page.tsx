@@ -1044,13 +1044,14 @@ function BrainDeployInner() {
           card.className =
             "mt-4 rounded-lg border border-orange-700/40 bg-orange-950/20 p-4 text-sm text-zinc-200";
           const isFreeVerified = lr.tier === "free_verified";
-          const heading = isFreeVerified ? "Upgrade to keep going" : "Usage limit reached";
+          const heading = isFreeVerified ? "Ready to run a real raise?" : "Time for hands-on support?";
           const ctaLabel = isFreeVerified
-            ? "Upgrade to Launchpad — $200/mo"
+            ? "Upgrade to Advisor — $200/mo"
             : "Contact us about Concierge";
+          const capDetail = lr.cap ? `${lr.cap} messages a month` : "your monthly allotment";
           const description = isFreeVerified
-            ? "Launchpad gives you 800 messages/month with full tool access — investor matching, outreach drafting, deck analysis, and the rest."
-            : "Reach out and we'll get the right tier set up for your raise.";
+            ? `You've used ${capDetail} on Launchpad. Advisor ($200/mo) gives you full access to every tool throughout your raise — investor matching, outreach drafting, deck analysis, pipeline tracking, the works.`
+            : "Concierge brings hands-on support to your raise — pitch positioning, warm intros, meeting prep, term sheet review. Reach out and we'll set it up.";
 
           card.innerHTML = `
             <div class="font-semibold text-orange-200 mb-1">${heading}</div>
