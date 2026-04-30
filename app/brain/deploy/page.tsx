@@ -567,6 +567,20 @@ function BrainDeployInner() {
   );
   const conversationIdRef = useRef<string | null>(null);
   const historyRef = useRef<{ role: string; content: string }[]>([]);
+  // Per-message rate-limit signals captured from SSE events
+  const limitReachedRef = useRef<null | {
+    tier: string;
+    reason: string | null;
+    cap: number | null;
+    next_reset: string | null;
+  }>(null);
+  const limitWarningRef = useRef<null | {
+    tier: string;
+    window: string;
+    remaining: number;
+    cap: number;
+    next_reset: string | null;
+  }>(null);
 
   // DOM refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -922,6 +936,21 @@ function BrainDeployInner() {
               if (event.conversation_id) conversationIdRef.current = event.conversation_id;
               brainStateRef.current = "idle";
               activeColorRef.current = null;
+            } else if (event.type === "limit_reached") {
+              limitReachedRef.current = {
+                tier: event.tier,
+                reason: event.reason ?? null,
+                cap: event.cap ?? null,
+                next_reset: event.next_reset ?? null,
+              };
+            } else if (event.type === "limit_warning") {
+              limitWarningRef.current = {
+                tier: event.tier,
+                window: event.window,
+                remaining: event.remaining,
+                cap: event.cap,
+                next_reset: event.next_reset ?? null,
+              };
             }
           } catch { /* ignore parse errors */ }
         }
@@ -990,6 +1019,55 @@ function BrainDeployInner() {
             }
           }, TICK_MS);
         });
+
+        // ── Limit signals ─────────────────────────────────────────
+        // Render the soft warning chip above the response (one-shot at 80%).
+        if (limitWarningRef.current) {
+          const w = limitWarningRef.current;
+          const chip = document.createElement("div");
+          chip.className =
+            "mb-3 flex items-center gap-2 rounded-md border border-amber-700/40 bg-amber-950/20 px-3 py-2 text-xs text-amber-200";
+          const resetLabel = w.next_reset
+            ? new Date(w.next_reset).toLocaleDateString(undefined, { month: "short", day: "numeric" })
+            : "soon";
+          chip.textContent =
+            `${w.remaining} message${w.remaining === 1 ? "" : "s"} left this ${w.window === "monthly" ? "month" : w.window === "daily" ? "day" : "hour"}. ` +
+            `Resets ${resetLabel}.`;
+          contentEl.parentElement?.insertBefore(chip, contentEl);
+          limitWarningRef.current = null;
+        }
+
+        // Render the upgrade card below the response when the cap was hit.
+        if (limitReachedRef.current) {
+          const lr = limitReachedRef.current;
+          const card = document.createElement("div");
+          card.className =
+            "mt-4 rounded-lg border border-orange-700/40 bg-orange-950/20 p-4 text-sm text-zinc-200";
+          const isFreeVerified = lr.tier === "free_verified";
+          const heading = isFreeVerified ? "Upgrade to keep going" : "Usage limit reached";
+          const ctaLabel = isFreeVerified
+            ? "Upgrade to Launchpad — $200/mo"
+            : "Contact us about Concierge";
+          const subject = isFreeVerified
+            ? "Upgrade%20to%20Launchpad"
+            : "Concierge%20inquiry";
+          card.innerHTML = `
+            <div class="font-semibold text-orange-200 mb-1">${heading}</div>
+            <div class="text-zinc-400 mb-3 text-xs leading-relaxed">
+              ${
+                isFreeVerified
+                  ? "Launchpad gives you 800 messages/month with full tool access — investor matching, outreach drafting, deck analysis, and the rest."
+                  : "Reach out and we'll get the right tier set up for your raise."
+              }
+            </div>
+            <a href="mailto:team@raisefn.com?subject=${subject}"
+               class="inline-block rounded-full border border-orange-600/60 bg-orange-900/30 px-5 py-2 text-xs font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50">
+              ${ctaLabel}
+            </a>
+          `;
+          contentEl.appendChild(card);
+          limitReachedRef.current = null;
+        }
       }
     } catch (e) {
       const errDiv = document.createElement("div");
