@@ -1048,24 +1048,65 @@ function BrainDeployInner() {
           const ctaLabel = isFreeVerified
             ? "Upgrade to Launchpad — $200/mo"
             : "Contact us about Concierge";
-          const subject = isFreeVerified
-            ? "Upgrade%20to%20Launchpad"
-            : "Concierge%20inquiry";
+          const description = isFreeVerified
+            ? "Launchpad gives you 800 messages/month with full tool access — investor matching, outreach drafting, deck analysis, and the rest."
+            : "Reach out and we'll get the right tier set up for your raise.";
+
           card.innerHTML = `
             <div class="font-semibold text-orange-200 mb-1">${heading}</div>
-            <div class="text-zinc-400 mb-3 text-xs leading-relaxed">
-              ${
-                isFreeVerified
-                  ? "Launchpad gives you 800 messages/month with full tool access — investor matching, outreach drafting, deck analysis, and the rest."
-                  : "Reach out and we'll get the right tier set up for your raise."
-              }
-            </div>
-            <a href="mailto:team@raisefn.com?subject=${subject}"
-               class="inline-block rounded-full border border-orange-600/60 bg-orange-900/30 px-5 py-2 text-xs font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50">
+            <div class="text-zinc-400 mb-3 text-xs leading-relaxed">${description}</div>
+            <button data-cta="${isFreeVerified ? "launchpad" : "concierge"}"
+                    class="cta-btn inline-block rounded-full border border-orange-600/60 bg-orange-900/30 px-5 py-2 text-xs font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50 disabled:opacity-50">
               ${ctaLabel}
-            </a>
+            </button>
+            <div class="cta-error mt-2 text-xs text-red-400" style="display:none"></div>
           `;
           contentEl.appendChild(card);
+
+          // Wire the CTA — Launchpad → Stripe checkout, Concierge → mailto.
+          const btn = card.querySelector(".cta-btn") as HTMLButtonElement | null;
+          const errDiv = card.querySelector(".cta-error") as HTMLDivElement | null;
+          btn?.addEventListener("click", async () => {
+            if (btn.dataset.cta === "concierge") {
+              window.location.href = "mailto:team@raisefn.com?subject=Concierge%20inquiry";
+              return;
+            }
+            // Launchpad → POST /api/stripe/checkout, redirect to session.url
+            if (!session?.access_token) {
+              if (errDiv) {
+                errDiv.style.display = "block";
+                errDiv.textContent = "Session expired — refresh and try again.";
+              }
+              return;
+            }
+            btn.disabled = true;
+            btn.textContent = "Opening checkout…";
+            try {
+              const res = await fetch("/api/stripe/checkout", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({ tier: "launchpad" }),
+              });
+              const data = await res.json();
+              if (!res.ok || !data.url) {
+                throw new Error(data.error || "Checkout failed");
+              }
+              window.location.href = data.url;
+            } catch (e) {
+              btn.disabled = false;
+              btn.textContent = ctaLabel;
+              if (errDiv) {
+                errDiv.style.display = "block";
+                errDiv.textContent =
+                  "Couldn't start checkout — try again or email team@raisefn.com.";
+              }
+              console.error("Stripe checkout error:", e);
+            }
+          });
+
           limitReachedRef.current = null;
         }
       }
