@@ -48,6 +48,7 @@ const capabilities: { label: string; oneliner: string; status: Status; audience:
   { label: "Post-raise Intelligence", oneliner: "Prepare for your next round before you need it", status: "planned", audience: "founders", color: "#2dd4bf" },
   { label: "Sector Analysis", oneliner: "Market-level trends, activity, and momentum by sector", status: "planned", audience: "investors", color: "#fbbf24" },
   { label: "Match Scores", oneliner: "Quantified fit between founders and investors — sector, stage, check size, activity, thesis alignment", status: "planned", audience: "everyone", color: "#2dd4bf" },
+  { label: "LP Intelligence", oneliner: "Who backs the funds you're pitching — fund cycle pressure, mandate constraints, deployment timing", status: "planned", audience: "founders", color: "#a78bfa" },
 
   { label: "Meeting Tool Integration", oneliner: "Otter, Fireflies, Fathom — transcripts flow in automatically", status: "planned", audience: "everyone", color: "#2dd4bf" },
   { label: "Data Freshness Layer", oneliner: "Every data point timestamped and scored — stale intel surfaced transparently", status: "planned", audience: "everyone", color: "#fb923c" },
