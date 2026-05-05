@@ -557,7 +557,13 @@ function BrainDeployInner() {
   const [chatStarted, setChatStarted] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [input, setInput] = useState("");
-  const [attachedFile, setAttachedFile] = useState<{ name: string; text: string } | null>(null);
+  // Attached file may be a text-extracted document (gets injected into the
+  // user message) OR an image (sent as a multimodal content block via the
+  // brain's `images` request field).
+  type AttachedFile =
+    | { kind: "text"; name: string; text: string }
+    | { kind: "image"; name: string; mediaType: string; data: string };
+  const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const raiseIdRef = useRef<string | null>(
@@ -836,7 +842,7 @@ function BrainDeployInner() {
   }, [loading]);
 
   /* ── Send message (exact SSE logic from chat.html) ── */
-  const send = useCallback(async (message: string, opts?: { silent?: boolean; displayMessage?: string }) => {
+  const send = useCallback(async (message: string, opts?: { silent?: boolean; displayMessage?: string; images?: { media_type: string; data: string }[] }) => {
     if (isStreaming || !session) return;
     const silent = opts?.silent ?? false;
 
@@ -879,6 +885,7 @@ function BrainDeployInner() {
         history: historyRef.current.slice(-101, -1),
         ...(raiseIdRef.current && { raise_id: raiseIdRef.current }),
         ...(conversationIdRef.current && { conversation_id: conversationIdRef.current }),
+        ...(opts?.images && opts.images.length > 0 && { images: opts.images }),
       });
 
       const brainUrl = "https://brain-production-61da.up.railway.app/v1/brain/chat";
@@ -1453,9 +1460,7 @@ function BrainDeployInner() {
     }
   }
 
-  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  async function uploadFile(file: File) {
     setUploading(true);
     try {
       const formData = new FormData();
@@ -1466,12 +1471,45 @@ function BrainDeployInner() {
         alert(data.error || "Failed to upload file.");
         return;
       }
-      setAttachedFile({ name: data.filename, text: data.text });
+      if (data.kind === "image") {
+        setAttachedFile({
+          kind: "image",
+          name: data.filename,
+          mediaType: data.media_type,
+          data: data.data,
+        });
+      } else {
+        setAttachedFile({ kind: "text", name: data.filename, text: data.text });
+      }
     } catch {
       alert("Failed to upload file.");
     } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await uploadFile(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  // Paste handler — clipboard image (Cmd+V on a screenshot) becomes an
+  // attached image, same path as the file picker.
+  async function handlePaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      if (it.kind === "file" && it.type.startsWith("image/")) {
+        const file = it.getAsFile();
+        if (file) {
+          e.preventDefault();
+          await uploadFile(file);
+          return;
+        }
+      }
     }
   }
 
@@ -1482,17 +1520,27 @@ function BrainDeployInner() {
     // Build display message (what the user sees) and brain message (what gets sent)
     let displayMsg = userText;
     let brainMsg = userText;
+    let imagePayload: { media_type: string; data: string }[] | undefined;
 
     if (attachedFile) {
-      const instruction = userText || "Please analyze this document.";
-      displayMsg = `📎 ${attachedFile.name}${userText ? "\n" + userText : ""}`;
-      brainMsg = `[Attached file: ${attachedFile.name}]\n\n${attachedFile.text}\n\n${instruction}`;
+      if (attachedFile.kind === "image") {
+        // Images go to the brain as multimodal content blocks via `images`,
+        // not stuffed into the text. The model sees the screenshot directly.
+        const instruction = userText || "What's in this image?";
+        displayMsg = `🖼 ${attachedFile.name}${userText ? "\n" + userText : ""}`;
+        brainMsg = instruction;
+        imagePayload = [{ media_type: attachedFile.mediaType, data: attachedFile.data }];
+      } else {
+        const instruction = userText || "Please analyze this document.";
+        displayMsg = `📎 ${attachedFile.name}${userText ? "\n" + userText : ""}`;
+        brainMsg = `[Attached file: ${attachedFile.name}]\n\n${attachedFile.text}\n\n${instruction}`;
+      }
       setAttachedFile(null);
     }
 
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "48px";
-    send(brainMsg, { displayMessage: displayMsg });
+    send(brainMsg, { displayMessage: displayMsg, images: imagePayload });
   }
 
   function handleTextareaInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -1691,14 +1739,14 @@ function BrainDeployInner() {
           <div className="input-bar">
             {attachedFile && (
               <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 12px", fontSize: "12px", color: "#2dd4bf", background: "#18181b", borderRadius: "8px", marginBottom: "6px" }}>
-                <span>📎 {attachedFile.name}</span>
+                <span>{attachedFile.kind === "image" ? "🖼" : "📎"} {attachedFile.name}</span>
                 <button onClick={() => setAttachedFile(null)} style={{ background: "none", border: "none", color: "#71717a", cursor: "pointer", fontSize: "14px", padding: "0 4px" }}>✕</button>
               </div>
             )}
             <input
               ref={fileInputRef}
               type="file"
-              accept=".pdf,.docx,.txt,.md"
+              accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.webp,.gif,image/*"
               onChange={handleFileUpload}
               style={{ display: "none" }}
             />
@@ -1707,6 +1755,7 @@ function BrainDeployInner() {
               value={input}
               onChange={handleTextareaInput}
               onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
               placeholder="Ask the Brain..."
               rows={1}
             />
@@ -1715,7 +1764,7 @@ function BrainDeployInner() {
               disabled={uploading || isStreaming}
               className="send-btn"
               style={{ opacity: 0.5, fontSize: "16px", minWidth: "auto", padding: "8px 10px" }}
-              title="Upload a file (PDF, DOCX, TXT)"
+              title="Upload a file or image (PDF, DOCX, TXT, PNG, JPG)"
             >
               {uploading ? "..." : "📎"}
             </button>
