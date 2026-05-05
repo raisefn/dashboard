@@ -116,7 +116,7 @@ export default function PricingPage() {
               href="/signup"
               className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30 inline-block"
             >
-              Get started
+              Set Up Your Raise
             </a>
           </div>
         </FadeInSection>
@@ -296,7 +296,7 @@ export default function PricingPage() {
               onClick={() => router.push("/signup")}
               className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
             >
-              Get started
+              Set Up Your Raise
             </button>
           </div>
         </FadeInSection>

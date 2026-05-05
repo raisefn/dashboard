@@ -704,7 +704,7 @@ export default function LandingPage() {
                 href="/signup"
                 className="rounded-full border border-orange-700/50 bg-orange-950/30 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/40 hover:text-orange-200"
               >
-                Start Your Raise
+                Set Up Your Raise
               </Link>
               <Link
                 href="/tracker"

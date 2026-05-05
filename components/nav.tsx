@@ -80,7 +80,7 @@ export default function Nav() {
               href="/signup"
               className="rounded-full bg-orange-600 px-5 py-1.5 text-xs font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
             >
-              Get Started
+              Set Up Your Raise
             </Link>
 
             {/* Mobile hamburger */}
