@@ -1231,15 +1231,13 @@ function BrainDeployInner() {
       if (role === "builder") {
         return `Hey ${firstName}! Welcome to raise(fn). What are you working on?`;
       }
-      // Founder — two-bubble welcome (second bubble set in showWelcome).
-      // Names the unlock concretely so the founder knows the bargain:
-      // walk through discovery → tools + matching unlock.
-      return (
-        `Hey ${firstName}! Quick walk-through to get your profile set up. ` +
-        `Once we wrap, all the AI tools unlock — investor matching, outreach drafting, ` +
-        `deck analysis, term sheet review, pipeline tracking — and we start surfacing ` +
-        `you to investors raising at your stage.`
-      );
+      // Founder — two-bubble welcome aligned to Phase 3 locked plan
+      // (2026-05-06). The old "tools unlock once we wrap" framing is gone
+      // because tools are always free now. The new framing invites the
+      // composable upload: drop a deck, paste a list, share a URL, or just
+      // describe. Brain handles whatever comes in — deck extraction fires
+      // automatically on uploads; chat auto-extract captures from text.
+      return `Hey ${firstName}. Welcome to raise(fn).`;
     }
 
     function showWelcome(firstName: string) {
@@ -1256,7 +1254,7 @@ function BrainDeployInner() {
         showWelcomeTwoBubbles(
           firstName,
           buildWelcomeMessage(firstName),
-          "What problem are you solving? Any traction yet?"
+          "Tell me about your raise. Drop your deck, paste an investor list, share your company URL — or just describe what you're building."
         );
       } else {
         showWelcomeWithMessage(firstName, buildWelcomeMessage(firstName));
@@ -1728,8 +1726,8 @@ function BrainDeployInner() {
             <span className="o">raise</span><span className="t">(fn)</span> brain
           </div>
           <div className="welcome-text">
-            <h2>Ask a real question. <span className="t">Get a real answer.</span></h2>
-            <p>{impersonating ? `Acting as ${impersonating}` : "You\u2019re inside the Brain."}</p>
+            <h2>Tell me about your raise <span className="t">(or paste anything).</span></h2>
+            <p>{impersonating ? `Acting as ${impersonating}` : "Deck, investor list, company URL, or just describe it."}</p>
           </div>
           <div className="starters">
             {STARTERS.map((s) => (
