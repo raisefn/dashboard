@@ -287,6 +287,10 @@ const BRAIN_CSS = `
   .message {
     line-height: 1.7; font-size: 14px;
     animation: fade-in-up 0.4s ease-out both;
+    /* Long unbroken strings (URLs, tokens, code) wrap inside the bubble
+       instead of overflowing the max-width and breaking layout. */
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   .message.user {
     align-self: flex-end;
@@ -913,13 +917,40 @@ function BrainDeployInner() {
         return;
       }
 
-      // Read SSE stream — show status messages live as they arrive
+      // Read SSE stream — show status messages live as they arrive.
+      // Read timeout: if no chunk arrives within 60s, the connection is
+      // effectively dead (Anthropic streaming + brain SSE should emit
+      // something at least every few seconds during processing). Bail
+      // with a clear error rather than hang the spinner forever — the
+      // "stuck, refresh to recover" failure mode this protects against.
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();
       let fullText = "", buffer = "";
+      const READ_TIMEOUT_MS = 60_000;
 
       while (true) {
-        const { done, value } = await reader.read();
+        const result = await Promise.race([
+          reader.read(),
+          new Promise<{ done: true; value: undefined; timeout: true }>((resolve) =>
+            setTimeout(
+              () => resolve({ done: true, value: undefined, timeout: true }),
+              READ_TIMEOUT_MS
+            )
+          ),
+        ]);
+
+        if ("timeout" in result && result.timeout) {
+          contentEl.innerHTML =
+            `<div class="error-msg">Connection stalled. Refresh and try again — your conversation is saved.</div>`;
+          try { reader.cancel(); } catch {}
+          brainStateRef.current = "idle";
+          activeColorRef.current = null;
+          setIsStreaming(false);
+          if (sendBtnRef.current) sendBtnRef.current.disabled = false;
+          return;
+        }
+
+        const { done, value } = result;
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split("\n");

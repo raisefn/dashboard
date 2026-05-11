@@ -4,6 +4,12 @@ export const runtime = "nodejs";
 
 const IMAGE_MIME_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // Anthropic's per-image limit
+// Document size cap. Decks and pipeline lists comfortably fit under 25MB —
+// a 200-page text-heavy PDF is ~5MB; a 25MB PDF is heavily image-stacked
+// and would just bloat extraction without adding signal. Server-side cap
+// protects us from runaway uploads (memory + extraction time) regardless
+// of what Vercel/Next default body limits allow.
+const MAX_DOC_BYTES = 25 * 1024 * 1024;
 
 export async function POST(req: Request) {
   try {
@@ -46,7 +52,19 @@ export async function POST(req: Request) {
       });
     }
 
-    // Document branch — extract text. Existing behavior.
+    // Document branch — extract text. Enforce size cap before extraction
+    // so we don't waste memory + time on runaway uploads.
+    if (buffer.length > MAX_DOC_BYTES) {
+      return NextResponse.json(
+        {
+          error:
+            `File too large (${(buffer.length / 1024 / 1024).toFixed(1)}MB). ` +
+            `Max 25MB. Compress your deck, or paste the text directly into chat.`,
+        },
+        { status: 400 }
+      );
+    }
+
     let text = "";
 
     if (lower.endsWith(".pdf")) {
