@@ -1,35 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 import Link from "next/link";
 
 type Role = "founder" | "investor" | "builder";
 
 export default function SignupPage() {
-  const router = useRouter();
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "builder_done" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "sending" | "sent" | "builder_done" | "oauth_redirecting" | "error"
+  >("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [company, setCompany] = useState("");
-  const [phone, setPhone] = useState("");
-  const [role, setRole] = useState<Role | "">("");
-  const [roleSpecific, setRoleSpecific] = useState("");
+  // Founder is the default role — the "Set Up Your Raise" CTA brings the
+  // founder cohort here. Investors and Builders still have access via the
+  // role toggle below. Phase 3 dropped company/phone/raising_status from
+  // the form; brain captures those naturally during chat.
+  const [role, setRole] = useState<Role>("founder");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const inputClass =
     "w-full rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-teal-700 transition-colors";
-
-  const btnClass = (selected: boolean) =>
-    `w-full text-left rounded-lg border px-3 py-2.5 text-sm transition-all ${
-      selected
-        ? "border-teal-600 bg-teal-950/40 text-teal-300"
-        : "border-zinc-800 bg-zinc-900/50 text-zinc-500 hover:border-zinc-700 hover:text-zinc-400"
-    }`;
 
   const roleOptions: { value: Role; label: string }[] = [
     { value: "founder", label: "Founder" },
@@ -37,47 +31,36 @@ export default function SignupPage() {
     { value: "builder", label: "Builder" },
   ];
 
-  const founderOptions = [
-    { value: "active", label: "Yes, actively raising" },
-    { value: "planning", label: "Planning to in the next 6 months" },
-    { value: "exploring", label: "Just exploring" },
-  ];
-
-  const investorOptions = [
-    { value: "deploying", label: "Yes, actively deploying" },
-    { value: "planning", label: "Raising a new fund / planning to deploy" },
-    { value: "exploring", label: "Just exploring" },
-  ];
-
-  const builderOptions = [
-    { value: "sdk", label: "Building on the SDK / API" },
-    { value: "opportunities", label: "Looking for startup opportunities" },
-    { value: "advising", label: "Advising or consulting" },
-    { value: "curious", label: "Just curious" },
-  ];
-
-  const roleSpecificOptions =
-    role === "founder" ? founderOptions :
-    role === "investor" ? investorOptions :
-    role === "builder" ? builderOptions : [];
-
-  const roleSpecificLabel =
-    role === "founder" ? "Are you raising?" :
-    role === "investor" ? "Are you actively deploying?" :
-    role === "builder" ? "What are you looking for?" : "";
-
-  // Builder flow: no account creation, just capture data
+  // Builder path: no Supabase account, just Slack notification.
   const isBuilder = role === "builder";
   const needsPassword = !isBuilder;
-  const companyRequired = !isBuilder;
 
   function canSubmit() {
-    if (!role || !roleSpecific) return false;
     if (!name.trim() || !email.trim()) return false;
     if (needsPassword && password.length < 6) return false;
-    if (companyRequired && !company.trim()) return false;
     if (!agreedToTerms) return false;
     return true;
+  }
+
+  async function handleGoogle() {
+    setStatus("oauth_redirecting");
+    setErrorMsg("");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
+    });
+    if (error) {
+      setStatus("error");
+      setErrorMsg(error.message);
+    }
+    // On success: browser redirects to Google → /auth/callback → /brain/deploy.
+    // No further code runs here.
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -92,17 +75,14 @@ export default function SignupPage() {
     setErrorMsg("");
 
     if (isBuilder) {
-      // Builder: just notify Slack, no Supabase account
+      // Builder: just notify Slack, no Supabase account.
       fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
           email: email.trim().toLowerCase(),
-          company: company.trim() || "—",
           role: "builder",
-          raising_status: roleSpecific,
-          phone: phone.trim() || "—",
         }),
       }).catch(() => {});
 
@@ -110,17 +90,16 @@ export default function SignupPage() {
       return;
     }
 
-    // Founder / Investor: create Supabase account
+    // Founder / Investor: create Supabase account. Email verification
+    // step is still required (security + anti-abuse); user lands at
+    // /auth/callback → /brain/deploy after clicking the link.
     const { error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
       options: {
         data: {
           name: name.trim(),
-          company: company.trim(),
           role,
-          raising_status: roleSpecific,
-          phone: phone.trim() || null,
         },
       },
     });
@@ -131,17 +110,13 @@ export default function SignupPage() {
       return;
     }
 
-    // Slack notification
     fetch("/api/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: name.trim(),
         email: email.trim().toLowerCase(),
-        company: company.trim(),
         role,
-        raising_status: roleSpecific,
-        phone: phone.trim() || "—",
       }),
     }).catch(() => {});
 
@@ -153,10 +128,7 @@ export default function SignupPage() {
     setName("");
     setEmail("");
     setPassword("");
-    setCompany("");
-    setPhone("");
-    setRole("");
-    setRoleSpecific("");
+    setRole("founder");
     setAgreedToTerms(false);
     setErrorMsg("");
   }
@@ -203,6 +175,14 @@ export default function SignupPage() {
     );
   }
 
+  if (status === "oauth_redirecting") {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center px-4">
+        <p className="text-sm text-zinc-400">Redirecting to Google…</p>
+      </div>
+    );
+  }
+
   // ── Signup form ──
 
   return (
@@ -210,11 +190,37 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-white">Get started</h1>
-          <p className="text-sm text-zinc-500 mt-2">Create your account</p>
+          <p className="text-sm text-zinc-500 mt-2">Create your account in seconds</p>
         </div>
 
+        {/* Google OAuth — primary path, no email-verification step */}
+        {!isBuilder && (
+          <>
+            <button
+              type="button"
+              onClick={handleGoogle}
+              className="w-full flex items-center justify-center gap-3 rounded-full border border-zinc-700 bg-zinc-900 py-3 text-sm font-medium text-zinc-100 transition-all hover:border-zinc-600 hover:bg-zinc-800 mb-4"
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden>
+                <path fill="#4285F4" d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" />
+                <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" />
+                <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" />
+                <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" />
+              </svg>
+              Continue with Google
+            </button>
+
+            <div className="flex items-center gap-3 my-4">
+              <div className="flex-1 h-px bg-zinc-800" />
+              <span className="text-xs text-zinc-600 uppercase tracking-wider">or</span>
+              <div className="flex-1 h-px bg-zinc-800" />
+            </div>
+          </>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Role selection */}
+          {/* Role selection — defaults to Founder, kept visible so
+              Investor and Builder paths are still accessible. */}
           <div>
             <label className="block text-xs text-zinc-500 mb-2">I am a...</label>
             <div className="flex gap-2">
@@ -222,7 +228,7 @@ export default function SignupPage() {
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => { setRole(opt.value); setRoleSpecific(""); }}
+                  onClick={() => setRole(opt.value)}
                   className={`flex-1 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
                     role === opt.value
                       ? "border-teal-600 bg-teal-950/40 text-teal-300"
@@ -263,7 +269,7 @@ export default function SignupPage() {
             />
           </div>
 
-          {/* Password — founders and investors only */}
+          {/* Password — founders and investors only (builders submit without auth) */}
           {needsPassword && (
             <div>
               <label htmlFor="su-password" className="block text-xs text-zinc-500 mb-1.5">Password</label>
@@ -279,55 +285,9 @@ export default function SignupPage() {
             </div>
           )}
 
-          {/* Company — required for founders/investors, optional for builders */}
-          <div>
-            <label htmlFor="su-company" className="block text-xs text-zinc-500 mb-1.5">
-              {isBuilder ? "Company (optional)" : "Company"}
-            </label>
-            <input
-              id="su-company"
-              type="text"
-              required={companyRequired}
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              className={inputClass}
-              placeholder={isBuilder ? "Company name (if applicable)" : "Company name"}
-            />
-          </div>
-
-          {/* Phone — optional */}
-          <div>
-            <label htmlFor="su-phone" className="block text-xs text-zinc-500 mb-1.5">
-              Phone (optional)
-            </label>
-            <input
-              id="su-phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className={inputClass}
-              placeholder="+1 (555) 000-0000"
-            />
-          </div>
-
-          {/* Role-specific question — only shows when a role is selected */}
-          {role && roleSpecificOptions.length > 0 && (
-            <div>
-              <label className="block text-xs text-zinc-500 mb-2">{roleSpecificLabel}</label>
-              <div className="space-y-2">
-                {roleSpecificOptions.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setRoleSpecific(opt.value)}
-                    className={btnClass(roleSpecific === opt.value)}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* TODO: Cloudflare Turnstile — wire when NEXT_PUBLIC_TURNSTILE_SITE_KEY
+              is set in env. Phase 3 launch-gate item; not blocking for first
+              users but should land before public traffic. */}
 
           {/* Terms agreement */}
           <label className="flex items-start gap-2 text-xs text-zinc-500 cursor-pointer">
