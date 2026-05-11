@@ -1074,19 +1074,35 @@ function BrainDeployInner() {
         if (isFreeVerified) {
             card.innerHTML = `
               <div class="upgrade-card-leadin">
-                Looks like you've gotten through your Launchpad trial — nice work.
-                If you're running an active raise, take a look at Advisor:
+                That's your 12 messages this month. If you're running an active
+                raise, take a look at Advisor:
               </div>
               <div class="upgrade-card-header">Ready to run a real raise?</div>
               <div class="upgrade-card-subhead">
-                Advisor unlocks the full platform for an active raise.
+                Advisor turns the brain into your fundraise operating system.
               </div>
 
               <div class="upgrade-card-section">
-                <div class="upgrade-card-section-label">Intelligence</div>
+                <div class="upgrade-card-section-label">Proprietary Network</div>
+                <div class="upgrade-card-grid-item">
+                  Investors who signed up to raise(fn) directly — not in any
+                  public database. Match notifications fire when new ones join.
+                </div>
+              </div>
+
+              <div class="upgrade-card-section">
+                <div class="upgrade-card-section-label">Persistent Memory</div>
+                <div class="upgrade-card-grid-item">
+                  The brain remembers your entire raise across sessions — every
+                  conversation, every investor decision, every comp.
+                </div>
+              </div>
+
+              <div class="upgrade-card-section">
+                <div class="upgrade-card-section-label">Unlimited Messages + Intelligence</div>
                 <div class="upgrade-card-grid">
                   <div class="upgrade-card-grid-item">Investor matching</div>
-                  <div class="upgrade-card-grid-item">Outreach strategy</div>
+                  <div class="upgrade-card-grid-item">Outreach drafting</div>
                   <div class="upgrade-card-grid-item">Term sheet analysis</div>
                   <div class="upgrade-card-grid-item">Pitch positioning</div>
                   <div class="upgrade-card-grid-item">Signal reading</div>
@@ -1104,18 +1120,13 @@ function BrainDeployInner() {
                 </div>
               </div>
 
-              <div class="upgrade-card-section">
-                <div class="upgrade-card-section-label">Memory</div>
-                <div class="upgrade-card-grid-item">Remembers your entire raise across sessions</div>
-              </div>
-
               <div class="upgrade-card-cta-row">
                 <button class="upgrade-card-btn" data-cta="launchpad">
                   Upgrade to Advisor — $200/mo
                 </button>
                 <a href="mailto:team@raisefn.com?subject=Concierge%20inquiry"
                    class="upgrade-card-secondary">
-                  Need hands-on guidance? Reach out about Concierge →
+                  Want hands-on support? Reach out about Concierge →
                 </a>
                 <div class="upgrade-card-error" style="display:none"></div>
               </div>
