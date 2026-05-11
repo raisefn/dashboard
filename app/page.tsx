@@ -697,7 +697,7 @@ export default function LandingPage() {
               Ready to raise?
             </h2>
             <p className="text-zinc-500 mb-10">
-              Get a free raise readiness assessment. No credit card required.
+              Sign up free. Set up your raise.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
