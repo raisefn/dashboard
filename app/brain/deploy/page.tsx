@@ -1058,7 +1058,10 @@ function BrainDeployInner() {
       // is skipped, but we still need to show the card.
       if (limitReachedRef.current) {
         const lr = limitReachedRef.current;
-        const isFreeVerified = lr.tier === "free_verified";
+        // Free tier (Phase 3 model — no more free_verified split) hits cap
+        // → show the rich upgrade card. Paid tier hits day/month cap →
+        // show the Concierge mailto.
+        const isFreeVerified = lr.tier === "free";
 
         // The card IS the response — no empty assistant bubble above it.
         // Brain stops streaming text on limit_reached; the placeholder
