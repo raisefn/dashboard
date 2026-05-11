@@ -311,7 +311,7 @@ const BRAIN_CSS = `
   .message.assistant .content h2 { font-size: 15px; }
   .message.assistant .content h3 { font-size: 14px; }
   .message.assistant .content strong { color: #2dd4bf; font-weight: 600; }
-  .message.assistant .content em { color: #71717a; }
+  .message.assistant .content em { color: #d4d4d8; }
 
   .status-msg {
     display: inline-flex; align-items: center; gap: 8px;
@@ -868,7 +868,7 @@ function BrainDeployInner() {
     const assistantEl = addMessageToDOM("assistant", "");
     const contentEl = assistantEl.querySelector(".content") as HTMLElement;
     if (contentEl) {
-      contentEl.innerHTML = '<div class="status-msg">Searching brain intelligence...</div>';
+      contentEl.innerHTML = '<div class="status-msg">Thinking…</div>';
     }
     brainStateRef.current = "thinking";
     activeColorRef.current = null;
