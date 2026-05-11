@@ -133,13 +133,21 @@ function LoginInner() {
               {status === "sending" ? "Signing in..." : "Sign in"}
             </button>
 
-            <button
-              type="button"
-              onClick={() => { setMode("magic"); setStatus("idle"); setErrorMsg(""); }}
-              className="w-full text-xs text-zinc-600 hover:text-zinc-400 transition-colors py-1"
-            >
-              Use magic link instead
-            </button>
+            <div className="flex items-center justify-between text-xs">
+              <button
+                type="button"
+                onClick={() => { setMode("magic"); setStatus("idle"); setErrorMsg(""); }}
+                className="text-zinc-600 hover:text-zinc-400 transition-colors py-1"
+              >
+                Use magic link instead
+              </button>
+              <a
+                href="/forgot-password"
+                className="text-zinc-600 hover:text-zinc-400 transition-colors py-1"
+              >
+                Forgot password?
+              </a>
+            </div>
           </form>
         ) : (
           <form onSubmit={handleMagicLink} className="space-y-4">

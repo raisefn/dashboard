@@ -31,11 +31,17 @@ function AuthCallbackInner() {
       const type = searchParams.get("type");
       const code = searchParams.get("code");
 
+      // Password reset flow — Supabase appends type=recovery to the
+      // redirectTo URL we passed at resetPasswordForEmail() time. After
+      // verifying the OTP the user has a valid session; we route them
+      // to /reset-password to actually set a new password instead of
+      // dropping them into the brain authenticated-but-unprompted.
+      const isRecovery = type === "recovery";
+
       if (tokenHash && type) {
-        // Email confirmation (signup, password reset)
         const { error } = await supabase.auth.verifyOtp({
           token_hash: tokenHash,
-          type: type as "signup" | "email",
+          type: type as "signup" | "email" | "recovery",
         });
 
         if (error) {
@@ -43,12 +49,12 @@ function AuthCallbackInner() {
           return;
         }
 
-        router.replace("/brain/deploy");
+        router.replace(isRecovery ? "/reset-password" : "/brain/deploy");
         return;
       }
 
       if (code) {
-        // PKCE flow (magic link)
+        // PKCE flow (magic link or OAuth)
         const { error } = await supabase.auth.exchangeCodeForSession(code);
 
         if (error) {
@@ -56,7 +62,7 @@ function AuthCallbackInner() {
           return;
         }
 
-        router.replace("/brain/deploy");
+        router.replace(isRecovery ? "/reset-password" : "/brain/deploy");
         return;
       }
 
