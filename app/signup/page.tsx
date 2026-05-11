@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { supabase } from "@/lib/supabase-browser";
 import Link from "next/link";
 
 type Role = "founder" | "investor" | "builder";
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export default function SignupPage() {
   const [status, setStatus] = useState<
@@ -21,6 +24,11 @@ export default function SignupPage() {
   // the form; brain captures those naturally during chat.
   const [role, setRole] = useState<Role>("founder");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  // Cloudflare Turnstile token — populated by the widget when challenge
+  // completes. Required for email/password signup; Google OAuth path
+  // doesn't need it (Google already does its own bot detection).
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance | null>(null);
 
   const inputClass =
     "w-full rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-teal-700 transition-colors";
@@ -39,6 +47,10 @@ export default function SignupPage() {
     if (!name.trim() || !email.trim()) return false;
     if (needsPassword && password.length < 6) return false;
     if (!agreedToTerms) return false;
+    // Turnstile required for non-builder email/password path. Builder skips
+    // (no Supabase account to protect). Google OAuth path doesn't go through
+    // this submit handler — Google does its own bot defense upstream.
+    if (TURNSTILE_SITE_KEY && needsPassword && !turnstileToken) return false;
     return true;
   }
 
@@ -74,6 +86,26 @@ export default function SignupPage() {
     setStatus("sending");
     setErrorMsg("");
 
+    // Verify Turnstile token server-side BEFORE touching Supabase. Block
+    // bot signups at the perimeter so we don't burn auth-provider rate
+    // limits or DB rows on automated junk. Builders skip this since their
+    // path is just a Slack notification.
+    if (TURNSTILE_SITE_KEY && needsPassword && turnstileToken) {
+      const verifyRes = await fetch("/api/turnstile/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: turnstileToken }),
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) {
+        setStatus("error");
+        setErrorMsg("Verification failed. Please try again.");
+        turnstileRef.current?.reset();
+        setTurnstileToken(null);
+        return;
+      }
+    }
+
     if (isBuilder) {
       // Builder: just notify Slack, no Supabase account.
       fetch("/api/signup", {
@@ -107,6 +139,9 @@ export default function SignupPage() {
     if (error) {
       setStatus("error");
       setErrorMsg(error.message);
+      // Token is single-use after verify — reset for any retry.
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
       return;
     }
 
@@ -291,9 +326,24 @@ export default function SignupPage() {
             </div>
           )}
 
-          {/* TODO: Cloudflare Turnstile — wire when NEXT_PUBLIC_TURNSTILE_SITE_KEY
-              is set in env. Phase 3 launch-gate item; not blocking for first
-              users but should land before public traffic. */}
+          {/* Cloudflare Turnstile — bot defense at the door. Skips
+              when role=builder (no Supabase account to protect) and
+              when the site key isn't configured (graceful local-dev
+              fallback). Token is submitted with the form and verified
+              server-side via /api/turnstile/verify before Supabase
+              gets touched. */}
+          {TURNSTILE_SITE_KEY && needsPassword && (
+            <div className="flex justify-center">
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={TURNSTILE_SITE_KEY}
+                options={{ theme: "dark", size: "normal" }}
+                onSuccess={(token) => setTurnstileToken(token)}
+                onError={() => setTurnstileToken(null)}
+                onExpire={() => setTurnstileToken(null)}
+              />
+            </div>
+          )}
 
           {/* Terms agreement */}
           <label className="flex items-start gap-2 text-xs text-zinc-500 cursor-pointer">
