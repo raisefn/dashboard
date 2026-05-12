@@ -1,15 +1,46 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { supabase } from "@/lib/supabase-browser";
 import Link from "next/link";
 
 type Role = "founder" | "investor" | "builder";
+const VALID_ROLES: readonly Role[] = ["founder", "investor", "builder"] as const;
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
+// Wrapper component — Next.js 14+ requires useSearchParams to live under
+// a Suspense boundary or the whole page becomes dynamic. Matches the same
+// pattern in /auth/callback that's been in production for weeks.
 export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[80vh] items-center justify-center px-4">
+          <p className="text-sm text-zinc-500">Loading…</p>
+        </div>
+      }
+    >
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
+  // Deeplink: ?role=investor or ?role=builder preselects the role tab.
+  // Used in outreach copy ("raisefn.com/signup?role=investor") so investors
+  // landing from a DM see the Investor tab already active — one less click
+  // before they engage with the form. Falls back to founder for missing or
+  // unrecognized values; never trust user input as a tier.
+  const searchParams = useSearchParams();
+  const paramRole = searchParams.get("role");
+  const initialRole: Role = VALID_ROLES.includes(paramRole as Role)
+    ? (paramRole as Role)
+    : "founder";
+
+
   const [status, setStatus] = useState<
     "idle" | "sending" | "sent" | "builder_done" | "oauth_redirecting" | "error"
   >("idle");
@@ -22,7 +53,9 @@ export default function SignupPage() {
   // founder cohort here. Investors and Builders still have access via the
   // role toggle below. Phase 3 dropped company/phone/raising_status from
   // the form; brain captures those naturally during chat.
-  const [role, setRole] = useState<Role>("founder");
+  // Initial value comes from the ?role= deeplink (validated above) — falls
+  // back to founder for missing/invalid params.
+  const [role, setRole] = useState<Role>(initialRole);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   // Cloudflare Turnstile token — populated by the widget when challenge
   // completes. Required for email/password signup; Google OAuth path
