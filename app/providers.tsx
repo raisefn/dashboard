@@ -20,7 +20,14 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
+        // Recovery links create a real session before any of our code runs.
+        // Force the user to /reset-password before they can navigate anywhere
+        // else; otherwise the email link doubles as a passwordless login.
+        if (event === "PASSWORD_RECOVERY") {
+          window.location.replace("/reset-password");
+          return;
+        }
         if (session?.user) {
           posthog.identify(session.user.id, {
             email: session.user.email,
