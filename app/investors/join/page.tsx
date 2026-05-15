@@ -9,6 +9,15 @@ const SECTORS = [
   "crypto_web3", "logistics", "real_estate", "defense", "legal", "other",
 ];
 const STAGES = ["pre_seed", "seed", "series_a", "series_b", "series_c", "growth"];
+// Country names match founder.location free-text via case-insensitive substring,
+// so use full English country names. Empty selection = "no geo filter" — investor
+// matches founders anywhere.
+const COUNTRIES = [
+  "United States", "Canada", "Mexico", "Brazil", "United Kingdom", "Germany",
+  "France", "Spain", "Italy", "Netherlands", "Sweden", "Switzerland",
+  "Ireland", "Israel", "UAE", "Saudi Arabia", "India", "Singapore",
+  "Australia", "Japan", "Nigeria", "Kenya", "South Africa",
+];
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
@@ -22,6 +31,7 @@ export default function InvestorJoinPage() {
   const [checkMax, setCheckMax] = useState("");
   const [sectors, setSectors] = useState<string[]>([]);
   const [stages, setStages] = useState<string[]>([]);
+  const [countries, setCountries] = useState<string[]>([]);
   const [isDeploying, setIsDeploying] = useState<boolean | null>(null);
   const [leadsRounds, setLeadsRounds] = useState<boolean | null>(null);
   const [fundSize, setFundSize] = useState("");
@@ -61,6 +71,7 @@ export default function InvestorJoinPage() {
         check_size_max: checkMax ? Number(checkMax) : undefined,
         focus_sectors: sectors,
         focus_stages: stages,
+        focus_countries: countries,
         is_deploying: isDeploying,
         leads_rounds: leadsRounds,
         fund_size_usd: fundSize ? Number(fundSize) : undefined,
@@ -192,6 +203,25 @@ export default function InvestorJoinPage() {
                 }`}
               >
                 {s.replace(/_/g, "-")}
+              </button>
+            ))}
+          </div>
+        </Field>
+
+        <Field label="Countries you invest in (optional — leave blank for no geo filter)">
+          <div className="flex flex-wrap gap-2">
+            {COUNTRIES.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setCountries((cur) => toggle(cur, c))}
+                className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                  countries.includes(c)
+                    ? "border-teal-500 bg-teal-950/40 text-teal-200"
+                    : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
+                }`}
+              >
+                {c}
               </button>
             ))}
           </div>
