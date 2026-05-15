@@ -65,9 +65,9 @@ export default function PricingPage() {
             Fundraising intelligence built for founders
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            Investor matching, deck analysis, outreach strategy — grounded in
-            24,000+ rounds of fundraising activity. Free to try the brain.
-            Advisor when you&apos;re running an active raise.
+            Targeting, deck analysis, outreach drafts — grounded in 24,000+
+            rounds of fundraising activity. Free to try the brain. Advisor
+            when you&apos;re running an active raise.
           </p>
         </div>
       </section>
@@ -95,7 +95,7 @@ export default function PricingPage() {
                 ["Investor research", "tracker firms + named partners across the public record"],
                 ["Deck and narrative review", "calibrated feedback before you go out"],
                 ["Outreach drafts", "cold and warm intros, drafted for your context"],
-                ["All brain tools", "matching, planning, term review — no feature gates"],
+                ["All brain tools", "targeting, planning, term review — no feature gates"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
                   <span className="text-teal-400 text-lg leading-snug shrink-0">•</span>
@@ -133,17 +133,15 @@ export default function PricingPage() {
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
               For founders running an active raise. Unlimited messages,
-              persistent memory across sessions, and access to investors who
-              signed up to raise(fn) directly — not in any public database.
-              Match notifications fire when new ones join.
+              persistent memory across sessions, and an AI partner that runs
+              the day-to-day of your fundraise alongside you.
             </p>
 
             <ul className="space-y-4 mb-10 list-none">
               {[
-                ["Proprietary network matches", "investors who signed up to raise(fn) directly"],
                 ["Persistent raise memory", "the brain remembers your entire raise across sessions"],
-                ["Match notifications", "alerts when new investors who match your profile join"],
-                ["Pipeline CRM", "every investor interaction tracked automatically"],
+                ["Targeting & outreach drafts", "who to reach, what to say, ready to send"],
+                ["Pipeline memory", "every investor conversation logged so you never re-explain"],
                 ["Unlimited messages", "no cap during an active raise"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
@@ -193,14 +191,14 @@ export default function PricingPage() {
             </p>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
               We work alongside you for the duration of your raise — pitch
-              positioning, investor matching, warm intros, meeting prep, term
+              positioning, targeted outreach, warm intros, meeting prep, term
               sheet review. Whatever the raise needs.
             </p>
 
             <ul className="space-y-4 mb-10 list-none">
               {[
                 ["Pitch positioning", "how to land the narrative with each investor"],
-                ["Investor matching", "warm introductions from our network"],
+                ["Warm introductions", "real intros from our network, not algorithmic guesses"],
                 ["Outreach strategy", "who to contact, in what order, what to lead with"],
                 ["Meeting prep and debrief", "before and after every investor conversation"],
                 ["Term sheet review", "comp data, red flags, and negotiation strategy"],

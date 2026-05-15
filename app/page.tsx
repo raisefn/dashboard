@@ -537,7 +537,7 @@ export default function LandingPage() {
           </div>
           <div className="mx-auto max-w-3xl grid gap-y-8 gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { title: "Investor Matching", desc: "Ranked by actual fit — sector, stage, activity, check size. Not a directory.", color: "#2dd4bf" },
+              { title: "Investor Targeting", desc: "Ranked by actual fit — sector, stage, activity, check size. Not a directory.", color: "#2dd4bf" },
               { title: "Signal Reading", desc: "Decode investor behavior into actionable signals from real pattern data.", color: "#fb923c" },
               { title: "Term Sheet Intel", desc: "Market-rate terms for your stage and sector. Know where you have leverage.", color: "#a78bfa" },
               { title: "Readiness Evaluation", desc: "Your metrics vs. projects that raised at your stage. Know where you stand.", color: "#34d399" },
