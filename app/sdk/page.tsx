@@ -167,7 +167,7 @@ export default function SDKPage() {
         <div className="mx-auto max-w-3xl text-center animate-fade-in">
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto">
             Native integrations for LangChain, CrewAI, Claude, and REST.
-            Build fundraising intelligence into your product — investor matching,
+            Build fundraising intelligence into your product — investor targeting,
             readiness scoring, signal reading — through a single function call.
           </p>
         </div>

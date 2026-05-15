@@ -11,7 +11,7 @@ const audienceColors: Record<string, string> = {
 
 const capabilities: { label: string; oneliner: string; status: Status; audience: string; color: string }[] = [
   // Live
-  { label: "Investor Matching", oneliner: "Find who's actively deploying in your sector right now", status: "live", audience: "founders", color: "#2dd4bf" },
+  { label: "Investor Targeting", oneliner: "Find who's actively deploying in your sector right now", status: "live", audience: "founders", color: "#2dd4bf" },
   { label: "Readiness Evaluation", oneliner: "Know if your metrics are strong enough before you pitch", status: "live", audience: "founders", color: "#34d399" },
   { label: "Narrative Analysis", oneliner: "Is your pitch landing? Find out before you send it", status: "live", audience: "founders", color: "#fbbf24" },
   { label: "Signal Reading", oneliner: "Decode what investor behavior actually means", status: "live", audience: "founders", color: "#fb923c" },
@@ -23,7 +23,7 @@ const capabilities: { label: string; oneliner: string; status: Status; audience:
   { label: "Tracker — Rounds", oneliner: "Live funding rounds from SEC filings and 290+ sources", status: "live", audience: "everyone", color: "#2dd4bf" },
   { label: "Tracker — Investors", oneliner: "Investor profiles cross-referenced across data sources", status: "live", audience: "everyone", color: "#fb923c" },
   { label: "Tracker — Projects", oneliner: "Companies tracked with traction signals and team data", status: "live", audience: "everyone", color: "#34d399" },
-  { label: "Deal CRM", oneliner: "Track every deal through conversation — no data entry", status: "live", audience: "everyone", color: "#fb923c" },
+  { label: "Deal Memory", oneliner: "Track every deal through conversation — no data entry", status: "live", audience: "everyone", color: "#fb923c" },
   { label: "Pitch Deck Analysis", oneliner: "Paste your deck, get calibrated feedback on narrative and positioning", status: "live", audience: "founders", color: "#fbbf24" },
   { label: "Email Notifications", oneliner: "Follow-up reminders and stale pipeline alerts via email", status: "live", audience: "everyone", color: "#34d399" },
   { label: "Outreach Drafting", oneliner: "Cold emails, warm intro requests, and follow-ups — tailored per investor", status: "live", audience: "founders", color: "#f87171" },
@@ -47,7 +47,7 @@ const capabilities: { label: string; oneliner: string; status: Status; audience:
   { label: "Behavioral Intelligence", oneliner: "How investors actually behave — from real raise data", status: "planned", audience: "investors", color: "#f97316" },
   { label: "Post-raise Intelligence", oneliner: "Prepare for your next round before you need it", status: "planned", audience: "founders", color: "#2dd4bf" },
   { label: "Sector Analysis", oneliner: "Market-level trends, activity, and momentum by sector", status: "planned", audience: "investors", color: "#fbbf24" },
-  { label: "Match Scores", oneliner: "Quantified fit between founders and investors — sector, stage, check size, activity, thesis alignment", status: "planned", audience: "everyone", color: "#2dd4bf" },
+  { label: "Fit Scores", oneliner: "Quantified fit between founders and investors — sector, stage, check size, activity, thesis alignment", status: "planned", audience: "everyone", color: "#2dd4bf" },
   { label: "LP Intelligence", oneliner: "Who backs the funds you're pitching — fund cycle pressure, mandate constraints, deployment timing", status: "planned", audience: "founders", color: "#a78bfa" },
 
   { label: "Meeting Tool Integration", oneliner: "Otter, Fireflies, Fathom — transcripts flow in automatically", status: "planned", audience: "everyone", color: "#2dd4bf" },

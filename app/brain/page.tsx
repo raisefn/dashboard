@@ -7,7 +7,7 @@ import { generatePositions } from "@/lib/galaxy";
 
 /* ── Diagram nodes ── */
 const nodes = [
-  { label: "Investor Matching", desc: "", color: "#2dd4bf", active: true },
+  { label: "Investor Targeting", desc: "", color: "#2dd4bf", active: true },
   { label: "Readiness Eval", desc: "", color: "#34d399", active: true },
   { label: "Narrative Analysis", desc: "", color: "#fbbf24", active: true },
   { label: "Signal Reading", desc: "", color: "#fb923c", active: true },
@@ -16,9 +16,9 @@ const nodes = [
   { label: "Pipeline Memory", desc: "", color: "#2dd4bf", active: true },
   { label: "Meeting Ingestion", desc: "", color: "#34d399", active: true },
   { label: "Deal Flow", desc: "", color: "#f97316", active: true },
-  { label: "Deal CRM", desc: "", color: "#f97316", active: true },
+  { label: "Deal Memory", desc: "", color: "#f97316", active: true },
   { label: "Live Rounds", desc: "", color: "#2dd4bf", active: true },
-  { label: "Investor Profiles", desc: "", color: "#fb923c", active: true },
+  { label: "Investor Research", desc: "", color: "#fb923c", active: true },
   { label: "Outcome Data", desc: "", color: "#34d399", active: true },
   { label: "Valuation", desc: "", color: "#fbbf24", active: true },
   { label: "Raise Timing", desc: "", color: "#34d399", active: true },
@@ -180,7 +180,7 @@ export default function BrainPage() {
           </div>
           <div className="mx-auto max-w-3xl grid gap-y-8 gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { title: "Investor Matching", desc: "Who's actively deploying in your sector, ranked by fit. Not a database — a recommendation.", color: "#2dd4bf" },
+              { title: "Investor Targeting", desc: "Who's actively deploying in your sector, ranked by fit. Not a database — a recommendation.", color: "#2dd4bf" },
               { title: "Readiness Evaluation", desc: "Your metrics benchmarked against companies that actually closed. Know before you pitch.", color: "#34d399" },
               { title: "Narrative Analysis", desc: "Is your pitch resonating? What's working in the market right now? Fix it before you send it.", color: "#fbbf24" },
               { title: "Signal Reading", desc: "Investor behavior decoded. What their actions mean, and what to do next.", color: "#fb923c" },
