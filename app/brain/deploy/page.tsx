@@ -1604,6 +1604,12 @@ function BrainDeployInner() {
     setChatStarted(false);
     centerUiRef.current?.classList.remove("at-bottom");
     messagesRef.current?.classList.remove("active");
+    // Re-enable the one-shot session-restore useEffect so the new impersonation
+    // target's existing conversation (and welcome state) gets loaded via
+    // /brain/session with the new X-Impersonate header. Without this reset,
+    // the impersonated user's chat starts blank even when they have prior
+    // conversations.
+    hasAutoProbed.current = false;
   }
 
   async function handleManagePlan() {
