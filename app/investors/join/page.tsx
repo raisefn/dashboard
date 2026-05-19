@@ -18,6 +18,19 @@ const COUNTRIES = [
   "Ireland", "Israel", "UAE", "Saudi Arabia", "India", "Singapore",
   "Australia", "Japan", "Nigeria", "Kenya", "South Africa",
 ];
+const HARD_REQUIREMENTS: { key: string; label: string }[] = [
+  { key: "local", label: "Must be local (geographic proximity)" },
+  { key: "team", label: "Must have cofounder(s)" },
+  { key: "revenue", label: "Must have measurable traction / revenue" },
+];
+const CADENCES: { key: string; label: string }[] = [
+  { key: "continuous", label: "Continuous" },
+  { key: "monthly", label: "Monthly committee" },
+  { key: "quarterly", label: "Quarterly committee" },
+];
+
+type AdditionalContact = { name: string; email: string; role: string };
+type ThesisType = "sector_driven" | "sector_agnostic";
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
@@ -26,12 +39,18 @@ export default function InvestorJoinPage() {
   const [name, setName] = useState("");
   const [firmName, setFirmName] = useState("");
   const [title, setTitle] = useState("");
+  const [website, setWebsite] = useState("");
   const [thesis, setThesis] = useState("");
+  const [thesisType, setThesisType] = useState<ThesisType | null>(null);
   const [checkMin, setCheckMin] = useState("");
   const [checkMax, setCheckMax] = useState("");
   const [sectors, setSectors] = useState<string[]>([]);
   const [stages, setStages] = useState<string[]>([]);
   const [countries, setCountries] = useState<string[]>([]);
+  const [hardRequirements, setHardRequirements] = useState<string[]>([]);
+  const [geoScope, setGeoScope] = useState("");
+  const [committeeCadence, setCommitteeCadence] = useState<string | null>(null);
+  const [additionalContacts, setAdditionalContacts] = useState<AdditionalContact[]>([]);
   const [isDeploying, setIsDeploying] = useState<boolean | null>(null);
   const [leadsRounds, setLeadsRounds] = useState<boolean | null>(null);
   const [fundSize, setFundSize] = useState("");
@@ -44,14 +63,36 @@ export default function InvestorJoinPage() {
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const localRequired = hardRequirements.includes("local");
+
   const submitDisabled = useMemo(() => {
-    if (!email || !thesis || sectors.length === 0 || stages.length === 0) return true;
+    if (!email || !thesis || !thesisType || stages.length === 0) return true;
+    if (thesisType === "sector_driven" && sectors.length === 0) return true;
     if (TURNSTILE_SITE_KEY && !turnstileToken) return true;
     return false;
-  }, [email, thesis, sectors, stages, turnstileToken]);
+  }, [email, thesis, thesisType, sectors, stages, turnstileToken]);
 
   function toggle(set: string[], value: string): string[] {
     return set.includes(value) ? set.filter((s) => s !== value) : [...set, value];
+  }
+
+  function pickThesisType(t: ThesisType) {
+    setThesisType(t);
+    // Clearing sectors when switching to sector-agnostic keeps the backend
+    // validator happy and matches what the user sees on screen.
+    if (t === "sector_agnostic") setSectors([]);
+  }
+
+  function addContact() {
+    setAdditionalContacts((cur) => [...cur, { name: "", email: "", role: "" }]);
+  }
+  function updateContact(idx: number, field: keyof AdditionalContact, value: string) {
+    setAdditionalContacts((cur) =>
+      cur.map((c, i) => (i === idx ? { ...c, [field]: value } : c)),
+    );
+  }
+  function removeContact(idx: number) {
+    setAdditionalContacts((cur) => cur.filter((_, i) => i !== idx));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -61,17 +102,35 @@ export default function InvestorJoinPage() {
     setSubmitError(null);
 
     try {
-      const body = {
+      // Filter out additional contacts that are incomplete — name + email
+      // both required, role optional. Backend rejects partial rows.
+      const cleanContacts = additionalContacts
+        .map((c) => ({
+          name: c.name.trim(),
+          email: c.email.trim(),
+          role: c.role.trim() || undefined,
+        }))
+        .filter((c) => c.name && c.email);
+
+      const body: Record<string, unknown> = {
         email: email.trim().toLowerCase(),
         name: name || undefined,
         firm_name: firmName || undefined,
         title: title || undefined,
+        website: website.trim() || undefined,
         thesis: thesis.trim(),
+        thesis_type: thesisType,
         check_size_min: checkMin ? Number(checkMin) : undefined,
         check_size_max: checkMax ? Number(checkMax) : undefined,
-        focus_sectors: sectors,
+        focus_sectors: thesisType === "sector_driven" ? sectors : [],
         focus_stages: stages,
         focus_countries: countries,
+        hard_requirements: hardRequirements,
+        // Only send geo_scope when "local" is actually checked — otherwise
+        // the field is stale UI state the user can't see.
+        geo_scope: localRequired && geoScope.trim() ? geoScope.trim() : undefined,
+        committee_cadence: committeeCadence || undefined,
+        additional_contacts: cleanContacts.length ? cleanContacts : undefined,
         is_deploying: isDeploying,
         leads_rounds: leadsRounds,
         fund_size_usd: fundSize ? Number(fundSize) : undefined,
@@ -155,9 +214,14 @@ export default function InvestorJoinPage() {
           </Field>
         </div>
 
-        <Field label="Title">
-          <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} placeholder="Partner" />
-        </Field>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Title">
+            <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} placeholder="Partner" />
+          </Field>
+          <Field label="Website">
+            <input value={website} onChange={(e) => setWebsite(e.target.value)} className={inputClass} placeholder="https://yourfirm.com" />
+          </Field>
+        </div>
 
         <Field label="Thesis *">
           <textarea
@@ -170,24 +234,43 @@ export default function InvestorJoinPage() {
           />
         </Field>
 
-        <Field label="Focus sectors *">
-          <div className="flex flex-wrap gap-2">
-            {SECTORS.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setSectors((cur) => toggle(cur, s))}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                  sectors.includes(s)
-                    ? "border-teal-500 bg-teal-950/40 text-teal-200"
-                    : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
-                }`}
-              >
-                {s.replace(/_/g, " ")}
-              </button>
-            ))}
+        <Field label="How do you choose investments? *">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <RadioCard
+              selected={thesisType === "sector_driven"}
+              onClick={() => pickThesisType("sector_driven")}
+              title="Sector-driven"
+              body="I invest in specific sectors. I'll pick them below."
+            />
+            <RadioCard
+              selected={thesisType === "sector_agnostic"}
+              onClick={() => pickThesisType("sector_agnostic")}
+              title="Sector-agnostic"
+              body="Sector doesn't drive my decision — I evaluate on criteria like team, traction, market fit."
+            />
           </div>
         </Field>
+
+        {thesisType === "sector_driven" && (
+          <Field label="Focus sectors *">
+            <div className="flex flex-wrap gap-2">
+              {SECTORS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setSectors((cur) => toggle(cur, s))}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                    sectors.includes(s)
+                      ? "border-teal-500 bg-teal-950/40 text-teal-200"
+                      : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
+                  }`}
+                >
+                  {s.replace(/_/g, " ")}
+                </button>
+              ))}
+            </div>
+          </Field>
+        )}
 
         <Field label="Focus stages *">
           <div className="flex flex-wrap gap-2">
@@ -203,6 +286,58 @@ export default function InvestorJoinPage() {
                 }`}
               >
                 {s.replace(/_/g, "-")}
+              </button>
+            ))}
+          </div>
+        </Field>
+
+        <Field label="Hard requirements (optional — must-haves for any investment)">
+          <div className="flex flex-col gap-2">
+            {HARD_REQUIREMENTS.map((r) => (
+              <button
+                key={r.key}
+                type="button"
+                onClick={() => setHardRequirements((cur) => toggle(cur, r.key))}
+                className={`text-left text-xs px-3 py-2 rounded-md border transition-all ${
+                  hardRequirements.includes(r.key)
+                    ? "border-teal-500 bg-teal-950/40 text-teal-200"
+                    : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
+                }`}
+              >
+                <span className="mr-2">{hardRequirements.includes(r.key) ? "✓" : "○"}</span>
+                {r.label}
+              </button>
+            ))}
+          </div>
+        </Field>
+
+        {localRequired && (
+          <Field label="Where is local for you? (e.g., California, NYC metro)">
+            <input
+              value={geoScope}
+              onChange={(e) => setGeoScope(e.target.value)}
+              className={inputClass}
+              placeholder="California"
+            />
+          </Field>
+        )}
+
+        <Field label="Decision cadence (optional)">
+          <div className="flex gap-2">
+            {CADENCES.map((c) => (
+              <button
+                key={c.key}
+                type="button"
+                onClick={() =>
+                  setCommitteeCadence((cur) => (cur === c.key ? null : c.key))
+                }
+                className={`text-xs px-3 py-1.5 rounded-md border transition-all ${
+                  committeeCadence === c.key
+                    ? "border-teal-500 bg-teal-950/40 text-teal-200"
+                    : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
+                }`}
+              >
+                {c.label}
               </button>
             ))}
           </div>
@@ -253,6 +388,49 @@ export default function InvestorJoinPage() {
             <input value={location} onChange={(e) => setLocation(e.target.value)} className={inputClass} placeholder="San Francisco, CA" />
           </Field>
         </div>
+
+        <Field label="Additional contacts at your firm (optional)">
+          <div className="space-y-2">
+            {additionalContacts.map((c, idx) => (
+              <div key={idx} className="grid grid-cols-12 gap-2 items-center">
+                <input
+                  value={c.name}
+                  onChange={(e) => updateContact(idx, "name", e.target.value)}
+                  className={`${inputClass} col-span-4`}
+                  placeholder="Name"
+                />
+                <input
+                  type="email"
+                  value={c.email}
+                  onChange={(e) => updateContact(idx, "email", e.target.value)}
+                  className={`${inputClass} col-span-4`}
+                  placeholder="Email"
+                />
+                <input
+                  value={c.role}
+                  onChange={(e) => updateContact(idx, "role", e.target.value)}
+                  className={`${inputClass} col-span-3`}
+                  placeholder="Role"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeContact(idx)}
+                  className="col-span-1 text-zinc-500 hover:text-red-400 text-sm"
+                  aria-label="Remove contact"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addContact}
+              className="text-xs text-teal-400 hover:text-teal-300"
+            >
+              + Add contact
+            </button>
+          </div>
+        </Field>
 
         <Field label="Bio (optional)">
           <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={2} className={inputClass} placeholder="Background, prior firms, notable bets…" />
@@ -327,5 +505,34 @@ function TriToggle({ value, onChange }: { value: boolean | null; onChange: (v: b
         </button>
       ))}
     </div>
+  );
+}
+
+function RadioCard({
+  selected,
+  onClick,
+  title,
+  body,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  title: string;
+  body: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`text-left px-3 py-3 rounded-md border transition-all ${
+        selected
+          ? "border-teal-500 bg-teal-950/40"
+          : "border-zinc-700 bg-zinc-900 hover:border-zinc-500"
+      }`}
+    >
+      <div className={`text-sm font-medium mb-1 ${selected ? "text-teal-200" : "text-zinc-300"}`}>
+        {title}
+      </div>
+      <div className="text-xs text-zinc-500 leading-relaxed">{body}</div>
+    </button>
   );
 }
