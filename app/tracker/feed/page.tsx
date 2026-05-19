@@ -1,7 +1,22 @@
+import type { Metadata } from "next";
 import { getRounds } from "@/lib/api";
 import { formatUSD } from "@/lib/format";
 import { typeColors, sourceColors } from "@/lib/colors";
 import TrackerComingSoon from "@/components/tracker-coming-soon";
+
+export const metadata: Metadata = {
+  title: "Live Funding Feed — Latest Rounds | raise(fn)",
+  description:
+    "Real-time feed of fundraising rounds — detected from SEC Form D filings, news sources, and public records. Cross-referenced for accuracy.",
+  alternates: { canonical: "/tracker/feed" },
+  openGraph: {
+    title: "Live Funding Feed — Latest Rounds | raise(fn)",
+    description:
+      "Real-time feed of fundraising rounds — detected from SEC Form D filings and public records.",
+    type: "website",
+    siteName: "raise(fn)",
+  },
+};
 
 export const dynamic = "force-dynamic";
 

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getProject, getRounds, type Founder } from "@/lib/api";
 import { formatUSD, formatNumber, formatPercent, formatPrice, formatDate, percentColor } from "@/lib/format";
@@ -6,6 +7,37 @@ import TrackerComingSoon from "@/components/tracker-coming-soon";
 
 interface Props {
   params: Promise<{ slug: string }>;
+}
+
+function clip(text: string, max = 160): string {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > 100 ? cut.slice(0, lastSpace) : cut) + "…";
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  try {
+    const project = await getProject(slug);
+    const tokenSuffix = project.token_symbol ? ` (${project.token_symbol})` : "";
+    const title = `${project.name}${tokenSuffix} — Funding & Traction | raise(fn)`;
+    const sectorPart = project.sector ? `${project.sector} startup` : "startup";
+    const fallbackDescription = `${project.name} is a ${sectorPart}. View funding history, team, and traction signals tracked from SEC filings, GitHub, and public sources on raise(fn).`;
+    const description = project.description
+      ? clip(project.description, 160)
+      : clip(fallbackDescription, 160);
+    const url = `/tracker/projects/${slug}`;
+    return {
+      title,
+      description,
+      alternates: { canonical: url },
+      openGraph: { title, description, url, type: "website", siteName: "raise(fn)" },
+      twitter: { card: "summary", title, description },
+    };
+  } catch {
+    return { title: "Project — raise(fn)" };
+  }
 }
 
 function FounderCard({ founder }: { founder: Founder }) {

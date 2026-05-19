@@ -1,8 +1,23 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getProjects } from "@/lib/api";
 import { formatUSD, formatNumber } from "@/lib/format";
 import Pagination from "@/components/pagination";
 import TrackerComingSoon from "@/components/tracker-coming-soon";
+
+export const metadata: Metadata = {
+  title: "Startup Directory — Fundraising Activity & Traction | raise(fn)",
+  description:
+    "Every startup tracked from SEC filings, accelerator directories, and developer platforms. See funding history, team, traction signals, and which investors backed them.",
+  alternates: { canonical: "/tracker/projects" },
+  openGraph: {
+    title: "Startup Directory — Fundraising Activity & Traction | raise(fn)",
+    description:
+      "Every startup tracked from SEC filings, accelerator directories, and developer platforms.",
+    type: "website",
+    siteName: "raise(fn)",
+  },
+};
 
 interface Props {
   searchParams: Promise<{

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getInvestor, getInvestorRounds } from "@/lib/api";
 import { formatUSD, formatDate } from "@/lib/format";
@@ -6,6 +7,38 @@ import BrainCTAInline from "@/components/brain-cta-inline";
 
 interface Props {
   params: Promise<{ slug: string }>;
+}
+
+// Truncate to N chars on a word boundary, ending with an ellipsis if cut.
+function clip(text: string, max = 160): string {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > 100 ? cut.slice(0, lastSpace) : cut) + "…";
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  try {
+    const investor = await getInvestor(slug);
+    const title = `${investor.name} — Investor Profile | raise(fn)`;
+    const typePart = investor.type ? `${investor.type}` : "investor";
+    const locPart = investor.hq_location ? `, based in ${investor.hq_location}` : "";
+    const fallbackDescription = `${investor.name} is a ${typePart}${locPart}. View their recent funding activity, portfolio companies, and round-level data tracked from SEC filings on raise(fn).`;
+    const description = investor.description
+      ? clip(investor.description, 160)
+      : clip(fallbackDescription, 160);
+    const url = `/tracker/investors/${slug}`;
+    return {
+      title,
+      description,
+      alternates: { canonical: url },
+      openGraph: { title, description, url, type: "website", siteName: "raise(fn)" },
+      twitter: { card: "summary", title, description },
+    };
+  } catch {
+    return { title: "Investor — raise(fn)" };
+  }
 }
 
 export default async function InvestorDetailPage({ params }: Props) {

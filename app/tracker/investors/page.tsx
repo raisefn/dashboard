@@ -1,8 +1,23 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getInvestors } from "@/lib/api";
 import { formatNumber } from "@/lib/format";
 import Pagination from "@/components/pagination";
 import TrackerComingSoon from "@/components/tracker-coming-soon";
+
+export const metadata: Metadata = {
+  title: "Investor Directory — VCs, Angels, Family Offices | raise(fn)",
+  description:
+    "Searchable directory of active investors — identified from SEC Form D filings, 13F holdings, and Form ADV registrations. Find who's actually writing checks at your stage.",
+  alternates: { canonical: "/tracker/investors" },
+  openGraph: {
+    title: "Investor Directory — VCs, Angels, Family Offices | raise(fn)",
+    description:
+      "Searchable directory of active investors — identified from SEC Form D filings, 13F holdings, and Form ADV registrations.",
+    type: "website",
+    siteName: "raise(fn)",
+  },
+};
 
 interface Props {
   searchParams: Promise<{

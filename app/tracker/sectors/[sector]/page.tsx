@@ -1,9 +1,26 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getRounds, getStatsSectors } from "@/lib/api";
 import { formatUSD, formatDate } from "@/lib/format";
 import TrackerComingSoon from "@/components/tracker-coming-soon";
 import StatsCard from "@/components/stats-card";
 import BrainCTAInline from "@/components/brain-cta-inline";
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { sector } = await params;
+  const sectorName = decodeURIComponent(sector).replace(/_/g, " ");
+  const display = sectorName.charAt(0).toUpperCase() + sectorName.slice(1);
+  const title = `${display} Investors — Active Funding Activity | raise(fn)`;
+  const description = `Recent funding rounds, top investors, and capital flowing into ${sectorName} startups. Real-time data from SEC filings, accelerator directories, and public sources on raise(fn).`;
+  const url = `/tracker/sectors/${sector}`;
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title, description, url, type: "website", siteName: "raise(fn)" },
+    twitter: { card: "summary", title, description },
+  };
+}
 
 const typeColors: Record<string, string> = {
   seed: "bg-emerald-900/60 text-emerald-300",

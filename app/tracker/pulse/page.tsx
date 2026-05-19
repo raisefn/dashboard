@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   getStatsOverview,
@@ -14,6 +15,20 @@ import { formatUSD, formatNumber, formatPercent, percentColor } from "@/lib/form
 import StatsCard from "@/components/stats-card";
 import TrackerComingSoon from "@/components/tracker-coming-soon";
 import { typeColorsText } from "@/lib/colors";
+
+export const metadata: Metadata = {
+  title: "Market Pulse — Sector Momentum & Top Investors | raise(fn)",
+  description:
+    "Sector momentum, top investors by velocity, and emerging traction signals. Real-time market intelligence aggregated from SEC filings, GitHub, and public sources.",
+  alternates: { canonical: "/tracker/pulse" },
+  openGraph: {
+    title: "Market Pulse — Sector Momentum & Top Investors | raise(fn)",
+    description:
+      "Sector momentum, top investors by velocity, and emerging traction signals from SEC filings and public sources.",
+    type: "website",
+    siteName: "raise(fn)",
+  },
+};
 
 export const dynamic = "force-dynamic";
 

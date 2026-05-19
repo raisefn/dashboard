@@ -1,8 +1,23 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getRounds } from "@/lib/api";
 import { formatUSD, formatDate } from "@/lib/format";
 import Pagination from "@/components/pagination";
 import TrackerComingSoon from "@/components/tracker-coming-soon";
+
+export const metadata: Metadata = {
+  title: "Funding Rounds — Searchable by Sector, Stage, Amount | raise(fn)",
+  description:
+    "Every funding round tracked from SEC Form D filings and public records. Filter by sector, stage, lead investor, or amount range. Cross-referenced and continuously updated.",
+  alternates: { canonical: "/tracker/rounds" },
+  openGraph: {
+    title: "Funding Rounds — Searchable by Sector, Stage, Amount | raise(fn)",
+    description:
+      "Every funding round tracked from SEC Form D filings. Filter by sector, stage, lead investor, or amount range.",
+    type: "website",
+    siteName: "raise(fn)",
+  },
+};
 
 interface Props {
   searchParams: Promise<{
