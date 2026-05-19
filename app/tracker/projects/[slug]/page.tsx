@@ -16,8 +16,16 @@ function clip(text: string, max = 160): string {
   return (lastSpace > 100 ? cut.slice(0, lastSpace) : cut) + "…";
 }
 
+function nameFromSlug(slug: string): string {
+  return slug
+    .split("-")
+    .map((part) => (part.length > 0 ? part[0].toUpperCase() + part.slice(1) : part))
+    .join(" ");
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const url = `/tracker/projects/${slug}`;
   try {
     const project = await getProject(slug);
     const tokenSuffix = project.token_symbol ? ` (${project.token_symbol})` : "";
@@ -27,7 +35,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const description = project.description
       ? clip(project.description, 160)
       : clip(fallbackDescription, 160);
-    const url = `/tracker/projects/${slug}`;
     return {
       title,
       description,
@@ -36,7 +43,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       twitter: { card: "summary", title, description },
     };
   } catch {
-    return { title: "Project — raise(fn)" };
+    // API failed — derive per-entity title from slug so each page stays
+    // individually indexable.
+    const displayName = nameFromSlug(slug);
+    const title = `${displayName} — Funding & Traction | raise(fn)`;
+    const description = `View funding history, team details, and traction signals for ${displayName} on raise(fn) — sourced from SEC filings and public records.`;
+    return {
+      title,
+      description,
+      alternates: { canonical: url },
+      openGraph: { title, description, url, type: "website", siteName: "raise(fn)" },
+      twitter: { card: "summary", title, description },
+    };
   }
 }
 

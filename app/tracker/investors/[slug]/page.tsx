@@ -17,8 +17,19 @@ function clip(text: string, max = 160): string {
   return (lastSpace > 100 ? cut.slice(0, lastSpace) : cut) + "…";
 }
 
+// Best-effort display name from a slug. "01-advisors" → "01 Advisors".
+// Used as the metadata fallback when the API call fails — keeps each page
+// individually rankable instead of all defaulting to the same fallback title.
+function nameFromSlug(slug: string): string {
+  return slug
+    .split("-")
+    .map((part) => (part.length > 0 ? part[0].toUpperCase() + part.slice(1) : part))
+    .join(" ");
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const url = `/tracker/investors/${slug}`;
   try {
     const investor = await getInvestor(slug);
     const title = `${investor.name} — Investor Profile | raise(fn)`;
@@ -28,7 +39,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const description = investor.description
       ? clip(investor.description, 160)
       : clip(fallbackDescription, 160);
-    const url = `/tracker/investors/${slug}`;
     return {
       title,
       description,
@@ -37,7 +47,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       twitter: { card: "summary", title, description },
     };
   } catch {
-    return { title: "Investor — raise(fn)" };
+    // API failed — derive a per-entity title from the slug so each page is
+    // still individually indexable. Generic fallback would make every dynamic
+    // page identical to Google.
+    const displayName = nameFromSlug(slug);
+    const title = `${displayName} — Investor Profile | raise(fn)`;
+    const description = `View funding activity and portfolio details for ${displayName} on raise(fn) — fundraising intelligence sourced from SEC filings and public records.`;
+    return {
+      title,
+      description,
+      alternates: { canonical: url },
+      openGraph: { title, description, url, type: "website", siteName: "raise(fn)" },
+      twitter: { card: "summary", title, description },
+    };
   }
 }
 
