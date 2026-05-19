@@ -63,6 +63,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+const SITE = "https://www.raisefn.com";
+
 export default async function InvestorDetailPage({ params }: Props) {
   const { slug } = await params;
 
@@ -75,8 +77,37 @@ export default async function InvestorDetailPage({ params }: Props) {
     return <TrackerComingSoon />;
   }
 
+  // JSON-LD structured data — Organization with affiliated rounds where
+  // possible. Lets Google render rich knowledge-panel-style results +
+  // surfaces this as a real entity in their knowledge graph.
+  const sameAs = [
+    investor.website,
+    investor.twitter ? `https://twitter.com/${investor.twitter}` : null,
+  ].filter((x): x is string => !!x);
+
+  const jsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: investor.name,
+    url: `${SITE}/tracker/investors/${slug}`,
+    ...(investor.website && { sameAs }),
+    ...(investor.description && { description: investor.description }),
+    ...(investor.hq_location && {
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: investor.hq_location,
+      },
+    }),
+    ...(investor.type && { additionalType: investor.type }),
+  };
+
   return (
-    <div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div>
       <Link href="/tracker/investors" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
         &larr; Back to investors
       </Link>
@@ -175,6 +206,7 @@ export default async function InvestorDetailPage({ params }: Props) {
       <BrainCTAInline
         text={`Want to know if ${investor.name} is the right fit for your raise? Get matched with the right investors.`}
       />
-    </div>
+      </div>
+    </>
   );
 }

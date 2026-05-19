@@ -124,6 +124,8 @@ function FounderCard({ founder }: { founder: Founder }) {
   );
 }
 
+const SITE = "https://www.raisefn.com";
+
 export default async function ProjectDetailPage({ params }: Props) {
   const { slug } = await params;
 
@@ -138,8 +140,43 @@ export default async function ProjectDetailPage({ params }: Props) {
 
   const founders = project.founders || [];
 
+  // JSON-LD: Organization shape for the startup with industry context.
+  // Founders → employee list. Funding rounds aren't directly modeled in
+  // schema.org so we link via sameAs (website/github/twitter).
+  const sameAs = [
+    project.website,
+    project.twitter ? `https://twitter.com/${project.twitter}` : null,
+    project.github
+      ? project.github.startsWith("http")
+        ? project.github
+        : `https://github.com/${project.github}`
+      : null,
+  ].filter((x): x is string => !!x);
+
+  const jsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: project.name,
+    url: `${SITE}/tracker/projects/${slug}`,
+    ...(sameAs.length > 0 && { sameAs }),
+    ...(project.description && { description: project.description }),
+    ...(project.sector && { industry: project.sector }),
+    ...(founders.length > 0 && {
+      employee: founders.slice(0, 10).map((f) => ({
+        "@type": "Person",
+        name: f.name,
+        ...(f.role && { jobTitle: f.role }),
+      })),
+    }),
+  };
+
   return (
-    <div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div>
       <Link href="/tracker/projects" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
         &larr; Back to projects
       </Link>
@@ -292,6 +329,7 @@ export default async function ProjectDetailPage({ params }: Props) {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

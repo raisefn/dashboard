@@ -66,8 +66,37 @@ export default async function SectorDetailPage({ params }: Props) {
 
   const displayName = sectorName.replace(/_/g, " ");
 
+  // JSON-LD: CollectionPage — this is an index of funding activity in
+  // a sector, modeled as a curated collection of recent rounds.
+  const SITE = "https://www.raisefn.com";
+  const jsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${displayName.charAt(0).toUpperCase() + displayName.slice(1)} — Funding Activity`,
+    url: `${SITE}/tracker/sectors/${sector}`,
+    description: `Recent funding rounds and active investors in ${displayName}.`,
+    ...(sectorStats && {
+      mainEntity: {
+        "@type": "Dataset",
+        name: `${displayName} funding rounds`,
+        ...(sectorStats.round_count && {
+          variableMeasured: [
+            { "@type": "PropertyValue", name: "Round count", value: sectorStats.round_count },
+            { "@type": "PropertyValue", name: "Total capital (USD)", value: sectorStats.total_capital },
+            { "@type": "PropertyValue", name: "Average round size (USD)", value: sectorStats.avg_round_size },
+          ],
+        }),
+      },
+    }),
+  };
+
   return (
-    <div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div>
       <Link
         href="/tracker/pulse"
         className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
@@ -183,6 +212,7 @@ export default async function SectorDetailPage({ params }: Props) {
       <BrainCTAInline
         text={`Building in ${displayName}? Get matched with investors active in this sector.`}
       />
-    </div>
+      </div>
+    </>
   );
 }
