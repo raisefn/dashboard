@@ -27,9 +27,20 @@ function AuthCallbackInner() {
 
   useEffect(() => {
     async function handleCallback() {
-      const tokenHash = searchParams.get("token_hash");
-      const type = searchParams.get("type");
-      const code = searchParams.get("code");
+      // useSearchParams() can return empty on the first effect run before
+      // Next.js hydrates. Fall back to window.location.search so we don't
+      // briefly fall through the "Invalid confirmation link" branch on
+      // every successful OAuth callback.
+      const windowParams =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search)
+          : null;
+      const tokenHash =
+        searchParams.get("token_hash") || windowParams?.get("token_hash");
+      const type =
+        searchParams.get("type") || windowParams?.get("type");
+      const code =
+        searchParams.get("code") || windowParams?.get("code");
 
       // Password reset flow — Supabase appends type=recovery to the
       // redirectTo URL we passed at resetPasswordForEmail() time. After
