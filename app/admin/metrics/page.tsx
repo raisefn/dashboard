@@ -135,27 +135,6 @@ export default function AdminMetricsPage() {
       color: "#34d399",
       note: "Distinct founders with any raise event in the month.",
     },
-    {
-      title: "Meeting debriefs",
-      data: metrics.meeting_debriefs,
-      color: "#a78bfa",
-      note: "Logs via log_meeting_debrief tool (last_debriefed_at).",
-    },
-    {
-      title: "Pipeline: committed",
-      data: metrics.pipeline_outcomes.committed,
-      color: "#10b981",
-    },
-    {
-      title: "Pipeline: soft pass",
-      data: metrics.pipeline_outcomes.soft_pass,
-      color: "#fb923c",
-    },
-    {
-      title: "Pipeline: hard pass",
-      data: metrics.pipeline_outcomes.hard_pass,
-      color: "#ef4444",
-    },
   ];
 
   const stripeReady =
