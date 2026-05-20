@@ -45,9 +45,23 @@ function AuthConfirmInner() {
       }
     }
 
-    function handleSession(user: { user_metadata?: Record<string, unknown>; email?: string } | undefined) {
+    function handleSession(user: { user_metadata?: Record<string, unknown>; email?: string; app_metadata?: { provider?: string; providers?: string[] } } | undefined) {
       if (!user) {
         setError("Authentication failed.");
+        return;
+      }
+      // OAuth users authenticate via their provider (Google, etc.) and
+      // already have a credential. Forcing them to set a Supabase password
+      // is nonsense — skip straight to the app. The password setup flow
+      // exists for invite-link / magic-link users where no credential
+      // exists yet.
+      const provider = user.app_metadata?.provider;
+      const providers = user.app_metadata?.providers || [];
+      const isOauth =
+        (provider && provider !== "email") ||
+        providers.some((p) => p && p !== "email");
+      if (isOauth) {
+        router.replace("/brain/deploy");
         return;
       }
       const hasSetPassword = user.user_metadata?.password_set;
