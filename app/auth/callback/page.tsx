@@ -42,6 +42,18 @@ function AuthCallbackInner() {
       const code =
         searchParams.get("code") || windowParams?.get("code");
 
+      // Belt-and-suspenders: if Supabase already established a session
+      // (it auto-processes hash-token implicit flows like #access_token=...
+      // on page load), redirect immediately instead of falling through to
+      // the no-params error branch. Covers PKCE, implicit, and any other
+      // flow where the session is already valid by the time we render.
+      const { data: { session: existingSession } } = await supabase.auth.getSession();
+      if (existingSession) {
+        const isRecovery = type === "recovery";
+        router.replace(isRecovery ? "/reset-password" : "/brain/deploy");
+        return;
+      }
+
       // Password reset flow — Supabase appends type=recovery to the
       // redirectTo URL we passed at resetPasswordForEmail() time. After
       // verifying the OTP the user has a valid session; we route them
