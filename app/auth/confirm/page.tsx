@@ -24,7 +24,14 @@ function AuthConfirmInner() {
 
   useEffect(() => {
     async function init() {
-      const code = searchParams.get("code");
+      // Fall back to window.location.search when useSearchParams hasn't
+      // hydrated yet — otherwise the first effect run misses the code
+      // and incorrectly hits the implicit-flow branch.
+      const windowParams =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search)
+          : null;
+      const code = searchParams.get("code") || windowParams?.get("code");
 
       if (code) {
         // PKCE flow (magic link login)
