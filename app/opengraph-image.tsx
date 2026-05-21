@@ -3,6 +3,11 @@ import { ImageResponse } from "next/og";
 // Root OG image — matches the homepage hero (radar rings + grid + logo +
 // tagline). Used as the default share preview for every raisefn page that
 // doesn't define its own opengraph-image.tsx.
+//
+// Loads Geist Bold from Google Fonts so the type weight matches the
+// website (which uses next/font/google for Geist). Without this, the
+// fallback system-ui renders the logo noticeably lighter than the live
+// site — defeats the "share preview looks like the product" goal.
 
 export const runtime = "edge";
 export const alt =
@@ -10,7 +15,28 @@ export const alt =
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function Image() {
+async function loadGeistBold(): Promise<ArrayBuffer> {
+  // Resolve the actual woff2 URL via Google Fonts CSS API (the CSS endpoint
+  // returns different URLs depending on the User-Agent — Mozilla UA gets the
+  // modern woff2 format Satori can use).
+  const cssResponse = await fetch(
+    "https://fonts.googleapis.com/css2?family=Geist:wght@700&display=swap",
+    {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+      },
+    }
+  );
+  const css = await cssResponse.text();
+  const match = css.match(/src: url\((https:\/\/[^)]+\.woff2)\)/);
+  if (!match) throw new Error("Could not extract Geist woff2 URL from Google Fonts response");
+  return fetch(match[1]).then((r) => r.arrayBuffer());
+}
+
+export default async function Image() {
+  const geistBold = await loadGeistBold();
+
   return new ImageResponse(
     (
       <div
@@ -21,7 +47,7 @@ export default function Image() {
           alignItems: "center",
           justifyContent: "center",
           background: "#09090b",
-          fontFamily: "system-ui, sans-serif",
+          fontFamily: "Geist",
           position: "relative",
         }}
       >
@@ -84,9 +110,9 @@ export default function Image() {
           <div
             style={{
               display: "flex",
-              fontSize: 156,
+              fontSize: 168,
               fontWeight: 700,
-              letterSpacing: "-0.04em",
+              letterSpacing: "-0.05em",
               lineHeight: 1,
             }}
           >
@@ -97,6 +123,7 @@ export default function Image() {
             style={{
               marginTop: 28,
               fontSize: 32,
+              fontWeight: 400,
               color: "#a1a1aa",
               textAlign: "center",
               maxWidth: 800,
@@ -107,6 +134,16 @@ export default function Image() {
         </div>
       </div>
     ),
-    { ...size }
+    {
+      ...size,
+      fonts: [
+        {
+          name: "Geist",
+          data: geistBold,
+          style: "normal",
+          weight: 700,
+        },
+      ],
+    }
   );
 }

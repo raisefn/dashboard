@@ -1,15 +1,10 @@
 import { ImageResponse } from "next/og";
 
 // Tracker-section OG image — same hero design as root, no section label.
-// Per Justin's call: every shared link should look like the homepage hero
-// (radar rings + grid + raise(fn) logo + tagline). Section-specific labels
-// were dropped because they made the card look like fragmented marketing
-// rather than the actual product.
-//
-// Kept as a separate file (vs deleting and inheriting) because the tracker
+// Identical to /app/opengraph-image.tsx; lives here because the tracker
 // layout.tsx references /tracker/opengraph-image explicitly. Eventually
-// can be deduped; for now identical content with separate URLs is clear
-// and predictable.
+// can be deduped via a shared helper module; for now standalone files
+// keep each route independent and easy to reason about.
 
 export const runtime = "edge";
 export const alt =
@@ -17,7 +12,25 @@ export const alt =
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function Image() {
+async function loadGeistBold(): Promise<ArrayBuffer> {
+  const cssResponse = await fetch(
+    "https://fonts.googleapis.com/css2?family=Geist:wght@700&display=swap",
+    {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+      },
+    }
+  );
+  const css = await cssResponse.text();
+  const match = css.match(/src: url\((https:\/\/[^)]+\.woff2)\)/);
+  if (!match) throw new Error("Could not extract Geist woff2 URL from Google Fonts response");
+  return fetch(match[1]).then((r) => r.arrayBuffer());
+}
+
+export default async function Image() {
+  const geistBold = await loadGeistBold();
+
   return new ImageResponse(
     (
       <div
@@ -28,7 +41,7 @@ export default function Image() {
           alignItems: "center",
           justifyContent: "center",
           background: "#09090b",
-          fontFamily: "system-ui, sans-serif",
+          fontFamily: "Geist",
           position: "relative",
         }}
       >
@@ -88,9 +101,9 @@ export default function Image() {
           <div
             style={{
               display: "flex",
-              fontSize: 156,
+              fontSize: 168,
               fontWeight: 700,
-              letterSpacing: "-0.04em",
+              letterSpacing: "-0.05em",
               lineHeight: 1,
             }}
           >
@@ -101,6 +114,7 @@ export default function Image() {
             style={{
               marginTop: 28,
               fontSize: 32,
+              fontWeight: 400,
               color: "#a1a1aa",
               textAlign: "center",
               maxWidth: 800,
@@ -111,6 +125,16 @@ export default function Image() {
         </div>
       </div>
     ),
-    { ...size }
+    {
+      ...size,
+      fonts: [
+        {
+          name: "Geist",
+          data: geistBold,
+          style: "normal",
+          weight: 700,
+        },
+      ],
+    }
   );
 }
