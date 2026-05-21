@@ -1,15 +1,15 @@
 import { ImageResponse } from "next/og";
 
-// Root OG image — homepage hero design: concentric radar rings + logo +
-// tagline on a dark background. Matches the visual of /app/page.tsx so
-// shared links look like the actual product.
+// Root OG image — homepage hero design with deliberate visual weight:
+// • Subtle grid background (60px) gives the canvas texture
+// • 5 concentric dashed rings at visible opacities (0.35 → 0.10)
+// • Logo at fontSize 180, fontWeight 900, tight letter-spacing
+// • Tagline on one line at fontSize 30
+// • Orange→teal accent stripe at the bottom (4px) for brand framing
 //
-// Kept intentionally simple: nodejs runtime + system-ui fonts + no
-// external fetches. The previous version with Geist Bold + Google Fonts
-// edge fetch was returning HTTP 200 with 0 bytes (silent crash on
-// Vercel's edge runtime). When in doubt, mirror the proven pattern from
-// app/tracker/investors/[slug]/opengraph-image.tsx which has been
-// reliably rendering.
+// nodejs runtime + system-ui — proven to render reliably on Vercel.
+// The font is heavy enough at weight 900 that the lack of Geist is
+// barely noticeable.
 
 export const runtime = "nodejs";
 export const alt =
@@ -28,13 +28,27 @@ export default function Image() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background:
-            "linear-gradient(135deg, #09090b 0%, #18181b 50%, #09090b 100%)",
+          background: "#09090b",
           fontFamily: "system-ui, sans-serif",
           position: "relative",
         }}
       >
-        {/* Concentric radar rings — match the HeroRings component on the homepage */}
+        {/* Subtle grid background — gives texture without dominating */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: "flex",
+            backgroundImage:
+              "linear-gradient(rgba(63,63,70,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(63,63,70,0.2) 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+          }}
+        />
+
+        {/* Concentric dashed rings — bumped opacity so they actually read */}
         <svg
           style={{
             position: "absolute",
@@ -42,21 +56,21 @@ export default function Image() {
             left: "50%",
             transform: "translate(-50%, -50%)",
           }}
-          width={900}
-          height={900}
-          viewBox="0 0 900 900"
+          width={1000}
+          height={1000}
+          viewBox="0 0 1000 1000"
         >
           {[
-            { r: 90, color: "rgba(249,115,22,0.18)" },
-            { r: 160, color: "rgba(45,212,191,0.15)" },
-            { r: 240, color: "rgba(249,115,22,0.11)" },
-            { r: 330, color: "rgba(45,212,191,0.08)" },
-            { r: 430, color: "rgba(249,115,22,0.05)" },
+            { r: 110, color: "rgba(249,115,22,0.35)" },
+            { r: 190, color: "rgba(45,212,191,0.28)" },
+            { r: 280, color: "rgba(249,115,22,0.20)" },
+            { r: 380, color: "rgba(45,212,191,0.14)" },
+            { r: 490, color: "rgba(249,115,22,0.10)" },
           ].map((ring, i) => (
             <circle
               key={i}
-              cx={450}
-              cy={450}
+              cx={500}
+              cy={500}
               r={ring.r}
               fill="none"
               stroke={ring.color}
@@ -66,32 +80,52 @@ export default function Image() {
           ))}
         </svg>
 
-        {/* Logo */}
+        {/* Logo + tagline (foreground, centered) */}
         <div
           style={{
+            position: "relative",
             display: "flex",
-            fontSize: 168,
-            fontWeight: 800,
-            letterSpacing: "-0.05em",
-            lineHeight: 1,
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <span style={{ color: "#f97316" }}>raise</span>
-          <span style={{ color: "#2dd4bf" }}>(fn)</span>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 180,
+              fontWeight: 900,
+              letterSpacing: "-0.06em",
+              lineHeight: 1,
+            }}
+          >
+            <span style={{ color: "#f97316" }}>raise</span>
+            <span style={{ color: "#2dd4bf" }}>(fn)</span>
+          </div>
+          <div
+            style={{
+              marginTop: 32,
+              fontSize: 30,
+              color: "#d4d4d8",
+              textAlign: "center",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Fundraising intelligence that gets smarter with every raise.
+          </div>
         </div>
 
-        {/* Tagline */}
+        {/* Brand accent stripe — orange→teal gradient, 4px tall, full width */}
         <div
           style={{
-            marginTop: 28,
-            fontSize: 32,
-            color: "#a1a1aa",
-            textAlign: "center",
-            maxWidth: 800,
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 4,
+            background: "linear-gradient(90deg, #f97316, #2dd4bf)",
           }}
-        >
-          Fundraising intelligence that gets smarter with every raise.
-        </div>
+        />
       </div>
     ),
     { ...size }

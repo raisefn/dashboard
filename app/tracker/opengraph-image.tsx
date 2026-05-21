@@ -1,8 +1,7 @@
 import { ImageResponse } from "next/og";
 
-// Tracker-section OG image — same hero design as root, no section label.
-// Identical to /app/opengraph-image.tsx; lives here because the tracker
-// layout.tsx references /tracker/opengraph-image explicitly.
+// Tracker-section OG image — identical to root. See /app/opengraph-image.tsx
+// for design rationale.
 
 export const runtime = "nodejs";
 export const alt =
@@ -21,12 +20,25 @@ export default function Image() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background:
-            "linear-gradient(135deg, #09090b 0%, #18181b 50%, #09090b 100%)",
+          background: "#09090b",
           fontFamily: "system-ui, sans-serif",
           position: "relative",
         }}
       >
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: "flex",
+            backgroundImage:
+              "linear-gradient(rgba(63,63,70,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(63,63,70,0.2) 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+          }}
+        />
+
         <svg
           style={{
             position: "absolute",
@@ -34,21 +46,21 @@ export default function Image() {
             left: "50%",
             transform: "translate(-50%, -50%)",
           }}
-          width={900}
-          height={900}
-          viewBox="0 0 900 900"
+          width={1000}
+          height={1000}
+          viewBox="0 0 1000 1000"
         >
           {[
-            { r: 90, color: "rgba(249,115,22,0.18)" },
-            { r: 160, color: "rgba(45,212,191,0.15)" },
-            { r: 240, color: "rgba(249,115,22,0.11)" },
-            { r: 330, color: "rgba(45,212,191,0.08)" },
-            { r: 430, color: "rgba(249,115,22,0.05)" },
+            { r: 110, color: "rgba(249,115,22,0.35)" },
+            { r: 190, color: "rgba(45,212,191,0.28)" },
+            { r: 280, color: "rgba(249,115,22,0.20)" },
+            { r: 380, color: "rgba(45,212,191,0.14)" },
+            { r: 490, color: "rgba(249,115,22,0.10)" },
           ].map((ring, i) => (
             <circle
               key={i}
-              cx={450}
-              cy={450}
+              cx={500}
+              cy={500}
               r={ring.r}
               fill="none"
               stroke={ring.color}
@@ -60,28 +72,48 @@ export default function Image() {
 
         <div
           style={{
+            position: "relative",
             display: "flex",
-            fontSize: 168,
-            fontWeight: 800,
-            letterSpacing: "-0.05em",
-            lineHeight: 1,
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <span style={{ color: "#f97316" }}>raise</span>
-          <span style={{ color: "#2dd4bf" }}>(fn)</span>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 180,
+              fontWeight: 900,
+              letterSpacing: "-0.06em",
+              lineHeight: 1,
+            }}
+          >
+            <span style={{ color: "#f97316" }}>raise</span>
+            <span style={{ color: "#2dd4bf" }}>(fn)</span>
+          </div>
+          <div
+            style={{
+              marginTop: 32,
+              fontSize: 30,
+              color: "#d4d4d8",
+              textAlign: "center",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Fundraising intelligence that gets smarter with every raise.
+          </div>
         </div>
 
         <div
           style={{
-            marginTop: 28,
-            fontSize: 32,
-            color: "#a1a1aa",
-            textAlign: "center",
-            maxWidth: 800,
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 4,
+            background: "linear-gradient(90deg, #f97316, #2dd4bf)",
           }}
-        >
-          Fundraising intelligence that gets smarter with every raise.
-        </div>
+        />
       </div>
     ),
     { ...size }
