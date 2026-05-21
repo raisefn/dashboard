@@ -12,20 +12,27 @@ export const alt =
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-async function loadGeistBold(): Promise<ArrayBuffer> {
-  const cssResponse = await fetch(
-    "https://fonts.googleapis.com/css2?family=Geist:wght@700&display=swap",
-    {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-      },
-    }
-  );
-  const css = await cssResponse.text();
-  const match = css.match(/src: url\((https:\/\/[^)]+\.woff2)\)/);
-  if (!match) throw new Error("Could not extract Geist woff2 URL from Google Fonts response");
-  return fetch(match[1]).then((r) => r.arrayBuffer());
+async function loadGeistBold(): Promise<ArrayBuffer | null> {
+  try {
+    const cssResponse = await fetch(
+      "https://fonts.googleapis.com/css2?family=Geist:wght@700&display=swap",
+      {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        },
+      }
+    );
+    if (!cssResponse.ok) return null;
+    const css = await cssResponse.text();
+    const match = css.match(/src: url\((https:\/\/[^)]+\.woff2)\)/);
+    if (!match) return null;
+    const fontResponse = await fetch(match[1]);
+    if (!fontResponse.ok) return null;
+    return await fontResponse.arrayBuffer();
+  } catch {
+    return null;
+  }
 }
 
 export default async function Image() {
@@ -41,7 +48,7 @@ export default async function Image() {
           alignItems: "center",
           justifyContent: "center",
           background: "#09090b",
-          fontFamily: "Geist",
+          fontFamily: "Geist, system-ui, sans-serif",
           position: "relative",
         }}
       >
@@ -127,14 +134,18 @@ export default async function Image() {
     ),
     {
       ...size,
-      fonts: [
-        {
-          name: "Geist",
-          data: geistBold,
-          style: "normal",
-          weight: 700,
-        },
-      ],
+      ...(geistBold
+        ? {
+            fonts: [
+              {
+                name: "Geist",
+                data: geistBold,
+                style: "normal" as const,
+                weight: 700 as const,
+              },
+            ],
+          }
+        : {}),
     }
   );
 }
