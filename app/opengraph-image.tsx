@@ -1,49 +1,23 @@
 import { ImageResponse } from "next/og";
 
-// Root OG image — matches the homepage hero (radar rings + grid + logo +
-// tagline). Used as the default share preview for every raisefn page that
-// doesn't define its own opengraph-image.tsx.
+// Root OG image — homepage hero design: concentric radar rings + logo +
+// tagline on a dark background. Matches the visual of /app/page.tsx so
+// shared links look like the actual product.
 //
-// Loads Geist Bold from Google Fonts so the type weight matches the
-// website (which uses next/font/google for Geist). Without this, the
-// fallback system-ui renders the logo noticeably lighter than the live
-// site — defeats the "share preview looks like the product" goal.
+// Kept intentionally simple: nodejs runtime + system-ui fonts + no
+// external fetches. The previous version with Geist Bold + Google Fonts
+// edge fetch was returning HTTP 200 with 0 bytes (silent crash on
+// Vercel's edge runtime). When in doubt, mirror the proven pattern from
+// app/tracker/investors/[slug]/opengraph-image.tsx which has been
+// reliably rendering.
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const alt =
   "raise(fn) — Fundraising intelligence that gets smarter with every raise";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-async function loadGeistBold(): Promise<ArrayBuffer | null> {
-  // Resolve the actual woff2 URL via Google Fonts CSS API. Returns null on
-  // ANY failure so the image still renders with system fallback — the
-  // previous version threw an unhandled exception and returned 0 bytes.
-  try {
-    const cssResponse = await fetch(
-      "https://fonts.googleapis.com/css2?family=Geist:wght@700&display=swap",
-      {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-        },
-      }
-    );
-    if (!cssResponse.ok) return null;
-    const css = await cssResponse.text();
-    const match = css.match(/src: url\((https:\/\/[^)]+\.woff2)\)/);
-    if (!match) return null;
-    const fontResponse = await fetch(match[1]);
-    if (!fontResponse.ok) return null;
-    return await fontResponse.arrayBuffer();
-  } catch {
-    return null;
-  }
-}
-
-export default async function Image() {
-  const geistBold = await loadGeistBold();
-
+export default function Image() {
   return new ImageResponse(
     (
       <div
@@ -51,33 +25,21 @@ export default async function Image() {
           width: "100%",
           height: "100%",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "#09090b",
-          fontFamily: "Geist, system-ui, sans-serif",
+          background:
+            "linear-gradient(135deg, #09090b 0%, #18181b 50%, #09090b 100%)",
+          fontFamily: "system-ui, sans-serif",
           position: "relative",
         }}
       >
-        {/* Subtle grid background */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage:
-              "linear-gradient(rgba(63,63,70,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(63,63,70,0.15) 1px, transparent 1px)",
-            backgroundSize: "60px 60px",
-          }}
-        />
-
-        {/* Concentric radar rings — match HeroRings component */}
+        {/* Concentric radar rings — match the HeroRings component on the homepage */}
         <svg
           style={{
             position: "absolute",
-            left: "50%",
             top: "50%",
+            left: "50%",
             transform: "translate(-50%, -50%)",
           }}
           width={900}
@@ -104,57 +66,34 @@ export default async function Image() {
           ))}
         </svg>
 
-        {/* Logo + tagline (centered, above the rings) */}
+        {/* Logo */}
         <div
           style={{
-            position: "relative",
             display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
+            fontSize: 168,
+            fontWeight: 800,
+            letterSpacing: "-0.05em",
+            lineHeight: 1,
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              fontSize: 168,
-              fontWeight: 700,
-              letterSpacing: "-0.05em",
-              lineHeight: 1,
-            }}
-          >
-            <span style={{ color: "#f97316" }}>raise</span>
-            <span style={{ color: "#2dd4bf" }}>(fn)</span>
-          </div>
-          <div
-            style={{
-              marginTop: 28,
-              fontSize: 32,
-              fontWeight: 400,
-              color: "#a1a1aa",
-              textAlign: "center",
-              maxWidth: 800,
-            }}
-          >
-            Fundraising intelligence that gets smarter with every raise.
-          </div>
+          <span style={{ color: "#f97316" }}>raise</span>
+          <span style={{ color: "#2dd4bf" }}>(fn)</span>
+        </div>
+
+        {/* Tagline */}
+        <div
+          style={{
+            marginTop: 28,
+            fontSize: 32,
+            color: "#a1a1aa",
+            textAlign: "center",
+            maxWidth: 800,
+          }}
+        >
+          Fundraising intelligence that gets smarter with every raise.
         </div>
       </div>
     ),
-    {
-      ...size,
-      ...(geistBold
-        ? {
-            fonts: [
-              {
-                name: "Geist",
-                data: geistBold,
-                style: "normal" as const,
-                weight: 700 as const,
-              },
-            ],
-          }
-        : {}),
-    }
+    { ...size }
   );
 }
