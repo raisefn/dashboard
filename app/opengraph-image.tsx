@@ -1,15 +1,11 @@
 import { ImageResponse } from "next/og";
 
-// Root OG image — homepage hero design with deliberate visual weight:
-// • Subtle grid background (60px) gives the canvas texture
-// • 5 concentric dashed rings at visible opacities (0.35 → 0.10)
-// • Logo at fontSize 180, fontWeight 900, tight letter-spacing
-// • Tagline on one line at fontSize 30
-// • Orange→teal accent stripe at the bottom (4px) for brand framing
+// Root OG image — homepage hero design (radar rings + grid + logo + tagline).
 //
-// nodejs runtime + system-ui — proven to render reliably on Vercel.
-// The font is heavy enough at weight 900 that the lack of Geist is
-// barely noticeable.
+// Tries to load Geist Black (900) from Google Fonts CSS API so the logo
+// renders with the same visual weight as the live site. Falls back to
+// system-ui at fontSize 200 if the fetch fails (returns null), so the
+// image always renders.
 
 export const runtime = "nodejs";
 export const alt =
@@ -17,7 +13,32 @@ export const alt =
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function Image() {
+async function loadGeistBlack(): Promise<ArrayBuffer | null> {
+  try {
+    const cssResponse = await fetch(
+      "https://fonts.googleapis.com/css2?family=Geist:wght@900&display=swap",
+      {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        },
+      }
+    );
+    if (!cssResponse.ok) return null;
+    const css = await cssResponse.text();
+    const match = css.match(/src: url\((https:\/\/[^)]+\.woff2)\)/);
+    if (!match) return null;
+    const fontResponse = await fetch(match[1]);
+    if (!fontResponse.ok) return null;
+    return await fontResponse.arrayBuffer();
+  } catch {
+    return null;
+  }
+}
+
+export default async function Image() {
+  const geistBlack = await loadGeistBlack();
+
   return new ImageResponse(
     (
       <div
@@ -29,11 +50,11 @@ export default function Image() {
           alignItems: "center",
           justifyContent: "center",
           background: "#09090b",
-          fontFamily: "system-ui, sans-serif",
+          fontFamily: "Geist, system-ui, sans-serif",
           position: "relative",
         }}
       >
-        {/* Subtle grid background — gives texture without dominating */}
+        {/* Subtle grid background */}
         <div
           style={{
             position: "absolute",
@@ -48,7 +69,7 @@ export default function Image() {
           }}
         />
 
-        {/* Concentric dashed rings — bumped opacity so they actually read */}
+        {/* Concentric dashed rings */}
         <svg
           style={{
             position: "absolute",
@@ -80,7 +101,7 @@ export default function Image() {
           ))}
         </svg>
 
-        {/* Logo + tagline (foreground, centered) */}
+        {/* Logo + tagline */}
         <div
           style={{
             position: "relative",
@@ -93,9 +114,9 @@ export default function Image() {
           <div
             style={{
               display: "flex",
-              fontSize: 180,
+              fontSize: 200,
               fontWeight: 900,
-              letterSpacing: "-0.06em",
+              letterSpacing: "-0.07em",
               lineHeight: 1,
             }}
           >
@@ -106,7 +127,8 @@ export default function Image() {
             style={{
               marginTop: 32,
               fontSize: 30,
-              color: "#d4d4d8",
+              fontWeight: 400,
+              color: "#a1a1aa",
               textAlign: "center",
               whiteSpace: "nowrap",
             }}
@@ -114,20 +136,22 @@ export default function Image() {
             Fundraising intelligence that gets smarter with every raise.
           </div>
         </div>
-
-        {/* Brand accent stripe — orange→teal gradient, 4px tall, full width */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 4,
-            background: "linear-gradient(90deg, #f97316, #2dd4bf)",
-          }}
-        />
       </div>
     ),
-    { ...size }
+    {
+      ...size,
+      ...(geistBlack
+        ? {
+            fonts: [
+              {
+                name: "Geist",
+                data: geistBlack,
+                style: "normal" as const,
+                weight: 900 as const,
+              },
+            ],
+          }
+        : {}),
+    }
   );
 }
