@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "raise(fn) — Fundraising Intelligence for Startups",
   description: "The intelligence layer for startup fundraising — built for founders, VCs, and the agent economy.",
-  metadataBase: new URL("https://raisefn.com"),
+  metadataBase: new URL("https://www.raisefn.com"),
 };
 
 export default function RootLayout({
