@@ -16,6 +16,7 @@ export const metadata: Metadata = {
       "Searchable directory of active investors — identified from SEC Form D filings, 13F holdings, and Form ADV registrations.",
     type: "website",
     siteName: "raise(fn)",
+    images: ["/tracker/opengraph-image"],
   },
 };
 

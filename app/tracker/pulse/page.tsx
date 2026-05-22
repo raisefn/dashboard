@@ -27,6 +27,7 @@ export const metadata: Metadata = {
       "Sector momentum, top investors by velocity, and emerging traction signals from SEC filings and public sources.",
     type: "website",
     siteName: "raise(fn)",
+    images: ["/tracker/opengraph-image"],
   },
 };
 

@@ -16,6 +16,7 @@ export const metadata: Metadata = {
       "Every startup tracked from SEC filings, accelerator directories, and developer platforms.",
     type: "website",
     siteName: "raise(fn)",
+    images: ["/tracker/opengraph-image"],
   },
 };
 

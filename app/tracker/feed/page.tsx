@@ -15,6 +15,7 @@ export const metadata: Metadata = {
       "Real-time feed of fundraising rounds — detected from SEC Form D filings and public records.",
     type: "website",
     siteName: "raise(fn)",
+    images: ["/tracker/opengraph-image"],
   },
 };
 

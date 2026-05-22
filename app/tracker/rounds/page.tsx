@@ -16,6 +16,7 @@ export const metadata: Metadata = {
       "Every funding round tracked from SEC Form D filings. Filter by sector, stage, lead investor, or amount range.",
     type: "website",
     siteName: "raise(fn)",
+    images: ["/tracker/opengraph-image"],
   },
 };
 
