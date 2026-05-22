@@ -36,8 +36,14 @@ function UnsubscribeInner() {
       typeof window !== "undefined"
         ? new URLSearchParams(window.location.search)
         : null;
+    // Accept `?token=<uuid>` (current format) OR `?api_key=<uuid>`
+    // (legacy format from emails sent before Phase D shipped — same UUID,
+    // just different param name). Both resolve to the same api_key id.
     const token =
-      searchParams.get("token") || winParams?.get("token");
+      searchParams.get("token") ||
+      winParams?.get("token") ||
+      searchParams.get("api_key") ||
+      winParams?.get("api_key");
 
     if (!token) {
       setState("error");
