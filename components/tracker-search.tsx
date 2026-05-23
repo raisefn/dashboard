@@ -12,8 +12,6 @@ interface Result {
   extra: Record<string, string>;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
-
 export default function TrackerSearch() {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -46,8 +44,11 @@ export default function TrackerSearch() {
     setLoading(true);
     debounceRef.current = setTimeout(async () => {
       try {
+        // Same-origin proxy at /api/search — server-side route that
+        // attaches the tracker API key. Public API key exposure not
+        // possible from the browser.
         const res = await fetch(
-          `${API_BASE}/v1/search?q=${encodeURIComponent(value)}&limit=8`
+          `/api/search?q=${encodeURIComponent(value)}&limit=8`
         );
         if (res.ok) {
           const data = await res.json();
