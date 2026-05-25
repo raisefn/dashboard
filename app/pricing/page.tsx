@@ -23,20 +23,36 @@ export default function PricingPage() {
 
   async function startAdvisorCheckout() {
     setCheckoutError(null);
-    if (!authedToken) {
+
+    // Re-fetch the session at click time — React state can hold a stale
+    // token (e.g., user signed out in another tab, JWT expired during page
+    // dwell). The Supabase client also auto-refreshes here when possible.
+    const { data: { session: freshSession } } = await supabase.auth.getSession();
+    const token = freshSession?.access_token;
+    if (!token) {
       router.push("/signup?after=upgrade-advisor");
       return;
     }
+
     setCheckoutLoading(true);
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authedToken}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ tier: "advisor" }),
       });
+
+      // If server rejects the token (expired between getSession + fetch,
+      // or session revoked server-side), bounce to signup with intent
+      // preserved instead of showing the generic error.
+      if (res.status === 401) {
+        router.push("/signup?after=upgrade-advisor");
+        return;
+      }
+
       const data = await res.json();
       if (!res.ok || !data.url) {
         throw new Error(data.error || "Checkout failed");
