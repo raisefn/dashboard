@@ -1199,16 +1199,28 @@ function BrainDeployInner() {
           // Pricing v2 (2026-05-25): consent collected natively on Stripe's
           // Checkout page via consent_collection.terms_of_service, so we can
           // go straight from card → Stripe (no /pricing pitstop needed).
+          //
+          // Defense (mirrors /pricing): re-fetch session at click time
+          // (state may be stale across long chat sessions), and handle 401
+          // by routing to /signup with intent preserved instead of showing
+          // the generic error.
           if (isFreeVerified) {
             const btn = card.querySelector(".upgrade-card-btn") as HTMLButtonElement | null;
             const errDiv = card.querySelector(".upgrade-card-error") as HTMLDivElement | null;
             const originalLabel = btn?.textContent || "";
             btn?.addEventListener("click", async () => {
-              if (!session?.access_token) {
-                if (errDiv) {
-                  errDiv.style.display = "block";
-                  errDiv.textContent = "Session expired — refresh and try again.";
+              // Re-fetch the session in case the in-React-state token has
+              // expired during a long chat (Supabase auto-refresh handles
+              // this when possible).
+              const { data: { session: freshSession } } = await supabase.auth.getSession();
+              const token = freshSession?.access_token;
+              if (!token) {
+                try {
+                  localStorage.setItem("pendingPostAuthIntent", "upgrade-advisor");
+                } catch {
+                  /* localStorage unavailable — fall through */
                 }
+                router.push("/signup?after=upgrade-advisor");
                 return;
               }
               btn.disabled = true;
@@ -1218,10 +1230,24 @@ function BrainDeployInner() {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${session.access_token}`,
+                    Authorization: `Bearer ${token}`,
                   },
                   body: JSON.stringify({ tier: "advisor" }),
                 });
+
+                // Server rejected the token (expired between getSession +
+                // fetch, session revoked). Same recovery path: preserve
+                // intent + route to signup.
+                if (res.status === 401) {
+                  try {
+                    localStorage.setItem("pendingPostAuthIntent", "upgrade-advisor");
+                  } catch {
+                    /* localStorage unavailable — fall through */
+                  }
+                  router.push("/signup?after=upgrade-advisor");
+                  return;
+                }
+
                 const data = await res.json();
                 if (!res.ok || !data.url) {
                   throw new Error(data.error || "Checkout failed");

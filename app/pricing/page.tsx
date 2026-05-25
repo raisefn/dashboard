@@ -24,27 +24,59 @@ export default function PricingPage() {
   // Auto-resume the checkout if we got bounced here from /auth/confirm or
   // /auth/callback after a fresh signup (the post-auth helper redirects to
   // /pricing?checkout=resume when pendingPostAuthIntent === "upgrade-advisor").
-  // Waits for the session to hydrate before firing.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("checkout") !== "resume") return;
-    if (!authedToken) return; // session not hydrated yet — wait for re-run
-    // Strip the param so a refresh doesn't re-fire the redirect
-    const stripped = window.location.pathname;
-    window.history.replaceState({}, "", stripped);
-    startAdvisorCheckout();
+    // Strip the param immediately so a refresh doesn't re-fire the redirect
+    window.history.replaceState({}, "", window.location.pathname);
+    // Fire with fromAutoResume so checkout waits for session hydration
+    // instead of bouncing to /signup on the initial null. Even if the
+    // session hasn't fully propagated to this page yet, the wait loop
+    // gives it a chance to arrive via onAuthStateChange.
+    startAdvisorCheckout({ fromAutoResume: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authedToken]);
+  }, []);
 
-  async function startAdvisorCheckout() {
+  // Wait up to `timeoutMs` for a valid Supabase session to be available.
+  // Resolves with the token on success, or null on timeout. Used by the
+  // auto-resume path where the session may not have propagated to this
+  // page context yet at the moment auto-fire runs (race between
+  // /auth/callback's router.replace and Supabase client cache hydration).
+  async function waitForSession(timeoutMs: number): Promise<string | null> {
+    // Try immediately first — no need to wait if it's already there
+    const { data: { session: immediate } } = await supabase.auth.getSession();
+    if (immediate?.access_token) return immediate.access_token;
+    return new Promise<string | null>((resolve) => {
+      let settled = false;
+      const finish = (token: string | null) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        sub.subscription.unsubscribe();
+        resolve(token);
+      };
+      const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+        if (session?.access_token) finish(session.access_token);
+      });
+      const timer = setTimeout(() => finish(null), timeoutMs);
+    });
+  }
+
+  async function startAdvisorCheckout(opts?: { fromAutoResume?: boolean }) {
     setCheckoutError(null);
 
-    // Re-fetch the session at click time — React state can hold a stale
-    // token (e.g., user signed out in another tab, JWT expired during page
-    // dwell). The Supabase client also auto-refreshes here when possible.
-    const { data: { session: freshSession } } = await supabase.auth.getSession();
-    const token = freshSession?.access_token;
+    // Resolve a session token. From the auto-resume path, wait up to 5s
+    // for Supabase to finish propagating the session that /auth/callback
+    // just established. From a normal click, only the immediate read —
+    // a missing session means the user is genuinely signed out.
+    let token: string | null = null;
+    if (opts?.fromAutoResume) {
+      token = await waitForSession(5000);
+    } else {
+      const { data: { session } } = await supabase.auth.getSession();
+      token = session?.access_token ?? null;
+    }
     if (!token) {
       router.push("/signup?after=upgrade-advisor");
       return;
@@ -112,7 +144,7 @@ export default function PricingPage() {
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
                 Launchpad
               </h2>
-              <span className="text-sm text-zinc-500">Free — 12 messages / month</span>
+              <span className="text-sm text-zinc-500">Free — 12 messages</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
               Drop your deck, paste an investor list, or just ask. The brain
@@ -189,7 +221,7 @@ export default function PricingPage() {
             </ul>
 
             <button
-              onClick={startAdvisorCheckout}
+              onClick={() => startAdvisorCheckout()}
               disabled={checkoutLoading}
               className="rounded-full border border-orange-600/60 bg-orange-900/30 px-8 py-3 text-sm font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50 disabled:opacity-50"
             >
