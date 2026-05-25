@@ -1110,8 +1110,7 @@ function BrainDeployInner() {
         if (isFreeVerified) {
             card.innerHTML = `
               <div class="upgrade-card-leadin">
-                That's your 12 messages this month. If you're running an active
-                raise, take a look at Advisor:
+                That's your 12 free messages. Lifetime upgrade unlocks the rest:
               </div>
               <div class="upgrade-card-header">Ready to run a real raise?</div>
               <div class="upgrade-card-subhead">
