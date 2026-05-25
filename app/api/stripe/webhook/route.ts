@@ -29,6 +29,22 @@ export async function POST(req: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
+    // Defense-in-depth: refuse to flip tier unless Stripe captured the
+    // Advisor engagement letter consent on its checkout page. Our checkout
+    // route sets consent_collection.terms_of_service='required', so any
+    // legitimate session should have consent.terms_of_service='accepted'.
+    // A session missing this likely means it was created via a different
+    // code path (manual creation, future bug, etc.) — fail closed.
+    if (session.consent?.terms_of_service !== "accepted") {
+      console.error(
+        "Refusing to flip tier — checkout session missing terms_of_service consent:",
+        session.id,
+        "consent:",
+        session.consent
+      );
+      return NextResponse.json({ received: true });
+    }
+
     // Derive tier from metadata or from the price ID
     let tier = session.metadata?.tier;
 

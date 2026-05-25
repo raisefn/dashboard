@@ -10,7 +10,6 @@ export default function PricingPage() {
   const [authedToken, setAuthedToken] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const [engagementAccepted, setEngagementAccepted] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -24,12 +23,6 @@ export default function PricingPage() {
 
   async function startAdvisorCheckout() {
     setCheckoutError(null);
-    if (!engagementAccepted) {
-      setCheckoutError(
-        "Please review and accept the Advisor engagement terms first."
-      );
-      return;
-    }
     if (!authedToken) {
       router.push("/signup?after=upgrade-advisor");
       return;
@@ -42,11 +35,7 @@ export default function PricingPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${authedToken}`,
         },
-        body: JSON.stringify({
-          tier: "advisor",
-          engagement_accepted: true,
-          engagement_version: "v1",
-        }),
+        body: JSON.stringify({ tier: "advisor" }),
       });
       const data = await res.json();
       if (!res.ok || !data.url) {
@@ -167,36 +156,25 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <div className="mb-6 max-w-xl">
-              <label className="flex items-start gap-3 cursor-pointer text-sm">
-                <input
-                  type="checkbox"
-                  checked={engagementAccepted}
-                  onChange={(e) => setEngagementAccepted(e.target.checked)}
-                  className="mt-1 h-4 w-4 cursor-pointer accent-orange-500"
-                />
-                <span className="text-zinc-400 leading-relaxed">
-                  I&apos;ve read and agree to the{" "}
-                  <a
-                    href="/legal/engagement"
-                    target="_blank"
-                    rel="noopener"
-                    className="text-teal-400 hover:text-teal-300 underline"
-                  >
-                    Advisor engagement terms
-                  </a>
-                  , including the 2% success fee on capital from raisefn-introduced investors.
-                </span>
-              </label>
-            </div>
-
             <button
               onClick={startAdvisorCheckout}
-              disabled={checkoutLoading || !engagementAccepted}
-              className="rounded-full border border-orange-600/60 bg-orange-900/30 px-8 py-3 text-sm font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50 disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={checkoutLoading}
+              className="rounded-full border border-orange-600/60 bg-orange-900/30 px-8 py-3 text-sm font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50 disabled:opacity-50"
             >
               {checkoutLoading ? "Opening checkout…" : "Get Advisor — $999"}
             </button>
+            <p className="mt-3 text-xs text-zinc-500 max-w-xl">
+              Engagement terms (including the 2% success fee) shown for review and acceptance at checkout. See the full{" "}
+              <a
+                href="/legal/engagement"
+                target="_blank"
+                rel="noopener"
+                className="text-teal-400 hover:text-teal-300 underline"
+              >
+                Advisor engagement letter
+              </a>
+              .
+            </p>
             {checkoutError && (
               <div className="mt-3 text-xs text-red-400 max-w-xl">{checkoutError}</div>
             )}

@@ -1157,11 +1157,10 @@ function BrainDeployInner() {
               </div>
 
               <div class="upgrade-card-cta-row">
-                <a href="/pricing"
-                   class="upgrade-card-btn"
-                   style="text-decoration:none">
+                <button class="upgrade-card-btn" data-cta="advisor">
                   Get Advisor — $999 lifetime
-                </a>
+                </button>
+                <div class="upgrade-card-error" style="display:none"></div>
               </div>
             `;
           } else {
@@ -1197,10 +1196,50 @@ function BrainDeployInner() {
             card.scrollIntoView({ behavior: "smooth", block: "center" });
           });
 
-          // Pricing v2 (2026-05-25): upgrade card is now a pitch, not a
-          // checkout. The CTA links to /pricing which carries the engagement
-          // letter consent checkbox + the actual Stripe call. Keeps a single
-          // consent surface and removes inline Stripe error handling.
+          // Wire the upgrade CTA → Stripe checkout (free user only).
+          // Pricing v2 (2026-05-25): consent collected natively on Stripe's
+          // Checkout page via consent_collection.terms_of_service, so we can
+          // go straight from card → Stripe (no /pricing pitstop needed).
+          if (isFreeVerified) {
+            const btn = card.querySelector(".upgrade-card-btn") as HTMLButtonElement | null;
+            const errDiv = card.querySelector(".upgrade-card-error") as HTMLDivElement | null;
+            const originalLabel = btn?.textContent || "";
+            btn?.addEventListener("click", async () => {
+              if (!session?.access_token) {
+                if (errDiv) {
+                  errDiv.style.display = "block";
+                  errDiv.textContent = "Session expired — refresh and try again.";
+                }
+                return;
+              }
+              btn.disabled = true;
+              btn.textContent = "Opening checkout…";
+              try {
+                const res = await fetch("/api/stripe/checkout", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${session.access_token}`,
+                  },
+                  body: JSON.stringify({ tier: "advisor" }),
+                });
+                const data = await res.json();
+                if (!res.ok || !data.url) {
+                  throw new Error(data.error || "Checkout failed");
+                }
+                window.location.href = data.url;
+              } catch (e) {
+                btn.disabled = false;
+                btn.textContent = originalLabel;
+                if (errDiv) {
+                  errDiv.style.display = "block";
+                  errDiv.textContent =
+                    "Couldn't start checkout — try again or email team@raisefn.com.";
+                }
+                console.error("Stripe checkout error:", e);
+              }
+            });
+          }
 
         limitReachedRef.current = null;
       }
