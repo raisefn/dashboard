@@ -55,6 +55,9 @@ export default function EngagementPage() {
               <span className="text-white font-medium">2% of any capital committed</span>{" "}
               by an investor we introduce
             </li>
+            <li>
+              <span className="text-white font-medium">All purchases final.</span> The $999 is non-refundable.
+            </li>
           </ul>
         </section>
 

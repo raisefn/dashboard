@@ -106,12 +106,23 @@ export default function TermsPage() {
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            Payments and refunds
+            Payments
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
-            <li>Advisor is a one-time payment via Stripe &mdash; no recurring billing</li>
-            <li>30-day money-back guarantee &mdash; full refund within 30 days of purchase, no questions asked</li>
-            <li>After 30 days, lifetime access is non-refundable; the 2% success fee on raisefn-introduced raises still applies per the engagement letter</li>
+            <li>Advisor is a one-time $999 payment via Stripe &mdash; no recurring billing</li>
+            <li><strong className="text-zinc-100">All purchases final.</strong> The $999 is non-refundable.</li>
+            <li>
+              The 2% success fee on raisefn-introduced capital applies regardless of
+              whether the engagement is later ended (per the{" "}
+              <a
+                href="/legal/engagement"
+                className="text-teal-400 hover:text-teal-300 transition-colors"
+              >
+                Advisor engagement letter
+              </a>
+              )
+            </li>
+            <li>Disputes or chargebacks: email team@raisefn.com before opening a dispute</li>
           </ul>
         </section>
 
