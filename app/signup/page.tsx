@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { supabase } from "@/lib/supabase-browser";
@@ -39,6 +39,23 @@ function SignupForm() {
   const initialRole: Role = VALID_ROLES.includes(paramRole as Role)
     ? (paramRole as Role)
     : "founder";
+
+  // Capture post-auth intent (e.g., ?after=upgrade-advisor) into
+  // localStorage. Survives email-click + OAuth round-trip back to
+  // /auth/confirm or /auth/callback, where it's read + cleared to route
+  // the user to the right destination (e.g., /pricing?checkout=resume
+  // instead of the default /brain/deploy).
+  useEffect(() => {
+    const after = searchParams.get("after");
+    if (after) {
+      try {
+        localStorage.setItem("pendingPostAuthIntent", after);
+      } catch {
+        // localStorage can be disabled (incognito Safari, some configs);
+        // intent is best-effort, drop silently on failure.
+      }
+    }
+  }, [searchParams]);
 
 
   const [status, setStatus] = useState<

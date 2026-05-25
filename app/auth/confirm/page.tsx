@@ -4,6 +4,22 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 
+// Map of post-auth intent values → destination URLs. Set at /signup via
+// localStorage.setItem("pendingPostAuthIntent", "<key>"), consumed here.
+// Returns "/brain/deploy" (the default) if no recognized intent.
+function consumePostAuthDestination(): string {
+  if (typeof window === "undefined") return "/brain/deploy";
+  try {
+    const intent = localStorage.getItem("pendingPostAuthIntent");
+    if (!intent) return "/brain/deploy";
+    localStorage.removeItem("pendingPostAuthIntent");
+    if (intent === "upgrade-advisor") return "/pricing?checkout=resume";
+    return "/brain/deploy";
+  } catch {
+    return "/brain/deploy";
+  }
+}
+
 export default function AuthConfirmPage() {
   return (
     <Suspense fallback={<div className="flex min-h-[60vh] items-center justify-center"><p className="text-zinc-400 text-sm">Loading...</p></div>}>
@@ -68,12 +84,12 @@ function AuthConfirmInner() {
         (provider && provider !== "email") ||
         providers.some((p) => p && p !== "email");
       if (isOauth) {
-        router.replace("/brain/deploy");
+        router.replace(consumePostAuthDestination());
         return;
       }
       const hasSetPassword = user.user_metadata?.password_set;
       if (hasSetPassword) {
-        router.replace("/brain/deploy");
+        router.replace(consumePostAuthDestination());
       } else {
         setUserName((user.user_metadata?.name as string) || user.email?.split("@")[0] || "");
         setShowPasswordSetup(true);
@@ -109,7 +125,7 @@ function AuthConfirmInner() {
       return;
     }
 
-    router.replace("/brain/deploy");
+    router.replace(consumePostAuthDestination());
   }
 
   if (showPasswordSetup) {

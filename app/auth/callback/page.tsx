@@ -4,6 +4,22 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 
+// Map of post-auth intent values → destination URLs. Set at /signup via
+// localStorage.setItem("pendingPostAuthIntent", "<key>"), consumed here.
+// Returns "/brain/deploy" (the default) if no recognized intent.
+function consumePostAuthDestination(): string {
+  if (typeof window === "undefined") return "/brain/deploy";
+  try {
+    const intent = localStorage.getItem("pendingPostAuthIntent");
+    if (!intent) return "/brain/deploy";
+    localStorage.removeItem("pendingPostAuthIntent");
+    if (intent === "upgrade-advisor") return "/pricing?checkout=resume";
+    return "/brain/deploy";
+  } catch {
+    return "/brain/deploy";
+  }
+}
+
 export default function AuthCallbackPage() {
   return (
     <Suspense fallback={<Loading />}>
@@ -50,7 +66,7 @@ function AuthCallbackInner() {
       const { data: { session: existingSession } } = await supabase.auth.getSession();
       if (existingSession) {
         const isRecovery = type === "recovery";
-        router.replace(isRecovery ? "/reset-password" : "/brain/deploy");
+        router.replace(isRecovery ? "/reset-password" : consumePostAuthDestination());
         return;
       }
 
@@ -72,7 +88,7 @@ function AuthCallbackInner() {
           return;
         }
 
-        router.replace(isRecovery ? "/reset-password" : "/brain/deploy");
+        router.replace(isRecovery ? "/reset-password" : consumePostAuthDestination());
         return;
       }
 
@@ -85,7 +101,7 @@ function AuthCallbackInner() {
           return;
         }
 
-        router.replace(isRecovery ? "/reset-password" : "/brain/deploy");
+        router.replace(isRecovery ? "/reset-password" : consumePostAuthDestination());
         return;
       }
 

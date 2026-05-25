@@ -21,6 +21,22 @@ export default function PricingPage() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // Auto-resume the checkout if we got bounced here from /auth/confirm or
+  // /auth/callback after a fresh signup (the post-auth helper redirects to
+  // /pricing?checkout=resume when pendingPostAuthIntent === "upgrade-advisor").
+  // Waits for the session to hydrate before firing.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") !== "resume") return;
+    if (!authedToken) return; // session not hydrated yet — wait for re-run
+    // Strip the param so a refresh doesn't re-fire the redirect
+    const stripped = window.location.pathname;
+    window.history.replaceState({}, "", stripped);
+    startAdvisorCheckout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authedToken]);
+
   async function startAdvisorCheckout() {
     setCheckoutError(null);
 
