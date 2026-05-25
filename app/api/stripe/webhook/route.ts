@@ -116,10 +116,9 @@ export async function POST(req: Request) {
       console.log(`Payment completed: ${customerEmail} → ${tier}`);
 
       // Public display names — internal tier codes stay the same.
+      // Pricing v2 (2026-05-25): single paid tier "advisor".
       const TIER_DISPLAY: Record<string, string> = {
-        launchpad: "Advisor",
-        launchpad_annual: "Advisor (annual)",
-        catalyst: "Concierge",
+        advisor: "Advisor",
       };
       const displayName = TIER_DISPLAY[tier] ?? tier;
 
@@ -140,19 +139,27 @@ export async function POST(req: Request) {
     }
   }
 
-  if (event.type === "customer.subscription.deleted") {
-    const subscription = event.data.object as Stripe.Subscription;
-    let customerEmail = subscription.metadata?.email;
+  // Pricing v2 (2026-05-25): one-time payments don't fire
+  // customer.subscription.deleted. Refunds (the only "downgrade" path now)
+  // fire charge.refunded — handle that to flip tier back to free.
+  if (event.type === "charge.refunded") {
+    const charge = event.data.object as Stripe.Charge;
+    // Only flip on FULL refunds. Partial refunds keep advisor access.
+    const fullyRefunded =
+      charge.refunded === true && charge.amount_refunded === charge.amount;
+    if (!fullyRefunded) {
+      return NextResponse.json({ received: true });
+    }
 
-    // Fallback: look up email from Stripe customer if not in metadata
-    if (!customerEmail && subscription.customer) {
+    let customerEmail = charge.billing_details?.email || charge.receipt_email;
+    if (!customerEmail && charge.customer) {
       try {
-        const customer = await stripe.customers.retrieve(subscription.customer as string);
+        const customer = await stripe.customers.retrieve(charge.customer as string);
         if ("email" in customer && customer.email) {
           customerEmail = customer.email;
         }
       } catch (err) {
-        console.error("Could not fetch customer for cancellation:", err);
+        console.error("Could not fetch customer for refund:", err);
       }
     }
 
@@ -172,12 +179,16 @@ export async function POST(req: Request) {
         const supabase = getSupabase();
         await supabase
           .from("payments")
-          .update({ status: "cancelled" })
-          .eq("stripe_subscription_id", subscription.id);
+          .update({ status: "refunded" })
+          .eq("stripe_session_id", charge.metadata?.session_id || "");
 
-        console.log(`Subscription cancelled: ${customerEmail} → free`);
+        await notifySlack(
+          "stripePayments",
+          `↩️ Refund processed: *${customerEmail}* → free`
+        );
+        console.log(`Refund processed: ${customerEmail} → free`);
       } catch (err) {
-        console.error("Error processing subscription cancellation:", err);
+        console.error("Error processing refund:", err);
       }
     }
   }

@@ -93,6 +93,11 @@ const BRAIN_CSS = `
   .nav-right { display: flex; align-items: center; gap: 12px; }
   .nav-link, .nav-link-btn { font-size: 12px; color: #52525b; text-decoration: none; transition: color 0.2s; background: none; border: none; cursor: pointer; font-family: inherit; }
   .nav-link:hover, .nav-link-btn:hover { color: #a1a1aa; }
+  .nav-badge {
+    font-size: 11px; color: #fdba74; padding: 3px 10px;
+    border: 1px solid rgba(251, 146, 60, 0.4); border-radius: 999px;
+    background: rgba(124, 45, 18, 0.2); white-space: nowrap;
+  }
   .nav-right .user-name { font-size: 13px; color: #a1a1aa; }
   .nav-right .sign-out {
     font-size: 12px; color: #52525b; cursor: pointer;
@@ -1110,14 +1115,14 @@ function BrainDeployInner() {
               </div>
               <div class="upgrade-card-header">Ready to run a real raise?</div>
               <div class="upgrade-card-subhead">
-                Advisor turns the brain into your fundraise operating system.
+                Advisor is a one-time purchase — lifetime product access, curated warm intros, and a 1hr advisory call.
               </div>
 
               <div class="upgrade-card-section">
                 <div class="upgrade-card-section-label">Proprietary Network</div>
                 <div class="upgrade-card-grid-item">
                   Investors who signed up to raise(fn) directly — not in any
-                  public database. Match notifications fire when new ones join.
+                  public database. Curated warm intros only.
                 </div>
               </div>
 
@@ -1130,7 +1135,7 @@ function BrainDeployInner() {
               </div>
 
               <div class="upgrade-card-section">
-                <div class="upgrade-card-section-label">Unlimited Messages + Intelligence</div>
+                <div class="upgrade-card-section-label">Unlimited Product + Intelligence</div>
                 <div class="upgrade-card-grid">
                   <div class="upgrade-card-grid-item">Investor matching</div>
                   <div class="upgrade-card-grid-item">Outreach drafting</div>
@@ -1152,33 +1157,31 @@ function BrainDeployInner() {
               </div>
 
               <div class="upgrade-card-cta-row">
-                <button class="upgrade-card-btn" data-cta="launchpad">
-                  Upgrade to Advisor — $200/mo
-                </button>
-                <a href="mailto:team@raisefn.com?subject=Concierge%20inquiry"
-                   class="upgrade-card-secondary">
-                  Want hands-on support? Reach out about Concierge →
+                <a href="/pricing"
+                   class="upgrade-card-btn"
+                   style="text-decoration:none">
+                  Get Advisor — $999 lifetime
                 </a>
-                <div class="upgrade-card-error" style="display:none"></div>
               </div>
             `;
           } else {
-            // Paid tier hit a cap → Concierge mailto only (no Stripe button).
+            // Paid tier hit a soft cap — no upsell. Lifetime customers already
+            // paid. Just acknowledge and offer direct contact if they need more.
             card.innerHTML = `
               <div class="upgrade-card-leadin">
-                Heavy month — you've hit your Advisor allotment.
-                If you want hands-on support to keep the raise moving, Concierge is the next step.
+                Heavy month — you've hit a monthly soft cap on Advisor usage. Your
+                lifetime access continues; this is a temporary cost protection.
               </div>
-              <div class="upgrade-card-header">Time for hands-on support?</div>
+              <div class="upgrade-card-header">Need more this month?</div>
               <div class="upgrade-card-subhead">
-                Concierge brings pitch positioning, warm intros, meeting prep, and
-                term sheet review to your raise.
+                If you're actively closing a raise and need the cap bumped, just
+                email and we'll handle it.
               </div>
               <div class="upgrade-card-cta-row">
-                <a href="mailto:team@raisefn.com?subject=Concierge%20inquiry"
+                <a href="mailto:team@raisefn.com?subject=Advisor%20cap%20bump"
                    class="upgrade-card-btn"
                    style="text-decoration:none">
-                  Contact us about Concierge
+                  Email team@raisefn.com
                 </a>
               </div>
             `;
@@ -1194,47 +1197,10 @@ function BrainDeployInner() {
             card.scrollIntoView({ behavior: "smooth", block: "center" });
           });
 
-          // Wire the upgrade CTA → Stripe checkout (free_verified only).
-          if (isFreeVerified) {
-            const btn = card.querySelector(".upgrade-card-btn") as HTMLButtonElement | null;
-            const errDiv = card.querySelector(".upgrade-card-error") as HTMLDivElement | null;
-            const originalLabel = btn?.textContent || "";
-            btn?.addEventListener("click", async () => {
-              if (!session?.access_token) {
-                if (errDiv) {
-                  errDiv.style.display = "block";
-                  errDiv.textContent = "Session expired — refresh and try again.";
-                }
-                return;
-              }
-              btn.disabled = true;
-              btn.textContent = "Opening checkout…";
-              try {
-                const res = await fetch("/api/stripe/checkout", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${session.access_token}`,
-                  },
-                  body: JSON.stringify({ tier: "launchpad" }),
-                });
-                const data = await res.json();
-                if (!res.ok || !data.url) {
-                  throw new Error(data.error || "Checkout failed");
-                }
-                window.location.href = data.url;
-              } catch (e) {
-                btn.disabled = false;
-                btn.textContent = originalLabel;
-                if (errDiv) {
-                  errDiv.style.display = "block";
-                  errDiv.textContent =
-                    "Couldn't start checkout — try again or email team@raisefn.com.";
-                }
-                console.error("Stripe checkout error:", e);
-              }
-            });
-          }
+          // Pricing v2 (2026-05-25): upgrade card is now a pitch, not a
+          // checkout. The CTA links to /pricing which carries the engagement
+          // letter consent checkbox + the actual Stripe call. Keeps a single
+          // consent surface and removes inline Stripe error handling.
 
         limitReachedRef.current = null;
       }
@@ -1612,23 +1578,6 @@ function BrainDeployInner() {
     hasAutoProbed.current = false;
   }
 
-  async function handleManagePlan() {
-    if (!session) return;
-    try {
-      const res = await fetch("/api/stripe/portal", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch (err) {
-      console.error("Portal error:", err);
-    }
-  }
-
   async function handleSignOut() {
     await supabase.auth.signOut();
     router.replace("/login");
@@ -1669,7 +1618,9 @@ function BrainDeployInner() {
           </a>
           <div className="nav-right">
             {userTier !== "free" ? (
-              <button className="nav-link-btn" onClick={handleManagePlan}>Manage plan</button>
+              <span className="nav-badge" title="Lifetime Advisor — no recurring bill">
+                Lifetime Advisor
+              </span>
             ) : (
               <a href="/pricing" className="nav-link">Pricing</a>
             )}

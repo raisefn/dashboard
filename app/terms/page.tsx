@@ -84,33 +84,34 @@ export default function TermsPage() {
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            Concierge service
+            Advisor engagement
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              Hands-on fundraising support for active raises requires a separate
-              engagement agreement
+              Advisor is a one-time $999 lifetime purchase plus a 2% success fee on
+              capital raised from investors raisefn introduces
             </li>
             <li>
-              That agreement covers fees, success terms, scope, and timeline &mdash;
-              reach out to <a
-                href="mailto:team@raisefn.com"
+              Full terms are at the{" "}
+              <a
+                href="/legal/engagement"
                 className="text-teal-400 hover:text-teal-300 transition-colors"
               >
-                team@raisefn.com
-              </a> to discuss
+                Advisor engagement page
+              </a>
+              {" "}&mdash; you accept them at checkout
             </li>
           </ul>
         </section>
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            Payments and cancellation
+            Payments and refunds
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
-            <li>Paid plans are billed monthly or annually via Stripe</li>
-            <li>You can cancel anytime &mdash; access continues until the end of your billing period</li>
-            <li>Refunds are handled case-by-case &mdash; reach out at team@raisefn.com</li>
+            <li>Advisor is a one-time payment via Stripe &mdash; no recurring billing</li>
+            <li>30-day money-back guarantee &mdash; full refund within 30 days of purchase, no questions asked</li>
+            <li>After 30 days, lifetime access is non-refundable; the 2% success fee on raisefn-introduced raises still applies per the engagement letter</li>
           </ul>
         </section>
 

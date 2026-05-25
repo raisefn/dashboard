@@ -5,12 +5,23 @@ import { createClient } from "@supabase/supabase-js";
 export async function POST(req: Request) {
   try {
     const stripe = getStripe();
-    const { tier } = await req.json();
+    const { tier, engagement_accepted, engagement_version } = await req.json();
 
     const priceId = getPriceMap()[tier];
     if (!priceId) {
       return NextResponse.json(
         { error: "Invalid tier." },
+        { status: 400 }
+      );
+    }
+
+    // Engagement letter acceptance is required for Advisor. The terms
+    // include a 2% success fee on raisefn-introduced capital — pre-purchase
+    // acknowledgment is the core legal protection. See
+    // /legal/engagement and .claude/plans/pricing_lifetime_simplification.md.
+    if (!engagement_accepted) {
+      return NextResponse.json(
+        { error: "Advisor engagement terms must be accepted before checkout." },
         { status: 400 }
       );
     }
@@ -42,18 +53,25 @@ export async function POST(req: Request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://raisefn.com";
 
+    // Pricing v2 (2026-05-25): one-time payment, not recurring subscription.
+    // Metadata records engagement acceptance for audit trail.
     const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
+      mode: "payment",
       line_items: [{ price: priceId, quantity: 1 }],
       customer_email: user.email,
       metadata: {
         supabase_user_id: user.id,
         tier,
+        engagement_accepted: "true",
+        engagement_version: engagement_version || "v1",
+        engagement_accepted_at: new Date().toISOString(),
+        engagement_terms_url: `${baseUrl}/legal/engagement`,
       },
-      subscription_data: {
+      payment_intent_data: {
         metadata: {
           email: user.email,
           tier,
+          engagement_version: engagement_version || "v1",
         },
       },
       success_url: `${baseUrl}/brain/deploy?checkout=success`,

@@ -10,6 +10,7 @@ export default function PricingPage() {
   const [authedToken, setAuthedToken] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [engagementAccepted, setEngagementAccepted] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -21,10 +22,16 @@ export default function PricingPage() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  async function startLaunchpadCheckout() {
+  async function startAdvisorCheckout() {
     setCheckoutError(null);
+    if (!engagementAccepted) {
+      setCheckoutError(
+        "Please review and accept the Advisor engagement terms first."
+      );
+      return;
+    }
     if (!authedToken) {
-      router.push("/signup?after=upgrade-launchpad");
+      router.push("/signup?after=upgrade-advisor");
       return;
     }
     setCheckoutLoading(true);
@@ -35,7 +42,11 @@ export default function PricingPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${authedToken}`,
         },
-        body: JSON.stringify({ tier: "launchpad" }),
+        body: JSON.stringify({
+          tier: "advisor",
+          engagement_accepted: true,
+          engagement_version: "v1",
+        }),
       });
       const data = await res.json();
       if (!res.ok || !data.url) {
@@ -66,21 +77,21 @@ export default function PricingPage() {
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
             Targeting, deck analysis, outreach drafts — grounded in 24,000+
-            rounds of fundraising activity. Free to try the brain. Advisor
-            when you&apos;re running an active raise.
+            rounds of fundraising activity. Launchpad to try the brain.
+            Advisor when you&apos;re running an active raise.
           </p>
         </div>
       </section>
 
-      {/* ── Free ── */}
+      {/* ── Launchpad (free) ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">
             <div className="flex items-baseline gap-4 mb-2">
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Free
+                Launchpad
               </h2>
-              <span className="text-sm text-zinc-500">$0 — 12 messages / month</span>
+              <span className="text-sm text-zinc-500">Free — 12 messages / month</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
               Drop your deck, paste an investor list, or just ask. The brain
@@ -129,20 +140,22 @@ export default function PricingPage() {
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
                 Advisor
               </h2>
-              <span className="text-sm text-zinc-500">$200 / month</span>
+              <span className="text-sm text-zinc-500">$999 one-time, lifetime</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              For founders running an active raise. Unlimited messages,
-              persistent memory across sessions, and an AI partner that runs
-              the day-to-day of your fundraise alongside you.
+              For founders running an active raise. Unlimited product access,
+              curated warm intros from our proprietary network, and a 1-hour
+              advisory call. Pay once, keep it for the life of the platform.
             </p>
 
             <ul className="space-y-4 mb-10 list-none">
               {[
-                ["Persistent raise memory", "the brain remembers your entire raise across sessions"],
-                ["Targeting & outreach drafts", "who to reach, what to say, ready to send"],
+                ["Unlimited product access", "lifetime — no monthly cap, no recurring bill"],
+                ["Curated warm intros", "from raisefn's proprietary investor network"],
+                ["1hr advisory call", "with the raise(fn) team"],
                 ["Pipeline memory", "every investor conversation logged so you never re-explain"],
-                ["Unlimited messages", "no cap during an active raise"],
+                ["Targeting & outreach drafts", "who to reach, what to say, ready to send"],
+                ["2% success fee", "only on capital from raisefn-introduced investors — we win when you do"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
                   <span className="text-orange-400 text-lg leading-snug shrink-0">•</span>
@@ -154,72 +167,39 @@ export default function PricingPage() {
               ))}
             </ul>
 
+            <div className="mb-6 max-w-xl">
+              <label className="flex items-start gap-3 cursor-pointer text-sm">
+                <input
+                  type="checkbox"
+                  checked={engagementAccepted}
+                  onChange={(e) => setEngagementAccepted(e.target.checked)}
+                  className="mt-1 h-4 w-4 cursor-pointer accent-orange-500"
+                />
+                <span className="text-zinc-400 leading-relaxed">
+                  I&apos;ve read and agree to the{" "}
+                  <a
+                    href="/legal/engagement"
+                    target="_blank"
+                    rel="noopener"
+                    className="text-teal-400 hover:text-teal-300 underline"
+                  >
+                    Advisor engagement terms
+                  </a>
+                  , including the 2% success fee on capital from raisefn-introduced investors.
+                </span>
+              </label>
+            </div>
+
             <button
-              onClick={startLaunchpadCheckout}
-              disabled={checkoutLoading}
-              className="rounded-full border border-orange-600/60 bg-orange-900/30 px-8 py-3 text-sm font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50 disabled:opacity-50"
+              onClick={startAdvisorCheckout}
+              disabled={checkoutLoading || !engagementAccepted}
+              className="rounded-full border border-orange-600/60 bg-orange-900/30 px-8 py-3 text-sm font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {checkoutLoading ? "Opening checkout…" : "Upgrade to Advisor"}
+              {checkoutLoading ? "Opening checkout…" : "Get Advisor — $999"}
             </button>
             {checkoutError && (
               <div className="mt-3 text-xs text-red-400 max-w-xl">{checkoutError}</div>
             )}
-          </div>
-        </FadeInSection>
-      </section>
-
-      <div className="mx-auto max-w-3xl px-4">
-        <div className="border-t border-zinc-800/50" />
-      </div>
-
-      {/* ── Concierge ── */}
-      <section className="relative py-16 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl">
-            <div className="flex items-baseline gap-4 mb-2">
-              <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Concierge
-              </h2>
-              <span className="text-sm text-zinc-500">Contact us</span>
-            </div>
-            <p className="text-sm text-zinc-400 mb-4 max-w-xl">
-              Hands-on fundraising support from a team that&apos;s been there.
-              Together we&apos;ve raised over $21M across 1,100+ investor
-              meetings — and we&apos;ve watched every kind of &ldquo;no&rdquo;
-              and &ldquo;yes.&rdquo; We bring that pattern recognition to
-              your raise.
-            </p>
-            <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              We work alongside you for the duration of your raise — pitch
-              positioning, targeted outreach, warm intros, meeting prep, term
-              sheet review. Whatever the raise needs.
-            </p>
-
-            <ul className="space-y-4 mb-10 list-none">
-              {[
-                ["Pitch positioning", "how to land the narrative with each investor"],
-                ["Warm introductions", "real intros from our network, not algorithmic guesses"],
-                ["Outreach strategy", "who to contact, in what order, what to lead with"],
-                ["Meeting prep and debrief", "before and after every investor conversation"],
-                ["Term sheet review", "comp data, red flags, and negotiation strategy"],
-                ["Full Brain access", "every tool, throughout the raise, no friction"],
-              ].map(([name, desc]) => (
-                <li key={name} className="flex items-start gap-3">
-                  <span className="text-purple-400 text-lg leading-snug shrink-0">•</span>
-                  <span className="text-sm leading-relaxed">
-                    <strong className="text-zinc-100 font-semibold">{name}</strong>
-                    <span className="text-zinc-400"> — {desc}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            <a
-              href="mailto:team@raisefn.com?subject=Concierge%20inquiry"
-              className="rounded-full border border-purple-700/50 bg-purple-950/20 px-8 py-3 text-sm font-medium text-purple-300 transition-all hover:border-purple-500 hover:bg-purple-900/30 inline-block"
-            >
-              Contact us
-            </a>
           </div>
         </FadeInSection>
       </section>

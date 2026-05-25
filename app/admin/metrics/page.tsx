@@ -175,17 +175,17 @@ export default function AdminMetricsPage() {
         {stripeReady ? (
           <>
             <MetricCard
-              title="Revenue"
+              title="Revenue (one-time)"
               data={dataFor(metrics.revenue_usd!)}
               color="#22c55e"
               prefix="$"
-              note="Sum of active subscription plan amounts each month."
+              note="Sum of succeeded Stripe charges in each month."
             />
             <MetricCard
               title="Free → Paid conversions"
               data={dataFor(metrics.free_to_paid_conversions!)}
               color="#facc15"
-              note="New subscriptions per month."
+              note="Unique customers whose first paid charge landed in the month."
             />
           </>
         ) : (

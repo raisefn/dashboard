@@ -12,11 +12,12 @@ export function getStripe(): Stripe {
   return _stripe;
 }
 
+// Single tier post-pricing-v2 (2026-05-25): Advisor at $999 one-time.
+// STRIPE_LAUNCHPAD_PRICE_ID env var name preserved for backward compat
+// — points to the new $999 one-time price ID, not the old $200/mo.
 export function getPriceMap(): Record<string, string | undefined> {
   return {
-    launchpad: process.env.STRIPE_LAUNCHPAD_PRICE_ID,
-    launchpad_annual: process.env.STRIPE_LAUNCHPAD_ANNUAL_PRICE_ID,
-    catalyst: process.env.STRIPE_CATALYST_PRICE_ID,
+    advisor: process.env.STRIPE_LAUNCHPAD_PRICE_ID,
   };
 }
 
