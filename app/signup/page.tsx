@@ -62,6 +62,13 @@ function SignupForm() {
     "idle" | "sending" | "sent" | "builder_done" | "oauth_redirecting" | "error"
   >("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  // Resend state for the "check your email" screen. The verify email can land
+  // in spam (notably Microsoft 365 junks young sending domains — cost us a
+  // signup on 2026-05-27), so users need an escape hatch instead of going
+  // silent or bouncing.
+  const [resendStatus, setResendStatus] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -216,6 +223,17 @@ function SignupForm() {
     setRole("founder");
     setAgreedToTerms(false);
     setErrorMsg("");
+    setResendStatus("idle");
+  }
+
+  async function handleResend() {
+    if (resendStatus === "sending") return;
+    setResendStatus("sending");
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: email.trim().toLowerCase(),
+    });
+    setResendStatus(error ? "error" : "sent");
   }
 
   // ── Confirmation screens ──
@@ -227,8 +245,40 @@ function SignupForm() {
           <h3 className="text-2xl font-bold text-white mb-3">Check your email</h3>
           <p className="text-sm text-zinc-400 leading-relaxed">
             We sent a verification link to <span className="text-zinc-200">{email}</span>.
-            Click it to get started.
+            Click it to get started. It may take a minute, and{" "}
+            <span className="text-zinc-300">check your spam/junk folder</span> — it sometimes lands there.
           </p>
+
+          <div className="mt-6">
+            {resendStatus === "sent" ? (
+              <p className="text-sm text-teal-400">Sent again — check your inbox and spam folder.</p>
+            ) : resendStatus === "error" ? (
+              <p className="text-sm text-amber-400">
+                Couldn&apos;t resend. Email{" "}
+                <a href="mailto:justin@raisefn.com" className="underline hover:text-amber-300">
+                  justin@raisefn.com
+                </a>{" "}
+                and we&apos;ll get you in manually.
+              </p>
+            ) : (
+              <button
+                onClick={handleResend}
+                disabled={resendStatus === "sending"}
+                className="text-sm text-teal-400 hover:text-teal-300 transition-colors disabled:opacity-50"
+              >
+                {resendStatus === "sending" ? "Resending…" : "Didn't get it? Resend the email"}
+              </button>
+            )}
+          </div>
+
+          <p className="mt-4 text-xs text-zinc-600">
+            Still stuck? Email{" "}
+            <a href="mailto:justin@raisefn.com" className="text-zinc-500 underline hover:text-zinc-400">
+              justin@raisefn.com
+            </a>{" "}
+            and we&apos;ll verify you manually.
+          </p>
+
           <button onClick={resetForm} className="mt-6 text-sm text-zinc-600 hover:text-zinc-400 transition-colors">
             Sign up with a different email
           </button>
