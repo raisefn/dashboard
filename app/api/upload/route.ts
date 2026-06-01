@@ -66,8 +66,16 @@ export async function POST(req: Request) {
     }
 
     let text = "";
+    // PDF fallback snapshot. unpdf's extractText detaches the underlying
+    // ArrayBuffer (transfers ownership internally), which zeroes out `buffer`
+    // by the time the no-text-layer fallback fires. Snapshot the base64
+    // BEFORE calling unpdf so the document-block fallback has the data.
+    let pdfBase64Snapshot: string | null = null;
+    let pdfByteCount = 0;
 
     if (lower.endsWith(".pdf")) {
+      pdfBase64Snapshot = buffer.toString("base64");
+      pdfByteCount = buffer.length;
       const { extractText } = await import("unpdf");
       const result = await extractText(new Uint8Array(bytes));
       text = Array.isArray(result.text) ? result.text.join("\n") : result.text;
@@ -115,13 +123,14 @@ export async function POST(req: Request) {
       // raw PDF back as a document attachment — brain forwards it to Claude
       // as a document content block, which handles both text and image PDFs
       // via vision. Only PDF: Anthropic's document blocks support PDF only.
-      if (lower.endsWith(".pdf")) {
+      // Uses the snapshot captured before unpdf (which detaches `buffer`).
+      if (lower.endsWith(".pdf") && pdfBase64Snapshot) {
         return NextResponse.json({
           kind: "document",
           filename: name,
           media_type: "application/pdf",
-          data: buffer.toString("base64"),
-          bytes: buffer.length,
+          data: pdfBase64Snapshot,
+          bytes: pdfByteCount,
         });
       }
       return NextResponse.json(
