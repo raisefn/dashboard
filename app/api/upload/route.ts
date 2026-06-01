@@ -80,14 +80,50 @@ export async function POST(req: Request) {
       if (docXml) {
         text = docXml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
       }
+    } else if (lower.endsWith(".pptx")) {
+      // PowerPoint .pptx is a zip of Open Office XML — slide content lives at
+      // ppt/slides/slideN.xml. Same XML-strip approach as .docx, but iterated
+      // per slide and labeled so the LLM can reason about deck structure.
+      const JSZip = (await import("jszip")).default;
+      const zip = await JSZip.loadAsync(buffer);
+      const slideNames = Object.keys(zip.files)
+        .filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
+        .sort((a, b) => {
+          const numA = parseInt(a.match(/slide(\d+)\.xml$/)?.[1] || "0", 10);
+          const numB = parseInt(b.match(/slide(\d+)\.xml$/)?.[1] || "0", 10);
+          return numA - numB;
+        });
+      const slideTexts: string[] = [];
+      for (let i = 0; i < slideNames.length; i++) {
+        const xml = await zip.file(slideNames[i])?.async("string");
+        if (xml) {
+          const cleaned = xml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+          if (cleaned) slideTexts.push(`Slide ${i + 1}: ${cleaned}`);
+        }
+      }
+      text = slideTexts.join("\n\n");
     } else {
       return NextResponse.json(
-        { error: "Unsupported file type. Upload a PDF, DOCX, TXT, MD file, or image (PNG/JPG/WEBP/GIF)." },
+        { error: "Unsupported file type. Upload a PDF, DOCX, PPTX, TXT, MD file, or image (PNG/JPG/WEBP/GIF)." },
         { status: 400 }
       );
     }
 
     if (!text.trim()) {
+      // PDF fallback: image-based or text-as-paths PDFs (Canva/Figma/Keynote
+      // exports) produce zero extractable text. Instead of erroring, hand the
+      // raw PDF back as a document attachment — brain forwards it to Claude
+      // as a document content block, which handles both text and image PDFs
+      // via vision. Only PDF: Anthropic's document blocks support PDF only.
+      if (lower.endsWith(".pdf")) {
+        return NextResponse.json({
+          kind: "document",
+          filename: name,
+          media_type: "application/pdf",
+          data: buffer.toString("base64"),
+          bytes: buffer.length,
+        });
+      }
       return NextResponse.json(
         { error: "Could not extract text from file." },
         { status: 400 }

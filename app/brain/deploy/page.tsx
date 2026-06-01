@@ -567,11 +567,14 @@ function BrainDeployInner() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [input, setInput] = useState("");
   // Attached file may be a text-extracted document (gets injected into the
-  // user message) OR an image (sent as a multimodal content block via the
-  // brain's `images` request field).
+  // user message), an image (sent as a multimodal content block via `images`),
+  // or a raw PDF document (sent as an Anthropic document content block via
+  // `documents` when text extraction failed — Canva/Figma/Keynote exports
+  // typically have no extractable text layer; Claude reads them natively).
   type AttachedFile =
     | { kind: "text"; name: string; text: string }
-    | { kind: "image"; name: string; mediaType: string; data: string };
+    | { kind: "image"; name: string; mediaType: string; data: string }
+    | { kind: "document"; name: string; mediaType: string; data: string };
   const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -851,7 +854,7 @@ function BrainDeployInner() {
   }, [loading]);
 
   /* ── Send message (exact SSE logic from chat.html) ── */
-  const send = useCallback(async (message: string, opts?: { silent?: boolean; displayMessage?: string; images?: { media_type: string; data: string }[] }) => {
+  const send = useCallback(async (message: string, opts?: { silent?: boolean; displayMessage?: string; images?: { media_type: string; data: string }[]; documents?: { media_type: string; data: string; filename: string }[] }) => {
     if (isStreaming || !session) return;
     const silent = opts?.silent ?? false;
 
@@ -895,6 +898,7 @@ function BrainDeployInner() {
         ...(raiseIdRef.current && { raise_id: raiseIdRef.current }),
         ...(conversationIdRef.current && { conversation_id: conversationIdRef.current }),
         ...(opts?.images && opts.images.length > 0 && { images: opts.images }),
+        ...(opts?.documents && opts.documents.length > 0 && { documents: opts.documents }),
       });
 
       const brainUrl = "https://brain-production-61da.up.railway.app/v1/brain/chat";
@@ -1551,6 +1555,13 @@ function BrainDeployInner() {
           mediaType: data.media_type,
           data: data.data,
         });
+      } else if (data.kind === "document") {
+        setAttachedFile({
+          kind: "document",
+          name: data.filename,
+          mediaType: data.media_type,
+          data: data.data,
+        });
       } else {
         setAttachedFile({ kind: "text", name: data.filename, text: data.text });
       }
@@ -1594,6 +1605,7 @@ function BrainDeployInner() {
     let displayMsg = userText;
     let brainMsg = userText;
     let imagePayload: { media_type: string; data: string }[] | undefined;
+    let documentPayload: { media_type: string; data: string; filename: string }[] | undefined;
 
     if (attachedFile) {
       if (attachedFile.kind === "image") {
@@ -1603,6 +1615,20 @@ function BrainDeployInner() {
         displayMsg = `🖼 ${attachedFile.name}${userText ? "\n" + userText : ""}`;
         brainMsg = instruction;
         imagePayload = [{ media_type: attachedFile.mediaType, data: attachedFile.data }];
+      } else if (attachedFile.kind === "document") {
+        // Raw PDF — Claude reads it natively via document content block.
+        // Used as the fallback for PDFs whose text layer can't be extracted
+        // (Canva/Figma/Keynote exports). No `[Attached file: ...]` wrapper
+        // in the text because the document IS the content; the wrapper is
+        // a text-path concept.
+        const instruction = userText || "Please analyze this deck.";
+        displayMsg = `📎 ${attachedFile.name}${userText ? "\n" + userText : ""}`;
+        brainMsg = instruction;
+        documentPayload = [{
+          media_type: attachedFile.mediaType,
+          data: attachedFile.data,
+          filename: attachedFile.name,
+        }];
       } else {
         const instruction = userText || "Please analyze this document.";
         displayMsg = `📎 ${attachedFile.name}${userText ? "\n" + userText : ""}`;
@@ -1613,7 +1639,7 @@ function BrainDeployInner() {
 
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "48px";
-    send(brainMsg, { displayMessage: displayMsg, images: imagePayload });
+    send(brainMsg, { displayMessage: displayMsg, images: imagePayload, documents: documentPayload });
   }
 
   function handleTextareaInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
