@@ -31,20 +31,22 @@ interface BriefData {
   view_count: number;
 }
 
-async function fetchBrief(token: string): Promise<BriefData | null> {
+async function fetchBrief(
+  token: string,
+): Promise<{ data: BriefData | null; debug: string }> {
+  const url = `${BRAIN_URL}/v1/brain/briefs/${token}`;
   try {
-    const res = await fetch(`${BRAIN_URL}/v1/brain/briefs/${token}`, {
-      cache: "no-store",
-    });
-    if (res.status === 404) return null;
+    const res = await fetch(url, { cache: "no-store" });
+    if (res.status === 404) return { data: null, debug: `404 from brain (${url})` };
     if (!res.ok) {
-      console.error(`Brief fetch failed: ${res.status}`);
-      return null;
+      const body = await res.text().catch(() => "<no body>");
+      return { data: null, debug: `brain ${res.status}: ${body.slice(0, 200)}` };
     }
-    return (await res.json()) as BriefData;
+    const data = (await res.json()) as BriefData;
+    return { data, debug: "ok" };
   } catch (err) {
-    console.error("Brief fetch error:", err);
-    return null;
+    const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+    return { data: null, debug: `fetch threw: ${msg} (url=${url})` };
   }
 }
 
@@ -52,7 +54,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ token: string }> },
 ): Promise<Metadata> {
   const { token } = await params;
-  const brief = await fetchBrief(token);
+  const { data: brief } = await fetchBrief(token);
   if (!brief) {
     return { title: "Brief not found — raise(fn)" };
   }
@@ -65,14 +67,28 @@ export async function generateMetadata(
   };
 }
 
+// Force dynamic rendering. The brief content is mutable (regenerations
+// reuse no tokens but view_count bumps on every fetch) and we never want
+// a stale render.
+export const dynamic = "force-dynamic";
+
 export default async function BriefPage(
   { params }: { params: Promise<{ token: string }> },
 ) {
   const { token } = await params;
-  const brief = await fetchBrief(token);
+  const { data: brief, debug } = await fetchBrief(token);
 
   if (!brief) {
-    notFound();
+    // Temporary: render debug info on missing-brief so we can diagnose
+    // Vercel runtime fetch failures. Remove once stable.
+    return (
+      <main className="fixed inset-0 overflow-y-auto bg-white text-zinc-900 z-30 p-12 font-mono text-sm">
+        <h1 className="text-xl font-bold mb-4">Brief diagnostic</h1>
+        <p>Token: <code>{token}</code></p>
+        <p>BRAIN_URL: <code>{BRAIN_URL}</code></p>
+        <p>Status: <code>{debug}</code></p>
+      </main>
+    );
   }
 
   return (
