@@ -17,8 +17,10 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Metadata } from "next";
 
-const BRAIN_URL =
-  process.env.NEXT_PUBLIC_BRAIN_URL || "https://brain-production-61da.up.railway.app";
+// Hardcoded to the active brain Railway URL. The NEXT_PUBLIC_BRAIN_URL env
+// var on Vercel points at a stale (-61da-less) alias; relying on it caused
+// a silent 404 on first deploy.
+const BRAIN_URL = "https://brain-production-61da.up.railway.app";
 
 interface BriefData {
   token: string;
@@ -31,22 +33,20 @@ interface BriefData {
   view_count: number;
 }
 
-async function fetchBrief(
-  token: string,
-): Promise<{ data: BriefData | null; debug: string }> {
-  const url = `${BRAIN_URL}/v1/brain/briefs/${token}`;
+async function fetchBrief(token: string): Promise<BriefData | null> {
   try {
-    const res = await fetch(url, { cache: "no-store" });
-    if (res.status === 404) return { data: null, debug: `404 from brain (${url})` };
+    const res = await fetch(`${BRAIN_URL}/v1/brain/briefs/${token}`, {
+      cache: "no-store",
+    });
+    if (res.status === 404) return null;
     if (!res.ok) {
-      const body = await res.text().catch(() => "<no body>");
-      return { data: null, debug: `brain ${res.status}: ${body.slice(0, 200)}` };
+      console.error(`Brief fetch failed: ${res.status}`);
+      return null;
     }
-    const data = (await res.json()) as BriefData;
-    return { data, debug: "ok" };
+    return (await res.json()) as BriefData;
   } catch (err) {
-    const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
-    return { data: null, debug: `fetch threw: ${msg} (url=${url})` };
+    console.error("Brief fetch error:", err);
+    return null;
   }
 }
 
@@ -54,7 +54,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ token: string }> },
 ): Promise<Metadata> {
   const { token } = await params;
-  const { data: brief } = await fetchBrief(token);
+  const brief = await fetchBrief(token);
   if (!brief) {
     return { title: "Brief not found — raise(fn)" };
   }
@@ -67,28 +67,19 @@ export async function generateMetadata(
   };
 }
 
-// Force dynamic rendering. The brief content is mutable (regenerations
-// reuse no tokens but view_count bumps on every fetch) and we never want
-// a stale render.
+// Force dynamic rendering. The brief content can change (regenerations
+// produce new tokens but view_count bumps on every fetch) and we never
+// want a stale render.
 export const dynamic = "force-dynamic";
 
 export default async function BriefPage(
   { params }: { params: Promise<{ token: string }> },
 ) {
   const { token } = await params;
-  const { data: brief, debug } = await fetchBrief(token);
+  const brief = await fetchBrief(token);
 
   if (!brief) {
-    // Temporary: render debug info on missing-brief so we can diagnose
-    // Vercel runtime fetch failures. Remove once stable.
-    return (
-      <main className="fixed inset-0 overflow-y-auto bg-white text-zinc-900 z-30 p-12 font-mono text-sm">
-        <h1 className="text-xl font-bold mb-4">Brief diagnostic</h1>
-        <p>Token: <code>{token}</code></p>
-        <p>BRAIN_URL: <code>{BRAIN_URL}</code></p>
-        <p>Status: <code>{debug}</code></p>
-      </main>
-    );
+    notFound();
   }
 
   return (
