@@ -36,6 +36,13 @@ export default function Nav() {
 
   const subLinks = isTracker ? trackerLinks : isBrain ? brainLinks : null;
 
+  // /brief/<token> is a public shareable brief surface sent to external
+  // investors. It uses its own brand layout and must not show dashboard
+  // navigation. Same for the legal/engagement page convention.
+  if (pathname.startsWith("/brief")) {
+    return null;
+  }
+
   return (
     <>
     <header className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-md">
