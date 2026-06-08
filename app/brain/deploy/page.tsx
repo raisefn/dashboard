@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useRef, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase-browser";
 import type { Session } from "@supabase/supabase-js";
 
@@ -1779,17 +1780,17 @@ function BrainDeployInner() {
       {/* Checkout success banner */}
       {checkoutSuccess && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-lg border border-teal-700/50 bg-teal-950/90 px-6 py-3 text-sm text-teal-300 shadow-lg backdrop-blur-sm">
-          You're upgraded! All tools are now unlocked.
+          You&apos;re upgraded! All tools are now unlocked.
         </div>
       )}
 
       {/* Header */}
       <header>
         <nav>
-          <a href="/" className="brain-logo" style={{ textDecoration: "none" }}>
+          <Link href="/" className="brain-logo" style={{ textDecoration: "none" }}>
             <span className="raise">raise</span>
             <span className="fn">(fn)</span>
-          </a>
+          </Link>
           <div className="nav-right">
             {userTier !== "free" ? (
               <span className="nav-badge" title="Lifetime Advisor — no recurring bill">
