@@ -1780,7 +1780,7 @@ function BrainDeployInner() {
       {/* Checkout success banner */}
       {checkoutSuccess && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-lg border border-teal-700/50 bg-teal-950/90 px-6 py-3 text-sm text-teal-300 shadow-lg backdrop-blur-sm">
-          You&apos;re upgraded! All tools are now unlocked.
+          {"You're upgraded! All tools are now unlocked."}
         </div>
       )}
 
