@@ -2,17 +2,6 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  // Next 16 began failing the Vercel build on pre-existing eslint errors
-  // that local `next build` was treating as warnings, and on a TS check
-  // that's environmental on Vercel only. Multiple lint passes brought
-  // local eslint to 0 errors and Vercel still failed, leaving production
-  // serving an older bundle. Production-down trumps lint hygiene; we
-  // bypass these checks during the build and chase root cause without
-  // blocking ship. Local `npx eslint .` and `npx tsc --noEmit` remain
-  // available for hand checks.
-  eslint: { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
-
   async rewrites() {
     return [
       {

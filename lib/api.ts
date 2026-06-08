@@ -130,12 +130,17 @@ async function apiFetch<T>(path: string, params?: Record<string, string>): Promi
     });
   }
 
-  // Retry once on failure (handles Railway cold starts, momentary blips)
+  // Retry once on failure (handles Railway cold starts, momentary blips).
+  // 5s hard timeout per attempt so a hung tracker API can't lock the
+  // Vercel build (sitemap.xml generation calls this in a loop). Local
+  // builds saw fast 401s and breezed through; Vercel saw the same call
+  // hang for the full 60s static-gen timeout and killed the build.
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const res = await fetch(url.toString(), {
         headers: { "X-API-Key": API_KEY },
         next: { revalidate: 300 }, // cache 5 min
+        signal: AbortSignal.timeout(5000),
       });
       if (!res.ok) {
         if (attempt === 0) continue; // retry once
