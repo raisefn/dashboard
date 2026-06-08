@@ -44,8 +44,14 @@ async function fetchAllInvestors(): Promise<MetadataRoute.Sitemap> {
   const out: MetadataRoute.Sitemap = [];
   const limit = 100;
   let offset = 0;
-  // Hard outer bound to avoid runaway loops if the API misbehaves.
-  for (let i = 0; i < 1000; i++) {
+  // Cap to 10 pages = 1000 investor URLs. Local builds hit 401 fast and
+  // never even loop; Vercel builds have a working API key and previously
+  // walked the full 14K-row catalog, exceeding the 60s static-gen budget
+  // and crashing the build. 1000 URLs is plenty for SEO crawl-budget at
+  // this stage; we'll switch to a sitemap index once dynamic content
+  // scales past a few thousand entries.
+  const MAX_PAGES = 10;
+  for (let i = 0; i < MAX_PAGES; i++) {
     try {
       const res = await getInvestors({ limit, offset });
       for (const inv of res.data) {
@@ -77,7 +83,10 @@ async function fetchAllProjects(): Promise<MetadataRoute.Sitemap> {
   const out: MetadataRoute.Sitemap = [];
   const limit = 100;
   let offset = 0;
-  for (let i = 0; i < 1000; i++) {
+  // Same cap as fetchAllInvestors — 10 pages = 1000 URLs to stay under
+  // Vercel's 60s static-gen budget. See note there for details.
+  const MAX_PAGES = 10;
+  for (let i = 0; i < MAX_PAGES; i++) {
     try {
       const res = await getProjects({ limit, offset });
       for (const p of res.data) {
