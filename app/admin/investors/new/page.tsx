@@ -175,9 +175,8 @@ export default function AddInvestorPage() {
           {result.created ? "Investor added" : "Investor updated"}
         </h1>
         <p className="text-sm text-zinc-400 mb-6">
-          {email} — {firmName || "(no firm)"}. They'll start receiving match
-          notifications via the existing Slack/email pipeline when verified
-          founders match their thesis.
+          {email} — {firmName || "(no firm)"}.
+          {" They’ll start receiving match notifications via the existing Slack/email pipeline when verified founders match their thesis."}
         </p>
         <button
           onClick={() => {
@@ -219,13 +218,13 @@ export default function AddInvestorPage() {
           {existing && existing.role === "investor" && (
             <div className="mt-2 rounded-md border border-amber-700/40 bg-amber-950/20 p-3 text-xs text-amber-200">
               <strong>Existing investor:</strong> {existing.name || "(no name)"} at {existing.firm_name || "(no firm)"}.
-              Submitting will overwrite their fields. (You'll be asked to confirm.)
+              {" Submitting will overwrite their fields. (You’ll be asked to confirm.)"}
             </div>
           )}
           {existing && existing.role && existing.role !== "investor" && (
             <div className="mt-2 rounded-md border border-red-700/40 bg-red-950/20 p-3 text-xs text-red-300">
               <strong>Conflict:</strong> Email already exists as <code>{existing.role}</code>.
-              Use a different email — can't dual-purpose accounts.
+              {" Use a different email — can’t dual-purpose accounts."}
             </div>
           )}
         </Field>

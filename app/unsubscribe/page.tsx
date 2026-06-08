@@ -46,7 +46,9 @@ function UnsubscribeInner() {
       winParams?.get("api_key");
 
     if (!token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState("error");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMessage(
         "This unsubscribe link is missing a token. Email team@raisefn.com if you need help."
       );

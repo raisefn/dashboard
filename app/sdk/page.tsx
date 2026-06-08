@@ -258,10 +258,10 @@ export default function SDKPage() {
                 <span className="text-violet-400">import</span>{" x402Client\n\n"}
                 {"client = x402Client(\n"}
                 {"  "}<span className="text-teal-400">private_key</span>{"=AGENT_KEY,\n"}
-                {"  "}<span className="text-teal-400">network</span>{"="}<span className="text-orange-400">"base"</span>{"\n"})
+                {"  "}<span className="text-teal-400">network</span>{"="}<span className="text-orange-400">{"\"base\""}</span>{"\n"})
                 {"\n\n"}<span className="text-zinc-600">{"# One call. Auto-pays via x402. No API key."}</span>{"\n"}
                 {"rounds = "}<span className="text-violet-400">await</span>{" client.get(\n"}
-                {"  "}<span className="text-orange-400">"https://raisefn.com/v1/brain/rounds"</span>{"\n)"}
+                {"  "}<span className="text-orange-400">{"\"https://raisefn.com/v1/brain/rounds\""}</span>{"\n)"}
               </pre>
             </div>
 

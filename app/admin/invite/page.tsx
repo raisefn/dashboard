@@ -13,6 +13,10 @@ export default function AdminInvitePage() {
   const [secret, setSecret] = useState("");
 
   useEffect(() => {
+    // Intentional one-shot hydration of localStorage on mount; the
+    // React 19 set-state-in-effect rule fires on cascading renders, not
+    // this client-only init pattern.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSecret(localStorage.getItem("rfn_admin_secret") || "");
   }, []);
   const [email, setEmail] = useState("");
