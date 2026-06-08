@@ -601,6 +601,12 @@ function BrainDeployInner() {
     next_reset: string | null;
     reset_label: string | null;
   }>(null);
+  // Usage state from brain — surfaces nav Upgrade button + soft card
+  // at message-12 lifetime. Refs so updates don't re-render the page
+  // (the soft card is inserted manually via DOM after streaming).
+  const lifetimeCountRef = useRef<number | null>(null);
+  const monthCountRef = useRef<number | null>(null);
+  const monthCapRef = useRef<number | null>(null);
 
   // DOM refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -985,6 +991,26 @@ function BrainDeployInner() {
               if (event.conversation_id) conversationIdRef.current = event.conversation_id;
               brainStateRef.current = "idle";
               activeColorRef.current = null;
+            } else if (event.type === "usage") {
+              // Track usage state for nav Upgrade button + soft card.
+              // Mirror tier to localStorage so the Nav component (which
+              // doesn't have direct access to chat state) can render the
+              // Upgrade pill based on a fresh value.
+              if (typeof event.tier === "string") {
+                setUserTier(event.tier);
+                try {
+                  localStorage.setItem("raisefn_user_tier", event.tier);
+                } catch { /* private browsing etc. */ }
+              }
+              if (typeof event.lifetime_count === "number") {
+                lifetimeCountRef.current = event.lifetime_count;
+              }
+              if (typeof event.month_count === "number") {
+                monthCountRef.current = event.month_count;
+              }
+              if (typeof event.month_cap === "number" || event.month_cap === null) {
+                monthCapRef.current = event.month_cap;
+              }
             } else if (event.type === "limit_reached") {
               limitReachedRef.current = {
                 tier: event.tier,
@@ -1088,6 +1114,51 @@ function BrainDeployInner() {
           limitWarningRef.current = null;
         }
 
+        // ── Soft upgrade card (one-time at message-12 lifetime) ────
+        // Fires once per browser when a free user crosses 12 lifetime
+        // messages. Pitches Advisor (concierge), dismissible. Stored in
+        // localStorage so it never re-fires on this device. Advisor /
+        // already-dismissed users see nothing.
+        try {
+          const tier = (typeof window !== "undefined"
+            ? localStorage.getItem("raisefn_user_tier")
+            : null) || userTier;
+          const dismissed = typeof window !== "undefined"
+            ? localStorage.getItem("raisefn_upgrade_card_dismissed_v1") === "1"
+            : true;
+          const lc = lifetimeCountRef.current ?? 0;
+          if (tier === "free" && !dismissed && lc >= 12) {
+            const card = document.createElement("div");
+            card.className =
+              "mt-4 rounded-xl border border-orange-700/40 bg-gradient-to-br from-orange-950/30 to-zinc-900/40 p-5";
+            card.innerHTML = `
+              <div class="text-sm font-semibold text-orange-200 mb-1">Want raise(fn) Team in the loop?</div>
+              <div class="text-xs text-zinc-300 mb-4 leading-relaxed">
+                You've used raise(fn) for ${lc} messages now. The brain handles your prep and pipeline. Advisor adds the human side: warm intros to portfolio-fit investors, deck review by raise(fn) Team, and meeting prep when it counts.
+                <br/><br/>
+                $999 one-time, lifetime access. 2% success fee on capital raised through raise(fn)-introduced investors. <a href="/legal/engagement" class="text-orange-300 underline">Full terms</a>.
+              </div>
+              <div class="flex gap-2">
+                <button class="upgrade-card-soft-cta rounded-md bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold px-4 py-2 transition-colors">See Advisor</button>
+                <button class="upgrade-card-soft-dismiss rounded-md border border-zinc-700 hover:border-zinc-600 text-zinc-300 text-xs font-medium px-4 py-2 transition-colors">Not now</button>
+              </div>
+            `;
+            contentEl.parentElement?.appendChild(card);
+            const ctaBtn = card.querySelector(".upgrade-card-soft-cta") as HTMLButtonElement | null;
+            const dismissBtn = card.querySelector(".upgrade-card-soft-dismiss") as HTMLButtonElement | null;
+            ctaBtn?.addEventListener("click", () => {
+              try { localStorage.setItem("raisefn_upgrade_card_dismissed_v1", "1"); } catch { /* ignore */ }
+              router.push("/pricing");
+            });
+            dismissBtn?.addEventListener("click", () => {
+              try { localStorage.setItem("raisefn_upgrade_card_dismissed_v1", "1"); } catch { /* ignore */ }
+              card.style.opacity = "0";
+              setTimeout(() => card.remove(), 200);
+              card.style.transition = "opacity 200ms";
+            });
+          }
+        } catch { /* defensive — card is best-effort */ }
+
         // (limit_reached card render moved OUT of this if-fullText block —
         // see below. It runs whether or not text was streamed.)
       }
@@ -1112,9 +1183,18 @@ function BrainDeployInner() {
         card.className = "upgrade-card";
 
         if (isFreeVerified) {
+            // Dynamic lead-in. The reason field is "monthly" for the new
+            // 50/mo free cap; reset_label is server-formatted ("Jul 1").
+            const reasonWord = lr.reason === "monthly" ? "this month" :
+                               lr.reason === "daily" ? "today" :
+                               lr.reason === "hourly" ? "this hour" : "";
+            const capWord = lr.cap ? `${lr.cap} ` : "";
+            const resetText = lr.reset_label && lr.reset_label !== "never"
+              ? ` Resets ${lr.reset_label}.`
+              : "";
             card.innerHTML = `
               <div class="upgrade-card-leadin">
-                That's your 12 free messages. Lifetime upgrade unlocks the rest:
+                That's your ${capWord}free messages ${reasonWord}.${resetText} Want to keep going right now? Upgrade unlocks the rest:
               </div>
               <div class="upgrade-card-header">Ready to run a real raise?</div>
               <div class="upgrade-card-subhead">
@@ -1164,6 +1244,10 @@ function BrainDeployInner() {
                   Get Advisor — $999 lifetime
                 </button>
                 <div class="upgrade-card-error" style="display:none"></div>
+              </div>
+              <div style="margin-top:14px;font-size:12px;color:#a1a1aa;line-height:1.5">
+                Actively closing a raise and need the cap bumped this month?
+                <a href="mailto:team@raisefn.com?subject=Cap%20bump%20request" style="color:#fb923c;text-decoration:underline">Email team@raisefn.com</a>.
               </div>
             `;
           } else {

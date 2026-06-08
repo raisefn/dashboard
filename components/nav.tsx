@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import TrackerSearch from "@/components/tracker-search";
 
@@ -34,6 +34,22 @@ export default function Nav() {
   const isBrain = pathname.startsWith("/brain");
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Mirror of tier from chat's usage event (written to localStorage by the
+  // brain page). Lets us render the Upgrade pill on /brain pages without a
+  // separate fetch. Hidden for Advisor users. Hydration-safe by gating on
+  // mounted-after-hydration.
+  const [userTier, setUserTier] = useState<string | null>(null);
+  useEffect(() => {
+    const read = () => {
+      try {
+        setUserTier(localStorage.getItem("raisefn_user_tier"));
+      } catch { /* private browsing */ }
+    };
+    read();
+    window.addEventListener("storage", read);
+    return () => window.removeEventListener("storage", read);
+  }, []);
+
   const subLinks = isTracker ? trackerLinks : isBrain ? brainLinks : null;
 
   // /brief/<token> is a public shareable brief surface sent to external
@@ -42,6 +58,11 @@ export default function Nav() {
   if (pathname.startsWith("/brief")) {
     return null;
   }
+
+  // Upgrade pill: show on /brain pages when a non-Advisor user is signed
+  // in. Reads from the localStorage mirror written by the chat page's
+  // usage SSE event handler.
+  const showUpgrade = isBrain && userTier === "free";
 
   return (
     <>
@@ -77,6 +98,14 @@ export default function Nav() {
 
           {/* Right side: Log in + Get Started + hamburger */}
           <div className="flex items-center gap-3">
+            {showUpgrade && (
+              <Link
+                href="/pricing"
+                className="hidden sm:inline-flex rounded-full border border-orange-700/60 bg-orange-950/30 px-4 py-1.5 text-xs font-semibold text-orange-200 hover:bg-orange-900/40 hover:text-orange-100 transition-colors"
+              >
+                Upgrade
+              </Link>
+            )}
             <Link
               href="/login"
               className="text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
