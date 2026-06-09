@@ -40,6 +40,15 @@ type MatchListPayload = {
   data_quality?: { candidate_investors_found?: number; note?: string };
 };
 
+type Batch = {
+  id: string;
+  generated_at: string | null;
+  request?: { sector?: string; stage?: string; raising_usd?: number | null } | null;
+  individuals_to_target?: Investor[];
+  firms_to_consider?: Investor[];
+  count?: number;
+};
+
 type ExistingBrief = {
   token: string;
   investor_full_name: string | null;
@@ -58,8 +67,8 @@ export default function MatchesPage() {
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [matches, setMatches] = useState<MatchListPayload | null>(null);
-  const [generatedAt, setGeneratedAt] = useState<string | null>(null);
+  const [batches, setBatches] = useState<Batch[]>([]);
+  const [activeBatchId, setActiveBatchId] = useState<string | null>(null);
   const [briefs, setBriefs] = useState<ExistingBrief[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -85,8 +94,12 @@ export default function MatchesPage() {
         throw new Error(body.detail || `Failed to load matches (${res.status})`);
       }
       const data = await res.json();
-      setMatches(data.match_list);
-      setGeneratedAt(data.generated_at);
+      const incomingBatches: Batch[] = data.batches || [];
+      setBatches(incomingBatches);
+      setActiveBatchId((prev) => {
+        if (prev && incomingBatches.some((b) => b.id === prev)) return prev;
+        return incomingBatches[0]?.id || null;
+      });
       setBriefs(data.briefs || []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load matches.");
@@ -160,9 +173,22 @@ export default function MatchesPage() {
     );
   }
 
-  const individuals = matches?.individuals_to_target || [];
-  const firms = matches?.firms_to_consider || [];
+  const activeBatch = batches.find((b) => b.id === activeBatchId) || batches[0] || null;
+  const individuals = activeBatch?.individuals_to_target || [];
+  const firms = activeBatch?.firms_to_consider || [];
   const ordered: Investor[] = [...individuals, ...firms];
+
+  function batchLabel(b: Batch, idx: number, total: number): string {
+    const pos = total - idx; // newest = highest number
+    const when = b.generated_at ? new Date(b.generated_at) : null;
+    const dateStr = when ? when.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "";
+    const sector = b.request?.sector || "";
+    const stage = b.request?.stage || "";
+    const meta = [sector, stage].filter(Boolean).join(" · ");
+    const count = b.count != null ? `${b.count} match${b.count === 1 ? "" : "es"}` : "";
+    const parts = [dateStr, count, meta].filter(Boolean);
+    return `Batch ${pos} — ${parts.join(" · ")}`;
+  }
 
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-200">
@@ -179,10 +205,26 @@ export default function MatchesPage() {
       </header>
 
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="flex items-baseline justify-between mb-4">
+        <div className="flex items-baseline justify-between mb-4 gap-3 flex-wrap">
           <h1 className="text-xl font-semibold text-zinc-100">Your matches</h1>
-          {generatedAt && (
-            <span className="text-xs text-zinc-500">Generated {new Date(generatedAt).toLocaleString()}</span>
+          {batches.length > 1 ? (
+            <select
+              value={activeBatchId || ""}
+              onChange={(e) => setActiveBatchId(e.target.value)}
+              className="rounded-md bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 px-2 py-1.5 focus:border-zinc-600 outline-none"
+            >
+              {batches.map((b, idx) => (
+                <option key={b.id} value={b.id}>
+                  {batchLabel(b, idx, batches.length)}
+                </option>
+              ))}
+            </select>
+          ) : (
+            activeBatch?.generated_at && (
+              <span className="text-xs text-zinc-500">
+                Generated {new Date(activeBatch.generated_at).toLocaleString()}
+              </span>
+            )
           )}
         </div>
 
@@ -192,7 +234,7 @@ export default function MatchesPage() {
           </div>
         )}
 
-        {!matches || ordered.length === 0 ? (
+        {!activeBatch || ordered.length === 0 ? (
           <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 px-6 py-10 text-center">
             <p className="text-sm text-zinc-400 mb-3">No matches yet.</p>
             <p className="text-xs text-zinc-500 mb-5">Head back to chat and ask the brain to pull matches.</p>

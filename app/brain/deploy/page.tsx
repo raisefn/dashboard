@@ -35,6 +35,203 @@ const TOOL_COLORS: Record<string, keyof typeof COLORS> = {
 };
 
 /* ── Markdown renderer (matches chat.html exactly) ── */
+function fmtCheckSize(n: unknown): string | null {
+  if (typeof n !== "number" || !n) return null;
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+  if (n >= 1_000) return `$${Math.round(n / 1000)}K`;
+  return `$${n}`;
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+type MatchInvestor = {
+  kind?: string;
+  slug?: string;
+  name?: string;
+  firm_name?: string | null;
+  title?: string | null;
+  thesis?: string | null;
+  description?: string | null;
+  focus_sectors?: string[] | null;
+  focus_stages?: string[] | null;
+  focus_countries?: string[] | null;
+  check_size_min?: number | null;
+  check_size_max?: number | null;
+  hq_location?: string | null;
+  score?: number;
+  score_max?: number;
+  match_reasons?: string[];
+  data_source?: string;
+  openvc_url?: string | null;
+  linkedin?: string | null;
+};
+
+function renderMatchesPanel(
+  data: {
+    individuals_to_target?: Array<Record<string, unknown>>;
+    firms_to_consider?: Array<Record<string, unknown>>;
+    generated_at?: string;
+  },
+  contentEl: HTMLElement,
+  session: { access_token: string; user: { email?: string | null } } | null,
+  impersonating: string,
+): void {
+  if (!session) return;
+  const individuals = (data.individuals_to_target || []) as MatchInvestor[];
+  const firms = (data.firms_to_consider || []) as MatchInvestor[];
+  const ordered = [...individuals, ...firms];
+  if (ordered.length === 0) return;
+
+  const panel = document.createElement("div");
+  panel.className =
+    "mt-4 mb-1 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 space-y-2";
+
+  const header = document.createElement("div");
+  header.className = "flex items-baseline justify-between mb-1";
+  header.innerHTML = `
+    <div class="text-sm font-medium text-zinc-200">${ordered.length} match${ordered.length === 1 ? "" : "es"} — generate a brief on any of them</div>
+    <a href="/brain/matches" class="text-[11px] text-zinc-500 hover:text-zinc-300">View all →</a>
+  `;
+  panel.appendChild(header);
+
+  const cardsWrap = document.createElement("div");
+  cardsWrap.className = "space-y-1.5";
+  panel.appendChild(cardsWrap);
+
+  ordered.forEach((inv, idx) => {
+    const card = document.createElement("div");
+    card.className =
+      "rounded-lg border border-zinc-800 bg-zinc-950/60 hover:bg-zinc-900/70 transition-colors p-3";
+    const score =
+      typeof inv.score === "number" && typeof inv.score_max === "number" && inv.score_max
+        ? Math.round((inv.score / inv.score_max) * 100)
+        : null;
+    const firmLabel =
+      inv.firm_name && inv.kind === "individual"
+        ? `<span class="text-xs text-zinc-500">@ ${escapeHtml(inv.firm_name)}</span>`
+        : "";
+    const titleLabel = inv.title
+      ? `<span class="text-xs text-zinc-500">· ${escapeHtml(inv.title)}</span>`
+      : "";
+    const scoreBadge =
+      score !== null
+        ? `<span class="text-[10px] uppercase tracking-wide rounded bg-zinc-800 text-zinc-300 px-1.5 py-0.5">fit ${score}%</span>`
+        : "";
+    const kindBadge =
+      inv.kind === "firm"
+        ? `<span class="text-[10px] uppercase tracking-wide rounded bg-zinc-800 text-zinc-400 px-1.5 py-0.5">firm</span>`
+        : "";
+    const sourceLabel =
+      inv.data_source && inv.data_source !== "raisefn_network"
+        ? `<span class="text-[10px] text-zinc-600">via ${escapeHtml(inv.data_source)}</span>`
+        : "";
+    const thesisLine =
+      inv.thesis || inv.description
+        ? `<p class="text-[11px] text-zinc-400 mt-1 line-clamp-2">${escapeHtml(String(inv.thesis || inv.description))}</p>`
+        : "";
+    const facts: string[] = [];
+    const lo = fmtCheckSize(inv.check_size_min);
+    const hi = fmtCheckSize(inv.check_size_max);
+    if (lo || hi) facts.push(`check ${lo || "?"}–${hi || "?"}`);
+    if (Array.isArray(inv.focus_sectors) && inv.focus_sectors.length)
+      facts.push(`sectors ${inv.focus_sectors.slice(0, 3).join(", ")}`);
+    if (Array.isArray(inv.focus_stages) && inv.focus_stages.length)
+      facts.push(`stages ${inv.focus_stages.slice(0, 3).join(", ")}`);
+    if (inv.hq_location) facts.push(String(inv.hq_location));
+    const factsLine = facts.length
+      ? `<div class="flex flex-wrap gap-x-3 mt-1 text-[10px] text-zinc-500">${facts.map((f) => `<span>${escapeHtml(f)}</span>`).join("")}</div>`
+      : "";
+
+    card.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-sm font-medium text-zinc-100">${escapeHtml(inv.name || "Unknown")}</span>
+            ${firmLabel}
+            ${titleLabel}
+            ${scoreBadge}
+            ${kindBadge}
+            ${sourceLabel}
+          </div>
+          ${thesisLine}
+          ${factsLine}
+        </div>
+        <div class="shrink-0">
+          <button
+            class="match-brief-btn text-xs rounded-md bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5"
+            data-idx="${idx}"
+          >Generate brief</button>
+        </div>
+      </div>
+      <div class="match-brief-status mt-1.5 text-[11px] text-zinc-400 hidden"></div>
+    `;
+    cardsWrap.appendChild(card);
+
+    const btn = card.querySelector(".match-brief-btn") as HTMLButtonElement;
+    const status = card.querySelector(".match-brief-status") as HTMLDivElement;
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      const originalLabel = btn.textContent || "Generate brief";
+      btn.textContent = "Generating…";
+      status.classList.add("hidden");
+      status.textContent = "";
+      try {
+        const firmName =
+          (inv.firm_name as string | null | undefined) ||
+          (inv.kind === "firm" ? (inv.name as string | undefined) : null) ||
+          null;
+        const founderEmail = (session.user.email || "").toLowerCase();
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        };
+        if (impersonating) headers["X-Impersonate"] = impersonating;
+        const res = await fetch("/v1/brain/generate-brief", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            founder_email: impersonating || founderEmail,
+            investor_inline: {
+              name: inv.name || "",
+              firm: firmName,
+              title: inv.title || null,
+              thesis: inv.thesis || inv.description || null,
+              website: inv.openvc_url || null,
+            },
+          }),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.detail || `Brief generation failed (${res.status})`);
+        }
+        const briefData = await res.json();
+        window.open(briefData.url, "_blank", "noopener");
+        btn.textContent = "✓ Brief ready";
+        btn.className =
+          "text-xs rounded-md border border-teal-700/60 text-teal-300 px-3 py-1.5";
+        status.innerHTML = `<a href="${escapeHtml(briefData.url)}" target="_blank" rel="noopener" class="text-teal-300 hover:text-teal-200 underline">Open brief</a> · briefs persist at <a href="/brain/matches" class="text-zinc-300 hover:text-zinc-100 underline">your matches page</a>.`;
+        status.classList.remove("hidden");
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = originalLabel;
+        const msg = e instanceof Error ? e.message : "Brief generation failed.";
+        status.textContent = msg;
+        status.className = "match-brief-status mt-1.5 text-[11px] text-red-400";
+        status.classList.remove("hidden");
+      }
+    });
+  });
+
+  contentEl.parentElement?.appendChild(panel);
+}
+
 function formatMarkdown(text: string): string {
   if (!text) return "";
   let t = text;
@@ -942,6 +1139,15 @@ function BrainDeployInner() {
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();
       let fullText = "", buffer = "";
+      // Capture the match panel payload when the brain emits it mid-stream.
+      // We render it INLINE after the typewriter completes so the cards
+      // appear right under the brain's text response with per-row "Generate
+      // brief" buttons. V1 step 3 take-aways surface.
+      let matchesPanelData: {
+        individuals_to_target?: Array<Record<string, unknown>>;
+        firms_to_consider?: Array<Record<string, unknown>>;
+        generated_at?: string;
+      } | null = null;
       const READ_TIMEOUT_MS = 60_000;
 
       while (true) {
@@ -1029,6 +1235,12 @@ function BrainDeployInner() {
                 next_reset: event.next_reset ?? null,
                 reset_label: event.reset_label ?? null,
               };
+            } else if (event.type === "matches_panel") {
+              matchesPanelData = {
+                individuals_to_target: event.individuals_to_target || [],
+                firms_to_consider: event.firms_to_consider || [],
+                generated_at: event.generated_at,
+              };
             }
           } catch { /* ignore parse errors */ }
         }
@@ -1097,6 +1309,24 @@ function BrainDeployInner() {
             }
           }, TICK_MS);
         });
+
+        // ── Inline matches panel (V1 step 3 take-aways surface) ────
+        // When match_investors fired, brain emitted matches_panel via SSE.
+        // Render structured cards under the brain's text response with
+        // one-click "Generate brief" per row. This is where the founder
+        // ACTS on matches — no nav to /brain/matches required, no form.
+        if (matchesPanelData) {
+          try {
+            renderMatchesPanel(
+              matchesPanelData,
+              contentEl,
+              session,
+              impersonating,
+            );
+          } catch (e) {
+            console.error("Failed to render matches panel:", e);
+          }
+        }
 
         // ── Limit signals ─────────────────────────────────────────
         // Render the soft warning chip above the response (one-shot at 80%).
