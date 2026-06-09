@@ -1854,6 +1854,7 @@ function BrainDeployInner() {
             <span className="fn">(fn)</span>
           </Link>
           <div className="nav-right">
+            <Link href="/brain/matches" className="nav-link">Matches</Link>
             <button
               className="nav-link-btn"
               onClick={() => { setBriefError(null); setBriefResult(null); setBriefModalOpen(true); }}
