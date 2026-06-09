@@ -63,12 +63,8 @@ export default function MatchesPage() {
   const [briefs, setBriefs] = useState<ExistingBrief[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const [activeInvestor, setActiveInvestor] = useState<Investor | null>(null);
-  const [briefEmail, setBriefEmail] = useState("");
-  const [briefNotes, setBriefNotes] = useState("");
-  const [briefLoading, setBriefLoading] = useState(false);
-  const [briefError, setBriefError] = useState<string | null>(null);
-  const [briefResult, setBriefResult] = useState<{ url: string; token: string } | null>(null);
+  const [generatingKey, setGeneratingKey] = useState<string | null>(null);
+  const [rowError, setRowError] = useState<{ key: string; msg: string } | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -109,22 +105,17 @@ export default function MatchesPage() {
     return briefs.find((b) => (b.investor_full_name || "").toLowerCase().trim() === want) || null;
   }
 
-  function openBriefModal(inv: Investor) {
-    setActiveInvestor(inv);
-    setBriefEmail("");
-    setBriefNotes("");
-    setBriefError(null);
-    setBriefResult(null);
+  function rowKey(inv: Investor, idx: number): string {
+    return inv.slug || `${inv.name || "unknown"}-${idx}`;
   }
 
-  async function submitBrief() {
-    if (!session || !activeInvestor) return;
-    if (!briefEmail.trim()) { setBriefError("Investor email is required."); return; }
-    setBriefLoading(true);
-    setBriefError(null);
+  async function generateForInvestor(inv: Investor, idx: number) {
+    if (!session) return;
+    const key = rowKey(inv, idx);
+    setGeneratingKey(key);
+    setRowError(null);
     try {
       const founderEmail = (session.user.email || "").toLowerCase();
-      const inv = activeInvestor;
       const firmName = inv.firm_name || (inv.kind === "firm" ? inv.name : null);
       const res = await fetch("/v1/brain/generate-brief", {
         method: "POST",
@@ -134,16 +125,15 @@ export default function MatchesPage() {
         },
         body: JSON.stringify({
           founder_email: founderEmail,
-          investor_email: briefEmail.trim().toLowerCase(),
+          // No investor_email — server synthesizes a stable internal address
+          // from inline.name + firm so repeat clicks dedupe to the same stub.
           investor_inline: {
             name: inv.name || "",
             firm: firmName || null,
             title: inv.title || null,
             thesis: inv.thesis || inv.description || null,
             website: inv.openvc_url || null,
-            recent_investments: null,
           },
-          notes: briefNotes.trim() || null,
         }),
       });
       if (!res.ok) {
@@ -151,12 +141,14 @@ export default function MatchesPage() {
         throw new Error(body.detail || `Brief generation failed (${res.status})`);
       }
       const data = await res.json();
-      setBriefResult({ url: data.url, token: data.token });
-      if (session) fetchMatches(session);
+      // Open the brief in a new tab and refresh the list so this row flips
+      // to "View brief" via the briefs[] dedupe by investor name.
+      window.open(data.url, "_blank", "noopener");
+      if (session) await fetchMatches(session);
     } catch (e) {
-      setBriefError(e instanceof Error ? e.message : "Brief generation failed.");
+      setRowError({ key, msg: e instanceof Error ? e.message : "Brief generation failed." });
     } finally {
-      setBriefLoading(false);
+      setGeneratingKey(null);
     }
   }
 
@@ -213,9 +205,12 @@ export default function MatchesPage() {
             {ordered.map((inv, idx) => {
               const existing = findExistingBrief(inv.name);
               const score = inv.score && inv.score_max ? Math.round((inv.score / inv.score_max) * 100) : null;
+              const key = rowKey(inv, idx);
+              const isGenerating = generatingKey === key;
+              const errMsg = rowError?.key === key ? rowError.msg : null;
               return (
                 <div
-                  key={inv.slug || `${inv.name}-${idx}`}
+                  key={key}
                   className="rounded-lg border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900/80 transition-colors p-4"
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -266,6 +261,9 @@ export default function MatchesPage() {
                           ))}
                         </ul>
                       )}
+                      {errMsg && (
+                        <p className="text-[11px] text-red-400 mt-2">{errMsg}</p>
+                      )}
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       {existing ? (
@@ -279,10 +277,11 @@ export default function MatchesPage() {
                         </a>
                       ) : (
                         <button
-                          onClick={() => openBriefModal(inv)}
-                          className="text-xs rounded-md bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5"
+                          onClick={() => generateForInvestor(inv, idx)}
+                          disabled={isGenerating}
+                          className="text-xs rounded-md bg-teal-600 hover:bg-teal-500 disabled:opacity-60 disabled:cursor-wait text-white px-3 py-1.5"
                         >
-                          Generate brief
+                          {isGenerating ? "Generating…" : "Generate brief"}
                         </button>
                       )}
                       {inv.linkedin && (
@@ -323,111 +322,6 @@ export default function MatchesPage() {
         )}
       </div>
 
-      {activeInvestor && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          onClick={() => !briefLoading && setActiveInvestor(null)}
-        >
-          <div
-            className="w-full max-w-lg rounded-lg border border-zinc-800 bg-zinc-950 p-6 text-zinc-200 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h3 className="text-base font-semibold text-zinc-100">Generate brief — {activeInvestor.name}</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  {activeInvestor.firm_name || activeInvestor.name} · {activeInvestor.title || "investor"}
-                </p>
-              </div>
-              <button
-                onClick={() => !briefLoading && setActiveInvestor(null)}
-                className="text-zinc-500 hover:text-zinc-300 text-sm"
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            </div>
-
-            {briefResult ? (
-              <div className="space-y-3 text-sm">
-                <p className="text-zinc-300">Brief ready.</p>
-                <div className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 font-mono text-xs break-all text-teal-300">
-                  {briefResult.url}
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <button
-                    onClick={() => navigator.clipboard.writeText(briefResult.url)}
-                    className="rounded-md border border-zinc-700 hover:border-zinc-600 px-3 py-1.5 text-xs"
-                  >
-                    Copy link
-                  </button>
-                  <a
-                    href={briefResult.url}
-                    target="_blank"
-                    rel="noopener"
-                    className="rounded-md bg-teal-600 hover:bg-teal-500 px-3 py-1.5 text-xs font-medium text-white"
-                  >
-                    Open brief
-                  </a>
-                  <button
-                    onClick={() => setActiveInvestor(null)}
-                    className="ml-auto text-xs text-zinc-500 hover:text-zinc-300"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3 text-sm">
-                <label className="block">
-                  <span className="text-[11px] uppercase tracking-wide text-zinc-500">Investor email *</span>
-                  <input
-                    type="email"
-                    value={briefEmail}
-                    onChange={(e) => setBriefEmail(e.target.value)}
-                    placeholder="vinnie@goldengate.vc"
-                    className="mt-1 w-full rounded-md bg-zinc-900 border border-zinc-800 px-2.5 py-1.5 text-sm focus:border-zinc-600 outline-none"
-                  />
-                  <span className="text-[11px] text-zinc-600 block mt-1">Used as the brief identifier and stub profile email.</span>
-                </label>
-                <label className="block">
-                  <span className="text-[11px] uppercase tracking-wide text-zinc-500">Notes for the writer (optional)</span>
-                  <textarea
-                    value={briefNotes}
-                    onChange={(e) => setBriefNotes(e.target.value)}
-                    placeholder="First-hand observations. What they care about, what makes them tick, anything off the record."
-                    rows={3}
-                    className="mt-1 w-full rounded-md bg-zinc-900 border border-zinc-800 px-2.5 py-1.5 text-sm focus:border-zinc-600 outline-none resize-y"
-                  />
-                </label>
-
-                {briefError && (
-                  <div className="text-xs text-red-400 bg-red-950/40 border border-red-900/60 rounded-md px-3 py-2">
-                    {briefError}
-                  </div>
-                )}
-
-                <div className="flex gap-2 pt-1">
-                  <button
-                    onClick={submitBrief}
-                    disabled={briefLoading || !briefEmail.trim()}
-                    className="rounded-md bg-teal-600 hover:bg-teal-500 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm font-medium text-white"
-                  >
-                    {briefLoading ? "Generating..." : "Generate brief"}
-                  </button>
-                  <button
-                    onClick={() => setActiveInvestor(null)}
-                    disabled={briefLoading}
-                    className="rounded-md border border-zinc-700 hover:border-zinc-600 px-3 py-1.5 text-sm"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </main>
   );
 }
