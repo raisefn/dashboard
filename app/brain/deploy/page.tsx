@@ -632,6 +632,24 @@ function BrainDeployInner() {
   const [userTier, setUserTier] = useState<string>("free");
   const [sessionReady, setSessionReady] = useState(false);
 
+  // Brief generator modal (V1 step 2). Founder enters an investor they want
+  // a brief for. If the investor isn't on raise(fn) yet, inline data triggers
+  // stub-profile creation server-side.
+  const [briefModalOpen, setBriefModalOpen] = useState(false);
+  const [briefForm, setBriefForm] = useState({
+    investor_email: "",
+    name: "",
+    firm: "",
+    title: "",
+    thesis: "",
+    website: "",
+    recent_investments: "",
+    notes: "",
+  });
+  const [briefLoading, setBriefLoading] = useState(false);
+  const [briefError, setBriefError] = useState<string | null>(null);
+  const [briefResult, setBriefResult] = useState<{ url: string; token: string } | null>(null);
+
   /* ── Auth ── */
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -1758,6 +1776,50 @@ function BrainDeployInner() {
     router.replace("/login");
   }
 
+  async function submitBrief() {
+    if (!session) { setBriefError("Session expired. Sign in again."); return; }
+    const founderEmail = (session.user.email || "").toLowerCase();
+    const investorEmail = briefForm.investor_email.trim().toLowerCase();
+    if (!investorEmail) { setBriefError("Investor email is required."); return; }
+    if (!briefForm.name.trim()) { setBriefError("Investor name is required."); return; }
+    setBriefLoading(true);
+    setBriefError(null);
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch("/v1/brain/generate-brief", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          founder_email: impersonating || founderEmail,
+          investor_email: investorEmail,
+          investor_inline: {
+            name: briefForm.name.trim(),
+            firm: briefForm.firm.trim() || null,
+            title: briefForm.title.trim() || null,
+            thesis: briefForm.thesis.trim() || null,
+            website: briefForm.website.trim() || null,
+            recent_investments: briefForm.recent_investments.trim() || null,
+          },
+          notes: briefForm.notes.trim() || null,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Brief generation failed (${res.status})`);
+      }
+      const data = await res.json();
+      setBriefResult({ url: data.url, token: data.token });
+    } catch (e) {
+      setBriefError(e instanceof Error ? e.message : "Brief generation failed.");
+    } finally {
+      setBriefLoading(false);
+    }
+  }
+
   /* ── Loading ── */
   if (loading) {
     return (
@@ -1792,6 +1854,13 @@ function BrainDeployInner() {
             <span className="fn">(fn)</span>
           </Link>
           <div className="nav-right">
+            <button
+              className="nav-link-btn"
+              onClick={() => { setBriefError(null); setBriefResult(null); setBriefModalOpen(true); }}
+              title="Generate a one-page brief for an investor you want to engage with"
+            >
+              Generate brief
+            </button>
             {userTier !== "free" ? (
               <span className="nav-badge" title="Lifetime Advisor — no recurring bill">
                 Lifetime Advisor
@@ -1954,6 +2023,169 @@ function BrainDeployInner() {
           </div>
         </div>
       </div>
+
+      {briefModalOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
+          onClick={() => !briefLoading && setBriefModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-lg rounded-lg border border-zinc-800 bg-zinc-950 p-6 text-zinc-200 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <h3 className="text-base font-semibold text-zinc-100">Generate investor brief</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">One-page brief tailored to this specific investor.</p>
+              </div>
+              <button
+                onClick={() => !briefLoading && setBriefModalOpen(false)}
+                className="text-zinc-500 hover:text-zinc-300 text-sm"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            {briefResult ? (
+              <div className="space-y-3 text-sm">
+                <p className="text-zinc-300">Brief ready. Share this URL with the investor or keep it for outreach prep.</p>
+                <div className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 font-mono text-xs break-all text-teal-300">
+                  {briefResult.url}
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={() => navigator.clipboard.writeText(briefResult.url)}
+                    className="rounded-md border border-zinc-700 hover:border-zinc-600 px-3 py-1.5 text-xs"
+                  >
+                    Copy link
+                  </button>
+                  <a
+                    href={briefResult.url}
+                    target="_blank"
+                    rel="noopener"
+                    className="rounded-md bg-teal-600 hover:bg-teal-500 px-3 py-1.5 text-xs font-medium text-white"
+                  >
+                    Open brief
+                  </a>
+                  <button
+                    onClick={() => {
+                      setBriefResult(null);
+                      setBriefForm({ investor_email: "", name: "", firm: "", title: "", thesis: "", website: "", recent_investments: "", notes: "" });
+                    }}
+                    className="ml-auto text-xs text-zinc-500 hover:text-zinc-300"
+                  >
+                    Generate another
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2.5 text-sm">
+                <div className="grid grid-cols-2 gap-2.5">
+                  <label className="block">
+                    <span className="text-[11px] uppercase tracking-wide text-zinc-500">Investor name *</span>
+                    <input
+                      value={briefForm.name}
+                      onChange={(e) => setBriefForm({ ...briefForm, name: e.target.value })}
+                      placeholder="Vinnie Lauria"
+                      className="mt-1 w-full rounded-md bg-zinc-900 border border-zinc-800 px-2.5 py-1.5 text-sm focus:border-zinc-600 outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-[11px] uppercase tracking-wide text-zinc-500">Email *</span>
+                    <input
+                      type="email"
+                      value={briefForm.investor_email}
+                      onChange={(e) => setBriefForm({ ...briefForm, investor_email: e.target.value })}
+                      placeholder="vinnie@goldengate.vc"
+                      className="mt-1 w-full rounded-md bg-zinc-900 border border-zinc-800 px-2.5 py-1.5 text-sm focus:border-zinc-600 outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-[11px] uppercase tracking-wide text-zinc-500">Firm</span>
+                    <input
+                      value={briefForm.firm}
+                      onChange={(e) => setBriefForm({ ...briefForm, firm: e.target.value })}
+                      placeholder="Golden Gate Ventures"
+                      className="mt-1 w-full rounded-md bg-zinc-900 border border-zinc-800 px-2.5 py-1.5 text-sm focus:border-zinc-600 outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-[11px] uppercase tracking-wide text-zinc-500">Title</span>
+                    <input
+                      value={briefForm.title}
+                      onChange={(e) => setBriefForm({ ...briefForm, title: e.target.value })}
+                      placeholder="Founding Partner"
+                      className="mt-1 w-full rounded-md bg-zinc-900 border border-zinc-800 px-2.5 py-1.5 text-sm focus:border-zinc-600 outline-none"
+                    />
+                  </label>
+                </div>
+                <label className="block">
+                  <span className="text-[11px] uppercase tracking-wide text-zinc-500">Firm website</span>
+                  <input
+                    value={briefForm.website}
+                    onChange={(e) => setBriefForm({ ...briefForm, website: e.target.value })}
+                    placeholder="https://www.goldengate.vc"
+                    className="mt-1 w-full rounded-md bg-zinc-900 border border-zinc-800 px-2.5 py-1.5 text-sm focus:border-zinc-600 outline-none"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-[11px] uppercase tracking-wide text-zinc-500">Investment thesis (rough)</span>
+                  <textarea
+                    value={briefForm.thesis}
+                    onChange={(e) => setBriefForm({ ...briefForm, thesis: e.target.value })}
+                    placeholder="What they back. Sectors, stages, what makes them say yes."
+                    rows={2}
+                    className="mt-1 w-full rounded-md bg-zinc-900 border border-zinc-800 px-2.5 py-1.5 text-sm focus:border-zinc-600 outline-none resize-y"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-[11px] uppercase tracking-wide text-zinc-500">Recent investments</span>
+                  <input
+                    value={briefForm.recent_investments}
+                    onChange={(e) => setBriefForm({ ...briefForm, recent_investments: e.target.value })}
+                    placeholder="One or two portfolio companies, comma-separated."
+                    className="mt-1 w-full rounded-md bg-zinc-900 border border-zinc-800 px-2.5 py-1.5 text-sm focus:border-zinc-600 outline-none"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-[11px] uppercase tracking-wide text-zinc-500">Notes for the brief writer</span>
+                  <textarea
+                    value={briefForm.notes}
+                    onChange={(e) => setBriefForm({ ...briefForm, notes: e.target.value })}
+                    placeholder="First-hand observations. What you learned at coffee, what they care about, anything off the record."
+                    rows={2}
+                    className="mt-1 w-full rounded-md bg-zinc-900 border border-zinc-800 px-2.5 py-1.5 text-sm focus:border-zinc-600 outline-none resize-y"
+                  />
+                </label>
+
+                {briefError && (
+                  <div className="text-xs text-red-400 bg-red-950/40 border border-red-900/60 rounded-md px-3 py-2">
+                    {briefError}
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-1">
+                  <button
+                    onClick={submitBrief}
+                    disabled={briefLoading || !briefForm.name.trim() || !briefForm.investor_email.trim()}
+                    className="rounded-md bg-teal-600 hover:bg-teal-500 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm font-medium text-white"
+                  >
+                    {briefLoading ? "Generating..." : "Generate brief"}
+                  </button>
+                  <button
+                    onClick={() => setBriefModalOpen(false)}
+                    disabled={briefLoading}
+                    className="rounded-md border border-zinc-700 hover:border-zinc-600 px-3 py-1.5 text-sm"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
