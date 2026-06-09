@@ -16,6 +16,7 @@ import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Metadata } from "next";
+import BriefEditorOverlay from "./editor-overlay";
 
 // Hardcoded to the active brain Railway URL. The NEXT_PUBLIC_BRAIN_URL env
 // var on Vercel points at a stale (-61da-less) alias; relying on it caused
@@ -130,6 +131,9 @@ export default async function BriefPage(
           </p>
         </footer>
       </div>
+
+      {/* Owner-only edit surface. Renders nothing for public viewers. */}
+      <BriefEditorOverlay token={token} />
     </main>
   );
 }
