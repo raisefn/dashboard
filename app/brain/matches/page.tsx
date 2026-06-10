@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
 import type { Session } from "@supabase/supabase-js";
+import BrainTabs from "@/components/brain-tabs";
 
 type Investor = {
   kind?: "firm" | "individual";
@@ -197,12 +198,9 @@ export default function MatchesPage() {
           <Link href="/" className="font-semibold text-zinc-100">
             raise<span className="text-teal-400">(fn)</span>
           </Link>
-          <nav className="flex items-center gap-4 text-xs text-zinc-400">
-            <Link href="/brain/deploy" className="hover:text-zinc-200">Chat</Link>
-            <Link href="/brain/matches" className="text-teal-300">Matches</Link>
-          </nav>
         </div>
       </header>
+      <BrainTabs />
 
       <div className="max-w-4xl mx-auto px-6 py-10">
         <div className="flex items-baseline justify-between mb-6 gap-4 flex-wrap">

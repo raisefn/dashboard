@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import BrainTabs from "@/components/brain-tabs";
 import { supabase } from "@/lib/supabase-browser";
 import type { Session } from "@supabase/supabase-js";
 
@@ -2058,7 +2059,6 @@ function BrainDeployInner() {
             <span className="fn">(fn)</span>
           </Link>
           <div className="nav-right">
-            <Link href="/brain/matches" className="nav-link">Matches</Link>
             {userTier !== "free" ? (
               <span className="nav-badge" title="Lifetime Advisor — no recurring bill">
                 Lifetime Advisor
@@ -2072,6 +2072,7 @@ function BrainDeployInner() {
           </div>
         </nav>
       </header>
+      <BrainTabs />
 
       {/* Admin impersonation bar */}
       {isAdmin && (
