@@ -77,7 +77,7 @@ function PipelineMemoryCard() {
   );
 }
 
-/* ── Visual: brief preview snippet ── */
+/* ── Visual: full brief preview — the actual artifact you'd send ── */
 function BriefPreviewCard() {
   return (
     <div className="rounded-2xl border border-zinc-800 overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(24,24,27,0.95), rgba(9,9,11,0.98))" }}>
@@ -85,27 +85,108 @@ function BriefPreviewCard() {
         <span className="text-[11px] text-zinc-500 font-medium tracking-wide">Brief — Vinnie Lauria, Golden Gate Ventures</span>
         <span className="text-[10px] text-orange-400/70 font-semibold tracking-widest uppercase">Tailored</span>
       </div>
-      <div className="p-5 space-y-3 text-sm">
-        <p className="text-zinc-300 leading-relaxed">
-          <span className="font-semibold text-white">Why we think this fits:</span> Vinnie writes solo angel checks in
-          the $25-100K band across SEA B2B SaaS. Two of his last four
-          publicly-announced checks were US-headquartered founders raising
-          their A — pattern fits your geography + stage.
-        </p>
-        <p className="text-zinc-300 leading-relaxed">
-          <span className="font-semibold text-white">What to watch:</span> He typically passes if there's no clear path
-          to APAC expansion within 18 months. Worth surfacing your SEA
-          partnership pipeline up front.
-        </p>
-        <div className="pt-2 flex gap-2">
-          <button className="text-xs font-semibold px-3 py-1.5 rounded-md border border-teal-700/40 bg-teal-950/40 text-teal-300">
-            Send outreach
+      <div className="p-5 space-y-4 text-sm">
+        <div>
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5">What they fund</p>
+          <p className="text-zinc-300 leading-relaxed">
+            Solo angel checks of <span className="text-white font-semibold">$25-100K</span> across SEA
+            B2B SaaS. Sweet spot is post-revenue seed, $500K-$2M rounds.
+            Doesn&apos;t lead. Strong preference for technical founders.
+          </p>
+        </div>
+        <div className="border-t border-zinc-800/60 pt-4">
+          <p className="text-[10px] uppercase tracking-wider text-teal-400/80 mb-1.5">Why this fits</p>
+          <p className="text-zinc-300 leading-relaxed">
+            Two of his last four publicly-announced checks were
+            US-headquartered founders raising their A — pattern fits your
+            geography + stage. Your MRR ($18K) and growth rate (22% MoM)
+            land in his preferred traction band.
+          </p>
+        </div>
+        <div className="border-t border-zinc-800/60 pt-4">
+          <p className="text-[10px] uppercase tracking-wider text-orange-400/80 mb-1.5">What to watch</p>
+          <p className="text-zinc-300 leading-relaxed">
+            He typically passes if there&apos;s no clear path to APAC
+            expansion within 18 months. Worth surfacing your SEA
+            partnership pipeline up front. Also passes on founders who
+            can&apos;t articulate post-seed milestones in the first 10 minutes.
+          </p>
+        </div>
+        <div className="border-t border-zinc-800/60 pt-4">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">Recent moves</p>
+          <ul className="space-y-1.5 text-zinc-400 text-[13px]">
+            <li className="flex gap-2">
+              <span className="text-zinc-600">›</span>
+              <span><span className="text-zinc-300">Nimble Edge</span> — $75K, Mar 2026 (B2B AI ops, US/SG)</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-zinc-600">›</span>
+              <span><span className="text-zinc-300">Kestrel Health</span> — $50K, Feb 2026 (B2B SaaS, US/PH)</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-zinc-600">›</span>
+              <span><span className="text-zinc-300">Tapestry Books</span> — $40K, Jan 2026 (B2B SaaS, US)</span>
+            </li>
+          </ul>
+        </div>
+        <div className="border-t border-zinc-800/60 pt-4">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">Talking points</p>
+          <ul className="space-y-1.5 text-zinc-400 text-[13px]">
+            <li className="flex gap-2">
+              <span className="text-teal-400/80">·</span>
+              <span>Lead with the 22% MoM growth — that&apos;s in his sweet spot.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-teal-400/80">·</span>
+              <span>Mention your existing Manila design-partner pipeline.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-teal-400/80">·</span>
+              <span>Don&apos;t pitch lead-investor status — he co-invests.</span>
+            </li>
+          </ul>
+        </div>
+        <div className="pt-2 flex gap-2 border-t border-zinc-800/60">
+          <button className="text-xs font-semibold px-3 py-1.5 rounded-md border border-teal-700/40 bg-teal-950/40 text-teal-300 mt-3">
+            Draft outreach
           </button>
-          <button className="text-xs font-semibold px-3 py-1.5 rounded-md border border-zinc-700/60 bg-zinc-900/40 text-zinc-300">
-            Edit brief
+          <button className="text-xs font-semibold px-3 py-1.5 rounded-md border border-zinc-700/60 bg-zinc-900/40 text-zinc-300 mt-3">
+            Share link
+          </button>
+          <button className="text-xs font-semibold px-3 py-1.5 rounded-md border border-zinc-700/60 bg-zinc-900/40 text-zinc-300 mt-3">
+            Edit
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ── Capability grid — everything else the brain handles ── */
+const CAPABILITIES = [
+  { icon: "📑", name: "Deck extraction", desc: "Drop a PDF — sector, stage, MRR, team, raise size auto-populated." },
+  { icon: "🔎", name: "Investor research", desc: "GP-level detail — recent checks, sweet spots, what they pass on." },
+  { icon: "✉️", name: "Outreach drafting", desc: "Cold and warm intros, tailored per investor and round context." },
+  { icon: "🎤", name: "Meeting prep", desc: "Six-section briefing per meeting: angles, risks, hard questions, asks." },
+  { icon: "🗒️", name: "Meeting debrief", desc: "Capture next steps, commitments, status changes — no notes lost." },
+  { icon: "📜", name: "Term sheet analysis", desc: "Plain-English read of every clause, flagged for the founder-hostile ones." },
+  { icon: "🧭", name: "Narrative review", desc: "Where the pitch lands and where it leaks — before you go out wide." },
+  { icon: "📈", name: "Signal reading", desc: "Is the investor moving fast or slow-rolling? Pattern read across replies." },
+];
+
+function CapabilityGrid() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {CAPABILITIES.map((c) => (
+        <div
+          key={c.name}
+          className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:border-zinc-700 transition-colors"
+        >
+          <div className="text-xl mb-3">{c.icon}</div>
+          <p className="text-sm font-semibold text-white mb-1.5">{c.name}</p>
+          <p className="text-xs text-zinc-500 leading-relaxed">{c.desc}</p>
+        </div>
+      ))}
     </div>
   );
 }
@@ -231,6 +312,27 @@ export default function FoundersPage() {
             <div>
               <BriefPreviewCard />
             </div>
+          </div>
+        </FadeInSection>
+      </section>
+
+      {/* ── Capability grid — everything else the brain does ── */}
+      <section className="relative py-24 px-4 bg-zinc-950/40">
+        <FadeInSection>
+          <div className="mx-auto max-w-6xl">
+            <div className="text-center mb-12">
+              <p className="text-xs font-semibold uppercase tracking-wider text-teal-400 mb-3">
+                Everything else
+              </p>
+              <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4 leading-tight">
+                The full brain, not a feature wedge.
+              </h2>
+              <p className="text-zinc-400 max-w-2xl mx-auto">
+                Targeting, briefs, and memory are the headline acts.
+                Every other part of running a raise is in the same brain.
+              </p>
+            </div>
+            <CapabilityGrid />
           </div>
         </FadeInSection>
       </section>

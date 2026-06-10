@@ -56,6 +56,90 @@ function ThesisMatchCard() {
   );
 }
 
+/* ── Visual: warm intro email from raise(fn) Team to an investor ── */
+function WarmIntroCard() {
+  return (
+    <div className="rounded-2xl border border-zinc-800 overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(24,24,27,0.95), rgba(9,9,11,0.98))" }}>
+      <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/80">
+        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">From: raise(fn) Team · justin@raisefn.com</span>
+        <span className="text-[10px] text-teal-500/60 font-semibold tracking-widest uppercase">Warm intro</span>
+      </div>
+      <div className="px-5 py-3 border-b border-zinc-800/40 space-y-1">
+        <div className="flex gap-2 text-[11px]">
+          <span className="text-zinc-500 w-12">To</span>
+          <span className="text-zinc-300">you@firm.com</span>
+        </div>
+        <div className="flex gap-2 text-[11px]">
+          <span className="text-zinc-500 w-12">Subject</span>
+          <span className="text-white font-medium">OpenBooks AI — B2B SaaS seed, matches your thesis</span>
+        </div>
+      </div>
+      <div className="p-5 space-y-3 text-sm">
+        <p className="text-zinc-300 leading-relaxed">
+          Hi —
+        </p>
+        <p className="text-zinc-300 leading-relaxed">
+          <span className="text-white font-semibold">OpenBooks AI</span> hits your thesis cleanly. B2B SaaS for SMB
+          CPAs, $18K MRR, 22% MoM growth, raising a $2.5M seed,
+          San Diego based. Two technical cofounders, ex-Big4 audit.
+        </p>
+        <p className="text-zinc-300 leading-relaxed">
+          They&apos;re open to participation checks alongside their lead. I
+          pulled together a short brief on them for you:{" "}
+          <span className="text-teal-400 underline underline-offset-2">raisefn.com/brief/...</span>
+        </p>
+        <p className="text-zinc-300 leading-relaxed">
+          If interested, reply and I&apos;ll drop you both in the same
+          thread.
+        </p>
+        <p className="text-zinc-400 leading-relaxed">— Justin</p>
+        <div className="pt-2 flex gap-2 border-t border-zinc-800/60 mt-2">
+          <button className="text-xs font-semibold px-3 py-1.5 rounded-md border border-teal-700/40 bg-teal-950/40 text-teal-300 mt-3">
+            Interested
+          </button>
+          <button className="text-xs font-semibold px-3 py-1.5 rounded-md border border-zinc-700/60 bg-zinc-900/40 text-zinc-300 mt-3">
+            Read brief
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Visual: pre-qualification / no-scattershot card ── */
+function QualityControlCard() {
+  return (
+    <div className="rounded-2xl border border-zinc-800 overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(24,24,27,0.95), rgba(9,9,11,0.98))" }}>
+      <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/80">
+        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">This week — founders surfaced to you</span>
+        <span className="text-[10px] text-teal-500/60 font-semibold tracking-widest uppercase">Quality control</span>
+      </div>
+      <div className="p-5 space-y-4">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-zinc-500">Founders raising in your sectors</span>
+          <span className="text-zinc-300 font-medium">126</span>
+        </div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-zinc-500">Pass the matching engine (stage + check + geo)</span>
+          <span className="text-zinc-300 font-medium">31</span>
+        </div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-zinc-500">Pass raise(fn) Team quality review</span>
+          <span className="text-zinc-300 font-medium">12</span>
+        </div>
+        <div className="flex items-center justify-between text-xs pt-3 border-t border-zinc-800/60">
+          <span className="text-white font-semibold">Surfaced to you this week</span>
+          <span className="text-teal-400 font-semibold text-base">3</span>
+        </div>
+        <p className="text-[11px] text-zinc-500 leading-relaxed pt-2 border-t border-zinc-800/60">
+          The funnel narrows on purpose. You see the three founders worth
+          your time — not 126.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 /* ── Visual: founder profile depth ── */
 function FounderDepthCard() {
   const fields = [
@@ -191,23 +275,59 @@ export default function InvestorsPage() {
       {/* ── Pillar 3: Warm intros via raise(fn) Team ── */}
       <section className="relative py-20 px-4">
         <FadeInSection>
-          <div className="mx-auto max-w-4xl text-center">
-            <p className="text-xs font-semibold uppercase tracking-wider text-teal-400 mb-3">
-              03 — Warm intros
-            </p>
-            <h2 className="text-3xl font-bold text-white mb-5 leading-tight">
-              Warm intros from the raise(fn) Team.
-            </h2>
-            <p className="text-zinc-400 leading-relaxed max-w-2xl mx-auto mb-4">
-              You&apos;re part of the raise(fn) proprietary network — when
-              a founder we&apos;re working with hits your thesis, the
-              raise(fn) Team brokers the intro personally. No cold inbound
-              wave. No DM ladder. Just the founders worth your time.
-            </p>
-            <p className="text-zinc-500 text-sm max-w-2xl mx-auto leading-relaxed">
-              We control who reaches out and when, so your inbox stays
-              clean and the founders who do reach you arrive pre-qualified.
-            </p>
+          <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-teal-400 mb-3">
+                03 — Warm intros
+              </p>
+              <h2 className="text-3xl font-bold text-white mb-5 leading-tight">
+                Brokered intros, not cold inbound.
+              </h2>
+              <p className="text-zinc-400 leading-relaxed mb-4">
+                When a founder hits your thesis, the raise(fn) Team writes
+                the intro personally — context up front, the brief
+                attached, and a clear ask. You reply when interested.
+                That&apos;s it.
+              </p>
+              <p className="text-zinc-400 leading-relaxed">
+                You control the volume. We control the quality. No founder
+                in our network ever reaches out cold. Your inbox stays
+                clean and the people who do reach you arrive pre-qualified.
+              </p>
+            </div>
+            <div>
+              <WarmIntroCard />
+            </div>
+          </div>
+        </FadeInSection>
+      </section>
+
+      {/* ── Pillar 4: Quality control ── */}
+      <section className="relative py-20 px-4 bg-zinc-950/40">
+        <FadeInSection>
+          <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="md:order-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-teal-400 mb-3">
+                04 — Quality control
+              </p>
+              <h2 className="text-3xl font-bold text-white mb-5 leading-tight">
+                We narrow the funnel. You hear about the survivors.
+              </h2>
+              <p className="text-zinc-400 leading-relaxed mb-4">
+                Every founder raising in your sectors gets profiled by the
+                brain. Most don&apos;t pass the thesis-matching engine.
+                The ones who do go through a quality review by raise(fn)
+                Team — traction quality, founder coachability, deal
+                sanity.
+              </p>
+              <p className="text-zinc-400 leading-relaxed">
+                What lands in your inbox is what survived. Typically a few
+                founders a week, not a deluge.
+              </p>
+            </div>
+            <div className="md:order-1">
+              <QualityControlCard />
+            </div>
           </div>
         </FadeInSection>
       </section>

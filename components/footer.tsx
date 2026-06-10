@@ -56,7 +56,7 @@ export default function Footer() {
               {[
                 { href: "/brain", label: "The Brain" },
                 { href: "/tracker", label: "The Tracker" },
-                { href: "/agents", label: "For Agents" },
+                { href: "/roadmap", label: "Roadmap" },
                 { href: "/pricing", label: "Pricing" },
               ].map((l) => (
                 <li key={l.href}>
@@ -80,6 +80,7 @@ export default function Footer() {
               {[
                 { href: "/founders", label: "Founders" },
                 { href: "/investors", label: "Investors" },
+                { href: "/agents", label: "Agents" },
                 { href: "/investors/join", label: "Join as an investor" },
               ].map((l) => (
                 <li key={l.href}>
@@ -101,8 +102,6 @@ export default function Footer() {
             </p>
             <ul className="space-y-2.5">
               {[
-                { href: "/roadmap", label: "Roadmap" },
-                { href: "/legal/engagement", label: "Engagement letter" },
                 { href: "/privacy", label: "Privacy" },
                 { href: "/terms", label: "Terms" },
                 { href: "mailto:team@raisefn.com", label: "Contact" },
