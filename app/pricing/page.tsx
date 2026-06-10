@@ -131,17 +131,15 @@ export default function PricingPage() {
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
               Drop your deck, ask the brain anything, get real matches. Free
-              to get started. Hard lifetime caps so we keep the lights on —
-              upgrade when you outgrow them.
+              to get started. Upgrade when you need more.
             </p>
 
             <ul className="space-y-4 mb-10 list-none">
               {[
-                ["30 brain messages", "lifetime — enough to explore your raise end-to-end"],
-                ["10 investor briefs", "lifetime — one-page tailored summaries"],
-                ["30 investors matched", "lifetime, unique — about 3-4 batches of exploration"],
+                ["Brain chat", "limited — explore your raise end-to-end"],
+                ["Investor briefs", "limited — one-page summaries for any investor, matched or known"],
+                ["Investor matches", "limited — discover new investors that fit"],
                 ["Full product otherwise", "no feature gates — every brain tool available"],
-                ["Brief capture flow", "log investors you already know, build your network on raisefn"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
                   <span className="text-zinc-500 text-lg leading-snug shrink-0">•</span>
