@@ -295,6 +295,13 @@ function renderMatchesPanel(
       const after =
         idx + entry.key.length >= text.length ? " " : text[idx + entry.key.length];
       if (wordChar.test(before) || wordChar.test(after)) continue;
+      // Capitalization gate — investor names are proper nouns, so the
+      // first character of the match in the ORIGINAL text must be uppercase.
+      // Prevents single-word firms like "Science" (Science Inc., LA-based)
+      // from matching the lowercased word "science" in prose ("materials
+      // science", "hard science").
+      const firstChar = text[idx];
+      if (firstChar && firstChar !== firstChar.toUpperCase()) continue;
       if (bestIdx === -1 || idx < bestIdx) {
         bestIdx = idx;
         bestEntry = entry;
@@ -1436,69 +1443,82 @@ function BrainDeployInner() {
         }
       }
 
-      // Show response with typewriter effect
+      // Show response with typewriter effect — UNLESS this response carries
+      // matches_panel data. Match responses need their inline "Generate
+      // brief" buttons to appear WITH the text, not after a 15-20 second
+      // typewriter animation finishes. Justin's observation: the buttons
+      // were placed correctly per investor but became visible all at once
+      // at the end (because the text revealing them was blanked until the
+      // typewriter caught up). Match responses get rendered immediately;
+      // every other response keeps the typewriter for chat-feel.
       if (fullText) {
         historyRef.current.push({ role: "assistant", content: fullText });
 
-        // Render markdown once into a temp container
-        const temp = document.createElement("div");
-        temp.innerHTML = formatMarkdown(fullText);
+        if (matchesPanelData) {
+          // Immediate render path — no animation, buttons visible with text.
+          contentEl.innerHTML = formatMarkdown(fullText);
+          scrollToElement(assistantEl);
+        } else {
+          // Render markdown once into a temp container
+          const temp = document.createElement("div");
+          temp.innerHTML = formatMarkdown(fullText);
 
-        // Collect all text nodes and their parent elements
-        contentEl.innerHTML = "";
-        const nodes = Array.from(temp.childNodes);
+          // Collect all text nodes and their parent elements
+          contentEl.innerHTML = "";
+          const nodes = Array.from(temp.childNodes);
 
-        // Clone the structure but empty all text
-        for (const node of nodes) {
-          contentEl.appendChild(node.cloneNode(true));
+          // Clone the structure but empty all text
+          for (const node of nodes) {
+            contentEl.appendChild(node.cloneNode(true));
+          }
+
+          // Get all text nodes in the rendered content
+          const walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT);
+          const textNodes: Text[] = [];
+          let tn: Text | null;
+          while ((tn = walker.nextNode() as Text | null)) textNodes.push(tn);
+
+          // Store original text and blank them
+          const originals = textNodes.map(t => t.textContent || "");
+          textNodes.forEach(t => { t.textContent = ""; });
+
+          // Scroll to TOP of the response
+          scrollToElement(assistantEl);
+
+          // Reveal text character by character across all text nodes
+          const TICK_MS = 15;
+          const charsPerTick = 1;
+          let nodeIdx = 0;
+          let charIdx = 0;
+
+          await new Promise<void>((resolve) => {
+            const timer = setInterval(() => {
+              for (let c = 0; c < charsPerTick; c++) {
+                if (nodeIdx >= textNodes.length) {
+                  clearInterval(timer);
+                  // Ensure final state is perfect
+                  contentEl.innerHTML = formatMarkdown(fullText);
+                  resolve();
+                  return;
+                }
+                const orig = originals[nodeIdx];
+                charIdx++;
+                textNodes[nodeIdx].textContent = orig.slice(0, charIdx);
+                if (charIdx >= orig.length) {
+                  nodeIdx++;
+                  charIdx = 0;
+                }
+              }
+
+              // Scroll to keep latest text visible — scroll container, not to bottom
+              const m = messagesRef.current;
+              if (m) {
+                const nearBottom = m.scrollHeight - m.scrollTop - m.clientHeight < 200;
+                if (nearBottom) m.scrollTop = m.scrollHeight;
+              }
+            }, TICK_MS);
+          });
         }
-
-        // Get all text nodes in the rendered content
-        const walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT);
-        const textNodes: Text[] = [];
-        let tn: Text | null;
-        while ((tn = walker.nextNode() as Text | null)) textNodes.push(tn);
-
-        // Store original text and blank them
-        const originals = textNodes.map(t => t.textContent || "");
-        textNodes.forEach(t => { t.textContent = ""; });
-
-        // Scroll to TOP of the response
-        scrollToElement(assistantEl);
-
-        // Reveal text character by character across all text nodes
-        const TICK_MS = 15;
-        const charsPerTick = 1;
-        let nodeIdx = 0;
-        let charIdx = 0;
-
-        await new Promise<void>((resolve) => {
-          const timer = setInterval(() => {
-            for (let c = 0; c < charsPerTick; c++) {
-              if (nodeIdx >= textNodes.length) {
-                clearInterval(timer);
-                // Ensure final state is perfect
-                contentEl.innerHTML = formatMarkdown(fullText);
-                resolve();
-                return;
-              }
-              const orig = originals[nodeIdx];
-              charIdx++;
-              textNodes[nodeIdx].textContent = orig.slice(0, charIdx);
-              if (charIdx >= orig.length) {
-                nodeIdx++;
-                charIdx = 0;
-              }
-            }
-
-            // Scroll to keep latest text visible — scroll container, not to bottom
-            const m = messagesRef.current;
-            if (m) {
-              const nearBottom = m.scrollHeight - m.scrollTop - m.clientHeight < 200;
-              if (nearBottom) m.scrollTop = m.scrollHeight;
-            }
-          }, TICK_MS);
-        });
 
         // ── Inline matches panel (V1 step 3 take-aways surface) ────
         // When match_investors fired, brain emitted matches_panel via SSE.
