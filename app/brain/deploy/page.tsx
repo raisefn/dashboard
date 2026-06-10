@@ -420,7 +420,16 @@ function formatMarkdown(text: string): string {
   t = t.replace(/^### (.+)$/gm, "<h3>$1</h3>");
   t = t.replace(/^## (.+)$/gm, "<h2>$1</h2>");
   t = t.replace(/^# (.+)$/gm, "<h1>$1</h1>");
-  t = t.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  // Differentiate bold-labels ("Thesis:", "Check:", "Geo:") from bold-names
+  // ("GSR Ventures", "Vinnie Lauria") so the rendered chat has real visual
+  // hierarchy. Label = bold text ending in a colon → muted gray. Anything
+  // else → the brand teal we use for investor names.
+  t = t.replace(/\*\*(.+?)\*\*/g, (_match, content: string) => {
+    if (/:\s*$/.test(content)) {
+      return `<strong class="label">${content}</strong>`;
+    }
+    return `<strong>${content}</strong>`;
+  });
   t = t.replace(/\*(.+?)\*/g, "<em>$1</em>");
   t = t.replace(/^(\d+)\. (.+)$/gm, '<li class="numbered"><span class="li-num">$1.</span> $2</li>');
   t = t.replace(/^- (.+)$/gm, '<li class="bulleted">$1</li>');
@@ -691,6 +700,10 @@ const BRAIN_CSS = `
   .message.assistant .content h2 { font-size: 15px; }
   .message.assistant .content h3 { font-size: 14px; }
   .message.assistant .content strong { color: #2dd4bf; font-weight: 600; }
+  /* Bold labels like "Thesis:", "Check:", "Geo:" — muted so they don't
+     compete with investor names. Real visual hierarchy: teal name jumps,
+     gray label sits back, value reads as body text. */
+  .message.assistant .content strong.label { color: #a1a1aa; font-weight: 500; }
   .message.assistant .content em { color: #d4d4d8; }
 
   .status-msg {
