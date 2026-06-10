@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/nav";
+import Footer from "@/components/footer";
 import ScrollToTop from "@/components/scroll-to-top";
 import AuthRedirect from "@/components/auth-redirect";
 import { PostHogProvider } from "./providers";
@@ -39,6 +40,7 @@ export default function RootLayout({
           <div className="warm-glow" />
           <div className="teal-glow" />
           {children}
+          <Footer />
         </PostHogProvider>
       </body>
     </html>

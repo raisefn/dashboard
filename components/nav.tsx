@@ -6,12 +6,15 @@ import { useEffect, useState } from "react";
 
 import TrackerSearch from "@/components/tracker-search";
 
+// Marketing v3 (2026-06-10): audience-centric top nav. Brain landing,
+// Tracker (Eyes & Ears), and Roadmap move to the footer. Developer SDK
+// is killed — replaced by /agents with a different framing (founders +
+// investors plugging in personal AI assistants, not third-party devs).
 const topLinks = [
-  { href: "/brain", label: "Brain", prefix: "/brain" },
-  { href: "/tracker", label: "Eyes & Ears", prefix: "/tracker" },
-  { href: "/sdk", label: "Developer SDK", prefix: "/sdk" },
+  { href: "/founders", label: "For Founders", prefix: "/founders" },
+  { href: "/investors", label: "For Investors", prefix: "/investors" },
+  { href: "/agents", label: "For Agents", prefix: "/agents" },
   { href: "/pricing", label: "Pricing", prefix: "/pricing" },
-  { href: "/roadmap", label: "Roadmap", prefix: "/roadmap" },
 ];
 
 const trackerLinks = [

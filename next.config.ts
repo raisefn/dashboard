@@ -14,6 +14,19 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    // Marketing v3 (2026-06-10): nav restructured around audience.
+    // 301s preserve SEO link equity from old URLs.
+    return [
+      // Developer SDK framing killed — replaced by /agents
+      // (founders + investors plugging in their own AI assistants).
+      { source: "/sdk", destination: "/agents", permanent: true },
+      // Audience-specific brain pages → new top-level routes
+      { source: "/brain/entrepreneurs", destination: "/founders", permanent: true },
+      { source: "/brain/investors", destination: "/investors", permanent: true },
+      { source: "/brain/agents", destination: "/agents", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {
