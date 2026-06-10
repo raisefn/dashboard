@@ -257,149 +257,19 @@ function renderMatchesPanel(
   );
   entries.sort((a, b) => b.key.length - a.key.length);
 
-  // Walk text nodes in the brain's rendered response and inject a small
-  // "+ brief" button immediately AFTER the first occurrence of each known
-  // investor name. Founder reads the brain's recommendation and acts
-  // inline — no scroll-down-and-hunt.
-  const used = new Set<string>();
-  const walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT, {
-    acceptNode: (node) => {
-      const p = node.parentElement;
-      if (!p) return NodeFilter.FILTER_REJECT;
-      if (
-        p.tagName === "CODE" ||
-        p.tagName === "PRE" ||
-        p.closest(".inline-brief-btn")
-      ) {
-        return NodeFilter.FILTER_REJECT;
-      }
-      return NodeFilter.FILTER_ACCEPT;
-    },
-  });
-  const textNodes: Text[] = [];
-  let n: Text | null;
-  while ((n = walker.nextNode() as Text | null)) textNodes.push(n);
+  // Inline brief-button injection deleted 2026-06-10 — Justin's call after
+  // multiple iterations (chips, stacked bars, paragraph-end placement) all
+  // looked wrong in real founder flows. The brain now writes a numbered
+  // list of 10 matches (per rule 9) and the dashboard appends a single CTA
+  // pointing users to the Matches tab where the card UI is purpose-built
+  // for brief generation. `entries` / cache still maintained so future
+  // walker re-use in non-match contexts (e.g., brain mentioning a cached
+  // name in follow-up chat) doesn't break — for now nothing reads it.
+  void entries;
 
-  const wordChar = /[a-z0-9]/i;
-  for (const textNode of textNodes) {
-    const text = textNode.textContent || "";
-    if (!text.trim()) continue;
-    const lower = text.toLowerCase();
-
-    // Find the EARLIEST match across all un-used investor keys in this node.
-    let bestIdx = -1;
-    let bestEntry: MatchEntry | null = null;
-    for (const entry of entries) {
-      if (used.has(entry.key)) continue;
-      const idx = lower.indexOf(entry.key);
-      if (idx === -1) continue;
-      const before = idx === 0 ? " " : text[idx - 1];
-      const after =
-        idx + entry.key.length >= text.length ? " " : text[idx + entry.key.length];
-      if (wordChar.test(before) || wordChar.test(after)) continue;
-      // Capitalization gate — investor names are proper nouns, so the
-      // first character of the match in the ORIGINAL text must be uppercase.
-      // Prevents single-word firms like "Science" (Science Inc., LA-based)
-      // from matching the lowercased word "science" in prose ("materials
-      // science", "hard science").
-      const firstChar = text[idx];
-      if (firstChar && firstChar !== firstChar.toUpperCase()) continue;
-      if (bestIdx === -1 || idx < bestIdx) {
-        bestIdx = idx;
-        bestEntry = entry;
-      }
-    }
-    if (bestIdx === -1 || !bestEntry) continue;
-
-    // Negative-context skip — the brain frequently mentions investors in
-    // dismissive contexts ("DCG, Tribe Capital — all skipped", "not worth
-    // chasing X", "pass on Y"). Injecting a "Generate brief for DCG"
-    // button right next to "all skipped" makes the product look broken.
-    // Scan a ~60-char window around the match for dismissive keywords;
-    // if present, mark the name as used and move on without the button.
-    const winStart = Math.max(0, bestIdx - 60);
-    const winEnd = Math.min(text.length, bestIdx + bestEntry.key.length + 60);
-    const win = text.slice(winStart, winEnd).toLowerCase();
-    const NEGATIVE_CONTEXT = /\b(skip|skipped|skipping|ignore|ignored|pass on|passed on|rejected|not worth|don'?t bother)\b/;
-    if (NEGATIVE_CONTEXT.test(win)) {
-      used.add(bestEntry.key);
-      continue;
-    }
-
-    // Skip table cells — the matches page already grids those out cleanly
-    // and inline-button injection inside a <td> looks broken.
-    if (textNode.parentElement?.closest("table")) {
-      used.add(bestEntry.key);
-      continue;
-    }
-
-    const matchedText = text.substring(bestIdx, bestIdx + bestEntry.key.length);
-    const beforeText = text.substring(0, bestIdx);
-    const afterText = text.substring(bestIdx + bestEntry.key.length);
-
-    const parent = textNode.parentNode;
-    if (!parent) continue;
-
-    // Leave the text exactly as the brain wrote it. No inline button.
-    const beforeNode = document.createTextNode(beforeText);
-    const matchedSpan = document.createElement("span");
-    matchedSpan.textContent = matchedText;
-    const afterNode = document.createTextNode(afterText);
-
-    parent.insertBefore(beforeNode, textNode);
-    parent.insertBefore(matchedSpan, textNode);
-    parent.insertBefore(afterNode, textNode);
-    parent.removeChild(textNode);
-
-    // Inject the button on its own line AT THE END of the paragraph
-    // containing the name. The markdown formatter only emits <br> tags
-    // (no <p> wrapping), so paragraphs are runs of inline content
-    // separated by <br>s. Names are often wrapped in <strong>/<em>/<a>
-    // by the formatter, so we walk UP through ancestors (stopping at the
-    // contentEl boundary) looking for the next <br> in document flow.
-    const button = createInlineBriefButton(bestEntry.investor, session, impersonating);
-    let nextBr: Element | null = null;
-    let walkFrom: Node | null = afterNode;
-    while (walkFrom && walkFrom !== contentEl) {
-      let cursor: Node | null = walkFrom.nextSibling;
-      while (cursor) {
-        if (
-          cursor.nodeType === Node.ELEMENT_NODE &&
-          (cursor as Element).tagName === "BR"
-        ) {
-          nextBr = cursor as Element;
-          break;
-        }
-        cursor = cursor.nextSibling;
-      }
-      if (nextBr) break;
-      walkFrom = walkFrom.parentNode;
-    }
-    if (nextBr && nextBr.parentNode) {
-      nextBr.parentNode.insertBefore(button, nextBr);
-    } else {
-      // No <br> found anywhere downstream — name is in the last line of
-      // the message. Append button to contentEl so it lands right under
-      // the line, before the View-more summary that comes after.
-      contentEl.appendChild(button);
-    }
-
-    used.add(bestEntry.key);
-  }
-
-  // Always show a primary CTA back to the full match list. Button-styled so
-  // it doesn't get lost in surrounding prose. Total count uses the current
-  // batch size when available; falls back to the cross-batch cache size.
-  const total = ordered.length || SESSION_INVESTOR_CACHE.size;
-  const remainder = Math.max(0, total - used.size);
-  let label: string;
-  if (used.size > 0 && remainder > 0) {
-    label = `View ${remainder} more match${remainder === 1 ? "" : "es"}`;
-  } else if (used.size === 0) {
-    label = `View all ${total} matches`;
-  } else {
-    label = "View all matches";
-  }
+  // Single CTA — points the founder to the Matches tab where briefs are
+  // generated from the proper card UI.
+  const label = "Generate briefs from the Matches tab";
 
   const summary = document.createElement("div");
   summary.style.cssText = "margin-top: 20px;";
