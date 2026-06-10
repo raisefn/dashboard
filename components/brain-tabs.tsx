@@ -114,15 +114,15 @@ export default function BrainTabs() {
           padding: "10px 24px",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
         }}
       >
-        {/* LEFT GROUP: logo + tabs, packed tight together */}
+        {/* LEFT: logo, flex column with left-aligned content */}
         <div
           style={{
+            flex: 1,
             display: "flex",
             alignItems: "center",
-            gap: "28px",
+            justifyContent: "flex-start",
           }}
         >
           <Link
@@ -137,7 +137,16 @@ export default function BrainTabs() {
             <span style={{ color: "#f97316" }}>raise</span>
             <span style={{ color: "#2dd4bf" }}>(fn)</span>
           </Link>
+        </div>
 
+        {/* CENTER: tabs, centered in the bar */}
+        <div
+          style={{
+            flex: "0 0 auto",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
           <nav style={{ display: "flex", alignItems: "center", gap: "2px" }}>
             {TABS.map((tab) => {
               const active = isActive(tab.href);
@@ -201,11 +210,13 @@ export default function BrainTabs() {
           </nav>
         </div>
 
-        {/* RIGHT GROUP: upgrade + user + sign out */}
+        {/* RIGHT: upgrade + user + sign out, flex column with right-aligned content */}
         <div
           style={{
+            flex: 1,
             display: "flex",
             alignItems: "center",
+            justifyContent: "flex-end",
             gap: "14px",
           }}
         >
