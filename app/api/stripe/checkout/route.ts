@@ -42,37 +42,60 @@ export async function POST(req: Request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://raisefn.com";
 
-    // Pricing v2 (2026-05-25): one-time payment, not recurring subscription.
-    // Consent collected natively on Stripe's hosted Checkout page via
-    // consent_collection.terms_of_service. The Terms URL is set on
-    // Stripe Dashboard → Business → Business details → Terms of service URL.
-    // Custom acceptance message clarifies the 2% success fee surface.
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: [{ price: priceId, quantity: 1 }],
-      customer_email: user.email,
-      consent_collection: {
-        terms_of_service: "required",
-      },
-      custom_text: {
-        terms_of_service_acceptance: {
-          message:
-            "I agree to the **Advisor Engagement Letter**, including the 2% success fee on capital from raisefn-introduced investors. The $999 is non-refundable.",
-        },
-      },
-      metadata: {
-        supabase_user_id: user.id,
-        tier,
-      },
-      payment_intent_data: {
-        metadata: {
-          email: user.email,
-          tier,
-        },
-      },
-      success_url: `${baseUrl}/brain/deploy?checkout=success`,
-      cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
-    });
+    // Pricing v3 (2026-06-10) branches by tier:
+    // - advisor: one-time $999 with Engagement Letter consent (2% success
+    //   fee surface). Consent captured natively on Stripe's hosted page
+    //   via consent_collection.terms_of_service. Terms URL configured at
+    //   Stripe Dashboard → Business → Terms of service URL.
+    // - pro: $199/mo recurring subscription. No engagement letter, no
+    //   success fee — pure SaaS, cancel anytime.
+    const isAdvisor = tier === "advisor";
+    const session = await stripe.checkout.sessions.create(
+      isAdvisor
+        ? {
+            mode: "payment",
+            line_items: [{ price: priceId, quantity: 1 }],
+            customer_email: user.email,
+            consent_collection: {
+              terms_of_service: "required",
+            },
+            custom_text: {
+              terms_of_service_acceptance: {
+                message:
+                  "I agree to the **Advisor Engagement Letter**, including the 2% success fee on capital from raisefn-introduced investors. The $999 is non-refundable.",
+              },
+            },
+            metadata: {
+              supabase_user_id: user.id,
+              tier,
+            },
+            payment_intent_data: {
+              metadata: {
+                email: user.email,
+                tier,
+              },
+            },
+            success_url: `${baseUrl}/brain/deploy?checkout=success`,
+            cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
+          }
+        : {
+            mode: "subscription",
+            line_items: [{ price: priceId, quantity: 1 }],
+            customer_email: user.email,
+            metadata: {
+              supabase_user_id: user.id,
+              tier,
+            },
+            subscription_data: {
+              metadata: {
+                email: user.email,
+                tier,
+              },
+            },
+            success_url: `${baseUrl}/brain/deploy?checkout=success`,
+            cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
+          }
+    );
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
