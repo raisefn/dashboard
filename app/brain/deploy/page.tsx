@@ -302,14 +302,12 @@ function renderMatchesPanel(
     }
     if (bestIdx === -1 || !bestEntry) continue;
 
-    // Find the closest BLOCK element so the button can land on its own
-    // line under the named investor (Option B). For numbered lists this
-    // is the <li>; for paragraph mentions this is the <p>. Text nodes get
-    // a subtle highlight to mark which name the button is for.
-    const blockContainer = (textNode.parentElement?.closest(
-      "li, p, h1, h2, h3, h4, h5, blockquote, div",
-    ) || textNode.parentElement) as HTMLElement | null;
-    if (!blockContainer) continue;
+    // Skip table cells — the matches page already grids those out cleanly
+    // and inline-button injection inside a <td> looks broken.
+    if (textNode.parentElement?.closest("table")) {
+      used.add(bestEntry.key);
+      continue;
+    }
 
     const matchedText = text.substring(bestIdx, bestIdx + bestEntry.key.length);
     const beforeText = text.substring(0, bestIdx);
@@ -329,10 +327,34 @@ function renderMatchesPanel(
     parent.insertBefore(afterNode, textNode);
     parent.removeChild(textNode);
 
-    // Append the button as a block-level child of the containing element
-    // so it shows up on its own line beneath the name.
+    // Inject the button on its own line AT THE END of the paragraph
+    // containing the name. The markdown formatter only emits <br> tags
+    // (no <p> wrapping), so paragraphs are runs of inline content
+    // separated by <br>s. Find the next <br> after the matched text and
+    // insert the (block-level) button div immediately before it. If
+    // there's no next <br>, the button goes at the end of the containing
+    // block element.
     const button = createInlineBriefButton(bestEntry.investor, session, impersonating);
-    blockContainer.appendChild(button);
+    let nextBr: Element | null = null;
+    let cursor: Node | null = afterNode.nextSibling;
+    while (cursor) {
+      if (
+        cursor.nodeType === Node.ELEMENT_NODE &&
+        (cursor as Element).tagName === "BR"
+      ) {
+        nextBr = cursor as Element;
+        break;
+      }
+      cursor = cursor.nextSibling;
+    }
+    if (nextBr && nextBr.parentNode) {
+      nextBr.parentNode.insertBefore(button, nextBr);
+    } else {
+      const block = (textNode.parentElement?.closest(
+        "li, p, h1, h2, h3, h4, h5, blockquote, div",
+      ) || textNode.parentElement) as HTMLElement | null;
+      if (block) block.appendChild(button);
+    }
 
     used.add(bestEntry.key);
   }
