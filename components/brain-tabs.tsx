@@ -53,16 +53,24 @@ export default function BrainTabs() {
         });
         if (!res.ok || cancelled) return;
         const data = await res.json();
-        const matchList = data.match_list as
-          | {
-              individuals_to_target?: unknown[];
-              firms_to_consider?: unknown[];
-            }
-          | null;
-        const matchCount = matchList
-          ? (matchList.individuals_to_target?.length || 0) +
-            (matchList.firms_to_consider?.length || 0)
-          : 0;
+        // Count UNIQUE investors across all batches (not just the latest)
+        // so the number grows as the founder pulls more batches. Dedup by
+        // lowercase trimmed name; falls back to firm_name when name is
+        // missing.
+        const batches = Array.isArray(data.batches) ? data.batches : [];
+        const seen = new Set<string>();
+        for (const b of batches) {
+          const all = [
+            ...(Array.isArray(b.individuals_to_target) ? b.individuals_to_target : []),
+            ...(Array.isArray(b.firms_to_consider) ? b.firms_to_consider : []),
+          ];
+          for (const inv of all) {
+            const i = inv as { name?: string; firm_name?: string };
+            const key = (i.name || i.firm_name || "").toLowerCase().trim();
+            if (key) seen.add(key);
+          }
+        }
+        const matchCount = seen.size;
         const briefCount = Array.isArray(data.briefs) ? data.briefs.length : 0;
         if (!cancelled) setCounts({ matches: matchCount, briefs: briefCount });
       } catch {
@@ -70,8 +78,17 @@ export default function BrainTabs() {
       }
     }
     load();
+
+    // Refresh on custom events fired by the chat page when new matches
+    // or briefs land. Lets the count update without polling.
+    function onUpdate() { load(); }
+    window.addEventListener("raisefn:matches_updated", onUpdate);
+    window.addEventListener("raisefn:briefs_updated", onUpdate);
+
     return () => {
       cancelled = true;
+      window.removeEventListener("raisefn:matches_updated", onUpdate);
+      window.removeEventListener("raisefn:briefs_updated", onUpdate);
     };
   }, [pathname]);
 
@@ -92,7 +109,12 @@ export default function BrainTabs() {
     router.replace("/login");
   }
 
-  const showUpgrade = tier === "free";
+  // Show upgrade unless we KNOW the user is on a paid tier. Includes the
+  // null/undefined case (fresh login before the chat usage SSE has written
+  // tier to localStorage) — better to invite an upgrade than silently hide
+  // it for someone who would have qualified.
+  const PAID_TIERS = new Set(["advisor", "concierge", "lifetime", "lifetime_advisor"]);
+  const showUpgrade = !PAID_TIERS.has(tier || "");
   const displayName = email ? email.split("@")[0] : null;
 
   return (

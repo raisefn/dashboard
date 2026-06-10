@@ -158,6 +158,7 @@ export default function MatchesPage() {
       // Open the brief in a new tab and refresh the list so this row flips
       // to "View brief" via the briefs[] dedupe by investor name.
       window.open(data.url, "_blank", "noopener");
+      try { window.dispatchEvent(new CustomEvent("raisefn:briefs_updated")); } catch { /* defensive */ }
       if (session) await fetchMatches(session);
     } catch (e) {
       setRowError({ key, msg: e instanceof Error ? e.message : "Brief generation failed." });

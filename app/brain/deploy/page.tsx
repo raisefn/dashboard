@@ -187,6 +187,7 @@ function createInlineBriefButton(
       const briefData = await res.json();
       briefUrl = briefData.url;
       window.open(briefData.url, "_blank", "noopener");
+      try { window.dispatchEvent(new CustomEvent("raisefn:briefs_updated")); } catch { /* defensive */ }
       btn.style.cssText = BRIEF_BTN_DONE_STYLE;
       btn.innerHTML = `<span>✓ Open brief${escapeHtml(nameLabel)}</span>`;
       btn.disabled = false;
@@ -1438,6 +1439,10 @@ function BrainDeployInner() {
                 firms_to_consider: event.firms_to_consider || [],
                 generated_at: event.generated_at,
               };
+              // Tell BrainTabs to refresh its match count badge.
+              try {
+                window.dispatchEvent(new CustomEvent("raisefn:matches_updated"));
+              } catch { /* defensive */ }
             }
           } catch { /* ignore parse errors */ }
         }
