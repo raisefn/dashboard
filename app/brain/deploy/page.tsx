@@ -1575,120 +1575,10 @@ function BrainDeployInner() {
           limitWarningRef.current = null;
         }
 
-        // ── Soft upgrade card (one-time at message-12 lifetime) ────
-        // Fires once per browser when a free user crosses 12 lifetime
-        // messages. Pitches Advisor (concierge), dismissible. Stored in
-        // localStorage so it never re-fires on this device. Advisor /
-        // already-dismissed users see nothing.
-        try {
-          const tier = (typeof window !== "undefined"
-            ? localStorage.getItem("raisefn_user_tier")
-            : null) || userTier;
-          const dismissed = typeof window !== "undefined"
-            ? localStorage.getItem("raisefn_upgrade_card_dismissed_v1") === "1"
-            : true;
-          const lc = lifetimeCountRef.current ?? 0;
-          if (tier === "free" && !dismissed && lc >= 12) {
-            // All inline styles — Tailwind classes get purged when assigned
-            // via dynamic className strings, which was rendering this card
-            // as raw unstyled text.
-            const card = document.createElement("div");
-            card.style.cssText = [
-              "margin-top: 20px",
-              "padding: 22px 24px",
-              "border-radius: 14px",
-              "border: 1px solid rgba(194, 65, 12, 0.4)",
-              "background: linear-gradient(135deg, rgba(124, 45, 18, 0.32) 0%, rgba(24, 24, 27, 0.55) 100%)",
-              "box-shadow: 0 8px 24px -8px rgba(124, 45, 18, 0.35)",
-            ].join("; ");
-
-            const title = document.createElement("div");
-            title.style.cssText = [
-              "font-size: 15px",
-              "font-weight: 600",
-              "color: #fed7aa",
-              "margin-bottom: 6px",
-              "letter-spacing: -0.005em",
-            ].join("; ");
-            title.textContent = "Want raise(fn) Team in the loop?";
-
-            const body = document.createElement("div");
-            body.style.cssText = [
-              "font-size: 13px",
-              "color: #d4d4d8",
-              "line-height: 1.6",
-              "margin-bottom: 16px",
-            ].join("; ");
-            body.innerHTML = `You've used raise(fn) for ${lc} messages now. The brain handles your prep and pipeline. Advisor adds the human side: warm intros to portfolio-fit investors, deck review by raise(fn) Team, and meeting prep when it counts.<br><br><strong style="color: #f4f4f5; font-weight: 600;">$999 one-time, lifetime access.</strong> 2% success fee on capital raised through raise(fn)-introduced investors. <a href="/legal/engagement" style="color: #fdba74; text-decoration: underline;">Full terms</a>.`;
-
-            const buttonRow = document.createElement("div");
-            buttonRow.style.cssText = "display: flex; gap: 10px; align-items: center;";
-
-            const ctaBtn = document.createElement("button");
-            ctaBtn.style.cssText = [
-              "display: inline-flex",
-              "align-items: center",
-              "gap: 6px",
-              "padding: 9px 18px",
-              "border-radius: 8px",
-              "border: none",
-              "background: #ea580c",
-              "color: #ffffff",
-              "font-family: inherit",
-              "font-size: 13px",
-              "font-weight: 600",
-              "cursor: pointer",
-              "box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12)",
-              "transition: background-color 0.15s ease",
-            ].join("; ");
-            ctaBtn.textContent = "See Advisor →";
-            ctaBtn.onmouseenter = () => { ctaBtn.style.background = "#c2410c"; };
-            ctaBtn.onmouseleave = () => { ctaBtn.style.background = "#ea580c"; };
-
-            const dismissBtn = document.createElement("button");
-            dismissBtn.style.cssText = [
-              "display: inline-flex",
-              "align-items: center",
-              "padding: 8px 16px",
-              "border-radius: 8px",
-              "border: 1px solid #3f3f46",
-              "background: transparent",
-              "color: #a1a1aa",
-              "font-family: inherit",
-              "font-size: 13px",
-              "font-weight: 500",
-              "cursor: pointer",
-              "transition: border-color 0.15s ease, color 0.15s ease",
-            ].join("; ");
-            dismissBtn.textContent = "Not now";
-            dismissBtn.onmouseenter = () => {
-              dismissBtn.style.borderColor = "#52525b";
-              dismissBtn.style.color = "#d4d4d8";
-            };
-            dismissBtn.onmouseleave = () => {
-              dismissBtn.style.borderColor = "#3f3f46";
-              dismissBtn.style.color = "#a1a1aa";
-            };
-
-            buttonRow.appendChild(ctaBtn);
-            buttonRow.appendChild(dismissBtn);
-            card.appendChild(title);
-            card.appendChild(body);
-            card.appendChild(buttonRow);
-            contentEl.parentElement?.appendChild(card);
-
-            ctaBtn.addEventListener("click", () => {
-              try { localStorage.setItem("raisefn_upgrade_card_dismissed_v1", "1"); } catch { /* ignore */ }
-              router.push("/pricing");
-            });
-            dismissBtn.addEventListener("click", () => {
-              try { localStorage.setItem("raisefn_upgrade_card_dismissed_v1", "1"); } catch { /* ignore */ }
-              card.style.opacity = "0";
-              card.style.transition = "opacity 200ms";
-              setTimeout(() => card.remove(), 200);
-            });
-          }
-        } catch { /* defensive — card is best-effort */ }
+        // Pricing v3 (2026-06-10): the msg-12 soft Advisor card was
+        // removed. Three hard walls (30 msg / 10 briefs / 30 matches)
+        // now carry the entire upgrade pitch via the limit_reached
+        // event handler below.
 
         // (limit_reached card render moved OUT of this if-fullText block —
         // see below. It runs whether or not text was streamed.)
@@ -1714,71 +1604,70 @@ function BrainDeployInner() {
         card.className = "upgrade-card";
 
         if (isFreeVerified) {
-            // Dynamic lead-in. The reason field is "monthly" for the new
-            // 50/mo free cap; reset_label is server-formatted ("Jul 1").
-            const reasonWord = lr.reason === "monthly" ? "this month" :
-                               lr.reason === "daily" ? "today" :
-                               lr.reason === "hourly" ? "this hour" : "";
-            const capWord = lr.cap ? `${lr.cap} ` : "";
-            const resetText = lr.reset_label && lr.reset_label !== "never"
-              ? ` Resets ${lr.reset_label}.`
-              : "";
+            // Pricing v3 (2026-06-10) — equal-twin tiles. Pro (SaaS) and
+            // Advisor (concierge) presented side-by-side; user picks
+            // based on what they need. Leadin reflects which of the
+            // three lifetime caps fired (messages / briefs / matches).
+            //
+            // The `reason` field comes from the brain SSE limit_reached
+            // event. Backend emits:
+            //   - "monthly" / "daily" / "hourly" / "lifetime" for messages
+            //   - "briefs" for the 10-brief lifetime cap
+            //   - "matches" for the 30-unique-investors lifetime cap
+            const leadin = (() => {
+              if (lr.reason === "briefs") {
+                return `You've generated ${lr.cap ?? 10} briefs on the free plan. That's the lifetime cap. To keep building briefs, pick a path:`;
+              }
+              if (lr.reason === "matches") {
+                return `You've explored ${lr.cap ?? 30} unique investors on the free plan. That's the lifetime cap. To keep matching, pick a path:`;
+              }
+              // messages — covers "lifetime", "monthly", "daily", "hourly"
+              return `You've sent ${lr.cap ?? 30} messages on the free plan. That's the lifetime cap. To keep going, pick a path:`;
+            })();
+
             card.innerHTML = `
-              <div class="upgrade-card-leadin">
-                That's your ${capWord}free messages ${reasonWord}.${resetText} Want to keep going right now? Upgrade unlocks the rest:
-              </div>
-              <div class="upgrade-card-header">Ready to run a real raise?</div>
-              <div class="upgrade-card-subhead">
-                Advisor is a one-time purchase — lifetime product access, curated warm intros, and a 1hr advisory call.
-              </div>
+              <div class="upgrade-card-leadin">${leadin}</div>
 
-              <div class="upgrade-card-section">
-                <div class="upgrade-card-section-label">Proprietary Network</div>
-                <div class="upgrade-card-grid-item">
-                  Investors who signed up to raise(fn) directly — not in any
-                  public database. Curated warm intros only.
+              <div class="upgrade-card-tiers">
+                <div class="upgrade-card-tier upgrade-card-tier--pro">
+                  <div class="upgrade-card-tier-name">Pro</div>
+                  <div class="upgrade-card-tier-price">$199/mo · cancel anytime</div>
+                  <div class="upgrade-card-tier-pitch">
+                    Uncapped product, same brain you already know. The SaaS path.
+                  </div>
+                  <ul class="upgrade-card-tier-list">
+                    <li>Uncapped chat with the brain</li>
+                    <li>Uncapped investor matches</li>
+                    <li>Uncapped briefs</li>
+                    <li>Pipeline + memory across sessions</li>
+                  </ul>
+                  <button class="upgrade-card-tier-cta" data-cta="pro">
+                    Get Pro — $199/mo
+                  </button>
+                  <div class="upgrade-card-error" data-err="pro" style="display:none"></div>
                 </div>
-              </div>
 
-              <div class="upgrade-card-section">
-                <div class="upgrade-card-section-label">Persistent Memory</div>
-                <div class="upgrade-card-grid-item">
-                  The brain remembers your entire raise across sessions — every
-                  conversation, every investor decision, every comp.
+                <div class="upgrade-card-tier upgrade-card-tier--advisor">
+                  <div class="upgrade-card-tier-name">Advisor</div>
+                  <div class="upgrade-card-tier-price">$999 once + 2% on raised capital</div>
+                  <div class="upgrade-card-tier-pitch">
+                    Everything in Pro, plus raise(fn) Team in the loop.
+                  </div>
+                  <ul class="upgrade-card-tier-list">
+                    <li>Everything Pro has, uncapped</li>
+                    <li>Curated warm intros to portfolio-fit investors</li>
+                    <li>Deck review by raise(fn) Team</li>
+                    <li>Meeting prep when it counts · lifetime access</li>
+                  </ul>
+                  <button class="upgrade-card-tier-cta" data-cta="advisor">
+                    See Advisor — $999
+                  </button>
+                  <div class="upgrade-card-error" data-err="advisor" style="display:none"></div>
+                  <div class="upgrade-card-tier-foot">
+                    2% success fee on capital from raisefn-introduced investors.
+                    <a href="/legal/engagement">Full engagement letter</a>.
+                  </div>
                 </div>
-              </div>
-
-              <div class="upgrade-card-section">
-                <div class="upgrade-card-section-label">Unlimited Product + Intelligence</div>
-                <div class="upgrade-card-grid">
-                  <div class="upgrade-card-grid-item">Investor matching</div>
-                  <div class="upgrade-card-grid-item">Outreach drafting</div>
-                  <div class="upgrade-card-grid-item">Term sheet analysis</div>
-                  <div class="upgrade-card-grid-item">Pitch positioning</div>
-                  <div class="upgrade-card-grid-item">Signal reading</div>
-                  <div class="upgrade-card-grid-item">Deck analysis</div>
-                </div>
-              </div>
-
-              <div class="upgrade-card-section">
-                <div class="upgrade-card-section-label">Pipeline CRM</div>
-                <div class="upgrade-card-grid">
-                  <div class="upgrade-card-grid-item">Auto-track conversations</div>
-                  <div class="upgrade-card-grid-item">Meeting ingestion</div>
-                  <div class="upgrade-card-grid-item">Instant pipeline recall</div>
-                  <div class="upgrade-card-grid-item">Smarter every interaction</div>
-                </div>
-              </div>
-
-              <div class="upgrade-card-cta-row">
-                <button class="upgrade-card-btn" data-cta="advisor">
-                  Get Advisor — $999 lifetime
-                </button>
-                <div class="upgrade-card-error" style="display:none"></div>
-              </div>
-              <div style="margin-top:14px;font-size:12px;color:#a1a1aa;line-height:1.5">
-                Actively closing a raise and need the cap bumped this month?
-                <a href="mailto:team@raisefn.com?subject=Cap%20bump%20request" style="color:#fb923c;text-decoration:underline">Email team@raisefn.com</a>.
               </div>
             `;
           } else {
@@ -1814,75 +1703,67 @@ function BrainDeployInner() {
             card.scrollIntoView({ behavior: "smooth", block: "center" });
           });
 
-          // Wire the upgrade CTA → Stripe checkout (free user only).
-          // Pricing v2 (2026-05-25): consent collected natively on Stripe's
-          // Checkout page via consent_collection.terms_of_service, so we can
-          // go straight from card → Stripe (no /pricing pitstop needed).
-          //
-          // Defense (mirrors /pricing): re-fetch session at click time
-          // (state may be stale across long chat sessions), and handle 401
-          // by routing to /signup with intent preserved instead of showing
-          // the generic error.
+          // Wire each tier CTA → Stripe checkout. Pricing v3 (2026-06-10):
+          // Pro and Advisor both route through /api/stripe/checkout with
+          // the right tier body. Defensive token re-fetch + 401 → /signup
+          // is preserved per tier.
           if (isFreeVerified) {
-            const btn = card.querySelector(".upgrade-card-btn") as HTMLButtonElement | null;
-            const errDiv = card.querySelector(".upgrade-card-error") as HTMLDivElement | null;
-            const originalLabel = btn?.textContent || "";
-            btn?.addEventListener("click", async () => {
-              // Re-fetch the session in case the in-React-state token has
-              // expired during a long chat (Supabase auto-refresh handles
-              // this when possible).
-              const { data: { session: freshSession } } = await supabase.auth.getSession();
-              const token = freshSession?.access_token;
-              if (!token) {
-                try {
-                  localStorage.setItem("pendingPostAuthIntent", "upgrade-advisor");
-                } catch {
-                  /* localStorage unavailable — fall through */
-                }
-                router.push("/signup?after=upgrade-advisor");
-                return;
-              }
-              btn.disabled = true;
-              btn.textContent = "Opening checkout…";
-              try {
-                const res = await fetch("/api/stripe/checkout", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({ tier: "advisor" }),
-                });
-
-                // Server rejected the token (expired between getSession +
-                // fetch, session revoked). Same recovery path: preserve
-                // intent + route to signup.
-                if (res.status === 401) {
+            const wireTierCta = (tier: "pro" | "advisor") => {
+              const btn = card.querySelector(
+                `.upgrade-card-tier-cta[data-cta="${tier}"]`
+              ) as HTMLButtonElement | null;
+              const errDiv = card.querySelector(
+                `.upgrade-card-error[data-err="${tier}"]`
+              ) as HTMLDivElement | null;
+              if (!btn) return;
+              const originalLabel = btn.textContent || "";
+              btn.addEventListener("click", async () => {
+                const { data: { session: freshSession } } = await supabase.auth.getSession();
+                const token = freshSession?.access_token;
+                if (!token) {
                   try {
-                    localStorage.setItem("pendingPostAuthIntent", "upgrade-advisor");
-                  } catch {
-                    /* localStorage unavailable — fall through */
-                  }
-                  router.push("/signup?after=upgrade-advisor");
+                    localStorage.setItem("pendingPostAuthIntent", `upgrade-${tier}`);
+                  } catch { /* ignore */ }
+                  router.push(`/signup?after=upgrade-${tier}`);
                   return;
                 }
-
-                const data = await res.json();
-                if (!res.ok || !data.url) {
-                  throw new Error(data.error || "Checkout failed");
+                btn.disabled = true;
+                btn.textContent = "Opening checkout…";
+                try {
+                  const res = await fetch("/api/stripe/checkout", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ tier }),
+                  });
+                  if (res.status === 401) {
+                    try {
+                      localStorage.setItem("pendingPostAuthIntent", `upgrade-${tier}`);
+                    } catch { /* ignore */ }
+                    router.push(`/signup?after=upgrade-${tier}`);
+                    return;
+                  }
+                  const data = await res.json();
+                  if (!res.ok || !data.url) {
+                    throw new Error(data.error || "Checkout failed");
+                  }
+                  window.location.href = data.url;
+                } catch (e) {
+                  btn.disabled = false;
+                  btn.textContent = originalLabel;
+                  if (errDiv) {
+                    errDiv.style.display = "block";
+                    errDiv.textContent =
+                      "Couldn't start checkout — try again or email team@raisefn.com.";
+                  }
+                  console.error("Stripe checkout error:", e);
                 }
-                window.location.href = data.url;
-              } catch (e) {
-                btn.disabled = false;
-                btn.textContent = originalLabel;
-                if (errDiv) {
-                  errDiv.style.display = "block";
-                  errDiv.textContent =
-                    "Couldn't start checkout — try again or email team@raisefn.com.";
-                }
-                console.error("Stripe checkout error:", e);
-              }
-            });
+              });
+            };
+            wireTierCta("pro");
+            wireTierCta("advisor");
           }
 
         limitReachedRef.current = null;

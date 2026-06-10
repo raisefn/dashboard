@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 import FadeInSection from "@/components/fade-in-section";
 
+type Tier = "pro" | "advisor";
+
 export default function PricingPage() {
   const router = useRouter();
-  const [authedToken, setAuthedToken] = useState<string | null>(null);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [, setAuthedToken] = useState<string | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState<Tier | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -21,30 +23,21 @@ export default function PricingPage() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Auto-resume the checkout if we got bounced here from /auth/confirm or
-  // /auth/callback after a fresh signup (the post-auth helper redirects to
-  // /pricing?checkout=resume when pendingPostAuthIntent === "upgrade-advisor").
+  // Auto-resume checkout after fresh signup. Supports both Pro and Advisor
+  // intents (pendingPostAuthIntent set by the wall card before bouncing to
+  // /signup when the user wasn't authed yet).
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("checkout") !== "resume") return;
-    // Strip the param immediately so a refresh doesn't re-fire the redirect
+    const resume = params.get("checkout");
+    if (resume !== "resume-pro" && resume !== "resume-advisor") return;
     window.history.replaceState({}, "", window.location.pathname);
-    // Fire with fromAutoResume so checkout waits for session hydration
-    // instead of bouncing to /signup on the initial null. Even if the
-    // session hasn't fully propagated to this page yet, the wait loop
-    // gives it a chance to arrive via onAuthStateChange.
-    startAdvisorCheckout({ fromAutoResume: true });
+    const tier: Tier = resume === "resume-pro" ? "pro" : "advisor";
+    startCheckout(tier, { fromAutoResume: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Wait up to `timeoutMs` for a valid Supabase session to be available.
-  // Resolves with the token on success, or null on timeout. Used by the
-  // auto-resume path where the session may not have propagated to this
-  // page context yet at the moment auto-fire runs (race between
-  // /auth/callback's router.replace and Supabase client cache hydration).
   async function waitForSession(timeoutMs: number): Promise<string | null> {
-    // Try immediately first — no need to wait if it's already there
     const { data: { session: immediate } } = await supabase.auth.getSession();
     if (immediate?.access_token) return immediate.access_token;
     return new Promise<string | null>((resolve) => {
@@ -63,13 +56,8 @@ export default function PricingPage() {
     });
   }
 
-  async function startAdvisorCheckout(opts?: { fromAutoResume?: boolean }) {
+  async function startCheckout(tier: Tier, opts?: { fromAutoResume?: boolean }) {
     setCheckoutError(null);
-
-    // Resolve a session token. From the auto-resume path, wait up to 5s
-    // for Supabase to finish propagating the session that /auth/callback
-    // just established. From a normal click, only the immediate read —
-    // a missing session means the user is genuinely signed out.
     let token: string | null = null;
     if (opts?.fromAutoResume) {
       token = await waitForSession(5000);
@@ -78,11 +66,11 @@ export default function PricingPage() {
       token = session?.access_token ?? null;
     }
     if (!token) {
-      router.push("/signup?after=upgrade-advisor");
+      router.push(`/signup?after=upgrade-${tier}`);
       return;
     }
 
-    setCheckoutLoading(true);
+    setCheckoutLoading(tier);
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -90,24 +78,19 @@ export default function PricingPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ tier: "advisor" }),
+        body: JSON.stringify({ tier }),
       });
-
-      // If server rejects the token (expired between getSession + fetch,
-      // or session revoked server-side), bounce to signup with intent
-      // preserved instead of showing the generic error.
       if (res.status === 401) {
-        router.push("/signup?after=upgrade-advisor");
+        router.push(`/signup?after=upgrade-${tier}`);
         return;
       }
-
       const data = await res.json();
       if (!res.ok || !data.url) {
         throw new Error(data.error || "Checkout failed");
       }
       window.location.href = data.url;
     } catch (e) {
-      setCheckoutLoading(false);
+      setCheckoutLoading(null);
       setCheckoutError(
         "Couldn't start checkout — try again or email team@raisefn.com."
       );
@@ -130,36 +113,82 @@ export default function PricingPage() {
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
             Targeting, deck analysis, outreach drafts — grounded in 24,000+
-            rounds of fundraising activity. Launchpad to try the brain.
-            Advisor when you&apos;re running an active raise.
+            rounds of fundraising activity. Free to try. Pro when you&apos;re
+            in the work. Advisor when you want raise(fn) Team in the loop.
           </p>
         </div>
       </section>
 
-      {/* ── Launchpad (free) ── */}
+      {/* ── Free ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">
             <div className="flex items-baseline gap-4 mb-2">
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
-                Launchpad
+                Free
               </h2>
-              <span className="text-sm text-zinc-500">Free — 12 messages</span>
+              <span className="text-sm text-zinc-500">$0 — try the brain</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              Drop your deck, paste an investor list, or just ask. The brain
-              reads what you give it, surfaces matches from public data plus
-              named investors from its training, and answers real questions
-              about your raise. No forms, no friction.
+              Drop your deck, ask the brain anything, get real matches. Free
+              to get started. Hard lifetime caps so we keep the lights on —
+              upgrade when you outgrow them.
             </p>
 
             <ul className="space-y-4 mb-10 list-none">
               {[
-                ["Drop your deck", "PDF or DOCX — profile auto-populates in seconds"],
-                ["Investor research", "tracker firms + named partners across the public record"],
-                ["Deck and narrative review", "calibrated feedback before you go out"],
-                ["Outreach drafts", "cold and warm intros, drafted for your context"],
-                ["All brain tools", "targeting, planning, term review — no feature gates"],
+                ["30 brain messages", "lifetime — enough to explore your raise end-to-end"],
+                ["10 investor briefs", "lifetime — one-page tailored summaries"],
+                ["30 investors matched", "lifetime, unique — about 3-4 batches of exploration"],
+                ["Full product otherwise", "no feature gates — every brain tool available"],
+                ["Brief capture flow", "log investors you already know, build your network on raisefn"],
+              ].map(([name, desc]) => (
+                <li key={name} className="flex items-start gap-3">
+                  <span className="text-zinc-500 text-lg leading-snug shrink-0">•</span>
+                  <span className="text-sm leading-relaxed">
+                    <strong className="text-zinc-100 font-semibold">{name}</strong>
+                    <span className="text-zinc-400"> — {desc}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <a
+              href="/signup"
+              className="rounded-full border border-zinc-700 bg-zinc-900/40 px-8 py-3 text-sm font-medium text-zinc-200 transition-all hover:border-zinc-500 hover:bg-zinc-800/60 inline-block"
+            >
+              Start Free
+            </a>
+          </div>
+        </FadeInSection>
+      </section>
+
+      <div className="mx-auto max-w-3xl px-4">
+        <div className="border-t border-zinc-800/50" />
+      </div>
+
+      {/* ── Pro ── */}
+      <section className="relative py-16 px-4">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl">
+            <div className="flex items-baseline gap-4 mb-2">
+              <h2 className="text-2xl font-bold text-white sm:text-3xl">
+                Pro
+              </h2>
+              <span className="text-sm text-zinc-500">$199/mo · cancel anytime</span>
+            </div>
+            <p className="text-sm text-zinc-400 mb-10 max-w-xl">
+              For founders actively raising. Same brain, no walls. Pay monthly,
+              cancel anytime. No engagement letter, no success fee.
+            </p>
+
+            <ul className="space-y-4 mb-10 list-none">
+              {[
+                ["Uncapped chat with the brain", "ask anything, as often as you need"],
+                ["Uncapped investor matches", "keep exploring until you find your fit"],
+                ["Uncapped briefs", "one-page summaries for every investor you target"],
+                ["Pipeline + memory across sessions", "the brain remembers every conversation"],
+                ["All brain tools", "targeting, deck review, outreach drafts, meeting prep"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
                   <span className="text-teal-400 text-lg leading-snug shrink-0">•</span>
@@ -171,12 +200,17 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <a
-              href="/signup"
-              className="rounded-full border border-teal-700/50 bg-teal-950/20 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/30 inline-block"
+            <button
+              onClick={() => startCheckout("pro")}
+              disabled={checkoutLoading === "pro"}
+              className="rounded-full border border-teal-600/60 bg-teal-900/30 px-8 py-3 text-sm font-medium text-teal-200 transition-all hover:border-teal-500 hover:bg-teal-900/50 disabled:opacity-50"
             >
-              Set Up Your Raise
-            </a>
+              {checkoutLoading === "pro" ? "Opening checkout…" : "Get Pro — $199/mo"}
+            </button>
+            <p className="mt-3 text-xs text-zinc-500 max-w-xl">
+              Cancel anytime from your account. Access continues through the
+              end of your billing period.
+            </p>
           </div>
         </FadeInSection>
       </section>
@@ -185,7 +219,7 @@ export default function PricingPage() {
         <div className="border-t border-zinc-800/50" />
       </div>
 
-      {/* ── Advisor (paid, runs a full raise) ── */}
+      {/* ── Advisor ── */}
       <section className="relative py-16 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl">
@@ -193,21 +227,20 @@ export default function PricingPage() {
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
                 Advisor
               </h2>
-              <span className="text-sm text-zinc-500">$999 one-time, lifetime</span>
+              <span className="text-sm text-zinc-500">$999 once + 2% success fee · lifetime</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              For founders running an active raise. Unlimited product access,
-              curated warm intros from our proprietary network, and a 1-hour
-              advisory call. Pay once, keep it for the life of the platform.
+              Everything in Pro, plus raise(fn) Team in the loop. Warm intros
+              from our proprietary network, deck review, meeting prep when it
+              counts. Pay once, keep it for the life of the platform.
             </p>
 
             <ul className="space-y-4 mb-10 list-none">
               {[
-                ["Unlimited product access", "lifetime — no monthly cap, no recurring bill"],
+                ["Everything Pro has, uncapped", "lifetime access — no monthly bill"],
                 ["Curated warm intros", "from raisefn's proprietary investor network"],
-                ["1hr advisory call", "with the raise(fn) team"],
-                ["Pipeline memory", "every investor conversation logged so you never re-explain"],
-                ["Targeting & outreach drafts", "who to reach, what to say, ready to send"],
+                ["Deck review by raise(fn) Team", "calibrated feedback before you send"],
+                ["Meeting prep when it counts", "tailored briefs and talking points per investor"],
                 ["2% success fee", "only on capital from raisefn-introduced investors — we win when you do"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
@@ -221,11 +254,11 @@ export default function PricingPage() {
             </ul>
 
             <button
-              onClick={() => startAdvisorCheckout()}
-              disabled={checkoutLoading}
+              onClick={() => startCheckout("advisor")}
+              disabled={checkoutLoading === "advisor"}
               className="rounded-full border border-orange-600/60 bg-orange-900/30 px-8 py-3 text-sm font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50 disabled:opacity-50"
             >
-              {checkoutLoading ? "Opening checkout…" : "Get Advisor — $999"}
+              {checkoutLoading === "advisor" ? "Opening checkout…" : "Get Advisor — $999"}
             </button>
             <p className="mt-3 text-xs text-zinc-500 max-w-xl">
               Engagement terms (including the 2% success fee) shown for review and acceptance at checkout. See the full{" "}

@@ -262,3 +262,172 @@ html {
   color: #f87171;
   margin-top: 4px;
 }
+
+/* ── Equal-twin tier tiles (pricing v3 wall card) ──
+   Two side-by-side cards: Pro (teal) + Advisor (orange). Stacks on
+   narrow widths so the chat-width card stays readable on mobile.
+   Internal name kept short for use inside .upgrade-card. */
+
+.upgrade-card-tiers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 4px;
+}
+
+@media (max-width: 720px) {
+  .upgrade-card-tiers { grid-template-columns: 1fr; }
+}
+
+.upgrade-card-tier {
+  display: flex;
+  flex-direction: column;
+  padding: 22px 22px 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(63, 63, 70, 0.55);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(0, 0, 0, 0.15));
+  transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.upgrade-card-tier:hover {
+  transform: translateY(-1px);
+}
+
+.upgrade-card-tier--pro {
+  border-color: rgba(45, 212, 191, 0.32);
+  background:
+    radial-gradient(circle at top right, rgba(45, 212, 191, 0.07), transparent 65%),
+    linear-gradient(180deg, rgba(45, 212, 191, 0.04), rgba(0, 0, 0, 0.18));
+}
+
+.upgrade-card-tier--pro:hover {
+  border-color: rgba(45, 212, 191, 0.55);
+  box-shadow: 0 10px 28px -16px rgba(45, 212, 191, 0.35);
+}
+
+.upgrade-card-tier--advisor {
+  border-color: rgba(234, 88, 12, 0.36);
+  background:
+    radial-gradient(circle at top right, rgba(234, 88, 12, 0.07), transparent 65%),
+    linear-gradient(180deg, rgba(234, 88, 12, 0.04), rgba(0, 0, 0, 0.18));
+}
+
+.upgrade-card-tier--advisor:hover {
+  border-color: rgba(234, 88, 12, 0.65);
+  box-shadow: 0 10px 28px -16px rgba(234, 88, 12, 0.35);
+}
+
+.upgrade-card-tier-name {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+
+.upgrade-card-tier--pro .upgrade-card-tier-name { color: #5eead4; }
+.upgrade-card-tier--advisor .upgrade-card-tier-name { color: #fb923c; }
+
+.upgrade-card-tier-price {
+  font-size: 13.5px;
+  color: #e4e4e7;
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+.upgrade-card-tier-pitch {
+  font-size: 13px;
+  color: #a1a1aa;
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.upgrade-card-tier-list {
+  list-style: none;
+  margin: 0 0 22px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upgrade-card-tier-list li {
+  font-size: 13px;
+  color: #d4d4d8;
+  line-height: 1.45;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.upgrade-card-tier-list li::before {
+  content: "—";
+  flex-shrink: 0;
+}
+
+.upgrade-card-tier--pro .upgrade-card-tier-list li::before { color: rgba(45, 212, 191, 0.65); }
+.upgrade-card-tier--advisor .upgrade-card-tier-list li::before { color: rgba(234, 88, 12, 0.65); }
+
+.upgrade-card-tier-cta {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 20px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+.upgrade-card-tier--pro .upgrade-card-tier-cta {
+  border-color: rgba(45, 212, 191, 0.55);
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.22), rgba(45, 212, 191, 0.08));
+  color: #5eead4;
+}
+
+.upgrade-card-tier--pro .upgrade-card-tier-cta:hover:not(:disabled) {
+  border-color: rgba(45, 212, 191, 0.85);
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.32), rgba(45, 212, 191, 0.14));
+  color: #99f6e4;
+  box-shadow: 0 6px 16px -8px rgba(45, 212, 191, 0.4);
+}
+
+.upgrade-card-tier--advisor .upgrade-card-tier-cta {
+  border-color: rgba(234, 88, 12, 0.55);
+  background: linear-gradient(135deg, rgba(234, 88, 12, 0.22), rgba(234, 88, 12, 0.08));
+  color: #fb923c;
+}
+
+.upgrade-card-tier--advisor .upgrade-card-tier-cta:hover:not(:disabled) {
+  border-color: rgba(234, 88, 12, 0.85);
+  background: linear-gradient(135deg, rgba(234, 88, 12, 0.32), rgba(234, 88, 12, 0.14));
+  color: #ffaf6a;
+  box-shadow: 0 6px 16px -8px rgba(234, 88, 12, 0.4);
+}
+
+.upgrade-card-tier-cta:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.upgrade-card-tier-foot {
+  margin-top: 14px;
+  font-size: 11.5px;
+  color: #71717a;
+  line-height: 1.5;
+}
+
+.upgrade-card-tier-foot a {
+  color: #a1a1aa;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.upgrade-card-tier-foot a:hover {
+  color: #e4e4e7;
+}
