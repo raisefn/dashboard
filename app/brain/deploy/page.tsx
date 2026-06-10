@@ -80,15 +80,15 @@ function createInlineBriefButton(
   impersonating: string,
 ): HTMLSpanElement {
   const wrap = document.createElement("span");
-  wrap.className = "inline-flex items-baseline gap-1 ml-1.5 whitespace-nowrap";
+  wrap.className = "inline-flex items-center gap-2 ml-3 whitespace-nowrap align-middle";
 
   const btn = document.createElement("button");
   btn.className =
-    "inline-brief-btn text-[11px] rounded-md bg-teal-600 hover:bg-teal-500 text-white px-2 py-0.5 font-medium align-baseline";
-  btn.textContent = "+ brief";
+    "inline-brief-btn text-xs rounded-md bg-teal-600 hover:bg-teal-500 text-white px-3 py-1 font-medium align-middle shadow-sm";
+  btn.textContent = "Generate brief →";
 
   const status = document.createElement("span");
-  status.className = "text-[11px] text-zinc-500";
+  status.className = "text-xs text-zinc-500";
 
   wrap.appendChild(btn);
   wrap.appendChild(status);
@@ -137,20 +137,27 @@ function createInlineBriefButton(
       const briefData = await res.json();
       briefUrl = briefData.url;
       window.open(briefData.url, "_blank", "noopener");
-      btn.textContent = "✓ open brief";
+      btn.textContent = "✓ Open brief";
       btn.className =
-        "inline-brief-btn text-[11px] rounded-md border border-teal-700/60 hover:border-teal-500 text-teal-300 px-2 py-0.5 font-medium align-baseline";
+        "inline-brief-btn text-xs rounded-md border border-teal-700/60 hover:border-teal-500 text-teal-300 px-3 py-1 font-medium align-middle";
       btn.disabled = false;
     } catch (err) {
       btn.disabled = false;
       btn.textContent = original;
       status.textContent = ` — ${err instanceof Error ? err.message : "failed"}`;
-      status.className = "text-[11px] text-red-400";
+      status.className = "text-xs text-red-400";
     }
   });
 
   return wrap;
 }
+
+// Session-wide investor cache so prior-batch references in the brain's prose
+// (e.g. "Daniel Moore from Batch 3") still get inline buttons even though the
+// current matches_panel only contains the latest batch. Keyed by lowercase
+// name OR firm name. First write wins (newer batches don't overwrite earlier
+// data — same investor, same metadata is fine).
+const SESSION_INVESTOR_CACHE: Map<string, MatchInvestor> = new Map();
 
 function renderMatchesPanel(
   data: {
@@ -166,23 +173,29 @@ function renderMatchesPanel(
   const individuals = (data.individuals_to_target || []) as MatchInvestor[];
   const firms = (data.firms_to_consider || []) as MatchInvestor[];
   const ordered = [...individuals, ...firms];
-  if (ordered.length === 0) return;
 
-  // Build a lookup of matchable names → investor. Both the investor's own
-  // name and the firm name (for firm-kind entries) get registered so that
-  // brain prose mentioning either resolves. Longest keys first so a
-  // 2-word name matches before a 1-word substring.
-  type MatchEntry = { key: string; investor: MatchInvestor };
-  const entries: MatchEntry[] = [];
+  // Update the cross-batch cache with this batch's investors.
   ordered.forEach((inv) => {
-    if (inv.name) entries.push({ key: String(inv.name).toLowerCase().trim(), investor: inv });
+    if (inv.name) {
+      const key = String(inv.name).toLowerCase().trim();
+      if (key && !SESSION_INVESTOR_CACHE.has(key)) SESSION_INVESTOR_CACHE.set(key, inv);
+    }
     if (inv.kind === "firm" && inv.firm_name) {
-      const fn = String(inv.firm_name).toLowerCase().trim();
-      if (!entries.some((e) => e.key === fn)) {
-        entries.push({ key: fn, investor: inv });
-      }
+      const key = String(inv.firm_name).toLowerCase().trim();
+      if (key && !SESSION_INVESTOR_CACHE.has(key)) SESSION_INVESTOR_CACHE.set(key, inv);
     }
   });
+
+  // No matches at all (current OR cached) → nothing to do.
+  if (ordered.length === 0 && SESSION_INVESTOR_CACHE.size === 0) return;
+
+  // Build lookup entries from the cache (union of all batches seen this
+  // session). Longest keys first so a 2-word name matches before a 1-word
+  // substring.
+  type MatchEntry = { key: string; investor: MatchInvestor };
+  const entries: MatchEntry[] = Array.from(SESSION_INVESTOR_CACHE.entries()).map(
+    ([key, investor]) => ({ key, investor }),
+  );
   entries.sort((a, b) => b.key.length - a.key.length);
 
   // Walk text nodes in the brain's rendered response and inject a small
@@ -254,18 +267,23 @@ function renderMatchesPanel(
     used.add(bestEntry.key);
   }
 
-  // Small unobtrusive link to the full grid for the matches the brain
-  // didn't call out by name. NO giant card panel — that was the bad design.
-  const summary = document.createElement("div");
-  summary.className = "mt-3 text-[11px] text-zinc-500";
-  const remainder = Math.max(0, ordered.length - used.size);
+  // Always show a primary CTA back to the full match list. Button-styled so
+  // it doesn't get lost in surrounding prose. Total count uses the current
+  // batch size when available; falls back to the cross-batch cache size.
+  const total = ordered.length || SESSION_INVESTOR_CACHE.size;
+  const remainder = Math.max(0, total - used.size);
+  let label: string;
   if (used.size > 0 && remainder > 0) {
-    summary.innerHTML = `<a href="/brain/matches" class="hover:text-zinc-300 underline">View ${remainder} more match${remainder === 1 ? "" : "es"} →</a>`;
+    label = `View ${remainder} more match${remainder === 1 ? "" : "es"}`;
   } else if (used.size === 0) {
-    summary.innerHTML = `<a href="/brain/matches" class="hover:text-zinc-300 underline">View all ${ordered.length} matches →</a>`;
+    label = `View all ${total} matches`;
   } else {
-    summary.innerHTML = `<a href="/brain/matches" class="hover:text-zinc-300 underline">View all matches →</a>`;
+    label = "View all matches";
   }
+
+  const summary = document.createElement("div");
+  summary.className = "mt-5 flex";
+  summary.innerHTML = `<a href="/brain/matches" class="inline-flex items-center gap-1.5 rounded-md border border-zinc-700 hover:border-zinc-500 bg-zinc-900/40 hover:bg-zinc-900 text-zinc-200 hover:text-zinc-100 px-4 py-2 text-sm font-medium transition-colors">${label} <span class="text-zinc-500">→</span></a>`;
   contentEl.parentElement?.appendChild(summary);
 }
 
