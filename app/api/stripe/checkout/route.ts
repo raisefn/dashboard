@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://raisefn.com";
 
     // Pricing v3 (2026-06-10) branches by tier:
-    // - advisor: one-time $999 with Engagement Letter consent (2% success
+    // - advisor: one-time $999 with Engagement Letter consent (3% success
     //   fee surface). Consent captured natively on Stripe's hosted page
     //   via consent_collection.terms_of_service. Terms URL configured at
     //   Stripe Dashboard → Business → Terms of service URL.
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
             custom_text: {
               terms_of_service_acceptance: {
                 message:
-                  "I agree to the **Advisor Engagement Letter**, including the 2% success fee on capital from raisefn-introduced investors. The $999 is non-refundable.",
+                  "I agree to the **Advisor Engagement Letter**, including the 3% success fee on capital from raisefn-introduced investors. The $999 is non-refundable.",
               },
             },
             metadata: {

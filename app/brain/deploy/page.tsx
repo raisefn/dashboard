@@ -1637,7 +1637,7 @@ function BrainDeployInner() {
 
                 <div class="upgrade-card-tier upgrade-card-tier--advisor">
                   <div class="upgrade-card-tier-name">Advisor</div>
-                  <div class="upgrade-card-tier-price">$999 once + 2% on raised capital</div>
+                  <div class="upgrade-card-tier-price">$999 once + 3% on raised capital</div>
                   <div class="upgrade-card-tier-pitch">
                     Everything in Pro, plus raise(fn) Team in the loop.
                   </div>
@@ -1652,7 +1652,7 @@ function BrainDeployInner() {
                   </button>
                   <div class="upgrade-card-error" data-err="advisor" style="display:none"></div>
                   <div class="upgrade-card-tier-foot">
-                    2% success fee on capital from raisefn-introduced investors.
+                    3% success fee on capital from raisefn-introduced investors.
                     <a href="/legal/engagement">Full engagement letter</a>.
                   </div>
                 </div>

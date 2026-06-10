@@ -225,7 +225,7 @@ export default function PricingPage() {
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
                 Advisor
               </h2>
-              <span className="text-sm text-zinc-500">$999 once + 2% success fee · lifetime</span>
+              <span className="text-sm text-zinc-500">$999 once + 3% success fee · lifetime</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
               Everything in Pro, plus raise(fn) Team in the loop. Warm intros
@@ -239,7 +239,7 @@ export default function PricingPage() {
                 ["Curated warm intros", "from raisefn's proprietary investor network"],
                 ["Deck review by raise(fn) Team", "calibrated feedback before you send"],
                 ["Meeting prep when it counts", "tailored briefs and talking points per investor"],
-                ["2% success fee", "only on capital from raisefn-introduced investors — we win when you do"],
+                ["3% success fee", "only on capital from raisefn-introduced investors — we win when you do"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
                   <span className="text-orange-400 text-lg leading-snug shrink-0">•</span>
@@ -259,7 +259,7 @@ export default function PricingPage() {
               {checkoutLoading === "advisor" ? "Opening checkout…" : "Get Advisor — $999"}
             </button>
             <p className="mt-3 text-xs text-zinc-500 max-w-xl">
-              Engagement terms (including the 2% success fee) shown for review and acceptance at checkout. See the full{" "}
+              Engagement terms (including the 3% success fee) shown for review and acceptance at checkout. See the full{" "}
               <a
                 href="/legal/engagement"
                 target="_blank"

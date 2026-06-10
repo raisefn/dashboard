@@ -15,7 +15,7 @@ export function getStripe(): Stripe {
 // Pricing v3 (2026-06-10): three-tier SaaS model.
 // - free: hard lifetime caps (no Stripe price)
 // - pro: $199/mo recurring — STRIPE_PRO_PRICE_ID
-// - advisor: $999 one-time + 2% success fee — STRIPE_LAUNCHPAD_PRICE_ID
+// - advisor: $999 one-time + 3% success fee — STRIPE_LAUNCHPAD_PRICE_ID
 //   (env var name preserved from v2 for backward compat).
 export function getPriceMap(): Record<string, string | undefined> {
   return {

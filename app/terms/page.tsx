@@ -88,7 +88,7 @@ export default function TermsPage() {
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              Advisor is a one-time $999 lifetime purchase plus a 2% success fee on
+              Advisor is a one-time $999 lifetime purchase plus a 3% success fee on
               capital raised from investors raisefn introduces
             </li>
             <li>
@@ -112,7 +112,7 @@ export default function TermsPage() {
             <li>Advisor is a one-time $999 payment via Stripe &mdash; no recurring billing</li>
             <li><strong className="text-zinc-100">All purchases final.</strong> The $999 is non-refundable.</li>
             <li>
-              The 2% success fee on raisefn-introduced capital applies regardless of
+              The 3% success fee on raisefn-introduced capital applies regardless of
               whether the engagement is later ended (per the{" "}
               <a
                 href="/legal/engagement"

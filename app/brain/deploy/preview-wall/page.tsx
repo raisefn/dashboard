@@ -56,7 +56,7 @@ function PreviewInner() {
 
             <div className="upgrade-card-tier upgrade-card-tier--advisor">
               <div className="upgrade-card-tier-name">Advisor</div>
-              <div className="upgrade-card-tier-price">$999 once + 2% on raised capital</div>
+              <div className="upgrade-card-tier-price">$999 once + 3% on raised capital</div>
               <div className="upgrade-card-tier-pitch">
                 Everything in Pro, plus raise(fn) Team in the loop.
               </div>
@@ -73,7 +73,7 @@ function PreviewInner() {
                 See Advisor — $999
               </button>
               <div className="upgrade-card-tier-foot">
-                2% success fee on capital from raisefn-introduced investors.{" "}
+                3% success fee on capital from raisefn-introduced investors.{" "}
                 <a href="/legal/engagement">Full engagement letter</a>.
               </div>
             </div>

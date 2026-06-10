@@ -3,7 +3,7 @@ import Link from "next/link";
 export const metadata = {
   title: "Advisor Engagement | raise(fn)",
   description:
-    "raise(fn) Advisor engagement terms — $999 one-time + 2% success fee on raisefn-introduced capital.",
+    "raise(fn) Advisor engagement terms — $999 one-time + 3% success fee on raisefn-introduced capital.",
 };
 
 export default function EngagementPage() {
@@ -52,7 +52,7 @@ export default function EngagementPage() {
               Stripe at checkout
             </li>
             <li>
-              <span className="text-white font-medium">2% of any capital committed</span>{" "}
+              <span className="text-white font-medium">3% of any capital committed</span>{" "}
               by an investor we introduce
             </li>
             <li>
@@ -77,7 +77,7 @@ export default function EngagementPage() {
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            When the 2% is owed
+            When the 3% is owed
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
@@ -94,7 +94,7 @@ export default function EngagementPage() {
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            What the 2% applies to
+            What the 3% applies to
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
@@ -115,7 +115,7 @@ export default function EngagementPage() {
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
               If we end the active engagement and an investor we introduced commits
-              capital within 12 months, the 2% still applies
+              capital within 12 months, the 3% still applies
             </li>
             <li>
               This protects us from a founder ending the engagement right before closing
