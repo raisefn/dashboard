@@ -330,30 +330,34 @@ function renderMatchesPanel(
     // Inject the button on its own line AT THE END of the paragraph
     // containing the name. The markdown formatter only emits <br> tags
     // (no <p> wrapping), so paragraphs are runs of inline content
-    // separated by <br>s. Find the next <br> after the matched text and
-    // insert the (block-level) button div immediately before it. If
-    // there's no next <br>, the button goes at the end of the containing
-    // block element.
+    // separated by <br>s. Names are often wrapped in <strong>/<em>/<a>
+    // by the formatter, so we walk UP through ancestors (stopping at the
+    // contentEl boundary) looking for the next <br> in document flow.
     const button = createInlineBriefButton(bestEntry.investor, session, impersonating);
     let nextBr: Element | null = null;
-    let cursor: Node | null = afterNode.nextSibling;
-    while (cursor) {
-      if (
-        cursor.nodeType === Node.ELEMENT_NODE &&
-        (cursor as Element).tagName === "BR"
-      ) {
-        nextBr = cursor as Element;
-        break;
+    let walkFrom: Node | null = afterNode;
+    while (walkFrom && walkFrom !== contentEl) {
+      let cursor: Node | null = walkFrom.nextSibling;
+      while (cursor) {
+        if (
+          cursor.nodeType === Node.ELEMENT_NODE &&
+          (cursor as Element).tagName === "BR"
+        ) {
+          nextBr = cursor as Element;
+          break;
+        }
+        cursor = cursor.nextSibling;
       }
-      cursor = cursor.nextSibling;
+      if (nextBr) break;
+      walkFrom = walkFrom.parentNode;
     }
     if (nextBr && nextBr.parentNode) {
       nextBr.parentNode.insertBefore(button, nextBr);
     } else {
-      const block = (textNode.parentElement?.closest(
-        "li, p, h1, h2, h3, h4, h5, blockquote, div",
-      ) || textNode.parentElement) as HTMLElement | null;
-      if (block) block.appendChild(button);
+      // No <br> found anywhere downstream — name is in the last line of
+      // the message. Append button to contentEl so it lands right under
+      // the line, before the View-more summary that comes after.
+      contentEl.appendChild(button);
     }
 
     used.add(bestEntry.key);
