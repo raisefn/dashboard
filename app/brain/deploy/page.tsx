@@ -73,6 +73,84 @@ type MatchInvestor = {
   linkedin?: string | null;
 };
 
+function createInlineBriefButton(
+  inv: MatchInvestor,
+  session: { access_token: string; user: { email?: string | null } },
+  impersonating: string,
+): HTMLSpanElement {
+  const wrap = document.createElement("span");
+  wrap.className = "inline-flex items-baseline gap-1 ml-1.5 whitespace-nowrap";
+
+  const btn = document.createElement("button");
+  btn.className =
+    "inline-brief-btn text-[11px] rounded-md bg-teal-600 hover:bg-teal-500 text-white px-2 py-0.5 font-medium align-baseline";
+  btn.textContent = "+ brief";
+
+  const status = document.createElement("span");
+  status.className = "text-[11px] text-zinc-500";
+
+  wrap.appendChild(btn);
+  wrap.appendChild(status);
+
+  let briefUrl: string | null = null;
+  btn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    // After success, subsequent clicks just open the brief
+    if (briefUrl) {
+      window.open(briefUrl, "_blank", "noopener");
+      return;
+    }
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = "generating…";
+    status.textContent = "";
+    try {
+      const firmName =
+        (inv.firm_name as string | null | undefined) ||
+        (inv.kind === "firm" ? (inv.name as string | undefined) : null) ||
+        null;
+      const founderEmail = (session.user.email || "").toLowerCase();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch("/v1/brain/generate-brief", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          founder_email: impersonating || founderEmail,
+          investor_inline: {
+            name: inv.name || "",
+            firm: firmName,
+            title: inv.title || null,
+            thesis: inv.thesis || inv.description || null,
+            website: inv.openvc_url || null,
+          },
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Brief failed (${res.status})`);
+      }
+      const briefData = await res.json();
+      briefUrl = briefData.url;
+      window.open(briefData.url, "_blank", "noopener");
+      btn.textContent = "✓ open brief";
+      btn.className =
+        "inline-brief-btn text-[11px] rounded-md border border-teal-700/60 hover:border-teal-500 text-teal-300 px-2 py-0.5 font-medium align-baseline";
+      btn.disabled = false;
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = original;
+      status.textContent = ` — ${err instanceof Error ? err.message : "failed"}`;
+      status.className = "text-[11px] text-red-400";
+    }
+  });
+
+  return wrap;
+}
+
 function renderMatchesPanel(
   data: {
     individuals_to_target?: Array<Record<string, unknown>>;
@@ -89,147 +167,105 @@ function renderMatchesPanel(
   const ordered = [...individuals, ...firms];
   if (ordered.length === 0) return;
 
-  const panel = document.createElement("div");
-  panel.className =
-    "mt-4 mb-1 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 space-y-2";
-
-  const header = document.createElement("div");
-  header.className = "flex items-baseline justify-between mb-1";
-  header.innerHTML = `
-    <div class="text-sm font-medium text-zinc-200">${ordered.length} match${ordered.length === 1 ? "" : "es"} — generate a brief on any of them</div>
-    <a href="/brain/matches" class="text-[11px] text-zinc-500 hover:text-zinc-300">View all →</a>
-  `;
-  panel.appendChild(header);
-
-  const cardsWrap = document.createElement("div");
-  cardsWrap.className = "space-y-1.5";
-  panel.appendChild(cardsWrap);
-
-  ordered.forEach((inv, idx) => {
-    const card = document.createElement("div");
-    card.className =
-      "rounded-lg border border-zinc-800 bg-zinc-950/60 hover:bg-zinc-900/70 transition-colors p-3";
-    const score =
-      typeof inv.score === "number" && typeof inv.score_max === "number" && inv.score_max
-        ? Math.round((inv.score / inv.score_max) * 100)
-        : null;
-    const firmLabel =
-      inv.firm_name && inv.kind === "individual"
-        ? `<span class="text-xs text-zinc-500">@ ${escapeHtml(inv.firm_name)}</span>`
-        : "";
-    const titleLabel = inv.title
-      ? `<span class="text-xs text-zinc-500">· ${escapeHtml(inv.title)}</span>`
-      : "";
-    const scoreBadge =
-      score !== null
-        ? `<span class="text-[10px] uppercase tracking-wide rounded bg-zinc-800 text-zinc-300 px-1.5 py-0.5">fit ${score}%</span>`
-        : "";
-    const kindBadge =
-      inv.kind === "firm"
-        ? `<span class="text-[10px] uppercase tracking-wide rounded bg-zinc-800 text-zinc-400 px-1.5 py-0.5">firm</span>`
-        : "";
-    const sourceLabel =
-      inv.data_source && inv.data_source !== "raisefn_network"
-        ? `<span class="text-[10px] text-zinc-600">via ${escapeHtml(inv.data_source)}</span>`
-        : "";
-    const thesisLine =
-      inv.thesis || inv.description
-        ? `<p class="text-[11px] text-zinc-400 mt-1 line-clamp-2">${escapeHtml(String(inv.thesis || inv.description))}</p>`
-        : "";
-    const facts: string[] = [];
-    const lo = fmtCheckSize(inv.check_size_min);
-    const hi = fmtCheckSize(inv.check_size_max);
-    if (lo || hi) facts.push(`check ${lo || "?"}–${hi || "?"}`);
-    if (Array.isArray(inv.focus_sectors) && inv.focus_sectors.length)
-      facts.push(`sectors ${inv.focus_sectors.slice(0, 3).join(", ")}`);
-    if (Array.isArray(inv.focus_stages) && inv.focus_stages.length)
-      facts.push(`stages ${inv.focus_stages.slice(0, 3).join(", ")}`);
-    if (inv.hq_location) facts.push(String(inv.hq_location));
-    const factsLine = facts.length
-      ? `<div class="flex flex-wrap gap-x-3 mt-1 text-[10px] text-zinc-500">${facts.map((f) => `<span>${escapeHtml(f)}</span>`).join("")}</div>`
-      : "";
-
-    card.innerHTML = `
-      <div class="flex items-start justify-between gap-3">
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-sm font-medium text-zinc-100">${escapeHtml(inv.name || "Unknown")}</span>
-            ${firmLabel}
-            ${titleLabel}
-            ${scoreBadge}
-            ${kindBadge}
-            ${sourceLabel}
-          </div>
-          ${thesisLine}
-          ${factsLine}
-        </div>
-        <div class="shrink-0">
-          <button
-            class="match-brief-btn text-xs rounded-md bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5"
-            data-idx="${idx}"
-          >Generate brief</button>
-        </div>
-      </div>
-      <div class="match-brief-status mt-1.5 text-[11px] text-zinc-400 hidden"></div>
-    `;
-    cardsWrap.appendChild(card);
-
-    const btn = card.querySelector(".match-brief-btn") as HTMLButtonElement;
-    const status = card.querySelector(".match-brief-status") as HTMLDivElement;
-    btn.addEventListener("click", async () => {
-      btn.disabled = true;
-      const originalLabel = btn.textContent || "Generate brief";
-      btn.textContent = "Generating…";
-      status.classList.add("hidden");
-      status.textContent = "";
-      try {
-        const firmName =
-          (inv.firm_name as string | null | undefined) ||
-          (inv.kind === "firm" ? (inv.name as string | undefined) : null) ||
-          null;
-        const founderEmail = (session.user.email || "").toLowerCase();
-        const headers: Record<string, string> = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        };
-        if (impersonating) headers["X-Impersonate"] = impersonating;
-        const res = await fetch("/v1/brain/generate-brief", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            founder_email: impersonating || founderEmail,
-            investor_inline: {
-              name: inv.name || "",
-              firm: firmName,
-              title: inv.title || null,
-              thesis: inv.thesis || inv.description || null,
-              website: inv.openvc_url || null,
-            },
-          }),
-        });
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error(body.detail || `Brief generation failed (${res.status})`);
-        }
-        const briefData = await res.json();
-        window.open(briefData.url, "_blank", "noopener");
-        btn.textContent = "✓ Brief ready";
-        btn.className =
-          "text-xs rounded-md border border-teal-700/60 text-teal-300 px-3 py-1.5";
-        status.innerHTML = `<a href="${escapeHtml(briefData.url)}" target="_blank" rel="noopener" class="text-teal-300 hover:text-teal-200 underline">Open brief</a> · briefs persist at <a href="/brain/matches" class="text-zinc-300 hover:text-zinc-100 underline">your matches page</a>.`;
-        status.classList.remove("hidden");
-      } catch (e) {
-        btn.disabled = false;
-        btn.textContent = originalLabel;
-        const msg = e instanceof Error ? e.message : "Brief generation failed.";
-        status.textContent = msg;
-        status.className = "match-brief-status mt-1.5 text-[11px] text-red-400";
-        status.classList.remove("hidden");
+  // Build a lookup of matchable names → investor. Both the investor's own
+  // name and the firm name (for firm-kind entries) get registered so that
+  // brain prose mentioning either resolves. Longest keys first so a
+  // 2-word name matches before a 1-word substring.
+  type MatchEntry = { key: string; investor: MatchInvestor };
+  const entries: MatchEntry[] = [];
+  ordered.forEach((inv) => {
+    if (inv.name) entries.push({ key: String(inv.name).toLowerCase().trim(), investor: inv });
+    if (inv.kind === "firm" && inv.firm_name) {
+      const fn = String(inv.firm_name).toLowerCase().trim();
+      if (!entries.some((e) => e.key === fn)) {
+        entries.push({ key: fn, investor: inv });
       }
-    });
+    }
   });
+  entries.sort((a, b) => b.key.length - a.key.length);
 
-  contentEl.parentElement?.appendChild(panel);
+  // Walk text nodes in the brain's rendered response and inject a small
+  // "+ brief" button immediately AFTER the first occurrence of each known
+  // investor name. Founder reads the brain's recommendation and acts
+  // inline — no scroll-down-and-hunt.
+  const used = new Set<string>();
+  const walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node) => {
+      const p = node.parentElement;
+      if (!p) return NodeFilter.FILTER_REJECT;
+      if (
+        p.tagName === "CODE" ||
+        p.tagName === "PRE" ||
+        p.closest(".inline-brief-btn")
+      ) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+  const textNodes: Text[] = [];
+  let n: Text | null;
+  while ((n = walker.nextNode() as Text | null)) textNodes.push(n);
+
+  const wordChar = /[a-z0-9]/i;
+  for (const textNode of textNodes) {
+    const text = textNode.textContent || "";
+    if (!text.trim()) continue;
+    const lower = text.toLowerCase();
+
+    // Find the EARLIEST match across all un-used investor keys in this node.
+    let bestIdx = -1;
+    let bestEntry: MatchEntry | null = null;
+    for (const entry of entries) {
+      if (used.has(entry.key)) continue;
+      const idx = lower.indexOf(entry.key);
+      if (idx === -1) continue;
+      const before = idx === 0 ? " " : text[idx - 1];
+      const after =
+        idx + entry.key.length >= text.length ? " " : text[idx + entry.key.length];
+      if (wordChar.test(before) || wordChar.test(after)) continue;
+      if (bestIdx === -1 || idx < bestIdx) {
+        bestIdx = idx;
+        bestEntry = entry;
+      }
+    }
+    if (bestIdx === -1 || !bestEntry) continue;
+
+    const matchedText = text.substring(bestIdx, bestIdx + bestEntry.key.length);
+    const beforeText = text.substring(0, bestIdx);
+    const afterText = text.substring(bestIdx + bestEntry.key.length);
+
+    const parent = textNode.parentNode;
+    if (!parent) continue;
+
+    const beforeNode = document.createTextNode(beforeText);
+    const matchedSpan = document.createElement("span");
+    matchedSpan.textContent = matchedText;
+    const afterNode = document.createTextNode(afterText);
+    const button = createInlineBriefButton(bestEntry.investor, session, impersonating);
+
+    parent.insertBefore(beforeNode, textNode);
+    parent.insertBefore(matchedSpan, textNode);
+    parent.insertBefore(button, textNode);
+    parent.insertBefore(afterNode, textNode);
+    parent.removeChild(textNode);
+
+    used.add(bestEntry.key);
+  }
+
+  // Small unobtrusive link to the full grid for the matches the brain
+  // didn't call out by name. NO giant card panel — that was the bad design.
+  const summary = document.createElement("div");
+  summary.className = "mt-3 text-[11px] text-zinc-500";
+  const remainder = Math.max(0, ordered.length - used.size);
+  if (used.size > 0 && remainder > 0) {
+    summary.innerHTML = `<a href="/brain/matches" class="hover:text-zinc-300 underline">View ${remainder} more match${remainder === 1 ? "" : "es"} →</a>`;
+  } else if (used.size === 0) {
+    summary.innerHTML = `<a href="/brain/matches" class="hover:text-zinc-300 underline">View all ${ordered.length} matches →</a>`;
+  } else {
+    summary.innerHTML = `<a href="/brain/matches" class="hover:text-zinc-300 underline">View all matches →</a>`;
+  }
+  contentEl.parentElement?.appendChild(summary);
 }
 
 function formatMarkdown(text: string): string {
