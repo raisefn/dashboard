@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import BrainTabs from "@/components/brain-tabs";
 import { supabase } from "@/lib/supabase-browser";
+import { wallCardLeadin } from "@/lib/upgrade-card-copy";
 import type { Session } from "@supabase/supabase-js";
 
 const ADMIN_EMAILS = ["justin@raisefn.com", "justinpetsche@gmail.com"];
@@ -1606,24 +1607,11 @@ function BrainDeployInner() {
         if (isFreeVerified) {
             // Pricing v3 (2026-06-10) — equal-twin tiles. Pro (SaaS) and
             // Advisor (concierge) presented side-by-side; user picks
-            // based on what they need. Leadin reflects which of the
-            // three lifetime caps fired (messages / briefs / matches).
-            //
-            // The `reason` field comes from the brain SSE limit_reached
-            // event. Backend emits:
-            //   - "monthly" / "daily" / "hourly" / "lifetime" for messages
-            //   - "briefs" for the 10-brief lifetime cap
-            //   - "matches" for the 30-unique-investors lifetime cap
-            const leadin = (() => {
-              if (lr.reason === "briefs") {
-                return `You've generated ${lr.cap ?? 10} briefs on the free plan. That's the lifetime cap. To keep building briefs, pick a path:`;
-              }
-              if (lr.reason === "matches") {
-                return `You've explored ${lr.cap ?? 30} unique investors on the free plan. That's the lifetime cap. To keep matching, pick a path:`;
-              }
-              // messages — covers "lifetime", "monthly", "daily", "hourly"
-              return `You've sent ${lr.cap ?? 30} messages on the free plan. That's the lifetime cap. To keep going, pick a path:`;
-            })();
+            // based on what they need. Leadin reflects which lifetime cap
+            // fired (messages / briefs / matches). Copy lives in
+            // lib/upgrade-card-copy.ts so this card + the design preview
+            // route can't drift.
+            const leadin = wallCardLeadin(lr.reason);
 
             card.innerHTML = `
               <div class="upgrade-card-leadin">${leadin}</div>
