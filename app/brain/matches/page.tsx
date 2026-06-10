@@ -204,14 +204,21 @@ export default function MatchesPage() {
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="flex items-baseline justify-between mb-4 gap-3 flex-wrap">
-          <h1 className="text-xl font-semibold text-zinc-100">Your matches</h1>
+      <div className="max-w-4xl mx-auto px-6 py-10">
+        <div className="flex items-baseline justify-between mb-6 gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-semibold text-zinc-100 tracking-tight">
+              Your matches
+            </h1>
+            <p className="text-sm text-zinc-500 mt-1">
+              Generate a brief on any investor — one click, no form.
+            </p>
+          </div>
           {batches.length > 1 ? (
             <select
               value={activeBatchId || ""}
               onChange={(e) => setActiveBatchId(e.target.value)}
-              className="rounded-md bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 px-2 py-1.5 focus:border-zinc-600 outline-none"
+              className="rounded-md bg-zinc-900 border border-zinc-800 text-sm text-zinc-300 px-3 py-2 focus:border-zinc-600 outline-none"
             >
               {batches.map((b, idx) => (
                 <option key={b.id} value={b.id}>
@@ -243,85 +250,79 @@ export default function MatchesPage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {ordered.map((inv, idx) => {
               const existing = findExistingBrief(inv.name);
               const score = inv.score && inv.score_max ? Math.round((inv.score / inv.score_max) * 100) : null;
               const key = rowKey(inv, idx);
               const isGenerating = generatingKey === key;
               const errMsg = rowError?.key === key ? rowError.msg : null;
+              const subtitleParts: string[] = [];
+              if (inv.kind === "individual" && inv.firm_name) subtitleParts.push(inv.firm_name);
+              if (inv.title) subtitleParts.push(inv.title);
+              const facts: string[] = [];
+              if (inv.focus_stages && inv.focus_stages.length > 0) {
+                facts.push(inv.focus_stages.slice(0, 2).join(", "));
+              }
+              if (inv.check_size_min || inv.check_size_max) {
+                facts.push(`${fmtMoney(inv.check_size_min) || "?"}–${fmtMoney(inv.check_size_max) || "?"}`);
+              }
+              if (inv.focus_sectors && inv.focus_sectors.length > 0) {
+                facts.push(inv.focus_sectors.slice(0, 2).join(" / "));
+              }
               return (
                 <div
                   key={key}
-                  className="rounded-lg border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900/80 transition-colors p-4"
+                  className="rounded-lg border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 transition-colors px-5 py-4"
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between gap-6">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium text-zinc-100">{inv.name || "Unknown"}</span>
-                        {inv.firm_name && inv.kind === "individual" && (
-                          <span className="text-xs text-zinc-500">@ {inv.firm_name}</span>
-                        )}
-                        {inv.title && (
-                          <span className="text-xs text-zinc-500">· {inv.title}</span>
-                        )}
-                        {score !== null && (
-                          <span className="text-[11px] uppercase tracking-wide rounded bg-zinc-800 text-zinc-300 px-1.5 py-0.5">
-                            fit {score}%
+                      <div className="flex items-baseline gap-2 flex-wrap">
+                        <h3 className="text-base font-semibold text-zinc-100">
+                          {inv.name || "Unknown"}
+                        </h3>
+                        {subtitleParts.length > 0 && (
+                          <span className="text-sm text-zinc-500">
+                            {subtitleParts.join(" · ")}
                           </span>
-                        )}
-                        {inv.kind === "firm" && (
-                          <span className="text-[11px] uppercase tracking-wide rounded bg-zinc-800 text-zinc-400 px-1.5 py-0.5">
-                            firm
-                          </span>
-                        )}
-                        {inv.data_source && inv.data_source !== "raisefn_network" && (
-                          <span className="text-[11px] text-zinc-600">via {inv.data_source}</span>
                         )}
                       </div>
                       {(inv.thesis || inv.description) && (
-                        <p className="text-xs text-zinc-400 mt-1.5 line-clamp-2">{inv.thesis || inv.description}</p>
+                        <p className="text-sm text-zinc-400 mt-1.5 leading-relaxed line-clamp-2">
+                          {inv.thesis || inv.description}
+                        </p>
                       )}
-                      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[11px] text-zinc-500">
-                        {(inv.check_size_min || inv.check_size_max) && (
-                          <span>
-                            check {fmtMoney(inv.check_size_min) || "?"}–{fmtMoney(inv.check_size_max) || "?"}
-                          </span>
-                        )}
-                        {inv.focus_sectors && inv.focus_sectors.length > 0 && (
-                          <span>sectors {inv.focus_sectors.slice(0, 3).join(", ")}</span>
-                        )}
-                        {inv.focus_stages && inv.focus_stages.length > 0 && (
-                          <span>stages {inv.focus_stages.slice(0, 3).join(", ")}</span>
-                        )}
-                        {inv.hq_location && <span>{inv.hq_location}</span>}
-                      </div>
-                      {inv.match_reasons && inv.match_reasons.length > 0 && (
-                        <ul className="text-[11px] text-zinc-500 mt-2 space-y-0.5">
-                          {inv.match_reasons.slice(0, 2).map((r, i) => (
-                            <li key={i}>· {r}</li>
+                      {facts.length > 0 && (
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-zinc-500">
+                          {facts.map((f, i) => (
+                            <span key={i}>{f}</span>
                           ))}
-                        </ul>
+                        </div>
                       )}
                       {errMsg && (
-                        <p className="text-[11px] text-red-400 mt-2">{errMsg}</p>
+                        <p className="text-xs text-red-400 mt-2">{errMsg}</p>
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
+                      {score !== null && (
+                        <span className="text-[10px] uppercase tracking-wide font-medium text-zinc-500">
+                          fit {score}%
+                        </span>
+                      )}
                       {existing ? (
                         <a
                           href={`/brief/${existing.token}`}
                           target="_blank"
                           rel="noopener"
-                          className="text-xs rounded-md border border-teal-700/60 hover:border-teal-500 text-teal-300 px-3 py-1.5"
+                          className="text-sm rounded-md border border-teal-700/60 hover:border-teal-500 text-teal-300 px-4 py-2 font-medium"
                         >
-                          View brief
+                          View brief →
                         </a>
                       ) : (
                         <button
                           onClick={() => generateForInvestor(inv, idx)}
                           disabled={isGenerating}
-                          className="text-xs rounded-md bg-teal-600 hover:bg-teal-500 disabled:opacity-60 disabled:cursor-wait text-white px-3 py-1.5"
+                          className="text-sm rounded-md bg-teal-600 hover:bg-teal-500 disabled:opacity-60 disabled:cursor-wait text-white px-4 py-2 font-medium"
                         >
                           {isGenerating ? "Generating…" : "Generate brief"}
                         </button>
@@ -345,16 +346,28 @@ export default function MatchesPage() {
         )}
 
         {briefs.length > 0 && (
-          <section className="mt-10">
-            <h2 className="text-sm font-medium text-zinc-300 mb-2">Briefs you&apos;ve generated</h2>
-            <ul className="space-y-1.5">
+          <section className="mt-12 pt-8 border-t border-zinc-900">
+            <h2 className="text-sm font-semibold text-zinc-300 mb-3">
+              Briefs you&apos;ve generated
+            </h2>
+            <ul className="space-y-2">
               {briefs.map((b) => (
-                <li key={b.token} className="flex items-center justify-between text-xs text-zinc-400 border-b border-zinc-900 pb-1.5">
+                <li
+                  key={b.token}
+                  className="flex items-center justify-between text-sm text-zinc-300 py-2"
+                >
                   <span>{b.investor_full_name || "(unnamed)"}</span>
-                  <span className="flex items-center gap-3">
-                    <span className="text-zinc-600">{b.created_at ? new Date(b.created_at).toLocaleDateString() : ""}</span>
-                    <a href={`/brief/${b.token}`} target="_blank" rel="noopener" className="text-teal-300 hover:text-teal-200">
-                      Open
+                  <span className="flex items-center gap-4 text-xs">
+                    <span className="text-zinc-600">
+                      {b.created_at ? new Date(b.created_at).toLocaleDateString() : ""}
+                    </span>
+                    <a
+                      href={`/brief/${b.token}`}
+                      target="_blank"
+                      rel="noopener"
+                      className="text-teal-300 hover:text-teal-200 font-medium"
+                    >
+                      Open →
                     </a>
                   </span>
                 </li>
