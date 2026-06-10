@@ -310,6 +310,21 @@ function renderMatchesPanel(
     }
     if (bestIdx === -1 || !bestEntry) continue;
 
+    // Negative-context skip — the brain frequently mentions investors in
+    // dismissive contexts ("DCG, Tribe Capital — all skipped", "not worth
+    // chasing X", "pass on Y"). Injecting a "Generate brief for DCG"
+    // button right next to "all skipped" makes the product look broken.
+    // Scan a ~60-char window around the match for dismissive keywords;
+    // if present, mark the name as used and move on without the button.
+    const winStart = Math.max(0, bestIdx - 60);
+    const winEnd = Math.min(text.length, bestIdx + bestEntry.key.length + 60);
+    const win = text.slice(winStart, winEnd).toLowerCase();
+    const NEGATIVE_CONTEXT = /\b(skip|skipped|skipping|ignore|ignored|pass on|passed on|rejected|not worth|don'?t bother)\b/;
+    if (NEGATIVE_CONTEXT.test(win)) {
+      used.add(bestEntry.key);
+      continue;
+    }
+
     // Skip table cells — the matches page already grids those out cleanly
     // and inline-button injection inside a <td> looks broken.
     if (textNode.parentElement?.closest("table")) {
