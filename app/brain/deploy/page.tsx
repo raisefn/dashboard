@@ -74,21 +74,70 @@ type MatchInvestor = {
   linkedin?: string | null;
 };
 
+// Inline styles throughout. Tailwind purges classes that only appear in
+// dynamically-built strings (.className = "ml-3 ..."), which is why earlier
+// attempts had buttons rendering flush against the name. Inline styles
+// guarantee what ships is what was designed.
+const BRIEF_BTN_BASE_STYLE = [
+  "display: inline-flex",
+  "align-items: center",
+  "gap: 6px",
+  "background: #14b8a6",
+  "color: #ffffff",
+  "font-family: inherit",
+  "font-size: 13px",
+  "font-weight: 500",
+  "line-height: 1.2",
+  "padding: 7px 14px",
+  "border-radius: 6px",
+  "border: none",
+  "cursor: pointer",
+  "box-shadow: 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12)",
+  "transition: background-color 0.15s ease",
+  "white-space: nowrap",
+].join("; ");
+
+const BRIEF_BTN_DONE_STYLE = [
+  "display: inline-flex",
+  "align-items: center",
+  "gap: 6px",
+  "background: transparent",
+  "color: #5eead4",
+  "font-family: inherit",
+  "font-size: 13px",
+  "font-weight: 500",
+  "line-height: 1.2",
+  "padding: 7px 14px",
+  "border-radius: 6px",
+  "border: 1px solid rgba(45, 212, 191, 0.45)",
+  "cursor: pointer",
+  "transition: border-color 0.15s ease",
+  "white-space: nowrap",
+].join("; ");
+
 function createInlineBriefButton(
   inv: MatchInvestor,
   session: { access_token: string; user: { email?: string | null } },
   impersonating: string,
-): HTMLSpanElement {
-  const wrap = document.createElement("span");
-  wrap.className = "inline-flex items-center gap-2 ml-3 whitespace-nowrap align-middle";
+): HTMLDivElement {
+  // Block wrapper — places the button on its OWN line under the named
+  // investor with proper breathing room. Per Justin's Option B pick.
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "margin: 10px 0 12px 24px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;";
 
   const btn = document.createElement("button");
-  btn.className =
-    "inline-brief-btn text-xs rounded-md bg-teal-600 hover:bg-teal-500 text-white px-3 py-1 font-medium align-middle shadow-sm";
-  btn.textContent = "Generate brief →";
+  btn.style.cssText = BRIEF_BTN_BASE_STYLE;
+  const nameLabel = inv.name ? ` for ${inv.name}` : "";
+  btn.innerHTML = `<span>Generate brief${escapeHtml(nameLabel)}</span><span style="opacity: 0.85;">→</span>`;
+  btn.onmouseenter = () => {
+    if (!btn.disabled) btn.style.backgroundColor = "#0d9488";
+  };
+  btn.onmouseleave = () => {
+    if (!btn.disabled) btn.style.backgroundColor = "#14b8a6";
+  };
 
   const status = document.createElement("span");
-  status.className = "text-xs text-zinc-500";
+  status.style.cssText = "font-size: 12px; color: #71717a;";
 
   wrap.appendChild(btn);
   wrap.appendChild(status);
@@ -96,15 +145,16 @@ function createInlineBriefButton(
   let briefUrl: string | null = null;
   btn.addEventListener("click", async (e) => {
     e.preventDefault();
-    // After success, subsequent clicks just open the brief
     if (briefUrl) {
       window.open(briefUrl, "_blank", "noopener");
       return;
     }
     btn.disabled = true;
-    const original = btn.textContent;
-    btn.textContent = "generating…";
+    btn.style.opacity = "0.7";
+    btn.style.cursor = "wait";
+    btn.innerHTML = `<span>Generating brief${escapeHtml(nameLabel)}…</span>`;
     status.textContent = "";
+    status.style.color = "#71717a";
     try {
       const firmName =
         (inv.firm_name as string | null | undefined) ||
@@ -137,15 +187,22 @@ function createInlineBriefButton(
       const briefData = await res.json();
       briefUrl = briefData.url;
       window.open(briefData.url, "_blank", "noopener");
-      btn.textContent = "✓ Open brief";
-      btn.className =
-        "inline-brief-btn text-xs rounded-md border border-teal-700/60 hover:border-teal-500 text-teal-300 px-3 py-1 font-medium align-middle";
+      btn.style.cssText = BRIEF_BTN_DONE_STYLE;
+      btn.innerHTML = `<span>✓ Open brief${escapeHtml(nameLabel)}</span>`;
       btn.disabled = false;
+      btn.onmouseenter = () => {
+        btn.style.borderColor = "rgba(45, 212, 191, 0.75)";
+      };
+      btn.onmouseleave = () => {
+        btn.style.borderColor = "rgba(45, 212, 191, 0.45)";
+      };
     } catch (err) {
       btn.disabled = false;
-      btn.textContent = original;
+      btn.style.opacity = "1";
+      btn.style.cursor = "pointer";
+      btn.innerHTML = `<span>Generate brief${escapeHtml(nameLabel)}</span><span style="opacity: 0.85;">→</span>`;
       status.textContent = ` — ${err instanceof Error ? err.message : "failed"}`;
-      status.className = "text-xs text-red-400";
+      status.style.color = "#f87171";
     }
   });
 
@@ -245,6 +302,15 @@ function renderMatchesPanel(
     }
     if (bestIdx === -1 || !bestEntry) continue;
 
+    // Find the closest BLOCK element so the button can land on its own
+    // line under the named investor (Option B). For numbered lists this
+    // is the <li>; for paragraph mentions this is the <p>. Text nodes get
+    // a subtle highlight to mark which name the button is for.
+    const blockContainer = (textNode.parentElement?.closest(
+      "li, p, h1, h2, h3, h4, h5, blockquote, div",
+    ) || textNode.parentElement) as HTMLElement | null;
+    if (!blockContainer) continue;
+
     const matchedText = text.substring(bestIdx, bestIdx + bestEntry.key.length);
     const beforeText = text.substring(0, bestIdx);
     const afterText = text.substring(bestIdx + bestEntry.key.length);
@@ -252,17 +318,21 @@ function renderMatchesPanel(
     const parent = textNode.parentNode;
     if (!parent) continue;
 
+    // Leave the text exactly as the brain wrote it. No inline button.
     const beforeNode = document.createTextNode(beforeText);
     const matchedSpan = document.createElement("span");
     matchedSpan.textContent = matchedText;
     const afterNode = document.createTextNode(afterText);
-    const button = createInlineBriefButton(bestEntry.investor, session, impersonating);
 
     parent.insertBefore(beforeNode, textNode);
     parent.insertBefore(matchedSpan, textNode);
-    parent.insertBefore(button, textNode);
     parent.insertBefore(afterNode, textNode);
     parent.removeChild(textNode);
+
+    // Append the button as a block-level child of the containing element
+    // so it shows up on its own line beneath the name.
+    const button = createInlineBriefButton(bestEntry.investor, session, impersonating);
+    blockContainer.appendChild(button);
 
     used.add(bestEntry.key);
   }
@@ -282,8 +352,34 @@ function renderMatchesPanel(
   }
 
   const summary = document.createElement("div");
-  summary.className = "mt-5 flex";
-  summary.innerHTML = `<a href="/brain/matches" class="inline-flex items-center gap-1.5 rounded-md border border-zinc-700 hover:border-zinc-500 bg-zinc-900/40 hover:bg-zinc-900 text-zinc-200 hover:text-zinc-100 px-4 py-2 text-sm font-medium transition-colors">${label} <span class="text-zinc-500">→</span></a>`;
+  summary.style.cssText = "margin-top: 20px;";
+  const link = document.createElement("a");
+  link.href = "/brain/matches";
+  link.style.cssText = [
+    "display: inline-flex",
+    "align-items: center",
+    "gap: 8px",
+    "background: rgba(24, 24, 27, 0.6)",
+    "border: 1px solid #3f3f46",
+    "color: #e4e4e7",
+    "font-family: inherit",
+    "font-size: 13px",
+    "font-weight: 500",
+    "padding: 9px 16px",
+    "border-radius: 6px",
+    "text-decoration: none",
+    "transition: border-color 0.15s ease, background-color 0.15s ease",
+  ].join("; ");
+  link.innerHTML = `<span>${escapeHtml(label)}</span><span style="color: #71717a;">→</span>`;
+  link.onmouseenter = () => {
+    link.style.borderColor = "#52525b";
+    link.style.backgroundColor = "rgba(39, 39, 42, 0.8)";
+  };
+  link.onmouseleave = () => {
+    link.style.borderColor = "#3f3f46";
+    link.style.backgroundColor = "rgba(24, 24, 27, 0.6)";
+  };
+  summary.appendChild(link);
   contentEl.parentElement?.appendChild(summary);
 }
 
