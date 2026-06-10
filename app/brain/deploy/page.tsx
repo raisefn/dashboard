@@ -1536,33 +1536,103 @@ function BrainDeployInner() {
             : true;
           const lc = lifetimeCountRef.current ?? 0;
           if (tier === "free" && !dismissed && lc >= 12) {
+            // All inline styles — Tailwind classes get purged when assigned
+            // via dynamic className strings, which was rendering this card
+            // as raw unstyled text.
             const card = document.createElement("div");
-            card.className =
-              "mt-4 rounded-xl border border-orange-700/40 bg-gradient-to-br from-orange-950/30 to-zinc-900/40 p-5";
-            card.innerHTML = `
-              <div class="text-sm font-semibold text-orange-200 mb-1">Want raise(fn) Team in the loop?</div>
-              <div class="text-xs text-zinc-300 mb-4 leading-relaxed">
-                You've used raise(fn) for ${lc} messages now. The brain handles your prep and pipeline. Advisor adds the human side: warm intros to portfolio-fit investors, deck review by raise(fn) Team, and meeting prep when it counts.
-                <br/><br/>
-                $999 one-time, lifetime access. 2% success fee on capital raised through raise(fn)-introduced investors. <a href="/legal/engagement" class="text-orange-300 underline">Full terms</a>.
-              </div>
-              <div class="flex gap-2">
-                <button class="upgrade-card-soft-cta rounded-md bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold px-4 py-2 transition-colors">See Advisor</button>
-                <button class="upgrade-card-soft-dismiss rounded-md border border-zinc-700 hover:border-zinc-600 text-zinc-300 text-xs font-medium px-4 py-2 transition-colors">Not now</button>
-              </div>
-            `;
+            card.style.cssText = [
+              "margin-top: 20px",
+              "padding: 22px 24px",
+              "border-radius: 14px",
+              "border: 1px solid rgba(194, 65, 12, 0.4)",
+              "background: linear-gradient(135deg, rgba(124, 45, 18, 0.32) 0%, rgba(24, 24, 27, 0.55) 100%)",
+              "box-shadow: 0 8px 24px -8px rgba(124, 45, 18, 0.35)",
+            ].join("; ");
+
+            const title = document.createElement("div");
+            title.style.cssText = [
+              "font-size: 15px",
+              "font-weight: 600",
+              "color: #fed7aa",
+              "margin-bottom: 6px",
+              "letter-spacing: -0.005em",
+            ].join("; ");
+            title.textContent = "Want raise(fn) Team in the loop?";
+
+            const body = document.createElement("div");
+            body.style.cssText = [
+              "font-size: 13px",
+              "color: #d4d4d8",
+              "line-height: 1.6",
+              "margin-bottom: 16px",
+            ].join("; ");
+            body.innerHTML = `You've used raise(fn) for ${lc} messages now. The brain handles your prep and pipeline. Advisor adds the human side: warm intros to portfolio-fit investors, deck review by raise(fn) Team, and meeting prep when it counts.<br><br><strong style="color: #f4f4f5; font-weight: 600;">$999 one-time, lifetime access.</strong> 2% success fee on capital raised through raise(fn)-introduced investors. <a href="/legal/engagement" style="color: #fdba74; text-decoration: underline;">Full terms</a>.`;
+
+            const buttonRow = document.createElement("div");
+            buttonRow.style.cssText = "display: flex; gap: 10px; align-items: center;";
+
+            const ctaBtn = document.createElement("button");
+            ctaBtn.style.cssText = [
+              "display: inline-flex",
+              "align-items: center",
+              "gap: 6px",
+              "padding: 9px 18px",
+              "border-radius: 8px",
+              "border: none",
+              "background: #ea580c",
+              "color: #ffffff",
+              "font-family: inherit",
+              "font-size: 13px",
+              "font-weight: 600",
+              "cursor: pointer",
+              "box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12)",
+              "transition: background-color 0.15s ease",
+            ].join("; ");
+            ctaBtn.textContent = "See Advisor →";
+            ctaBtn.onmouseenter = () => { ctaBtn.style.background = "#c2410c"; };
+            ctaBtn.onmouseleave = () => { ctaBtn.style.background = "#ea580c"; };
+
+            const dismissBtn = document.createElement("button");
+            dismissBtn.style.cssText = [
+              "display: inline-flex",
+              "align-items: center",
+              "padding: 8px 16px",
+              "border-radius: 8px",
+              "border: 1px solid #3f3f46",
+              "background: transparent",
+              "color: #a1a1aa",
+              "font-family: inherit",
+              "font-size: 13px",
+              "font-weight: 500",
+              "cursor: pointer",
+              "transition: border-color 0.15s ease, color 0.15s ease",
+            ].join("; ");
+            dismissBtn.textContent = "Not now";
+            dismissBtn.onmouseenter = () => {
+              dismissBtn.style.borderColor = "#52525b";
+              dismissBtn.style.color = "#d4d4d8";
+            };
+            dismissBtn.onmouseleave = () => {
+              dismissBtn.style.borderColor = "#3f3f46";
+              dismissBtn.style.color = "#a1a1aa";
+            };
+
+            buttonRow.appendChild(ctaBtn);
+            buttonRow.appendChild(dismissBtn);
+            card.appendChild(title);
+            card.appendChild(body);
+            card.appendChild(buttonRow);
             contentEl.parentElement?.appendChild(card);
-            const ctaBtn = card.querySelector(".upgrade-card-soft-cta") as HTMLButtonElement | null;
-            const dismissBtn = card.querySelector(".upgrade-card-soft-dismiss") as HTMLButtonElement | null;
-            ctaBtn?.addEventListener("click", () => {
+
+            ctaBtn.addEventListener("click", () => {
               try { localStorage.setItem("raisefn_upgrade_card_dismissed_v1", "1"); } catch { /* ignore */ }
               router.push("/pricing");
             });
-            dismissBtn?.addEventListener("click", () => {
+            dismissBtn.addEventListener("click", () => {
               try { localStorage.setItem("raisefn_upgrade_card_dismissed_v1", "1"); } catch { /* ignore */ }
               card.style.opacity = "0";
-              setTimeout(() => card.remove(), 200);
               card.style.transition = "opacity 200ms";
+              setTimeout(() => card.remove(), 200);
             });
           }
         } catch { /* defensive — card is best-effort */ }
