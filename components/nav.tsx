@@ -59,6 +59,20 @@ export default function Nav() {
     return null;
   }
 
+  // Brain product surfaces — chat, matches, briefs — are the founder's
+  // working environment. They render their own product-style top bar
+  // (logo + tabs + account) so we don't want the marketing nav on top.
+  if (
+    pathname === "/brain/deploy" ||
+    pathname.startsWith("/brain/deploy/") ||
+    pathname === "/brain/matches" ||
+    pathname.startsWith("/brain/matches/") ||
+    pathname === "/brain/briefs" ||
+    pathname.startsWith("/brain/briefs/")
+  ) {
+    return null;
+  }
+
   // Upgrade pill: show on /brain pages when a non-Advisor user is signed
   // in. Reads from the localStorage mirror written by the chat page's
   // usage SSE event handler.

@@ -2187,27 +2187,7 @@ function BrainDeployInner() {
         </div>
       )}
 
-      {/* Header */}
-      <header>
-        <nav>
-          <Link href="/" className="brain-logo" style={{ textDecoration: "none" }}>
-            <span className="raise">raise</span>
-            <span className="fn">(fn)</span>
-          </Link>
-          <div className="nav-right">
-            {userTier !== "free" ? (
-              <span className="nav-badge" title="Lifetime Advisor — no recurring bill">
-                Lifetime Advisor
-              </span>
-            ) : (
-              <a href="/pricing" className="nav-link">Pricing</a>
-            )}
-            <span className="user-name">{displayName}</span>
-            <div className="key-dot" />
-            <button className="sign-out" onClick={handleSignOut}>Sign out</button>
-          </div>
-        </nav>
-      </header>
+      {/* Unified product top bar — logo + tabs + account */}
       <BrainTabs />
 
       {/* Admin impersonation bar */}
