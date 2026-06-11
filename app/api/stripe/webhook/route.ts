@@ -156,6 +156,38 @@ export async function POST(req: Request) {
     }
   }
 
+  // Pricing v4 (2026-06-11): auto-cancel Advisor monthly subscriptions
+  // after 3 billing cycles. The engagement letter is a 3-month engagement;
+  // without this hook the subscription would bill indefinitely until the
+  // founder emails to stop. cancel_at fires when reached → Stripe
+  // automatically transitions to subscription.deleted, which is handled
+  // below and flips tier to 'free'.
+  //
+  // Math: current_period_start + 90 days lands AFTER invoice 3 (which
+  // fires at day 60) and BEFORE invoice 4 (which would fire at day 90).
+  // Slight calendar-month drift is acceptable.
+  //
+  // Pro subscriptions are NOT auto-cancelled — they bill until founder
+  // cancels via Stripe portal or via app.
+  if (event.type === "customer.subscription.created") {
+    const sub = event.data.object as Stripe.Subscription;
+    if (
+      sub.metadata?.tier === "advisor" &&
+      sub.metadata?.advisor_billing === "monthly" &&
+      !sub.cancel_at
+    ) {
+      try {
+        const cancelAt = sub.current_period_start + 90 * 86400;
+        await stripe.subscriptions.update(sub.id, { cancel_at: cancelAt });
+        console.log(
+          `Advisor monthly auto-cancel scheduled for sub ${sub.id} at ${new Date(cancelAt * 1000).toISOString()}`
+        );
+      } catch (err) {
+        console.error("Could not set cancel_at on Advisor monthly subscription:", err);
+      }
+    }
+  }
+
   // Pricing v4 (2026-06-11): Pro AND Advisor (monthly) are recurring
   // subscriptions. When the subscription is fully terminated (cancelled
   // and period ended, or payment failed past retry window), Stripe fires
