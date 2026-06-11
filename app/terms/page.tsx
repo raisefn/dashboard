@@ -99,17 +99,7 @@ export default function TermsPage() {
               >
                 team@raisefn.com
               </a>{" "}
-              to start.
-            </li>
-            <li>
-              Full terms at the{" "}
-              <a
-                href="/legal/engagement"
-                className="text-teal-400 hover:text-teal-300 transition-colors"
-              >
-                Advisor engagement page
-              </a>
-              {" "}&mdash; you accept them at checkout.
+              to start. Full engagement terms reviewed and accepted at checkout.
             </li>
           </ul>
         </section>
@@ -122,16 +112,7 @@ export default function TermsPage() {
             <li>Pro is $199/month via Stripe &mdash; cancel anytime, access continues through end of billing period</li>
             <li>Advisor is $999/month for 3 months (auto-debited) or $1,999 upfront, via Stripe</li>
             <li><strong className="text-zinc-100">All purchases final.</strong> Funds paid are funds paid.</li>
-            <li>
-              Advisor: you can stop future charges anytime by emailing team@raisefn.com. Past charges are non-refundable. Full terms at the{" "}
-              <a
-                href="/legal/engagement"
-                className="text-teal-400 hover:text-teal-300 transition-colors"
-              >
-                Advisor engagement letter
-              </a>
-              .
-            </li>
+            <li>Advisor: you can stop future charges anytime by emailing team@raisefn.com. Past charges are non-refundable.</li>
             <li>Disputes or chargebacks: email team@raisefn.com before opening a dispute</li>
           </ul>
         </section>

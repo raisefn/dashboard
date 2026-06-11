@@ -258,16 +258,6 @@ export default function PricingPage() {
             </a>
             <p className="mt-3 text-xs text-zinc-500 max-w-xl">
               We&rsquo;ll walk you through the engagement, scope, and pricing.
-              Full{" "}
-              <a
-                href="/legal/engagement"
-                target="_blank"
-                rel="noopener"
-                className="text-teal-400 hover:text-teal-300 underline"
-              >
-                engagement terms
-              </a>{" "}
-              for review.
             </p>
             {checkoutError && (
               <div className="mt-3 text-xs text-red-400 max-w-xl">{checkoutError}</div>
