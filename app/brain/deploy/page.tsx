@@ -1507,34 +1507,34 @@ function BrainDeployInner() {
 
                 <div class="upgrade-card-tier upgrade-card-tier--advisor">
                   <div class="upgrade-card-tier-name">Advisor</div>
-                  <div class="upgrade-card-tier-price">$999 once + 3% on raised capital</div>
+                  <div class="upgrade-card-tier-price">$999/mo × 3 · or $1,999 upfront</div>
                   <div class="upgrade-card-tier-pitch">
-                    Everything in Pro, plus raise(fn) Team in the loop.
+                    Three months of hands-on support from raise(fn) Team.
                   </div>
                   <ul class="upgrade-card-tier-list">
-                    <li>Everything Pro has, uncapped</li>
-                    <li>Curated warm intros to portfolio-fit investors</li>
-                    <li>Deck review by raise(fn) Team</li>
-                    <li>Meeting prep when it counts · lifetime access</li>
+                    <li>Tailored briefs for every investor you target</li>
+                    <li>Pre-meeting prep + post-meeting debriefs</li>
+                    <li>Pipeline tracking + weekly check-ins</li>
+                    <li>Round-close support</li>
                   </ul>
                   <button class="upgrade-card-tier-cta" data-cta="advisor">
-                    See Advisor — $999
+                    Get Advisor — $999/mo
                   </button>
                   <div class="upgrade-card-error" data-err="advisor" style="display:none"></div>
                   <div class="upgrade-card-tier-foot">
-                    3% success fee on capital from raisefn-introduced investors.
+                    No success fees. No equity. Save ~33% with $1,999 upfront.
                     <a href="/legal/engagement">Full engagement letter</a>.
                   </div>
                 </div>
               </div>
             `;
           } else {
-            // Paid tier hit a soft cap — no upsell. Lifetime customers already
-            // paid. Just acknowledge and offer direct contact if they need more.
+            // Paid tier hit a soft cap — no upsell. Advisor customers are mid
+            // engagement; just acknowledge and offer direct contact for more.
             card.innerHTML = `
               <div class="upgrade-card-leadin">
-                Heavy month — you've hit a monthly soft cap on Advisor usage. Your
-                lifetime access continues; this is a temporary cost protection.
+                Heavy month — you've hit a monthly soft cap on Advisor usage.
+                This is a temporary cost protection during your engagement.
               </div>
               <div class="upgrade-card-header">Need more this month?</div>
               <div class="upgrade-card-subhead">

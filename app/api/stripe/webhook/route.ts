@@ -156,17 +156,20 @@ export async function POST(req: Request) {
     }
   }
 
-  // Pricing v3 (2026-06-10): Pro is a recurring subscription. When the
-  // subscription is fully terminated (cancelled and period ended, or
-  // payment failed past retry window), Stripe fires
+  // Pricing v4 (2026-06-11): Pro AND Advisor (monthly) are recurring
+  // subscriptions. When the subscription is fully terminated (cancelled
+  // and period ended, or payment failed past retry window), Stripe fires
   // customer.subscription.deleted — flip tier back to free.
   //
   // customer.subscription.updated fires on every renewal and on
   // user-initiated cancellation (status='canceled' with
   // cancel_at_period_end=true while access continues). We do NOT
   // downgrade on updated — only on deleted, which is the actual
-  // end-of-access signal. Renewals are no-ops here; the payments table
-  // doesn't track per-period rows in v3, just the subscription identity.
+  // end-of-access signal.
+  //
+  // Advisor upfront ($1,999 one-time) doesn't have a subscription, so
+  // this code path doesn't apply to them. They stay tier='advisor'
+  // until manually managed.
   if (event.type === "customer.subscription.deleted") {
     const sub = event.data.object as Stripe.Subscription;
     let customerEmail: string | null = null;
@@ -179,18 +182,38 @@ export async function POST(req: Request) {
       console.error("Could not fetch customer for subscription:", sub.id, err);
     }
 
+    // Determine which tier the subscription was for, so we know which
+    // tier to downgrade FROM. v4 has both pro and advisor_monthly subs.
+    const subTier = sub.metadata?.tier;
+
     if (customerEmail) {
       try {
         const dbUrl = process.env.DATABASE_URL;
         if (dbUrl) {
           const { Pool } = await import("pg");
           const pool = new Pool({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
-          // Only downgrade if currently on pro — never demote an Advisor
-          // user who happens to also have a stale subscription record.
-          await pool.query(
-            "UPDATE api_keys SET tier = 'free' WHERE email = $1 AND tier = 'pro'",
-            [customerEmail.toLowerCase()]
-          );
+          // Downgrade ONLY if the user is currently on the tier that
+          // matches the ended subscription. Defense against stale events:
+          // a Pro-sub-deleted event shouldn't demote an Advisor row, and
+          // vice versa.
+          if (subTier === "pro") {
+            await pool.query(
+              "UPDATE api_keys SET tier = 'free' WHERE email = $1 AND tier = 'pro'",
+              [customerEmail.toLowerCase()]
+            );
+          } else if (subTier === "advisor") {
+            await pool.query(
+              "UPDATE api_keys SET tier = 'free' WHERE email = $1 AND tier = 'advisor'",
+              [customerEmail.toLowerCase()]
+            );
+          } else {
+            // No tier metadata on the subscription. Conservative default:
+            // only demote pro (matches pre-v4 behavior).
+            await pool.query(
+              "UPDATE api_keys SET tier = 'free' WHERE email = $1 AND tier = 'pro'",
+              [customerEmail.toLowerCase()]
+            );
+          }
           await pool.end();
         }
 
@@ -200,24 +223,28 @@ export async function POST(req: Request) {
           .update({ status: "cancelled" })
           .eq("stripe_subscription_id", sub.id);
 
+        const displayTier = subTier === "advisor" ? "Advisor" : "Pro";
         await notifySlack(
           "stripePayments",
-          `❌ Pro subscription ended: *${customerEmail}* → free`
+          `❌ ${displayTier} subscription ended: *${customerEmail}* → free`
         );
-        console.log(`Subscription ended: ${customerEmail} → free`);
+        console.log(`Subscription ended (${subTier ?? "unknown"}): ${customerEmail} → free`);
       } catch (err) {
         console.error("Error processing subscription deletion:", err);
       }
     }
   }
 
-  // invoice.paid fires on every Pro renewal; no DB writes needed — the
-  // subscription stays active, the api_keys.tier row stays 'pro'. Only
-  // customer.subscription.deleted triggers downgrade.
+  // invoice.paid fires on every renewal; no DB writes needed — the
+  // subscription stays active, the api_keys.tier row stays as set.
+  // Only customer.subscription.deleted triggers downgrade.
 
-  // Pricing v2 (2026-05-25): one-time Advisor payments fire
-  // charge.refunded on manual refund — flip tier back to free.
-  // Still relevant in v3 — Advisor purchases stay one-time.
+  // Pricing v4 (2026-06-11): Advisor upfront ($1,999 one-time) payments
+  // CAN be manually refunded. charge.refunded flips tier back to free.
+  // This is defensive — engagement letter says "all purchases final,
+  // funds paid are funds paid" but if Stripe processes a refund anyway
+  // (chargeback, manual support refund) we shouldn't keep the user on a
+  // paid tier. Advisor monthly subs use subscription.deleted, not this.
   if (event.type === "charge.refunded") {
     const charge = event.data.object as Stripe.Charge;
     // Only flip on FULL refunds. Partial refunds keep advisor access.

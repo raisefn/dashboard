@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 import FadeInSection from "@/components/fade-in-section";
 
-type Tier = "pro" | "advisor";
+type Tier = "pro";
 
 export default function PricingPage() {
   const router = useRouter();
@@ -23,17 +23,16 @@ export default function PricingPage() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Auto-resume checkout after fresh signup. Supports both Pro and Advisor
-  // intents (pendingPostAuthIntent set by the wall card before bouncing to
-  // /signup when the user wasn't authed yet).
+  // Auto-resume Pro checkout after fresh signup (pendingPostAuthIntent set by
+  // the wall card before bouncing to /signup when the user wasn't authed yet).
+  // Advisor is now contact-us only — no self-serve checkout.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const resume = params.get("checkout");
-    if (resume !== "resume-pro" && resume !== "resume-advisor") return;
+    if (resume !== "resume-pro") return;
     window.history.replaceState({}, "", window.location.pathname);
-    const tier: Tier = resume === "resume-pro" ? "pro" : "advisor";
-    startCheckout(tier, { fromAutoResume: true });
+    startCheckout("pro", { fromAutoResume: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -114,7 +113,7 @@ export default function PricingPage() {
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
             Targeting, deck analysis, outreach drafts — grounded in 24,000+
             rounds of fundraising activity. Free to try. Pro when you&apos;re
-            in the work. Advisor when you want raise(fn) Team in the loop.
+            in the work. Hands-on Advisor support available on request.
           </p>
         </div>
       </section>
@@ -225,21 +224,21 @@ export default function PricingPage() {
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
                 Advisor
               </h2>
-              <span className="text-sm text-zinc-500">$999 once + 3% success fee · lifetime</span>
+              <span className="text-sm text-zinc-500">By request</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              Everything in Pro, plus raise(fn) Team in the loop. Warm intros
-              from our proprietary network, deck review, meeting prep when it
-              counts. Pay once, keep it for the life of the platform.
+              Three months of hands-on support while you raise &mdash; briefs,
+              meeting prep, debriefs, and close support, with raise(fn) Team in
+              the loop the whole way. No success fees. No equity.
             </p>
 
             <ul className="space-y-4 mb-10 list-none">
               {[
-                ["Everything Pro has, uncapped", "lifetime access — no monthly bill"],
-                ["Curated warm intros", "from raisefn's proprietary investor network"],
-                ["Deck review by raise(fn) Team", "calibrated feedback before you send"],
-                ["Meeting prep when it counts", "tailored briefs and talking points per investor"],
-                ["3% success fee", "only on capital from raisefn-introduced investors — we win when you do"],
+                ["Everything in Pro, uncapped", "for the duration of your engagement"],
+                ["Tailored investor briefs", "written for each match, not templated"],
+                ["Pre-meeting prep + post-meeting debriefs", "for every investor conversation"],
+                ["Pipeline tracking + weekly check-ins", "we stay close while you raise"],
+                ["Close support", "round-close docs, transition prep, next-round positioning"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
                   <span className="text-orange-400 text-lg leading-snug shrink-0">•</span>
@@ -251,24 +250,24 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <button
-              onClick={() => startCheckout("advisor")}
-              disabled={checkoutLoading === "advisor"}
-              className="rounded-full border border-orange-600/60 bg-orange-900/30 px-8 py-3 text-sm font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50 disabled:opacity-50"
+            <a
+              href="mailto:team@raisefn.com?subject=raise(fn)%20Advisor%20inquiry"
+              className="rounded-full border border-orange-600/60 bg-orange-900/30 px-8 py-3 text-sm font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50 inline-block"
             >
-              {checkoutLoading === "advisor" ? "Opening checkout…" : "Get Advisor — $999"}
-            </button>
+              Talk to us — team@raisefn.com
+            </a>
             <p className="mt-3 text-xs text-zinc-500 max-w-xl">
-              Engagement terms (including the 3% success fee) shown for review and acceptance at checkout. See the full{" "}
+              We&rsquo;ll walk you through the engagement, scope, and pricing.
+              Full{" "}
               <a
                 href="/legal/engagement"
                 target="_blank"
                 rel="noopener"
                 className="text-teal-400 hover:text-teal-300 underline"
               >
-                Advisor engagement letter
-              </a>
-              .
+                engagement terms
+              </a>{" "}
+              for review.
             </p>
             {checkoutError && (
               <div className="mt-3 text-xs text-red-400 max-w-xl">{checkoutError}</div>

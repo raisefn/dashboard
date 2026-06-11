@@ -88,18 +88,28 @@ export default function TermsPage() {
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              Advisor is a one-time $999 lifetime purchase plus a 3% success fee on
-              capital raised from investors raisefn introduces
+              Advisor is a 3-month hands-on engagement &mdash; $999/month for 3 months
+              ($2,997 total) or $1,999 upfront. No success fees.
             </li>
             <li>
-              Full terms are at the{" "}
+              Available by request. Email{" "}
+              <a
+                href="mailto:team@raisefn.com"
+                className="text-teal-400 hover:text-teal-300 transition-colors"
+              >
+                team@raisefn.com
+              </a>{" "}
+              to start.
+            </li>
+            <li>
+              Full terms at the{" "}
               <a
                 href="/legal/engagement"
                 className="text-teal-400 hover:text-teal-300 transition-colors"
               >
                 Advisor engagement page
               </a>
-              {" "}&mdash; you accept them at checkout
+              {" "}&mdash; you accept them at checkout.
             </li>
           </ul>
         </section>
@@ -109,18 +119,18 @@ export default function TermsPage() {
             Payments
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
-            <li>Advisor is a one-time $999 payment via Stripe &mdash; no recurring billing</li>
-            <li><strong className="text-zinc-100">All purchases final.</strong> The $999 is non-refundable.</li>
+            <li>Pro is $199/month via Stripe &mdash; cancel anytime, access continues through end of billing period</li>
+            <li>Advisor is $999/month for 3 months (auto-debited) or $1,999 upfront, via Stripe</li>
+            <li><strong className="text-zinc-100">All purchases final.</strong> Funds paid are funds paid.</li>
             <li>
-              The 3% success fee on raisefn-introduced capital applies regardless of
-              whether the engagement is later ended (per the{" "}
+              Advisor: you can stop future charges anytime by emailing team@raisefn.com. Past charges are non-refundable. Full terms at the{" "}
               <a
                 href="/legal/engagement"
                 className="text-teal-400 hover:text-teal-300 transition-colors"
               >
                 Advisor engagement letter
               </a>
-              )
+              .
             </li>
             <li>Disputes or chargebacks: email team@raisefn.com before opening a dispute</li>
           </ul>

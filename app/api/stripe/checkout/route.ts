@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
-import { getStripe, getPriceMap } from "@/lib/stripe";
+import { getStripe, getPriceIdFor, type AdvisorBilling } from "@/lib/stripe";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
   try {
     const stripe = getStripe();
-    const { tier } = await req.json();
+    const body = await req.json();
+    const tier: string = body.tier;
+    const billing: AdvisorBilling | undefined = body.billing;
 
-    const priceId = getPriceMap()[tier];
+    // Default Advisor billing to monthly. Upfront option requires explicit
+    // billing='upfront' in the request body.
+    const advisorBilling: AdvisorBilling = billing === "upfront" ? "upfront" : "monthly";
+
+    const priceId = getPriceIdFor(tier, advisorBilling);
     if (!priceId) {
       return NextResponse.json(
         { error: "Invalid tier." },
@@ -42,16 +48,24 @@ export async function POST(req: Request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://raisefn.com";
 
-    // Pricing v3 (2026-06-10) branches by tier:
-    // - advisor: one-time $999 with Engagement Letter consent (3% success
-    //   fee surface). Consent captured natively on Stripe's hosted page
-    //   via consent_collection.terms_of_service. Terms URL configured at
-    //   Stripe Dashboard → Business → Terms of service URL.
-    // - pro: $199/mo recurring subscription. No engagement letter, no
-    //   success fee — pure SaaS, cancel anytime.
+    // Pricing v4 (2026-06-11) checkout flows:
+    // - pro: $199/mo subscription, no engagement letter, pure SaaS
+    // - advisor (monthly): $999/mo recurring subscription. Engagement
+    //   letter consent required. Founder can stop future charges by
+    //   emailing team@raisefn.com. No auto-cancel; if they want to
+    //   continue past 3 months, they can.
+    // - advisor (upfront): $1,999 one-time payment. Engagement letter
+    //   consent required. Same scope as monthly, ~33% off the total.
+    //
+    // Consent collection wording reflects v4 letter — no 3%, no success
+    // fee, no equity. Founder accepts the engagement letter natively on
+    // Stripe's hosted page (terms_of_service URL configured in Stripe
+    // Dashboard → Business settings → Terms of service URL = /legal/engagement).
     const isAdvisor = tier === "advisor";
+    const isAdvisorUpfront = isAdvisor && advisorBilling === "upfront";
+
     const session = await stripe.checkout.sessions.create(
-      isAdvisor
+      isAdvisorUpfront
         ? {
             mode: "payment",
             line_items: [{ price: priceId, quantity: 1 }],
@@ -62,17 +76,48 @@ export async function POST(req: Request) {
             custom_text: {
               terms_of_service_acceptance: {
                 message:
-                  "I agree to the **Advisor Engagement Letter**, including the 3% success fee on capital from raisefn-introduced investors. The $999 is non-refundable.",
+                  "I agree to the **raise(fn) Advisor Engagement Letter**. Three months of hands-on support. No success fees. All purchases final — funds paid are funds paid.",
               },
             },
             metadata: {
               supabase_user_id: user.id,
               tier,
+              advisor_billing: "upfront",
             },
             payment_intent_data: {
               metadata: {
                 email: user.email,
                 tier,
+                advisor_billing: "upfront",
+              },
+            },
+            success_url: `${baseUrl}/brain/deploy?checkout=success`,
+            cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
+          }
+        : isAdvisor
+        ? {
+            mode: "subscription",
+            line_items: [{ price: priceId, quantity: 1 }],
+            customer_email: user.email,
+            consent_collection: {
+              terms_of_service: "required",
+            },
+            custom_text: {
+              terms_of_service_acceptance: {
+                message:
+                  "I agree to the **raise(fn) Advisor Engagement Letter**. $999/month for 3 months of hands-on support. No success fees. Stop future charges anytime by emailing team@raisefn.com. Funds paid are funds paid.",
+              },
+            },
+            metadata: {
+              supabase_user_id: user.id,
+              tier,
+              advisor_billing: "monthly",
+            },
+            subscription_data: {
+              metadata: {
+                email: user.email,
+                tier,
+                advisor_billing: "monthly",
               },
             },
             success_url: `${baseUrl}/brain/deploy?checkout=success`,

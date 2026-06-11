@@ -3,7 +3,7 @@ import Link from "next/link";
 export const metadata = {
   title: "Advisor Engagement | raise(fn)",
   description:
-    "raise(fn) Advisor engagement terms — $999 one-time + 3% success fee on raisefn-introduced capital.",
+    "raise(fn) Advisor engagement terms — three months of hands-on support while you raise. $999/month for 3 months or $1,999 upfront.",
 };
 
 export default function EngagementPage() {
@@ -28,113 +28,116 @@ export default function EngagementPage() {
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            What raisefn does
+            What we do
           </h2>
+          <p className="text-sm text-zinc-400 mb-4">
+            Three months of hands-on support while you raise.
+          </p>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              Unlimited access to the raise(fn) platform: investor matching, pitch
-              coaching, pipeline tracking
+              <span className="text-white font-medium">Month 1</span> &mdash; We build your
+              investor shortlist, write tailored briefs for the top matches, sequence the
+              outreach, and have a kickoff call.
             </li>
-            <li>Curated warm introductions from our proprietary investor network</li>
-            <li>One 1-hour advisory call with the raise(fn) team</li>
-            <li>Outreach strategy and term sheet review on request</li>
-            <li>Available by email throughout the engagement</li>
+            <li>
+              <span className="text-white font-medium">Month 2</span> &mdash; We prep you
+              before every investor meeting, debrief after, and track the pipeline live with
+              you. Weekly check-ins.
+            </li>
+            <li>
+              <span className="text-white font-medium">Month 3</span> &mdash; We help with
+              close support, write the materials you need to land the round, and set you up
+              to keep using raise(fn) Pro on your own afterward.
+            </li>
           </ul>
+          <p className="text-sm text-zinc-400 mt-4">
+            You decide who to talk to, what to say, what terms to take. We advise; you act.
+          </p>
         </section>
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
             What you pay
           </h2>
+          <p className="text-sm text-zinc-400 mb-4">Two ways to pay:</p>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              <span className="text-white font-medium">$999 one-time</span>, billed via
-              Stripe at checkout
+              <span className="text-white font-medium">Monthly &mdash; $999/month for 3 months.</span>{" "}
+              Auto-debited each month, $2,997 total. You can stop future charges anytime by
+              emailing team@raisefn.com.
             </li>
             <li>
-              <span className="text-white font-medium">3% of any capital committed</span>{" "}
-              by an investor we introduce
+              <span className="text-white font-medium">Upfront &mdash; $1,999 once.</span>{" "}
+              That&rsquo;s ~33% off the monthly total. Same scope, same engagement, no
+              recurring charges.
+            </li>
+          </ul>
+          <p className="text-sm text-zinc-400 mt-4 mb-2">Either way:</p>
+          <ul className="space-y-2 text-sm leading-relaxed">
+            <li>
+              No success fee. We don&rsquo;t get paid based on whether your round closes or
+              how much you raise.
             </li>
             <li>
-              <span className="text-white font-medium">All purchases final.</span> The $999 is non-refundable.
+              raise(fn) is not a registered broker-dealer. No cut of capital raised, no
+              equity, no securities brokering.
+            </li>
+            <li>
+              <span className="text-white font-medium">All purchases final.</span> Funds
+              paid are funds paid.
             </li>
           </ul>
         </section>
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            What counts as an introduction
+            How long it runs
+          </h2>
+          <p className="text-sm text-zinc-400 mb-4">3 months. After that, you choose:</p>
+          <ul className="space-y-2 text-sm leading-relaxed">
+            <li>Keep Advisor going at $999/month (cancel anytime, no commitment)</li>
+            <li>Drop to raise(fn) Pro at $199/month (software only)</li>
+            <li>End the engagement &mdash; you go back to the free tier</li>
+          </ul>
+          <p className="text-sm text-zinc-400 mt-4">
+            If you don&rsquo;t tell us within 7 days of the engagement ending, we default to
+            ending it. No surprise charges.
+          </p>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
+            Ending early
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
-            <li>An investor we connect you to who you weren&rsquo;t already actively talking to</li>
             <li>
-              We send you written confirmation each time we make one &mdash; both of us
-              have a record
+              You can stop future charges anytime &mdash; just email us at{" "}
+              <a
+                href="mailto:team@raisefn.com"
+                className="text-teal-400 hover:text-teal-300 transition-colors"
+              >
+                team@raisefn.com
+              </a>
+              . We cancel the next month&rsquo;s payment immediately.
             </li>
-            <li>You can see every qualifying intro in your raise(fn) dashboard</li>
+            <li>Funds paid stay paid.</li>
           </ul>
         </section>
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            When the 3% is owed
+            What you keep
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              When capital actually hits your bank account &mdash; not when a term sheet
-              is signed
-            </li>
-            <li>Payment due within 30 days of receipt</li>
-            <li>
-              If the round closes in tranches, the fee comes proportionally with each
-              tranche
-            </li>
-          </ul>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            What the 3% applies to
-          </h2>
-          <ul className="space-y-2 text-sm leading-relaxed">
-            <li>
-              Equity investments (SAFEs, priced rounds, convertible notes) from investors
-              we introduced
-            </li>
-            <li>Not grants, debt financing, or revenue-based financing</li>
-            <li>
-              Not investors you were already in conversation with before our introduction
-            </li>
-          </ul>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            Tail period
-          </h2>
-          <ul className="space-y-2 text-sm leading-relaxed">
-            <li>
-              If we end the active engagement and an investor we introduced commits
-              capital within 12 months, the 3% still applies
+              Everything we make for you &mdash; briefs, prep docs, debriefs, close
+              materials, positioning &mdash; is yours. Use it however you want, forever.
             </li>
             <li>
-              This protects us from a founder ending the engagement right before closing
-              a deal we sourced
+              We learn from the engagement in aggregate (what kinds of pitches land, what
+              investors ask) and use those learnings to make raise(fn) better for everyone
+              else. Your specific data stays yours.
             </li>
-          </ul>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            What we&rsquo;re not
-          </h2>
-          <ul className="space-y-2 text-sm leading-relaxed">
-            <li>Not a placement agent or broker-dealer</li>
-            <li>
-              We make introductions and advise &mdash; we don&rsquo;t negotiate or close
-              on your behalf
-            </li>
-            <li>We don&rsquo;t guarantee meetings, term sheets, or funding outcomes</li>
           </ul>
         </section>
 
@@ -144,26 +147,9 @@ export default function EngagementPage() {
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              Anything you share with us &mdash; financials, cap table, deal terms
-              &mdash; stays confidential
-            </li>
-            <li>
-              The same goes the other way: investor names, our notes, and our data stay
-              between us
-            </li>
-          </ul>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            Ending the engagement
-          </h2>
-          <ul className="space-y-2 text-sm leading-relaxed">
-            <li>Either of us can end the active engagement with 14 days&rsquo; written notice</li>
-            <li>Your lifetime product access continues regardless</li>
-            <li>
-              After ending: we stop making new intros; the 12-month tail still applies to
-              intros already made
+              We don&rsquo;t share your business plans, financials, investor conversations,
+              or round details with anyone outside raise(fn) &mdash; unless you tell us to
+              or the law requires it.
             </li>
           </ul>
         </section>
@@ -173,23 +159,60 @@ export default function EngagementPage() {
             What we don&rsquo;t promise
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
-            <li>Our total liability is limited to fees you&rsquo;ve paid in the 12 months prior</li>
-            <li>This agreement is governed by the laws of Delaware</li>
+            <li>We can&rsquo;t guarantee investors will respond, meet with you, or invest.</li>
+            <li>We can&rsquo;t guarantee terms.</li>
+            <li>We can&rsquo;t guarantee your round closes.</li>
+          </ul>
+          <p className="text-sm text-zinc-400 mt-4">
+            We&rsquo;re a tool and a team that helps. The outcome is yours.
+          </p>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
+            Limits
+          </h2>
+          <ul className="space-y-2 text-sm leading-relaxed">
+            <li>
+              If something goes sideways and you sue, our total liability is capped at what
+              you&rsquo;ve paid us under this agreement.
+            </li>
+            <li>We&rsquo;re not on the hook for indirect or consequential damages.</li>
           </ul>
         </section>
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            Accepted
+            How we work together
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              <span className="text-white font-medium">raise(fn) Inc.</span> &mdash; terms
-              offered to all founders accepting at checkout
+              raise(fn) is an independent contractor. We&rsquo;re not your partner,
+              employer, agent, or fiduciary. We work alongside you on your raise.
+            </li>
+          </ul>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
+            The legal stuff
+          </h2>
+          <ul className="space-y-2 text-sm leading-relaxed">
+            <li>California law governs this agreement.</li>
+            <li>
+              This agreement plus our{" "}
+              <a
+                href="/terms"
+                className="text-teal-400 hover:text-teal-300 transition-colors"
+              >
+                Terms of Service
+              </a>{" "}
+              is the full deal. It supersedes any prior agreements about the Advisor
+              engagement.
             </li>
             <li>
-              <span className="text-white font-medium">Founder</span> &mdash; acceptance
-              recorded electronically at checkout, timestamped, and held with your account
+              By paying the first $999 monthly or the $1,999 upfront on raisefn.com, you
+              accept these terms.
             </li>
           </ul>
         </section>
