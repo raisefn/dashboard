@@ -177,7 +177,9 @@ export async function POST(req: Request) {
       !sub.cancel_at
     ) {
       try {
-        const cancelAt = sub.current_period_start + 90 * 86400;
+        // sub.start_date = engagement creation timestamp (Unix seconds).
+        // 90 days lands AFTER invoice 3 (day 60) and BEFORE invoice 4 (day 90).
+        const cancelAt = sub.start_date + 90 * 86400;
         await stripe.subscriptions.update(sub.id, { cancel_at: cancelAt });
         console.log(
           `Advisor monthly auto-cancel scheduled for sub ${sub.id} at ${new Date(cancelAt * 1000).toISOString()}`
