@@ -267,9 +267,12 @@ function renderMatchesPanel(
   // name in follow-up chat) doesn't break — for now nothing reads it.
   void entries;
 
-  // Single CTA — points the founder to the Matches tab where briefs are
-  // generated from the proper card UI.
-  const label = "Generate briefs from the Matches tab";
+  // Single CTA — points the founder to the Matches tab where ALL matches
+  // are visible and briefs can be generated from the card UI. Phrasing
+  // updated 2026-06-15 — the chat output sometimes shows fewer items than
+  // the matcher actually returned (LLM editorializing), and founders had
+  // no signal that more matches existed on the tab.
+  const label = "See all matches & generate briefs";
 
   const summary = document.createElement("div");
   summary.style.cssText = "margin-top: 20px;";
