@@ -1865,8 +1865,15 @@ function BrainDeployInner() {
       .catch(() => {
         showWelcome(fallbackName);
       });
+  // impersonating in deps so switching the "Acting as" dropdown re-fetches
+  // the impersonated user's prior conversation. Without it, the effect ran
+  // once on initial page load and never re-fired after the dropdown handler
+  // reset hasAutoProbed.current / chatStarted / historyRef — leaving the
+  // new impersonation user's chat blank even when they had stored messages
+  // (Taylor Bennett, 2026-06-16: 14-message conversation existed but never
+  // restored on dropdown switch).
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, loading]);
+  }, [session, loading, impersonating]);
 
   /* ── DOM helpers (imperative, like the original) ── */
   function addMessageToDOM(role: string, content: string): HTMLDivElement {
