@@ -840,6 +840,28 @@ function BrainDeployInner() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [impersonateInput, setImpersonateInput] = useState("");
   const [impersonating, setImpersonating] = useState("");
+
+  // Persist impersonation across the dashboard so other components
+  // (BrainTabs especially — Briefs/Matches counts) can scope their
+  // API calls to the founder being acted-as. Without this, the tabs
+  // showed Justin's counts even while he was acting as a managed
+  // founder. Fired as both a localStorage write AND a custom event
+  // so listeners can update synchronously without polling storage.
+  useEffect(() => {
+    try {
+      if (impersonating) {
+        localStorage.setItem("raisefn_impersonating", impersonating);
+      } else {
+        localStorage.removeItem("raisefn_impersonating");
+      }
+      window.dispatchEvent(
+        new CustomEvent("raisefn:impersonate", { detail: { email: impersonating || null } }),
+      );
+    } catch {
+      /* private browsing — skip */
+    }
+  }, [impersonating]);
+
   const [adminUsers, setAdminUsers] = useState<Array<{
     email: string; name: string; role: string; tier: string;
     created_at: string | null;
