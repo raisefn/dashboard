@@ -83,13 +83,33 @@ export default function MatchesPage() {
     });
   }, [router]);
 
+  // Read & subscribe to impersonation state set by /brain/deploy's
+  // "Acting as" dropdown. Without this, matches.tsx fetches the admin's
+  // own matches/briefs while the dropdown is set to a managed founder.
+  const [impersonating, setImpersonating] = useState<string>("");
+  useEffect(() => {
+    try {
+      setImpersonating(localStorage.getItem("raisefn_impersonating") || "");
+    } catch {
+      /* private browsing */
+    }
+    function onImpersonate(e: Event) {
+      const ce = e as CustomEvent<{ email?: string | null }>;
+      setImpersonating(ce.detail?.email || "");
+    }
+    window.addEventListener("raisefn:impersonate", onImpersonate);
+    return () => window.removeEventListener("raisefn:impersonate", onImpersonate);
+  }, []);
+
   const fetchMatches = useCallback(async (s: Session) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/v1/brain/matches/mine", {
-        headers: { Authorization: `Bearer ${s.access_token}` },
-      });
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${s.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch("/v1/brain/matches/mine", { headers });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.detail || `Failed to load matches (${res.status})`);
@@ -107,7 +127,7 @@ export default function MatchesPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [impersonating]);
 
   useEffect(() => {
     if (session) fetchMatches(session);
@@ -129,14 +149,19 @@ export default function MatchesPage() {
     setGeneratingKey(key);
     setRowError(null);
     try {
-      const founderEmail = (session.user.email || "").toLowerCase();
+      // When acting as a managed founder, the brief is generated AS them
+      // (their api_key context, their briefs list). Without X-Impersonate,
+      // the brief would be attributed to the admin's account.
+      const founderEmail = (impersonating || session.user.email || "").toLowerCase();
       const firmName = inv.firm_name || (inv.kind === "firm" ? inv.name : null);
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
       const res = await fetch("/v1/brain/generate-brief", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers,
         body: JSON.stringify({
           founder_email: founderEmail,
           // No investor_email — server synthesizes a stable internal address
