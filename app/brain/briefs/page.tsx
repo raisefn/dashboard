@@ -32,12 +32,32 @@ export default function BriefsPage() {
     });
   }, [router]);
 
+  // Mirror the matches page / brain-tabs impersonation handling so an
+  // admin acting as a managed founder sees THAT founder's briefs, not
+  // their own.
+  const [impersonating, setImpersonating] = useState<string>("");
+  useEffect(() => {
+    try {
+      setImpersonating(localStorage.getItem("raisefn_impersonating") || "");
+    } catch {
+      /* private browsing */
+    }
+    function onImpersonate(e: Event) {
+      const ce = e as CustomEvent<{ email?: string | null }>;
+      setImpersonating(ce.detail?.email || "");
+    }
+    window.addEventListener("raisefn:impersonate", onImpersonate);
+    return () => window.removeEventListener("raisefn:impersonate", onImpersonate);
+  }, []);
+
   const load = useCallback(async (s: Session) => {
     try {
       setError(null);
-      const res = await fetch("/v1/brain/matches/mine", {
-        headers: { Authorization: `Bearer ${s.access_token}` },
-      });
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${s.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch("/v1/brain/matches/mine", { headers });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.detail || `Failed to load briefs (${res.status})`);
@@ -49,7 +69,7 @@ export default function BriefsPage() {
       setError(e instanceof Error ? e.message : "Failed to load briefs.");
       setLoading(false);
     }
-  }, []);
+  }, [impersonating]);
 
   useEffect(() => {
     if (session) load(session);
@@ -146,6 +166,7 @@ export default function BriefsPage() {
       {captureOpen && session && (
         <CaptureBriefModal
           session={session}
+          impersonating={impersonating}
           onClose={() => setCaptureOpen(false)}
           onCreated={(data) => {
             setCaptureOpen(false);
@@ -165,10 +186,12 @@ const STAGES = ["pre_seed", "seed", "series_a", "series_b", "series_c", "growth"
 
 function CaptureBriefModal({
   session,
+  impersonating,
   onClose,
   onCreated,
 }: {
   session: Session;
+  impersonating: string;
   onClose: () => void;
   onCreated: (data: { url: string; token: string }) => void;
 }) {
@@ -263,13 +286,17 @@ function CaptureBriefModal({
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const founderEmail = (session.user.email || "").toLowerCase();
+      // Generate the brief AS the impersonated founder so it lands in
+      // their api_key's brief list, not the admin's.
+      const founderEmail = (impersonating || session.user.email || "").toLowerCase();
+      const briefHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) briefHeaders["X-Impersonate"] = impersonating;
       const res = await fetch("/v1/brain/generate-brief", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers: briefHeaders,
         body: JSON.stringify({
           founder_email: founderEmail,
           investor_inline: {
