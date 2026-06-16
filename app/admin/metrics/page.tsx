@@ -20,6 +20,9 @@ interface Metrics {
   new_proprietary_investors: number[];
   matches_fired: number[];
   active_founders: number[];
+  // Distinct founders across the entire window (NOT sum of monthly).
+  // Optional for back-compat with older brain releases.
+  active_founders_total?: number;
   meeting_debriefs: number[];
   pipeline_outcomes: {
     committed: number[];
@@ -115,6 +118,10 @@ export default function AdminMetricsPage() {
     color: string;
     prefix?: string;
     note?: string;
+    // When set, the card's header total uses this value instead of summing
+    // the per-month data. Used for metrics where the same entity (founder)
+    // can appear in multiple months — sum would double-count.
+    totalOverride?: number;
   }[] = [
     { title: "New founders", data: metrics.new_founders, color: "#2dd4bf" },
     {
@@ -133,6 +140,11 @@ export default function AdminMetricsPage() {
       title: "Active founders",
       data: metrics.active_founders,
       color: "#34d399",
+      // Override the badge sum with distinct-across-window so the same
+      // founder active in 2-3 months doesn't get triple-counted in the
+      // header total. Falls back to sum if the field is missing (older
+      // brain versions).
+      totalOverride: metrics.active_founders_total,
       note: "Distinct founders with any raise event in the month.",
     },
   ];
@@ -170,6 +182,7 @@ export default function AdminMetricsPage() {
             color={c.color}
             note={c.note}
             prefix={c.prefix}
+            totalOverride={c.totalOverride}
           />
         ))}
         {stripeReady ? (
@@ -185,7 +198,7 @@ export default function AdminMetricsPage() {
               title="Free → Paid conversions"
               data={dataFor(metrics.free_to_paid_conversions!)}
               color="#facc15"
-              note="Unique customers whose first paid charge landed in the month."
+              note="Founders whose first paid event (Stripe charge OR manual admin upgrade) landed in the month."
             />
           </>
         ) : (
@@ -218,14 +231,22 @@ function MetricCard({
   color,
   prefix,
   note,
+  totalOverride,
 }: {
   title: string;
   data: { month: string; value: number }[];
   color: string;
   prefix?: string;
   note?: string;
+  totalOverride?: number;
 }) {
-  const total = data.reduce((acc, d) => acc + d.value, 0);
+  // When totalOverride is set, use it for the badge instead of summing the
+  // per-month series. Used for metrics where the same entity can appear in
+  // multiple months (e.g. active_founders). Otherwise sum (the right
+  // behavior for cumulative metrics like new_founders, revenue, etc.).
+  const total = totalOverride !== undefined
+    ? totalOverride
+    : data.reduce((acc, d) => acc + d.value, 0);
   const totalDisplay = prefix === "$"
     ? `$${Math.round(total).toLocaleString()}`
     : `${total.toLocaleString()}`;
