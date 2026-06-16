@@ -32,13 +32,26 @@ export default function BrainTabs() {
   const [counts, setCounts] = useState<Counts | null>(null);
   const [tier, setTier] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [impersonating, setImpersonating] = useState<string>("");
 
   useEffect(() => {
     try {
       setTier(localStorage.getItem("raisefn_user_tier"));
+      // Shared with deploy/page.tsx — the "Acting as" dropdown writes this
+      // key. Without reading it here, the counts always reflect the admin's
+      // own data even while they're acting as a managed founder.
+      setImpersonating(localStorage.getItem("raisefn_impersonating") || "");
     } catch {
       /* private browsing */
     }
+    // Listen for changes from deploy/page.tsx so the tabs update when the
+    // dropdown is switched mid-session.
+    function onImpersonate(e: Event) {
+      const ce = e as CustomEvent<{ email?: string | null }>;
+      setImpersonating(ce.detail?.email || "");
+    }
+    window.addEventListener("raisefn:impersonate", onImpersonate);
+    return () => window.removeEventListener("raisefn:impersonate", onImpersonate);
   }, []);
 
   useEffect(() => {
@@ -48,9 +61,11 @@ export default function BrainTabs() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
         if (!cancelled) setEmail(session.user.email || null);
-        const res = await fetch("/v1/brain/matches/mine", {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        });
+        const headers: Record<string, string> = {
+          Authorization: `Bearer ${session.access_token}`,
+        };
+        if (impersonating) headers["X-Impersonate"] = impersonating;
+        const res = await fetch("/v1/brain/matches/mine", { headers });
         if (!res.ok || cancelled) return;
         const data = await res.json();
         // Count UNIQUE investors across all batches (not just the latest)
@@ -90,7 +105,7 @@ export default function BrainTabs() {
       window.removeEventListener("raisefn:matches_updated", onUpdate);
       window.removeEventListener("raisefn:briefs_updated", onUpdate);
     };
-  }, [pathname]);
+  }, [pathname, impersonating]);
 
   function isActive(href: string): boolean {
     if (href === "/brain/deploy") return pathname?.startsWith("/brain/deploy") ?? false;
@@ -113,8 +128,15 @@ export default function BrainTabs() {
   // null/undefined case (fresh login before the chat usage SSE has written
   // tier to localStorage) — better to invite an upgrade than silently hide
   // it for someone who would have qualified.
-  const PAID_TIERS = new Set(["advisor", "concierge", "lifetime", "lifetime_advisor"]);
+  //
+  // Current paid tiers (post-v4 pricing, 2026-06): 'pro', 'advisor'.
+  // Legacy strings ('concierge', 'lifetime', 'lifetime_advisor') were
+  // never current — Lifetime Advisor was a pre-v4 marketing pitch that
+  // never shipped as a tier value. Removed 2026-06-16.
+  const PAID_TIERS = new Set(["pro", "advisor"]);
   const showUpgrade = !PAID_TIERS.has(tier || "");
+  const TIER_LABEL: Record<string, string> = { pro: "Pro", advisor: "Advisor" };
+  const tierLabel = tier && TIER_LABEL[tier] ? TIER_LABEL[tier] : null;
   const displayName = email ? email.split("@")[0] : null;
 
   return (
@@ -268,7 +290,7 @@ export default function BrainTabs() {
               Upgrade
             </Link>
           )}
-          {tier && tier !== "free" && (
+          {tierLabel && (
             <span
               style={{
                 display: "inline-flex",
@@ -281,9 +303,9 @@ export default function BrainTabs() {
                 border: "1px solid rgba(15, 118, 110, 0.45)",
                 borderRadius: "9999px",
               }}
-              title="Lifetime Advisor — no recurring bill"
+              title={`${tierLabel} tier`}
             >
-              Lifetime Advisor
+              {tierLabel}
             </span>
           )}
           {displayName && (
