@@ -99,21 +99,24 @@ export async function POST(req: Request) {
             [emailLower]
           );
 
+          let apiKeyId: string;
           if (existing.rowCount && existing.rowCount > 0) {
             // Row exists — update tier
+            apiKeyId = existing.rows[0].id;
             await pool.query(
               "UPDATE api_keys SET tier = $1, stripe_customer_id = $2 WHERE email = $3",
               [tier, session.customer as string, emailLower]
             );
           } else {
             // Row doesn't exist — pre-create so brain finds it with correct tier
+            apiKeyId = crypto.randomUUID();
             const rawKey = `rfn_${crypto.randomBytes(32).toString("hex")}`;
             const keyHash = crypto.createHash("sha256").update(rawKey).digest("hex");
             await pool.query(
               `INSERT INTO api_keys (id, key_hash, key_prefix, owner, email, role, tier, stripe_customer_id, is_active)
                VALUES ($1, $2, $3, $4, $5, 'founder', $6, $7, true)`,
               [
-                crypto.randomUUID(),
+                apiKeyId,
                 keyHash,
                 rawKey.slice(0, 8),
                 session.customer_details?.name || emailLower.split("@")[0],
@@ -124,6 +127,17 @@ export async function POST(req: Request) {
             );
             console.log(`Pre-created api_key for ${emailLower} with tier ${tier}`);
           }
+
+          // Record first-paid-at for the metrics dashboard's free→paid
+          // conversion chart. ON CONFLICT DO NOTHING so a repeat checkout
+          // (e.g. customer upgrades twice via Stripe in a session) doesn't
+          // overwrite the original first-paid timestamp.
+          await pool.query(
+            `INSERT INTO api_key_billing_state (api_key_id, first_paid_at, first_paid_source)
+             VALUES ($1, NOW(), 'stripe')
+             ON CONFLICT (api_key_id) DO NOTHING`,
+            [apiKeyId]
+          );
 
           await pool.end();
         }
