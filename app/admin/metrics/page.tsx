@@ -198,7 +198,7 @@ export default function AdminMetricsPage() {
               title="Free → Paid conversions"
               data={dataFor(metrics.free_to_paid_conversions!)}
               color="#facc15"
-              note="Founders whose first paid event (Stripe charge OR manual admin upgrade) landed in the month."
+              note="Real conversions only: Stripe checkouts + admin tier-change upgrades. Backfilled historical advisor onboards excluded — we can't tell if those were ever free."
             />
           </>
         ) : (
