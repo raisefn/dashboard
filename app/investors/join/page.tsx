@@ -45,6 +45,14 @@ export default function InvestorJoinPage() {
   const [checkMin, setCheckMin] = useState("");
   const [checkMax, setCheckMax] = useState("");
   const [sectors, setSectors] = useState<string[]>([]);
+  // sector_expertise: areas of DEEP specialty (max 3). Drives matcher_v2
+  // specialty bonus + populates the investor's taxonomy_v2.industry.
+  // Shown regardless of thesis_type — even sector-agnostic angels often
+  // have areas where they bring real domain knowledge.
+  const [sectorExpertise, setSectorExpertise] = useState<string[]>([]);
+  // hard_no: sectors the investor will NEVER invest in. Matcher_v2 uses
+  // this as a hard exclusion against the founder's industry tags.
+  const [hardNo, setHardNo] = useState<string[]>([]);
   const [stages, setStages] = useState<string[]>([]);
   const [countries, setCountries] = useState<string[]>([]);
   const [hardRequirements, setHardRequirements] = useState<string[]>([]);
@@ -123,6 +131,8 @@ export default function InvestorJoinPage() {
         check_size_min: checkMin ? Number(checkMin) : undefined,
         check_size_max: checkMax ? Number(checkMax) : undefined,
         focus_sectors: thesisType === "sector_driven" ? sectors : [],
+        sector_expertise: sectorExpertise,
+        hard_no: hardNo,
         focus_stages: stages,
         focus_countries: countries,
         hard_requirements: hardRequirements,
@@ -272,6 +282,32 @@ export default function InvestorJoinPage() {
           </Field>
         )}
 
+        <Field label={`Sector expertise (optional — areas you have deep domain knowledge in, max 3) ${sectorExpertise.length > 0 ? `· ${sectorExpertise.length}/3` : ""}`}>
+          <div className="flex flex-wrap gap-2">
+            {SECTORS.map((s) => {
+              const selected = sectorExpertise.includes(s);
+              const atCap = sectorExpertise.length >= 3 && !selected;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  disabled={atCap}
+                  onClick={() => setSectorExpertise((cur) => toggle(cur, s))}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                    selected
+                      ? "border-emerald-500 bg-emerald-950/40 text-emerald-200"
+                      : atCap
+                      ? "border-zinc-800 bg-zinc-950 text-zinc-600 cursor-not-allowed"
+                      : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
+                  }`}
+                >
+                  {s.replace(/_/g, " ")}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
+
         <Field label="Focus stages *">
           <div className="flex flex-wrap gap-2">
             {STAGES.map((s) => (
@@ -286,6 +322,25 @@ export default function InvestorJoinPage() {
                 }`}
               >
                 {s.replace(/_/g, "-")}
+              </button>
+            ))}
+          </div>
+        </Field>
+
+        <Field label="Hard no (optional — sectors you'll never invest in, regardless of fit)">
+          <div className="flex flex-wrap gap-2">
+            {SECTORS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setHardNo((cur) => toggle(cur, s))}
+                className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                  hardNo.includes(s)
+                    ? "border-rose-500 bg-rose-950/40 text-rose-200"
+                    : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
+                }`}
+              >
+                {s.replace(/_/g, " ")}
               </button>
             ))}
           </div>
