@@ -3,7 +3,7 @@ title: "How do I create urgency without lying about having other offers?"
 description: "Vague urgency is white noise to a VC. Made-up term sheets get caught in days. Here's what actually creates urgency you don't have to lie about — and why the founders who close fast aren't running better theater."
 published_at: "2026-06-17"
 updated_at: "2026-06-17"
-status: "published"
+status: "draft"
 category: "tactics"
 tags: ["urgency", "fundraising-tactics", "deal-momentum", "investor-psychology", "pre-seed", "seed"]
 fund_slugs: []

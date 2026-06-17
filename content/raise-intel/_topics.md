@@ -9,7 +9,8 @@ voice, ship.
 
 ## Status
 
-- ✅ done: 6
+- ✅ done: 5
+- 📝 drafted (awaiting review): 1
 - ⏳ pending: 14
 - 🎯 cadence target: daily (~1/day)
 
