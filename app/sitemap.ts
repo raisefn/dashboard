@@ -32,6 +32,11 @@ const STATIC_PAGES: MetadataRoute.Sitemap = [
   { url: `${SITE}/brain`, lastModified: NOW, changeFrequency: "weekly", priority: 0.7 },
   { url: `${SITE}/pricing`, lastModified: NOW, changeFrequency: "monthly", priority: 0.8 },
   { url: `${SITE}/thesis`, lastModified: NOW, changeFrequency: "monthly", priority: 0.6 },
+  // Trust pages — describe matching + learning. Strong inbound search intent
+  // ("how does X match investors?", "AI investor matching") + internal SEO
+  // backlinks from /founders, /investors, and footer Company section.
+  { url: `${SITE}/how-we-match`, lastModified: NOW, changeFrequency: "monthly", priority: 0.7 },
+  { url: `${SITE}/how-we-learn`, lastModified: NOW, changeFrequency: "monthly", priority: 0.7 },
   { url: `${SITE}/roadmap`, lastModified: NOW, changeFrequency: "weekly", priority: 0.5 },
   { url: `${SITE}/investors/join`, lastModified: NOW, changeFrequency: "monthly", priority: 0.7 },
   { url: `${SITE}/privacy`, lastModified: NOW, changeFrequency: "yearly", priority: 0.3 },
