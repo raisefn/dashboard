@@ -102,6 +102,8 @@ export default function Footer() {
             </p>
             <ul className="space-y-2.5">
               {[
+                { href: "/how-we-match", label: "How we match" },
+                { href: "/how-we-learn", label: "How we learn" },
                 { href: "/privacy", label: "Privacy" },
                 { href: "/terms", label: "Terms" },
                 { href: "mailto:team@raisefn.com", label: "Contact" },

@@ -250,6 +250,17 @@ export default function FoundersPage() {
                 are quietly writing checks, and the warm-intro candidates
                 in our proprietary network.
               </p>
+              <p className="text-sm text-zinc-500 mt-5">
+                See{" "}
+                <Link href="/how-we-match" className="text-teal-400 hover:text-teal-300 underline underline-offset-2">
+                  how we match
+                </Link>
+                {" "}across five dimensions, or{" "}
+                <Link href="/how-we-learn" className="text-teal-400 hover:text-teal-300 underline underline-offset-2">
+                  how we learn
+                </Link>
+                {" "}from every raise.
+              </p>
             </div>
             <div>
               <FounderMatchCard />

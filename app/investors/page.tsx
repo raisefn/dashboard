@@ -209,6 +209,17 @@ export default function InvestorsPage() {
               How it works →
             </a>
           </div>
+          <p className="text-xs text-zinc-500 mt-6">
+            Read more on{" "}
+            <Link href="/how-we-match" className="text-teal-400 hover:text-teal-300 underline underline-offset-2">
+              how we match
+            </Link>
+            {" "}or{" "}
+            <Link href="/how-we-learn" className="text-teal-400 hover:text-teal-300 underline underline-offset-2">
+              how we learn
+            </Link>
+            {" "}from every interaction.
+          </p>
         </div>
       </section>
 
