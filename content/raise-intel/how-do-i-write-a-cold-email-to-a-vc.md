@@ -8,6 +8,7 @@ category: "outreach"
 tags: ["cold-email", "investor-outreach", "fundraising-tactics", "pre-seed", "seed"]
 fund_slugs: []
 sector_slugs: []
+related_slugs: ["how-to-find-investors-who-invest-in-my-space", "how-do-i-know-if-a-vc-passed-or-is-just-slow", "am-i-ready-to-raise"]
 tldr: "Subject line: boring and specific. Body: four sentences — who you are, what you do, why they should care, what you want. Ask: a 20-minute call with a specific time. Attachment: a one-page brief, not a deck. Skip the personalization — VCs pattern-match on the deal, not the flattery."
 cta_text: "Open raise(fn) — get matched with investors who fund your space."
 cta_href: "/signup"
@@ -98,7 +99,7 @@ VCs archive these on sight. Don't take it personally — every one signals "mass
 
 The reason most cold emails fail isn't the writing. It's the list.
 
-You're emailing 50 funds and 30 of them don't fund your sector. No amount of subject-line tuning fixes that. The list comes first.
+You're emailing 50 funds and 30 of them don't fund your sector. No amount of subject-line tuning fixes that. The list comes first. The full method — sector + stage + check size + deployment activity — is in [How do I find investors who actually invest in my space](/raise-intel/how-to-find-investors-who-invest-in-my-space).
 
 We index 17,000+ investors. We've classified 4,331 of them against a 5-dimensional ontology of what they actually fund. 892 have observed thesis pulled from real check data — not what they claim on their website, what they actually wrote checks for in the last 18 months.
 
@@ -122,7 +123,7 @@ No. Pixels get flagged. Plain text.
 
 ### What if they don't reply?
 
-One nudge after 5 business days. Then move on. A third email is desperation.
+One nudge after 5 business days. Then move on. A third email is desperation. If you're not sure whether they're passing or just slow, see [How do I know if a VC passed — or is just slow](/raise-intel/how-do-i-know-if-a-vc-passed-or-is-just-slow).
 
 ### Email a partner or the firm's general inbox?
 

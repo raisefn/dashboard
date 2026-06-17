@@ -30,6 +30,11 @@ export interface RaiseIntelArticle {
   // headline question. Surfaced both in the page UI and in the JSON-LD
   // so AI crawlers can lift it as the canonical answer.
   tldr?: string;
+  // Hand-picked related article slugs for the "Related research" block
+  // at the bottom of each article. Internal linking is a major signal
+  // to both Google and AI search engines that articles form a topical
+  // cluster — every article should reference 2-3 others.
+  related_slugs: string[];
   body: string;
 }
 
@@ -140,6 +145,7 @@ function parseArticle(slug: string, raw: string): RaiseIntelArticle | null {
     cta_text: fm.cta_text ? String(fm.cta_text) : undefined,
     cta_href: fm.cta_href ? String(fm.cta_href) : undefined,
     tldr: fm.tldr ? String(fm.tldr) : undefined,
+    related_slugs: Array.isArray(fm.related_slugs) ? fm.related_slugs.map(String) : [],
     body: body.trim(),
   };
 }

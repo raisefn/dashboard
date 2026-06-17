@@ -8,6 +8,7 @@ category: "investor-discovery"
 tags: ["investor-discovery", "fundraising", "pre-seed", "seed", "vc-fit"]
 fund_slugs: []
 sector_slugs: []
+related_slugs: ["who-is-actually-writing-checks-right-now", "how-do-i-write-a-cold-email-to-a-vc", "am-i-ready-to-raise"]
 tldr: "Pull each fund's last 30 checks. That's their real thesis. Filter to ones that match your sector, stage, and check size. Throw out anyone who hasn't deployed in 12+ months. What's left is your list. Stated thesis is marketing. Observed thesis is signal."
 cta_text: "Open raise(fn) — get matched with investors who fund your space."
 cta_href: "/signup"
@@ -29,7 +30,7 @@ Run your raise through these in order. If a fund fails any of them, it's off the
 
 Most VC websites haven't been updated in a year. Funds wind down, pause between vintages, or quietly stop deploying — and never tell you.
 
-Cleanest signal: last SEC Form D filing. Every priced round files one within 15 days. If the fund's most recent filing is 6+ months old, they're slowing. 12+ months, they're paused. 18+ months, they're done.
+Cleanest signal: last SEC Form D filing. Every priced round files one within 15 days. If the fund's most recent filing is 6+ months old, they're slowing. 12+ months, they're paused. 18+ months, they're done. We cover how to check this fund-by-fund in [Who is actually writing checks right now](/raise-intel/who-is-actually-writing-checks-right-now).
 
 The "we'd love to invest in you" partner at a fund that hasn't written a check in 18 months is selling you nothing.
 
@@ -61,7 +62,7 @@ You answer a 5-minute intake. raise(fn) returns a ranked list of investors whose
 
 ## What to skip
 
-- **The famous funds at pre-seed.** Sequoia, a16z, Founders Fund. They see thousands of pre-seed deals, write almost none, and never lead at that stage. Bad odds. Save them for if you have a warm intro.
+- **The famous funds at pre-seed.** Sequoia, a16z, Founders Fund. They see thousands of pre-seed deals, write almost none, and never lead at that stage. Bad odds. Save them for if you have a warm intro. Before you open any conversations, run yourself through the [Raise Readiness Framework](/raise-intel/am-i-ready-to-raise) — premature outreach burns the best investors first.
 - **Curated "best AI investors" lists.** They were curated for a different cycle. Most of those funds aren't deploying right now.
 - **Geographic filtering first.** Pitching "investors in my city" before "investors in my sector" is local-optimum thinking. Sector fit at global beats geographic fit at local.
 - **The 200-name spray-and-pray list.** If it's not filtered to ~50 well-fitting candidates, you'll burn the best investors first while you're still figuring out your pitch.

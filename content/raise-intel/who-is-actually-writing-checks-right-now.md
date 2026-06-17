@@ -8,6 +8,7 @@ category: "active-investors"
 tags: ["active-investors", "fundraising-2026", "vc-deployment", "investor-discovery", "fund-velocity"]
 fund_slugs: []
 sector_slugs: []
+related_slugs: ["how-to-find-investors-who-invest-in-my-space", "how-do-i-know-if-a-vc-passed-or-is-just-slow", "am-i-ready-to-raise"]
 tldr: "A fund is actively deploying if they've filed an SEC Form D, closed a publicly reported round, or made a portfolio announcement in the last 6 months. Anything older than 12 months — treat as cold. VC websites are unreliable. Form D filings aren't. raise(fn) tracks deployment status automatically."
 cta_text: "Open raise(fn) — get matched with investors who fund your space."
 cta_href: "/signup"
@@ -17,7 +18,7 @@ cta_href: "/signup"
 
 Their websites haven't been updated in 18 months. The fund is between vintages, winding down, or quietly paused — and the *"we love founders"* page is still up.
 
-Founders find their initial list from those pages and from "best VCs" articles from 2024. Both lag reality by 12-24 months. The result: weeks pitching investors who couldn't write a check this quarter if they wanted to.
+Founders find their initial list from those pages and from "best VCs" articles from 2024. Both lag reality by 12-24 months. The result: weeks pitching investors who couldn't write a check this quarter if they wanted to. ([How do I find investors who actually invest in my space](/raise-intel/how-to-find-investors-who-invest-in-my-space) covers the broader filter method — this piece is on the activity check specifically.)
 
 The fix takes 30 seconds per fund. Public data, free, exact.
 

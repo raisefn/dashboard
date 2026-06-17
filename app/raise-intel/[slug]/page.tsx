@@ -104,11 +104,38 @@ export default async function RaiseIntelArticlePage({ params }: Props) {
         }
       : null;
 
+  // BreadcrumbList — tells Google + AI search this article sits inside
+  // a topical hub (Raise Intel) which itself sits under the site. Helps
+  // search engines build a cluster understanding of the surface.
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "raise(fn)", item: SITE },
+      { "@type": "ListItem", position: 2, name: "Raise Intel", item: `${SITE}/raise-intel` },
+      { "@type": "ListItem", position: 3, name: article.title, item: url },
+    ],
+  };
+
+  // Resolve related article slugs to full article objects so we can
+  // render them with their actual titles and descriptions. Filter out
+  // any that don't exist (e.g. typo'd slug or draft article).
+  const related = await Promise.all(
+    article.related_slugs.map((s) => getArticleBySlug(s)),
+  );
+  const validRelated = related.filter(
+    (a): a is NonNullable<typeof a> => a !== null && a.status === "published",
+  );
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       {faqSchema && (
         <script
@@ -255,6 +282,36 @@ export default async function RaiseIntelArticlePage({ params }: Props) {
             {article.body}
           </ReactMarkdown>
         </div>
+
+        {/* Related research — internal linking that compounds topical
+           authority on this surface. Each article hand-curates 2-3
+           related slugs in frontmatter. Sits above the CTA so a reader
+           who isn't ready to convert has a path deeper into the cluster
+           instead of bouncing. */}
+        {validRelated.length > 0 && (
+          <div className="mt-16 border-t border-zinc-800 pt-8">
+            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-4">
+              Related research
+            </p>
+            <ul className="space-y-4">
+              {validRelated.map((r) => (
+                <li key={r.slug}>
+                  <Link
+                    href={`/raise-intel/${r.slug}`}
+                    className="group block rounded-lg border border-zinc-800/60 bg-zinc-900/30 p-4 hover:border-zinc-700 hover:bg-zinc-900/50 transition-colors"
+                  >
+                    <p className="text-base font-semibold text-white group-hover:text-teal-300 transition-colors">
+                      {r.title}
+                    </p>
+                    <p className="mt-1 text-sm text-zinc-400 leading-snug">
+                      {r.description}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {(article.cta_text || article.cta_href) && (
           <div className="mt-16 rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900/80 to-zinc-950 p-8">

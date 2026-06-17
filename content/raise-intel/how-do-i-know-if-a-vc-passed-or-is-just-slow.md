@@ -8,6 +8,7 @@ category: "investor-signals"
 tags: ["investor-signals", "fundraising-tactics", "vc-process", "pipeline-management", "pre-seed", "seed"]
 fund_slugs: []
 sector_slugs: []
+related_slugs: ["how-do-i-write-a-cold-email-to-a-vc", "how-to-find-investors-who-invest-in-my-space", "who-is-actually-writing-checks-right-now"]
 tldr: "Slow is a pass. A VC who's interested moves fast and asks specifically. A VC who's polite but slow has already mentally said no. The five hard signals: 5+ business days to reply, second ask for 'more data,' offers of help unrelated to investing, no follow-up question in 72 hours, vague timing on next steps. Two of those = pass."
 cta_text: "Open raise(fn) — get matched with investors who fund your space."
 cta_href: "/signup"
@@ -75,7 +76,7 @@ Most founders default to option 1 too late, after 6 weeks of soft chasing. Read 
 
 If you can read signals accurately, you can run 15-20 active conversations in parallel because half clear themselves out within 2 weeks. If you can't, you can only run 5-6 because each one drags.
 
-The bottleneck isn't your time. It's your accuracy.
+The bottleneck isn't your time. It's your accuracy. Pipeline width also depends on the quality of your initial outreach — see [How do I write a cold email to a VC that actually works](/raise-intel/how-do-i-write-a-cold-email-to-a-vc).
 
 ## FAQ
 

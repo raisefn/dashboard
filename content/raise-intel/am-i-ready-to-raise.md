@@ -8,6 +8,7 @@ category: "readiness"
 tags: ["raise-readiness", "fundraising-timing", "pre-seed", "seed", "fundraising-strategy"]
 fund_slugs: []
 sector_slugs: []
+related_slugs: ["how-to-find-investors-who-invest-in-my-space", "how-do-i-write-a-cold-email-to-a-vc", "how-do-i-know-if-a-vc-passed-or-is-just-slow"]
 tldr: "You're ready when you can answer six questions with one sentence each: your story, your ask, what's moving, your wedge, your target list, and your post-close plan. Miss two and you'll raise slower, on worse terms, or not at all. Most founders fail on the story, the ask, or the list — not on the metrics."
 cta_text: "Open raise(fn) — get matched with investors who fund your space."
 cta_href: "/signup"
@@ -57,7 +58,7 @@ Wedge can be unfair distribution, technical insight, proprietary data, or sequen
 
 A ranked list of 50-80 investors who actually fund what you're building, with the right contact path for each.
 
-If your list is *"all the VCs my friends told me about,"* you're not ready. The right list is filtered by recent check behavior, sector and stage fit, and check size. (This is what raise(fn) builds in 5 minutes.)
+If your list is *"all the VCs my friends told me about,"* you're not ready. The right list is filtered by recent check behavior, sector and stage fit, and check size. We break down the full method in [How do I find investors who actually invest in my space](/raise-intel/how-to-find-investors-who-invest-in-my-space). (This is also what raise(fn) builds in 5 minutes.)
 
 ### 6. The post-close plan
 
