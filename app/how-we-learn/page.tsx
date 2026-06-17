@@ -7,12 +7,11 @@ import { useEffect, useState } from "react";
 // with five signal streams flowing in. No counters, no demos, no walls of
 // text. The visual IS the page.
 
-// Five signal categories — each becomes a flowing stream of particles.
-// Labels reference what's actually captured in the code.
-const STREAMS = [
+// Five input streams flowing INTO the brain — what the system learns from.
+const INPUTS = [
   {
     label: "Founder artifacts",
-    sub: "Emails. Decks. Diligence Q&A. Narrative.",
+    sub: "Emails. Decks. Diligence Q&A. Narrative iteration.",
     color: "#2dd4bf",
     angle: -90,
   },
@@ -20,19 +19,19 @@ const STREAMS = [
     label: "Investor behavior",
     sub: "Commitment rate. Objections. Resonance. Checks.",
     color: "#a78bfa",
-    angle: -18,
+    angle: -54,
   },
   {
     label: "Outcomes",
     sub: "Met. Passed. Term sheet. Closed.",
     color: "#fbbf24",
-    angle: 54,
+    angle: -18,
   },
   {
     label: "Network paths",
-    sub: "Warm intros. Co-investors. Backed-by.",
+    sub: "Warm intros. Co-investors. Backed-by signals.",
     color: "#22d3ee",
-    angle: 126,
+    angle: 162,
   },
   {
     label: "Market signal",
@@ -42,30 +41,55 @@ const STREAMS = [
   },
 ];
 
-// Brain "neurons" — denser cluster, three depth layers for richness.
-// Increased from 90 → 180 neurons for more density. Same seed → stable layout.
+// Three output streams flowing OUT of the brain — what gets sharper.
+const OUTPUTS = [
+  {
+    label: "Sharper matches",
+    sub: "Right investors, right time, right fit.",
+    color: "#f472b6",
+    angle: 18,
+  },
+  {
+    label: "Smarter briefs",
+    sub: "Tailored to each investor's pattern.",
+    color: "#fda4af",
+    angle: 54,
+  },
+  {
+    label: "Tighter intros",
+    sub: "Higher conviction. Faster closes.",
+    color: "#fcd34d",
+    angle: 90,
+  },
+];
+
+// Brain "neurons" — three depth layers, varied sizes. Outer layer is denser
+// to make the mesh look ALIVE all the way to the perimeter.
 const NEURONS = (() => {
-  const seed = 12345;
-  let rng = seed;
+  let rng = 12345;
   const rand = () => {
     rng = (rng * 9301 + 49297) % 233280;
     return rng / 233280;
   };
   const arr: { x: number; y: number; r: number; layer: number }[] = [];
-  for (let i = 0; i < 180; i++) {
+  for (let i = 0; i < 260; i++) {
     const angle = rand() * Math.PI * 2;
-    const dist = 25 + rand() * 135;
+    // Bias half the neurons to the outer ring for visible mesh density at edges
+    const distRand = rand();
+    const dist = i % 2 === 0
+      ? 60 + distRand * 160      // outer band
+      : 20 + distRand * 110;      // inner cluster
     arr.push({
       x: Math.cos(angle) * dist,
       y: Math.sin(angle) * dist,
-      r: 1.2 + rand() * 2.6,
-      layer: rand() < 0.4 ? 0 : rand() < 0.72 ? 1 : 2,
+      r: 1.1 + rand() * 2.4,
+      layer: rand() < 0.35 ? 0 : rand() < 0.7 ? 1 : 2,
     });
   }
   return arr;
 })();
 
-// Connection mesh — denser now, with more far-reaching arcs at low opacity.
+// Two-tier connection mesh — close visible + long-range faint webbing.
 const CONNECTIONS = (() => {
   const conns: { a: number; b: number; opacity: number }[] = [];
   for (let i = 0; i < NEURONS.length; i++) {
@@ -73,152 +97,224 @@ const CONNECTIONS = (() => {
       const dx = NEURONS[i].x - NEURONS[j].x;
       const dy = NEURONS[i].y - NEURONS[j].y;
       const d = Math.sqrt(dx * dx + dy * dy);
-      // Two tiers of connections: close-range (visible) and long-range (faint webbing).
-      if (d < 50 && Math.random() < 0.5) {
-        conns.push({ a: i, b: j, opacity: Math.max(0.08, 0.42 - d / 180) });
-      } else if (d < 110 && Math.random() < 0.08) {
-        conns.push({ a: i, b: j, opacity: 0.06 });
+      if (d < 48 && Math.random() < 0.45) {
+        conns.push({ a: i, b: j, opacity: Math.max(0.1, 0.45 - d / 160) });
+      } else if (d < 130 && Math.random() < 0.05) {
+        conns.push({ a: i, b: j, opacity: 0.07 });
       }
     }
   }
   return conns;
 })();
 
+// Activation epicenters — pre-computed neuron indices that act as "thinking
+// origin points." Every few seconds, a wave of brightness propagates from one
+// of these outward through the mesh, creating the sense the brain is alive.
+const EPICENTERS = [10, 47, 88, 132, 175, 220].map((i) => i % NEURONS.length);
+
 function Brain() {
-  // Center pushed down + viewBox extended so the top labels don't crop.
-  const CX = 500;
-  const CY = 480;
-  const STREAM_DIST = 340;
+  // Bigger canvas. Inputs go to LEFT half, outputs exit RIGHT half. Center
+  // pushed slightly low so top labels never crop.
+  const CX = 700;
+  const CY = 600;
+  const INPUT_DIST = 460;
+  const OUTPUT_DIST = 460;
 
   const [tick, setTick] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setTick((x) => x + 1), 70);
+    const t = setInterval(() => setTick((x) => x + 1), 55);
     return () => clearInterval(t);
   }, []);
+
+  // Activation wave — every ~3.5s a different epicenter fires; brightness
+  // ripples outward through the mesh based on distance from that point.
+  const waveEpoch = Math.floor(tick / 64);
+  const wavePhase = (tick % 64) / 64; // 0 → 1 across the wave
+  const epicenterIdx = EPICENTERS[waveEpoch % EPICENTERS.length];
+  const epi = NEURONS[epicenterIdx];
 
   return (
     <div className="relative w-full">
       <svg
-        viewBox="0 0 1000 960"
+        viewBox="0 0 1400 1200"
         className="w-full h-auto"
-        style={{ maxHeight: "88vh" }}
+        style={{ maxHeight: "92vh" }}
       >
         <defs>
           <radialGradient id="brainCore" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#10b981" stopOpacity="0.5" />
-            <stop offset="40%" stopColor="#0d9488" stopOpacity="0.18" />
-            <stop offset="80%" stopColor="#0d9488" stopOpacity="0.04" />
+            <stop offset="0%" stopColor="#10b981" stopOpacity="0.55" />
+            <stop offset="35%" stopColor="#0d9488" stopOpacity="0.22" />
+            <stop offset="75%" stopColor="#0d9488" stopOpacity="0.05" />
             <stop offset="100%" stopColor="#0d9488" stopOpacity="0" />
           </radialGradient>
           <radialGradient id="brainGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#10b981" stopOpacity="0.7" />
+            <stop offset="0%" stopColor="#10b981" stopOpacity="0.85" />
+            <stop offset="50%" stopColor="#0d9488" stopOpacity="0.25" />
             <stop offset="100%" stopColor="#0d9488" stopOpacity="0" />
           </radialGradient>
-          <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" />
-          </filter>
-          {STREAMS.map((s, i) => (
-            <linearGradient key={`sg-${i}`} id={`stream-${i}`} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={s.color} stopOpacity="0" />
-              <stop offset="40%" stopColor={s.color} stopOpacity="0.5" />
-              <stop offset="100%" stopColor={s.color} stopOpacity="0.05" />
-            </linearGradient>
-          ))}
+          <radialGradient id="brainAtmos" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#0d9488" stopOpacity="0" />
+            <stop offset="70%" stopColor="#0d9488" stopOpacity="0.08" />
+            <stop offset="100%" stopColor="#0d9488" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id="hotspot" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
+            <stop offset="40%" stopColor="#5eead4" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+          </radialGradient>
         </defs>
 
-        {/* outer atmospheric glow */}
-        <circle cx={CX} cy={CY} r="320" fill="url(#brainCore)" />
-        <circle cx={CX} cy={CY} r="180" fill="url(#brainGlow)" />
+        {/* Layered atmosphere — three concentric soft gradients for depth */}
+        <circle cx={CX} cy={CY} r="540" fill="url(#brainAtmos)" />
+        <circle cx={CX} cy={CY} r="420" fill="url(#brainCore)" />
+        <circle cx={CX} cy={CY} r="230" fill="url(#brainGlow)" />
 
-        {/* stream lines + flowing particles */}
-        {STREAMS.map((s, i) => {
-          const sx = CX + STREAM_DIST * Math.cos((s.angle * Math.PI) / 180);
-          const sy = CY + STREAM_DIST * Math.sin((s.angle * Math.PI) / 180);
-          const dx = CX + 100 * Math.cos((s.angle * Math.PI) / 180);
-          const dy = CY + 100 * Math.sin((s.angle * Math.PI) / 180);
+        {/* Slow-rotating outer ring of decoration — makes the brain feel ALIVE */}
+        <g transform={`rotate(${(tick * 0.4) % 360} ${CX} ${CY})`}>
+          <circle cx={CX} cy={CY} r="380" fill="none" stroke="#10b981" strokeOpacity="0.12" strokeWidth="0.8" strokeDasharray="2 12" />
+          <circle cx={CX} cy={CY} r="320" fill="none" stroke="#5eead4" strokeOpacity="0.08" strokeWidth="0.6" strokeDasharray="3 18" />
+        </g>
+
+        {/* INPUT streams — particles flowing INTO the brain */}
+        {INPUTS.map((s, i) => {
+          const sx = CX + INPUT_DIST * Math.cos((s.angle * Math.PI) / 180);
+          const sy = CY + INPUT_DIST * Math.sin((s.angle * Math.PI) / 180);
+          const dx = CX + 120 * Math.cos((s.angle * Math.PI) / 180);
+          const dy = CY + 120 * Math.sin((s.angle * Math.PI) / 180);
           return (
-            <g key={`s-${i}`}>
-              <line
-                x1={sx}
-                y1={sy}
-                x2={CX}
-                y2={CY}
-                stroke={s.color}
-                strokeOpacity="0.18"
-                strokeWidth="1"
-                strokeDasharray="2 6"
-              />
-              {/* particles flowing INTO brain — denser, varied sizes */}
-              {[0, 1, 2, 3, 4, 5, 6, 7].map((p) => {
-                const phase = ((tick + p * 14) % 100) / 100;
+            <g key={`in-${i}`}>
+              <line x1={sx} y1={sy} x2={dx} y2={dy} stroke={s.color} strokeOpacity="0.22" strokeWidth="1" strokeDasharray="2 6" />
+              {/* 12 staggered particles per input — dense flow */}
+              {Array.from({ length: 12 }).map((_, p) => {
+                const phase = ((tick + p * 11) % 100) / 100;
                 const px = sx + (dx - sx) * phase;
                 const py = sy + (dy - sy) * phase;
-                const sizeJitter = (p % 3) === 0 ? 2.6 : 1.8;
+                const sz = (p % 4) === 0 ? 3 : (p % 2) === 0 ? 2 : 1.4;
+                // Trail effect — each particle leaves a faint streak behind
                 return (
-                  <circle
-                    key={p}
-                    cx={px}
-                    cy={py}
-                    r={sizeJitter}
-                    fill={s.color}
-                    opacity={0.9 * (1 - Math.abs(phase - 0.5) * 2 + 0.25)}
-                  />
+                  <g key={p}>
+                    <circle cx={px} cy={py} r={sz} fill={s.color} opacity={0.95 * (1 - Math.abs(phase - 0.5) * 1.6)} />
+                  </g>
                 );
               })}
-              {/* stream source — node + label + concentric ring */}
-              <circle cx={sx} cy={sy} r="48" fill={s.color} fillOpacity="0.04" stroke={s.color} strokeOpacity="0.18" strokeWidth="0.8" strokeDasharray="2 4" />
-              <circle cx={sx} cy={sy} r="34" fill={s.color} fillOpacity="0.08" stroke={s.color} strokeOpacity="0.55" strokeWidth="1.3" />
-              <circle cx={sx} cy={sy} r="6" fill={s.color} fillOpacity="0.95">
-                <animate attributeName="r" values="6;9;6" dur={`${1.6 + i * 0.2}s`} repeatCount="indefinite" />
+              {/* Stream source — bigger, dramatic */}
+              <circle cx={sx} cy={sy} r="60" fill={s.color} fillOpacity="0.04" stroke={s.color} strokeOpacity="0.18" strokeWidth="0.8" strokeDasharray="2 5" />
+              <circle cx={sx} cy={sy} r="42" fill={s.color} fillOpacity="0.08" stroke={s.color} strokeOpacity="0.55" strokeWidth="1.4" />
+              <circle cx={sx} cy={sy} r="8" fill={s.color} fillOpacity="0.98">
+                <animate attributeName="r" values="8;13;8" dur={`${1.4 + i * 0.2}s`} repeatCount="indefinite" />
               </circle>
             </g>
           );
         })}
 
-        {/* neuron mesh — connections drawn first so they sit under the nodes */}
+        {/* OUTPUT streams — particles flowing OUT of the brain to labeled
+            destinations. Different palette (warm pink/gold) signals OUTFLOW. */}
+        {OUTPUTS.map((s, i) => {
+          const sx = CX + OUTPUT_DIST * Math.cos((s.angle * Math.PI) / 180);
+          const sy = CY + OUTPUT_DIST * Math.sin((s.angle * Math.PI) / 180);
+          const dx = CX + 120 * Math.cos((s.angle * Math.PI) / 180);
+          const dy = CY + 120 * Math.sin((s.angle * Math.PI) / 180);
+          return (
+            <g key={`out-${i}`}>
+              <line x1={dx} y1={dy} x2={sx} y2={sy} stroke={s.color} strokeOpacity="0.22" strokeWidth="1" strokeDasharray="2 6" />
+              {/* 10 particles flowing OUTWARD (brain → dest) */}
+              {Array.from({ length: 10 }).map((_, p) => {
+                const phase = ((tick + p * 13) % 100) / 100;
+                const px = dx + (sx - dx) * phase;
+                const py = dy + (sy - dy) * phase;
+                const sz = (p % 3) === 0 ? 2.8 : 1.8;
+                return (
+                  <circle key={p} cx={px} cy={py} r={sz} fill={s.color} opacity={0.95 * (1 - Math.abs(phase - 0.5) * 1.6)} />
+                );
+              })}
+              {/* Destination source — warmer styling */}
+              <circle cx={sx} cy={sy} r="60" fill={s.color} fillOpacity="0.04" stroke={s.color} strokeOpacity="0.18" strokeWidth="0.8" strokeDasharray="2 5" />
+              <circle cx={sx} cy={sy} r="42" fill={s.color} fillOpacity="0.08" stroke={s.color} strokeOpacity="0.55" strokeWidth="1.4" />
+              <circle cx={sx} cy={sy} r="8" fill={s.color} fillOpacity="0.98">
+                <animate attributeName="r" values="8;13;8" dur={`${1.5 + i * 0.15}s`} repeatCount="indefinite" />
+              </circle>
+            </g>
+          );
+        })}
+
+        {/* Neuron mesh — connections under nodes */}
         <g transform={`translate(${CX} ${CY})`}>
-          {CONNECTIONS.map((c, i) => (
-            <line
-              key={`c-${i}`}
-              x1={NEURONS[c.a].x}
-              y1={NEURONS[c.a].y}
-              x2={NEURONS[c.b].x}
-              y2={NEURONS[c.b].y}
-              stroke="#10b981"
-              strokeOpacity={c.opacity}
-              strokeWidth="0.8"
-            />
-          ))}
-          {NEURONS.map((n, i) => {
-            const phase = ((tick + i * 7) % 60) / 60;
-            const pulse = Math.sin(phase * Math.PI * 2) * 0.5 + 0.5;
+          {CONNECTIONS.map((c, i) => {
+            // Connections light up briefly when they're near the active epicenter
+            const midX = (NEURONS[c.a].x + NEURONS[c.b].x) / 2;
+            const midY = (NEURONS[c.a].y + NEURONS[c.b].y) / 2;
+            const distFromEpi = Math.sqrt((midX - epi.x) ** 2 + (midY - epi.y) ** 2);
+            const waveRadius = wavePhase * 240;
+            const inWave = Math.abs(distFromEpi - waveRadius) < 25;
+            const opacity = inWave ? Math.min(0.9, c.opacity + 0.5) : c.opacity;
+            const stroke = inWave ? "#ffffff" : "#10b981";
             return (
-              <circle
-                key={`n-${i}`}
-                cx={n.x}
-                cy={n.y}
-                r={n.r + pulse * 0.6}
-                fill={n.layer === 0 ? "#10b981" : n.layer === 1 ? "#5eead4" : "#ffffff"}
-                opacity={(n.layer === 2 ? 0.9 : 0.65) * (0.6 + pulse * 0.4)}
+              <line key={`c-${i}`}
+                x1={NEURONS[c.a].x} y1={NEURONS[c.a].y}
+                x2={NEURONS[c.b].x} y2={NEURONS[c.b].y}
+                stroke={stroke}
+                strokeOpacity={opacity}
+                strokeWidth={inWave ? 1.3 : 0.7}
               />
             );
           })}
+          {NEURONS.map((n, i) => {
+            // Base pulse — every neuron breathes on its own slow rhythm
+            const phase = ((tick + i * 7) % 60) / 60;
+            const pulse = Math.sin(phase * Math.PI * 2) * 0.5 + 0.5;
+            // Wave brightness — when the activation wavefront passes this neuron
+            const distFromEpi = Math.sqrt((n.x - epi.x) ** 2 + (n.y - epi.y) ** 2);
+            const waveRadius = wavePhase * 240;
+            const waveProximity = Math.max(0, 1 - Math.abs(distFromEpi - waveRadius) / 30);
+            const totalGlow = Math.min(1, pulse * 0.6 + waveProximity * 1.2);
+            const fill = waveProximity > 0.4 ? "#ffffff" :
+                         n.layer === 0 ? "#10b981" :
+                         n.layer === 1 ? "#5eead4" : "#ffffff";
+            return (
+              <circle key={`n-${i}`}
+                cx={n.x} cy={n.y}
+                r={n.r + totalGlow * 1.4}
+                fill={fill}
+                opacity={(n.layer === 2 ? 0.9 : 0.7) * (0.55 + totalGlow * 0.45)}
+              />
+            );
+          })}
+          {/* Hotspot at active epicenter — bright fading flash */}
+          <circle cx={epi.x} cy={epi.y} r={14} fill="url(#hotspot)" opacity={Math.max(0, 1 - wavePhase * 1.4)} />
         </g>
 
-        {/* stream LABELS — placed AFTER the circles so they overlay properly */}
-        {STREAMS.map((s, i) => {
-          const sx = CX + STREAM_DIST * Math.cos((s.angle * Math.PI) / 180);
-          const sy = CY + STREAM_DIST * Math.sin((s.angle * Math.PI) / 180);
-          // Label position offset OUTWARD from brain
-          const offsetX = 70 * Math.cos((s.angle * Math.PI) / 180);
-          const offsetY = 70 * Math.sin((s.angle * Math.PI) / 180);
+        {/* LABELS — inputs (left-leaning), outputs (right-leaning), placed
+            AFTER the mesh so they sit on top */}
+        {[
+          ...INPUTS.map((s) => ({ ...s, kind: "in" as const, dist: INPUT_DIST })),
+          ...OUTPUTS.map((s) => ({ ...s, kind: "out" as const, dist: OUTPUT_DIST })),
+        ].map((s, i) => {
+          const sx = CX + s.dist * Math.cos((s.angle * Math.PI) / 180);
+          const sy = CY + s.dist * Math.sin((s.angle * Math.PI) / 180);
+          const offsetMag = 90;
+          const offsetX = offsetMag * Math.cos((s.angle * Math.PI) / 180);
+          const offsetY = offsetMag * Math.sin((s.angle * Math.PI) / 180);
           const isLeft = sx + offsetX < CX;
+          const tag = s.kind === "in" ? "← INPUT" : "OUTPUT →";
           return (
             <g key={`l-${i}`}>
               <text
                 x={sx + offsetX}
-                y={sy + offsetY - 6}
-                fontSize="14"
+                y={sy + offsetY - 22}
+                fontSize="10"
+                fill={s.color}
+                fontFamily="sans-serif"
+                fontWeight="700"
+                letterSpacing="0.2em"
+                textAnchor={isLeft ? "end" : "start"}
+                opacity="0.8"
+              >
+                {tag}
+              </text>
+              <text
+                x={sx + offsetX}
+                y={sy + offsetY - 4}
+                fontSize="17"
                 fill="#fafafa"
                 fontFamily="sans-serif"
                 fontWeight="700"
@@ -228,9 +324,9 @@ function Brain() {
               </text>
               <text
                 x={sx + offsetX}
-                y={sy + offsetY + 10}
+                y={sy + offsetY + 14}
                 fontSize="11"
-                fill="#71717a"
+                fill="#a1a1aa"
                 fontFamily="sans-serif"
                 textAnchor={isLeft ? "end" : "start"}
               >
