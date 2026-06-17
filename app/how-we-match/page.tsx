@@ -309,82 +309,82 @@ export default function HowWeMatchPage() {
             {[
               {
                 tag: "Layer 01 · Ontology coverage",
-                weight: "core signal",
+                kind: "foundation",
                 color: "#2dd4bf",
-                title: "5 dimensions · 109 nodes · 264 connections",
-                desc: "Every founder and investor positioned in the same coordinate system. Coverage-mean scoring rewards completeness, not keyword hits.",
+                title: "Five dimensions. One coordinate system.",
+                desc: "Every founder and every investor positioned across industry, modality, technology, audience, and business model. Coverage matters, not keyword hits.",
               },
               {
                 tag: "Layer 02 · Specialty bonus",
-                weight: "×1.20 multiplier",
+                kind: "amplifier",
                 color: "#34d399",
-                title: "Narrow focus rewarded",
-                desc: "Investors with ≤3 industry tags get a multiplicative boost when their narrow specialty overlaps. A two-industry investor outranks a twelve-industry generalist on the same deal.",
+                title: "Narrow focus rewarded.",
+                desc: "Investors with a tight, focused thesis get amplified when their specialty overlaps. A focused investor outranks a broad generalist on the same deal.",
               },
               {
-                tag: "Layer 03 · Specialty combos",
-                weight: "up to ×1.40",
+                tag: "Layer 03 · Specialty patterns",
+                kind: "amplifier",
                 color: "#22d3ee",
-                title: "64 cross-dim patterns recognized",
-                desc: "Consumer marketplace. AI fintech. Vertical SaaS healthcare. On-demand household services. When founder and investor both express the same combo, the score multiplies.",
+                title: "Cross-dimensional combos recognized.",
+                desc: "Consumer marketplace. AI fintech. Vertical SaaS healthcare. On-demand household services. When founder and investor both express the same pattern, the conviction reads through.",
               },
               {
                 tag: "Layer 04 · Stage adjacency",
-                weight: "hard filter",
+                kind: "filter",
                 color: "#a78bfa",
                 title: "Pre-seed touches seed. Seed touches Series A.",
-                desc: "Stages adjacent to the raise pass the filter; the rest get cut. A growth-stage fund doesn't surface for a pre-seed; a pre-seed angel doesn't surface for Series B.",
+                desc: "Stages adjacent to the raise pass; the rest get cut. A growth-stage fund doesn't surface for a pre-seed. A pre-seed angel doesn't surface for Series B.",
               },
               {
                 tag: "Layer 05 · Check size fit",
-                weight: "score weight 1.0",
+                kind: "filter",
                 color: "#c4b5fd",
                 title: "Lead capable. Participation capable. Out of band.",
-                desc: "Check-size min/max measured against the raise. Lead-size matches score full credit; participation-size partial; out-of-band cut entirely. No founders pitching $5M to a $50K angel.",
+                desc: "Check-size mins and maxes measured against the raise. Lead-size matches score highest. Participation-size partial. Out-of-band cut. No founders pitching small angels on Series A.",
               },
               {
                 tag: "Layer 06 · Geography",
-                weight: "score weight 0.5",
+                kind: "filter",
                 color: "#fbbf24",
                 title: "Local-only honored. Global investors travel.",
-                desc: "Investors with local-only mandates only surface for nearby founders. Investors with focus_countries set match those geos. Sector-agnostic investors with global mandates match anywhere.",
+                desc: "Investors with local-only mandates surface only for nearby founders. Investors with regional focus match their geos. Global mandates match anywhere.",
               },
               {
                 tag: "Layer 07 · Deployment cadence",
-                weight: "score weight 0.5",
+                kind: "signal",
                 color: "#fb923c",
-                title: "Actively writing > paused > unknown",
-                desc: "An investor actively deploying gets a higher score than one on pause. Funds at the end of their cycle don't waste anyone's time.",
+                title: "Actively writing > paused > unknown.",
+                desc: "An investor actively deploying outranks one on pause. Funds at the end of their cycle don't waste anyone's time.",
               },
               {
                 tag: "Layer 08 · Hard nos",
-                weight: "exclusion filter",
+                kind: "exclusion",
                 color: "#f87171",
-                title: "Pre-rejected pairings never surface",
-                desc: "If the investor declared they'll never invest in crypto, hardware, or any other sector — and the founder is there — the match never fires. Saves both sides time.",
+                title: "Pre-rejected pairings never surface.",
+                desc: "When an investor declares the sectors they'll never touch — and the founder is there — the match never fires. Saves both sides the dance.",
               },
               {
                 tag: "Layer 09 · Behavioral profile",
-                weight: "ground truth",
+                kind: "signal",
                 color: "#fda4af",
                 title: "Real check sizes. Real commit rates. Real ghost rates.",
-                desc: "We track what investors actually do — checks written, meetings taken, days-to-decision, ghost rates. Matchmaking down-weights ghosters; up-weights deciders.",
+                desc: "We track what investors actually do, not what their website says — checks written, meetings taken, days to decision, ghost rates. The matcher quietly favors deciders.",
               },
               {
                 tag: "Layer 10 · Network signal",
-                weight: "score weight 2.0",
+                kind: "signal",
                 color: "#5eead4",
-                title: "Warm intro paths surface",
-                desc: "When other founders have engaged this investor, that history surfaces — commitment rate, what resonated, common objections — without exposing any individual founder's pipeline.",
+                title: "Warm-intro paths surface.",
+                desc: "When other founders have engaged this investor, the aggregated history surfaces — commitment rates, what resonated, common objections — without ever exposing any individual pipeline.",
               },
               {
                 tag: "Layer 11 · Human curation",
-                weight: "the final gate",
+                kind: "the final gate",
                 color: "#fde68a",
-                title: "Every warm intro brokered by a person",
-                desc: "The algorithm surfaces signal. A human reviews every proprietary match and decides what becomes an intro. No auto-fired emails. No abused inboxes. Ever.",
+                title: "Every warm intro brokered by a person.",
+                desc: "The lattice surfaces signal. A human decides what becomes an intro. No auto-fired emails. No abused inboxes. Ever.",
               },
-            ].map((layer, i) => (
+            ].map((layer) => (
               <div
                 key={layer.tag}
                 className="relative grid grid-cols-12 gap-4 px-5 py-5 rounded-lg border border-zinc-900 bg-zinc-950/60 hover:bg-zinc-900/60 hover:border-zinc-800 transition-colors group"
@@ -398,7 +398,7 @@ export default function HowWeMatchPage() {
                     <p className="text-[10px] uppercase tracking-widest font-bold mb-1" style={{ color: layer.color }}>
                       {layer.tag}
                     </p>
-                    <p className="text-[10px] text-zinc-600 font-mono">{layer.weight}</p>
+                    <p className="text-[10px] text-zinc-600 uppercase tracking-widest">{layer.kind}</p>
                   </div>
                 </div>
                 <div className="col-span-12 md:col-span-9">
