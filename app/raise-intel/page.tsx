@@ -46,12 +46,12 @@ export default async function RaiseIntelIndex() {
           Raise Intel
         </p>
         <h1 className="text-4xl font-bold text-white sm:text-5xl">
-          What investors actually fund.
+          Read before you raise.
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-zinc-400 leading-relaxed">
-          Most VC databases show you what funds say. We show you what they
-          actually wrote checks for. Sourced from real round data across 17,000+
-          investors and 210,000+ rounds.
+          Field research on how fundraising actually works in 2026 — what
+          investors fund, how rounds close, and where founders waste cycles.
+          Sourced from real round data, not Twitter advice.
         </p>
       </header>
 

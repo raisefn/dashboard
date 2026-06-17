@@ -1,8 +1,8 @@
 ---
 title: "How do I write a cold email to a VC that actually works?"
 description: "Skip the personalization. VCs pattern-match on the deal, not on whether you complimented their portfolio. Here's what actually moves the reply rate: subject line, four sentences, one specific ask, one-page brief."
-published_at: "2026-06-17"
-updated_at: "2026-06-17"
+published_at: "2026-06-04"
+updated_at: "2026-06-04"
 status: "published"
 category: "outreach"
 tags: ["cold-email", "investor-outreach", "fundraising-tactics", "pre-seed", "seed"]

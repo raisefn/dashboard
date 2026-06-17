@@ -1,8 +1,8 @@
 ---
 title: "How do I find investors who actually invest in my space?"
 description: "Stop reading VC websites. They lie by omission. Here's how to build a target list from what funds actually fund — recent check data, not stated thesis — in under 30 minutes."
-published_at: "2026-06-17"
-updated_at: "2026-06-17"
+published_at: "2026-06-13"
+updated_at: "2026-06-13"
 status: "published"
 category: "investor-discovery"
 tags: ["investor-discovery", "fundraising", "pre-seed", "seed", "vc-fit"]

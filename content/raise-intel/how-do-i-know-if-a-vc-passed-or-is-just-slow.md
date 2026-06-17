@@ -1,8 +1,8 @@
 ---
 title: "How do I know if a VC passed — or is just slow?"
 description: "Slow is a pass. Here are the specific signals that tell you which investors are actually moving forward and which have ghosted in slow motion. Read them right or you'll spend three weeks chasing a soft no."
-published_at: "2026-06-17"
-updated_at: "2026-06-17"
+published_at: "2026-06-09"
+updated_at: "2026-06-09"
 status: "published"
 category: "investor-signals"
 tags: ["investor-signals", "fundraising-tactics", "vc-process", "pipeline-management", "pre-seed", "seed"]

@@ -1,8 +1,8 @@
 ---
 title: "Who is actually writing checks right now?"
 description: "Half the VCs on your list aren't deploying. Their websites haven't caught up. Here's how to tell who's actually writing checks in 2026 versus who's quietly paused — in 30 seconds per fund."
-published_at: "2026-06-17"
-updated_at: "2026-06-17"
+published_at: "2026-05-29"
+updated_at: "2026-05-29"
 status: "published"
 category: "active-investors"
 tags: ["active-investors", "fundraising-2026", "vc-deployment", "investor-discovery", "fund-velocity"]
