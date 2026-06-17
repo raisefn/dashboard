@@ -42,8 +42,8 @@ const STREAMS = [
   },
 ];
 
-// Brain "neurons" — randomly distributed in the center cluster. Drawn once,
-// pulse subtly. Connection lines between neighbors. Layered for depth.
+// Brain "neurons" — denser cluster, three depth layers for richness.
+// Increased from 90 → 180 neurons for more density. Same seed → stable layout.
 const NEURONS = (() => {
   const seed = 12345;
   let rng = seed;
@@ -52,20 +52,20 @@ const NEURONS = (() => {
     return rng / 233280;
   };
   const arr: { x: number; y: number; r: number; layer: number }[] = [];
-  for (let i = 0; i < 90; i++) {
+  for (let i = 0; i < 180; i++) {
     const angle = rand() * Math.PI * 2;
-    const dist = 30 + rand() * 110;
+    const dist = 25 + rand() * 135;
     arr.push({
       x: Math.cos(angle) * dist,
       y: Math.sin(angle) * dist,
-      r: 1.4 + rand() * 2.4,
-      layer: rand() < 0.4 ? 0 : rand() < 0.7 ? 1 : 2,
+      r: 1.2 + rand() * 2.6,
+      layer: rand() < 0.4 ? 0 : rand() < 0.72 ? 1 : 2,
     });
   }
   return arr;
 })();
 
-// Pre-compute neuron-to-neuron connections for the inner mesh
+// Connection mesh — denser now, with more far-reaching arcs at low opacity.
 const CONNECTIONS = (() => {
   const conns: { a: number; b: number; opacity: number }[] = [];
   for (let i = 0; i < NEURONS.length; i++) {
@@ -73,8 +73,11 @@ const CONNECTIONS = (() => {
       const dx = NEURONS[i].x - NEURONS[j].x;
       const dy = NEURONS[i].y - NEURONS[j].y;
       const d = Math.sqrt(dx * dx + dy * dy);
-      if (d < 55 && Math.random() < 0.4) {
-        conns.push({ a: i, b: j, opacity: Math.max(0.05, 0.35 - d / 200) });
+      // Two tiers of connections: close-range (visible) and long-range (faint webbing).
+      if (d < 50 && Math.random() < 0.5) {
+        conns.push({ a: i, b: j, opacity: Math.max(0.08, 0.42 - d / 180) });
+      } else if (d < 110 && Math.random() < 0.08) {
+        conns.push({ a: i, b: j, opacity: 0.06 });
       }
     }
   }
@@ -82,23 +85,23 @@ const CONNECTIONS = (() => {
 })();
 
 function Brain() {
+  // Center pushed down + viewBox extended so the top labels don't crop.
   const CX = 500;
-  const CY = 400;
-  const STREAM_DIST = 320;
+  const CY = 480;
+  const STREAM_DIST = 340;
 
-  // Animate particles along each stream
   const [tick, setTick] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setTick((x) => x + 1), 80);
+    const t = setInterval(() => setTick((x) => x + 1), 70);
     return () => clearInterval(t);
   }, []);
 
   return (
     <div className="relative w-full">
       <svg
-        viewBox="0 0 1000 800"
+        viewBox="0 0 1000 960"
         className="w-full h-auto"
-        style={{ maxHeight: "85vh" }}
+        style={{ maxHeight: "88vh" }}
       >
         <defs>
           <radialGradient id="brainCore" cx="50%" cy="50%" r="50%">
@@ -145,25 +148,29 @@ function Brain() {
                 strokeWidth="1"
                 strokeDasharray="2 6"
               />
-              {/* particles flowing INTO brain */}
-              {[0, 1, 2, 3, 4].map((p) => {
-                const phase = ((tick + p * 20) % 100) / 100;
+              {/* particles flowing INTO brain — denser, varied sizes */}
+              {[0, 1, 2, 3, 4, 5, 6, 7].map((p) => {
+                const phase = ((tick + p * 14) % 100) / 100;
                 const px = sx + (dx - sx) * phase;
                 const py = sy + (dy - sy) * phase;
+                const sizeJitter = (p % 3) === 0 ? 2.6 : 1.8;
                 return (
                   <circle
                     key={p}
                     cx={px}
                     cy={py}
-                    r={2.2}
+                    r={sizeJitter}
                     fill={s.color}
-                    opacity={0.85 * (1 - Math.abs(phase - 0.5) * 2 + 0.3)}
+                    opacity={0.9 * (1 - Math.abs(phase - 0.5) * 2 + 0.25)}
                   />
                 );
               })}
-              {/* stream source — node + label */}
-              <circle cx={sx} cy={sy} r="36" fill={s.color} fillOpacity="0.07" stroke={s.color} strokeOpacity="0.5" strokeWidth="1.2" />
-              <circle cx={sx} cy={sy} r="6" fill={s.color} fillOpacity="0.95" />
+              {/* stream source — node + label + concentric ring */}
+              <circle cx={sx} cy={sy} r="48" fill={s.color} fillOpacity="0.04" stroke={s.color} strokeOpacity="0.18" strokeWidth="0.8" strokeDasharray="2 4" />
+              <circle cx={sx} cy={sy} r="34" fill={s.color} fillOpacity="0.08" stroke={s.color} strokeOpacity="0.55" strokeWidth="1.3" />
+              <circle cx={sx} cy={sy} r="6" fill={s.color} fillOpacity="0.95">
+                <animate attributeName="r" values="6;9;6" dur={`${1.6 + i * 0.2}s`} repeatCount="indefinite" />
+              </circle>
             </g>
           );
         })}

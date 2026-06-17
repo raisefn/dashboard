@@ -98,7 +98,6 @@ const COMBOS = [
 ];
 
 function Lattice() {
-  // Tight reactive column heights so the lattice fits any viewport
   const [comboIdx, setComboIdx] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setComboIdx((i) => (i + 1) % COMBOS.length), 3200);
@@ -108,13 +107,15 @@ function Lattice() {
   const active = COMBOS[comboIdx];
   const activeSet = new Set(active.tags);
 
-  // Layout constants
-  const COL_GAP = 200; // px between dim columns
-  const TAG_H = 18; // px per tag row
+  // Tight column spacing so the lattice fits the viewport without horizontal
+  // scroll. 5 cols × 172px + 32 padding ≈ 892px — comfortably under typical
+  // content widths (max-w-6xl ≈ 1152px).
+  const COL_GAP = 172;
+  const TAG_H = 18;
   const COL_TOP = 90;
 
   return (
-    <div className="relative w-full overflow-x-auto">
+    <div className="relative w-full overflow-hidden">
       <div
         className="relative mx-auto"
         style={{
@@ -283,45 +284,138 @@ export default function HowWeMatchPage() {
         </div>
       </section>
 
-      {/* Three pillars — tight, no diagram cards, just bold statements */}
-      <section className="relative py-16 px-4">
-        <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-10">
-          <div className="relative">
-            <div className="text-[10px] uppercase tracking-[0.3em] text-emerald-400/80 font-bold mb-4">
-              Specialists win
-            </div>
-            <h3 className="text-2xl font-bold text-white leading-tight mb-4">
-              Focused theses outrank broad ones.
-            </h3>
-            <p className="text-sm text-zinc-400 leading-relaxed">
-              An investor with two industries on the page beats a generalist with twelve.
-              Conviction is signal. Focus is how we measure it.
+      {/* Beyond the lattice — full matching stack. The 5 dims are the
+          FOUNDATION. The matcher also weighs check size, stage, geo,
+          deployment cadence, network signal, behavioral profile, hard nos,
+          and human curation. Make all of this visible. */}
+      <section className="relative py-20 px-4 border-t border-zinc-900/60">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-bold mb-3">
+              Beyond the lattice
+            </p>
+            <h2 className="text-4xl sm:text-5xl font-bold text-white leading-[1.05] tracking-tight mb-6">
+              The lattice is the <span className="text-teal-300">foundation</span>.
+            </h2>
+            <p className="text-lg text-zinc-400 max-w-3xl mx-auto leading-relaxed">
+              Then we layer everything else investors actually care about — stage adjacency,
+              check fit, geography, deployment cadence, recent activity, behavioral history,
+              network depth. Then a human decides what becomes an intro.
             </p>
           </div>
-          <div className="relative">
-            <div className="text-[10px] uppercase tracking-[0.3em] text-rose-300/80 font-bold mb-4">
-              Hard nos honored
-            </div>
-            <h3 className="text-2xl font-bold text-white leading-tight mb-4">
-              Pre-rejected deals never surface.
-            </h3>
-            <p className="text-sm text-zinc-400 leading-relaxed">
-              When an investor says &quot;never crypto, never hardware&quot; — we listen. Founders
-              don&apos;t waste pitches. Investors don&apos;t get pinged.
-            </p>
+
+          {/* The matching stack — vertical layers, each labeled and described */}
+          <div className="space-y-2">
+            {[
+              {
+                tag: "Layer 01 · Ontology coverage",
+                weight: "core signal",
+                color: "#2dd4bf",
+                title: "5 dimensions · 109 nodes · 264 connections",
+                desc: "Every founder and investor positioned in the same coordinate system. Coverage-mean scoring rewards completeness, not keyword hits.",
+              },
+              {
+                tag: "Layer 02 · Specialty bonus",
+                weight: "×1.20 multiplier",
+                color: "#34d399",
+                title: "Narrow focus rewarded",
+                desc: "Investors with ≤3 industry tags get a multiplicative boost when their narrow specialty overlaps. A two-industry investor outranks a twelve-industry generalist on the same deal.",
+              },
+              {
+                tag: "Layer 03 · Specialty combos",
+                weight: "up to ×1.40",
+                color: "#22d3ee",
+                title: "64 cross-dim patterns recognized",
+                desc: "Consumer marketplace. AI fintech. Vertical SaaS healthcare. On-demand household services. When founder and investor both express the same combo, the score multiplies.",
+              },
+              {
+                tag: "Layer 04 · Stage adjacency",
+                weight: "hard filter",
+                color: "#a78bfa",
+                title: "Pre-seed touches seed. Seed touches Series A.",
+                desc: "Stages adjacent to the raise pass the filter; the rest get cut. A growth-stage fund doesn't surface for a pre-seed; a pre-seed angel doesn't surface for Series B.",
+              },
+              {
+                tag: "Layer 05 · Check size fit",
+                weight: "score weight 1.0",
+                color: "#c4b5fd",
+                title: "Lead capable. Participation capable. Out of band.",
+                desc: "Check-size min/max measured against the raise. Lead-size matches score full credit; participation-size partial; out-of-band cut entirely. No founders pitching $5M to a $50K angel.",
+              },
+              {
+                tag: "Layer 06 · Geography",
+                weight: "score weight 0.5",
+                color: "#fbbf24",
+                title: "Local-only honored. Global investors travel.",
+                desc: "Investors with local-only mandates only surface for nearby founders. Investors with focus_countries set match those geos. Sector-agnostic investors with global mandates match anywhere.",
+              },
+              {
+                tag: "Layer 07 · Deployment cadence",
+                weight: "score weight 0.5",
+                color: "#fb923c",
+                title: "Actively writing > paused > unknown",
+                desc: "An investor actively deploying gets a higher score than one on pause. Funds at the end of their cycle don't waste anyone's time.",
+              },
+              {
+                tag: "Layer 08 · Hard nos",
+                weight: "exclusion filter",
+                color: "#f87171",
+                title: "Pre-rejected pairings never surface",
+                desc: "If the investor declared they'll never invest in crypto, hardware, or any other sector — and the founder is there — the match never fires. Saves both sides time.",
+              },
+              {
+                tag: "Layer 09 · Behavioral profile",
+                weight: "ground truth",
+                color: "#fda4af",
+                title: "Real check sizes. Real commit rates. Real ghost rates.",
+                desc: "We track what investors actually do — checks written, meetings taken, days-to-decision, ghost rates. Matchmaking down-weights ghosters; up-weights deciders.",
+              },
+              {
+                tag: "Layer 10 · Network signal",
+                weight: "score weight 2.0",
+                color: "#5eead4",
+                title: "Warm intro paths surface",
+                desc: "When other founders have engaged this investor, that history surfaces — commitment rate, what resonated, common objections — without exposing any individual founder's pipeline.",
+              },
+              {
+                tag: "Layer 11 · Human curation",
+                weight: "the final gate",
+                color: "#fde68a",
+                title: "Every warm intro brokered by a person",
+                desc: "The algorithm surfaces signal. A human reviews every proprietary match and decides what becomes an intro. No auto-fired emails. No abused inboxes. Ever.",
+              },
+            ].map((layer, i) => (
+              <div
+                key={layer.tag}
+                className="relative grid grid-cols-12 gap-4 px-5 py-5 rounded-lg border border-zinc-900 bg-zinc-950/60 hover:bg-zinc-900/60 hover:border-zinc-800 transition-colors group"
+              >
+                <div className="col-span-12 md:col-span-3 flex items-center gap-3">
+                  <div
+                    className="shrink-0 w-1 h-12 rounded-full"
+                    style={{ backgroundColor: layer.color }}
+                  />
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest font-bold mb-1" style={{ color: layer.color }}>
+                      {layer.tag}
+                    </p>
+                    <p className="text-[10px] text-zinc-600 font-mono">{layer.weight}</p>
+                  </div>
+                </div>
+                <div className="col-span-12 md:col-span-9">
+                  <h4 className="text-base font-bold text-white mb-1.5 leading-tight">
+                    {layer.title}
+                  </h4>
+                  <p className="text-sm text-zinc-400 leading-relaxed">{layer.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="relative">
-            <div className="text-[10px] uppercase tracking-[0.3em] text-amber-400/80 font-bold mb-4">
-              Brokered, not blasted
-            </div>
-            <h3 className="text-2xl font-bold text-white leading-tight mb-4">
-              Every warm intro is human.
-            </h3>
-            <p className="text-sm text-zinc-400 leading-relaxed">
-              The lattice surfaces signal. A person decides what becomes an intro. No auto-fired
-              emails. No abused inboxes. Ever.
-            </p>
-          </div>
+
+          <p className="mt-12 text-center text-sm text-zinc-500 max-w-2xl mx-auto leading-relaxed">
+            <span className="text-zinc-300 font-semibold">Eleven layers</span> applied to every founder, every investor,
+            every match. The score you don&apos;t see is the score we engineered to make sure
+            the names you DO see are the ones worth your time.
+          </p>
         </div>
       </section>
 
