@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getInvestors, getProjects } from "@/lib/api";
+import { listArticles } from "@/lib/raise-intel";
 
 const SITE = "https://www.raisefn.com";
 
@@ -37,6 +38,7 @@ const STATIC_PAGES: MetadataRoute.Sitemap = [
   // backlinks from /founders, /investors, and footer Company section.
   { url: `${SITE}/how-we-match`, lastModified: NOW, changeFrequency: "monthly", priority: 0.7 },
   { url: `${SITE}/how-we-learn`, lastModified: NOW, changeFrequency: "monthly", priority: 0.7 },
+  { url: `${SITE}/raise-intel`, lastModified: NOW, changeFrequency: "weekly", priority: 0.8 },
   { url: `${SITE}/roadmap`, lastModified: NOW, changeFrequency: "weekly", priority: 0.5 },
   { url: `${SITE}/investors/join`, lastModified: NOW, changeFrequency: "monthly", priority: 0.7 },
   { url: `${SITE}/privacy`, lastModified: NOW, changeFrequency: "yearly", priority: 0.3 },
@@ -51,7 +53,25 @@ const MAX_URLS_PER_SITEMAP = 49000;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const investors = await fetchAllInvestors();
   const projects = await fetchAllProjects();
-  return [...STATIC_PAGES, ...investors, ...projects];
+  const raiseIntel = await fetchRaiseIntelArticles();
+  return [...STATIC_PAGES, ...raiseIntel, ...investors, ...projects];
+}
+
+async function fetchRaiseIntelArticles(): Promise<MetadataRoute.Sitemap> {
+  // Raise Intel articles ship as markdown files in the repo, so no API
+  // call needed — readdir + parse runs at build time and is reliable.
+  try {
+    const articles = await listArticles();
+    return articles.map((a) => ({
+      url: `${SITE}/raise-intel/${a.slug}`,
+      lastModified: a.updated_at ? new Date(a.updated_at) : new Date(a.published_at),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    }));
+  } catch (e) {
+    console.error("[sitemap] raise-intel fetch failed", e);
+    return [];
+  }
 }
 
 async function fetchAllInvestors(): Promise<MetadataRoute.Sitemap> {
