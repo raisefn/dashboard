@@ -1,106 +1,233 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
-const SECTORS = [
+// Investor signup V2 (2026-06-17) — option C: required basics + optional
+// deep section. Basics captures high-signal off-the-top-of-head answers;
+// deep section refines the auto-classification for investors who want
+// precision. See /investors/join-mock for the design history.
+
+// ── Constants ───────────────────────────────────────────────────────────
+const INVESTOR_TYPES = [
+  { key: "vc", label: "VC fund", desc: "Institutional fund — partner, principal, or analyst." },
+  { key: "angel", label: "Angel", desc: "Individual investor writing personal checks." },
+  { key: "family_office", label: "Family office", desc: "Single or multi-family office allocating capital." },
+  { key: "cvc", label: "Corporate VC", desc: "Strategic arm of an operating company." },
+  { key: "syndicate", label: "Syndicate lead", desc: "Lead investor pooling LPs per deal." },
+  { key: "accelerator", label: "Accelerator / platform", desc: "Program-driven investor (YC, Techstars, etc.)." },
+  { key: "other", label: "Other", desc: "Operator-investor, scout, fund-of-funds, etc." },
+] as const;
+
+const THIN_THESIS_TYPES = new Set(["angel", "family_office", "syndicate", "other"]);
+
+const SECTORS_TOP = [
   "ai_ml", "fintech", "healthtech", "enterprise_saas", "consumer",
   "climate_energy", "hardware", "security", "infrastructure",
-  "crypto_web3", "logistics", "real_estate", "defense", "legal", "other",
-];
-const STAGES = ["pre_seed", "seed", "series_a", "series_b", "series_c", "growth"];
-// Country names match founder.location free-text via case-insensitive substring,
-// so use full English country names. Empty selection = "no geo filter" — investor
-// matches founders anywhere.
-const COUNTRIES = [
-  "United States", "Canada", "Mexico", "Brazil", "United Kingdom", "Germany",
-  "France", "Spain", "Italy", "Netherlands", "Sweden", "Switzerland",
-  "Ireland", "Israel", "UAE", "Saudi Arabia", "India", "Singapore",
-  "Australia", "Japan", "Nigeria", "Kenya", "South Africa",
-];
-const HARD_REQUIREMENTS: { key: string; label: string }[] = [
-  { key: "local", label: "Must be local (geographic proximity)" },
-  { key: "team", label: "Must have cofounder(s)" },
-  { key: "revenue", label: "Must have measurable traction / revenue" },
-];
-const CADENCES: { key: string; label: string }[] = [
-  { key: "continuous", label: "Continuous" },
-  { key: "monthly", label: "Monthly committee" },
-  { key: "quarterly", label: "Quarterly committee" },
+  "crypto_web3", "logistics", "real_estate", "defense", "legal",
+  "education", "services", "retail", "gaming", "media", "other",
 ];
 
-type AdditionalContact = { name: string; email: string; role: string };
-type ThesisType = "sector_driven" | "sector_agnostic";
+const STAGES = ["pre_seed", "seed", "series_a", "series_b", "series_c", "growth"];
+
+const REGIONS = [
+  "United States", "Canada", "LATAM", "EU", "United Kingdom", "Nordics",
+  "MENA", "Sub-Saharan Africa", "South Asia", "SEA",
+  "Greater China", "Japan", "Australia / NZ", "Global",
+];
+
+const COUNTRIES_OVERRIDE = [
+  "United States", "Canada", "Mexico", "Brazil", "Argentina", "Colombia",
+  "Chile", "Peru", "United Kingdom", "Germany", "France", "Spain",
+  "Italy", "Netherlands", "Sweden", "Norway", "Denmark", "Finland",
+  "Switzerland", "Ireland", "Portugal", "Poland", "Israel", "UAE",
+  "Saudi Arabia", "Egypt", "India", "Singapore", "Vietnam", "Thailand",
+  "Indonesia", "Malaysia", "Philippines", "Korea", "Japan", "Taiwan",
+  "Hong Kong", "China", "Australia", "New Zealand",
+  "Nigeria", "Kenya", "South Africa", "Ghana", "Rwanda",
+];
+
+const MODALITY = [
+  "saas", "marketplace", "managed_marketplace", "vertical_saas",
+  "direct_brand", "ecommerce", "subscription_commerce", "platform",
+  "infrastructure", "hardware", "services", "on_demand",
+  "network_effects", "embedded", "agency", "creator_tools",
+  "open_source", "community", "aggregator", "vertical_integration",
+  "consulting", "products",
+];
+
+const TECHNOLOGY = [
+  "ai_ml", "llm", "generative_ai", "ai_agents", "automation",
+  "computer_vision", "nlp", "speech_voice", "blockchain", "web3",
+  "iot", "autonomous_systems", "robotics_tech", "hardware_design",
+  "climate_tech_core", "bioinformatics", "synthetic_biology",
+  "ar_vr", "edge_compute", "low_code", "no_code", "privacy_tech",
+  "quantum",
+];
+
+const AUDIENCE_DEEP = [
+  "mass_consumer", "household", "prosumer", "creator",
+  "smb", "mid_market", "enterprise", "merchant", "supplier",
+  "developer", "designer", "vertical_professional",
+  "government_buyer", "educational_institution",
+  "non_profit_buyer", "platform_partner",
+];
+
+const BUSINESS = [
+  "subscription", "transactional", "marketplace_take_rate",
+  "enterprise_contract", "service_fee", "usage_based",
+  "advertising", "hardware_unit_sale", "managed_services",
+  "freemium", "licensing", "data_revenue", "one_time_purchase",
+  "white_label",
+];
+
+const ANTI_PATTERNS = [
+  "Solo founders",
+  "First-time founders",
+  "Pre-product",
+  "Pre-revenue",
+  "Pure consulting",
+  "Hardware with long manufacturing cycles",
+  "Regulated industries",
+  "Capital intensive",
+];
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
+const inputClass =
+  "w-full bg-zinc-950/60 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-teal-700 focus:outline-none focus:ring-1 focus:ring-teal-900";
+
+// ── Reusable primitives ────────────────────────────────────────────────
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">
+        {label}
+        {hint && <span className="text-zinc-600 normal-case font-normal tracking-normal"> · {hint}</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+function Chip({
+  selected,
+  onClick,
+  color = "teal",
+  children,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  color?: "teal" | "emerald" | "rose" | "violet" | "amber" | "cyan";
+  children: React.ReactNode;
+}) {
+  const palettes = {
+    teal: { on: "border-teal-500 bg-teal-950/40 text-teal-200", off: "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500" },
+    emerald: { on: "border-emerald-500 bg-emerald-950/40 text-emerald-200", off: "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500" },
+    rose: { on: "border-rose-500 bg-rose-950/40 text-rose-200", off: "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500" },
+    violet: { on: "border-violet-500 bg-violet-950/40 text-violet-200", off: "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500" },
+    amber: { on: "border-amber-500 bg-amber-950/40 text-amber-200", off: "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500" },
+    cyan: { on: "border-cyan-500 bg-cyan-950/40 text-cyan-200", off: "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500" },
+  };
+  const p = palettes[color];
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`text-xs px-3 py-1.5 rounded-full border transition-all ${selected ? p.on : p.off}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function ChipGroup<T>({
+  options,
+  selected,
+  onToggle,
+  color,
+  format = (s) => String(s).replace(/_/g, " "),
+}: {
+  options: T[];
+  selected: T[];
+  onToggle: (v: T) => void;
+  color?: "teal" | "emerald" | "rose" | "violet" | "amber" | "cyan";
+  format?: (v: T) => string;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((opt) => (
+        <Chip key={String(opt)} selected={selected.includes(opt)} onClick={() => onToggle(opt)} color={color}>
+          {format(opt)}
+        </Chip>
+      ))}
+    </div>
+  );
+}
+
+// ── Page ────────────────────────────────────────────────────────────────
 export default function InvestorJoinPage() {
+  // Identity + thesis
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [firmName, setFirmName] = useState("");
   const [title, setTitle] = useState("");
   const [website, setWebsite] = useState("");
   const [thesis, setThesis] = useState("");
-  const [thesisType, setThesisType] = useState<ThesisType | null>(null);
+  const [thesisType, setThesisType] = useState<"sector_driven" | "sector_agnostic" | null>(null);
+
+  // Basics
+  const [investorType, setInvestorType] = useState<string | null>(null);
   const [checkMin, setCheckMin] = useState("");
   const [checkMax, setCheckMax] = useState("");
-  const [sectors, setSectors] = useState<string[]>([]);
-  // sector_expertise: areas of DEEP specialty (max 3). Drives matcher_v2
-  // specialty bonus + populates the investor's taxonomy_v2.industry.
-  // Shown regardless of thesis_type — even sector-agnostic angels often
-  // have areas where they bring real domain knowledge.
-  const [sectorExpertise, setSectorExpertise] = useState<string[]>([]);
-  // hard_no: sectors the investor will NEVER invest in. Matcher_v2 uses
-  // this as a hard exclusion against the founder's industry tags.
-  const [hardNo, setHardNo] = useState<string[]>([]);
-  const [stages, setStages] = useState<string[]>([]);
-  const [countries, setCountries] = useState<string[]>([]);
-  const [hardRequirements, setHardRequirements] = useState<string[]>([]);
-  const [geoScope, setGeoScope] = useState("");
-  const [committeeCadence, setCommitteeCadence] = useState<string | null>(null);
-  const [additionalContacts, setAdditionalContacts] = useState<AdditionalContact[]>([]);
-  const [isDeploying, setIsDeploying] = useState<boolean | null>(null);
-  const [leadsRounds, setLeadsRounds] = useState<boolean | null>(null);
   const [fundSize, setFundSize] = useState("");
-  const [location, setLocation] = useState("");
-  const [bio, setBio] = useState("");
+  const [sectors, setSectors] = useState<string[]>([]);
+  const [stages, setStages] = useState<string[]>([]);
+  const [audienceSimple, setAudienceSimple] = useState<"b2b" | "b2c" | "both" | null>(null);
+  const [regions, setRegions] = useState<string[]>([]);
+  const [hardNoBasic, setHardNoBasic] = useState<string[]>([]);
 
+  // Deep section
+  const [showDeep, setShowDeep] = useState(false);
+  const deepRef = useRef<HTMLDivElement | null>(null);
+  const [sectorExpertise, setSectorExpertise] = useState<string[]>([]);
+  const [modality, setModality] = useState<string[]>([]);
+  const [technology, setTechnology] = useState<string[]>([]);
+  const [audienceDeep, setAudienceDeep] = useState<string[]>([]);
+  const [business, setBusiness] = useState<string[]>([]);
+  const [hardNoStages, setHardNoStages] = useState<string[]>([]);
+  const [antiPatterns, setAntiPatterns] = useState<string[]>([]);
+  const [countriesOverride, setCountriesOverride] = useState<string[]>([]);
+  const [otherDealBreakers, setOtherDealBreakers] = useState("");
+
+  // Submission
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
-
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const localRequired = hardRequirements.includes("local");
+  const toggle = <T,>(setter: React.Dispatch<React.SetStateAction<T[]>>) => (v: T) =>
+    setter((cur) => (cur.includes(v) ? cur.filter((x) => x !== v) : [...cur, v]));
 
   const submitDisabled = useMemo(() => {
-    if (!email || !thesis || !thesisType || stages.length === 0) return true;
+    if (!email || !thesis || !thesisType || !investorType || stages.length === 0) return true;
     if (thesisType === "sector_driven" && sectors.length === 0) return true;
     if (TURNSTILE_SITE_KEY && !turnstileToken) return true;
     return false;
-  }, [email, thesis, thesisType, sectors, stages, turnstileToken]);
+  }, [email, thesis, thesisType, investorType, sectors, stages, turnstileToken]);
 
-  function toggle(set: string[], value: string): string[] {
-    return set.includes(value) ? set.filter((s) => s !== value) : [...set, value];
-  }
+  // Adaptive nudge — angels/family offices typically have thin theses.
+  const thesisIsThin = thesis.trim().length < 200;
+  const typeIsThinThesis = investorType != null && THIN_THESIS_TYPES.has(investorType);
+  const shouldNudgeStrongly = (typeIsThinThesis || thesisIsThin) && investorType !== null;
+  const isVcType = investorType === "vc";
 
-  function pickThesisType(t: ThesisType) {
-    setThesisType(t);
-    // Clearing sectors when switching to sector-agnostic keeps the backend
-    // validator happy and matches what the user sees on screen.
-    if (t === "sector_agnostic") setSectors([]);
-  }
-
-  function addContact() {
-    setAdditionalContacts((cur) => [...cur, { name: "", email: "", role: "" }]);
-  }
-  function updateContact(idx: number, field: keyof AdditionalContact, value: string) {
-    setAdditionalContacts((cur) =>
-      cur.map((c, i) => (i === idx ? { ...c, [field]: value } : c)),
-    );
-  }
-  function removeContact(idx: number) {
-    setAdditionalContacts((cur) => cur.filter((_, i) => i !== idx));
+  function openDeep() {
+    setShowDeep(true);
+    setTimeout(() => {
+      deepRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -110,16 +237,6 @@ export default function InvestorJoinPage() {
     setSubmitError(null);
 
     try {
-      // Filter out additional contacts that are incomplete — name + email
-      // both required, role optional. Backend rejects partial rows.
-      const cleanContacts = additionalContacts
-        .map((c) => ({
-          name: c.name.trim(),
-          email: c.email.trim(),
-          role: c.role.trim() || undefined,
-        }))
-        .filter((c) => c.name && c.email);
-
       const body: Record<string, unknown> = {
         email: email.trim().toLowerCase(),
         name: name || undefined,
@@ -128,26 +245,29 @@ export default function InvestorJoinPage() {
         website: website.trim() || undefined,
         thesis: thesis.trim(),
         thesis_type: thesisType,
+        investor_type: investorType,
         check_size_min: checkMin ? Number(checkMin) : undefined,
         check_size_max: checkMax ? Number(checkMax) : undefined,
+        fund_size_usd: isVcType && fundSize ? Number(fundSize) : undefined,
         focus_sectors: thesisType === "sector_driven" ? sectors : [],
-        sector_expertise: sectorExpertise,
-        hard_no: hardNo,
         focus_stages: stages,
-        focus_countries: countries,
-        hard_requirements: hardRequirements,
-        // Only send geo_scope when "local" is actually checked — otherwise
-        // the field is stale UI state the user can't see.
-        geo_scope: localRequired && geoScope.trim() ? geoScope.trim() : undefined,
-        committee_cadence: committeeCadence || undefined,
-        additional_contacts: cleanContacts.length ? cleanContacts : undefined,
-        is_deploying: isDeploying,
-        leads_rounds: leadsRounds,
-        fund_size_usd: fundSize ? Number(fundSize) : undefined,
-        location: location || undefined,
-        bio: bio || undefined,
+        focus_countries: countriesOverride,
+        regions,
+        audience_simple: audienceSimple || undefined,
+        hard_no: hardNoBasic,
+        // Deep-section ontology dims (all optional)
+        sector_expertise: sectorExpertise,
+        modality,
+        technology,
+        audience: audienceDeep,
+        business,
+        // Deep-section structured hard nos
+        hard_no_stages: hardNoStages,
+        anti_patterns: antiPatterns,
+        other_deal_breakers: otherDealBreakers.trim() || undefined,
         turnstile_token: turnstileToken,
       };
+
       const res = await fetch("/api/investors/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -155,8 +275,6 @@ export default function InvestorJoinPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        // Brain returns structured detail for the "already exists" case;
-        // surface that cleanly without exposing the rest of the error shape.
         const msg =
           (data?.detail && typeof data.detail === "object" && data.detail.message) ||
           (typeof data?.detail === "string" ? data.detail : null) ||
@@ -166,7 +284,6 @@ export default function InvestorJoinPage() {
       }
       setSubmitState("done");
     } catch (err) {
-      // Reset Turnstile so the user can resubmit
       turnstileRef.current?.reset();
       setTurnstileToken(null);
       setSubmitError(err instanceof Error ? err.message : "Unknown error");
@@ -193,401 +310,335 @@ export default function InvestorJoinPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-8 text-zinc-200">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white mb-2">Join the v1 investor network</h1>
-        <p className="text-sm text-zinc-400 leading-relaxed">
-          Founders running real raises through raise(fn). Set your thesis once, get notified
-          when a matching founder is raising. No fee, no commitment — just curated intros
-          from our team when there&apos;s a fit.
+    <div className="relative">
+      <div className="grid-bg" />
+
+      <form onSubmit={handleSubmit} className="mx-auto max-w-3xl px-4 py-16">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-3">
+          For investors
         </p>
-      </div>
+        <h1 className="text-4xl font-bold text-white mb-3 leading-tight">
+          Join raise(fn).
+        </h1>
+        <p className="text-zinc-400 leading-relaxed mb-12 max-w-prose">
+          We&apos;ll only reach out when a founder fits your thesis. The faster you fill this out, the sharper the matches.
+        </p>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <Field label="Email *">
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={inputClass}
-            placeholder="you@firm.com"
-          />
-        </Field>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Name">
-            <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="Sarah Chen" />
-          </Field>
-          <Field label="Firm">
-            <input value={firmName} onChange={(e) => setFirmName(e.target.value)} className={inputClass} placeholder="Crystal Ventures" />
-          </Field>
+        {/* ── BASICS ──────────────────────────────────────────────────── */}
+        <div className="mb-2 flex items-center gap-2">
+          <span className="w-7 h-7 rounded-full bg-teal-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+          <h2 className="text-xl font-bold text-white">The basics</h2>
+          <span className="text-xs text-zinc-500 ml-2">~5 minutes</span>
         </div>
+        <p className="text-sm text-zinc-500 mb-8">
+          High-signal answers an investor knows off the top of their head.
+        </p>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Title">
-            <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} placeholder="Partner" />
-          </Field>
-          <Field label="Website">
-            <input value={website} onChange={(e) => setWebsite(e.target.value)} className={inputClass} placeholder="https://yourfirm.com" />
-          </Field>
-        </div>
-
-        <Field label="Thesis *">
-          <textarea
-            required
-            value={thesis}
-            onChange={(e) => setThesis(e.target.value)}
-            rows={3}
-            className={inputClass}
-            placeholder="What do you invest in? Be specific — this is what we'll match founder thesis against."
-          />
-        </Field>
-
-        <Field label="How do you choose investments? *">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <RadioCard
-              selected={thesisType === "sector_driven"}
-              onClick={() => pickThesisType("sector_driven")}
-              title="Sector-driven"
-              body="I invest in specific sectors. I'll pick them below."
-            />
-            <RadioCard
-              selected={thesisType === "sector_agnostic"}
-              onClick={() => pickThesisType("sector_agnostic")}
-              title="Sector-agnostic"
-              body="Sector doesn't drive my decision — I evaluate on criteria like team, traction, market fit."
-            />
-          </div>
-        </Field>
-
-        {thesisType === "sector_driven" && (
-          <Field label="Focus sectors *">
-            <div className="flex flex-wrap gap-2">
-              {SECTORS.map((s) => (
+        <div className="space-y-7 rounded-2xl border border-zinc-800/60 bg-zinc-950/40 p-6">
+          {/* Investor type */}
+          <Field label="What kind of investor are you? *" hint="Drives matching — different types are scored differently">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {INVESTOR_TYPES.map((t) => (
                 <button
-                  key={s}
+                  key={t.key}
                   type="button"
-                  onClick={() => setSectors((cur) => toggle(cur, s))}
-                  className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                    sectors.includes(s)
-                      ? "border-teal-500 bg-teal-950/40 text-teal-200"
-                      : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
+                  onClick={() => setInvestorType(t.key)}
+                  className={`text-left rounded-lg border p-3 transition-all ${
+                    investorType === t.key
+                      ? "border-teal-500 bg-teal-950/30"
+                      : "border-zinc-800 bg-zinc-900/50 hover:border-zinc-600"
                   }`}
                 >
-                  {s.replace(/_/g, " ")}
+                  <p className="text-sm font-semibold text-white mb-0.5">{t.label}</p>
+                  <p className="text-[11px] text-zinc-500 leading-snug">{t.desc}</p>
                 </button>
               ))}
             </div>
           </Field>
-        )}
 
-        <Field label={`Sector expertise (optional — areas you have deep domain knowledge in, max 3) ${sectorExpertise.length > 0 ? `· ${sectorExpertise.length}/3` : ""}`}>
-          <div className="flex flex-wrap gap-2">
-            {SECTORS.map((s) => {
-              const selected = sectorExpertise.includes(s);
-              const atCap = sectorExpertise.length >= 3 && !selected;
-              return (
+          {/* Identity */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Email *">
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} placeholder="you@firm.com" />
+            </Field>
+            <Field label="Your name">
+              <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="Jane Doe" />
+            </Field>
+            <Field label={isVcType ? "Firm" : "Firm / fund (if any)"}>
+              <input value={firmName} onChange={(e) => setFirmName(e.target.value)} className={inputClass} placeholder={isVcType ? "Firm name" : "Optional"} />
+            </Field>
+            <Field label="Title">
+              <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} placeholder="GP, Partner, Angel, Principal..." />
+            </Field>
+          </div>
+
+          <Field label="Website">
+            <input value={website} onChange={(e) => setWebsite(e.target.value)} className={inputClass} placeholder="https://yourfirm.com" />
+          </Field>
+
+          <Field label="Thesis *" hint="Free text — what you invest in, in your own words">
+            <textarea
+              required
+              rows={3}
+              value={thesis}
+              onChange={(e) => setThesis(e.target.value)}
+              className={inputClass}
+              placeholder={isVcType
+                ? "What does your fund invest in? Be specific."
+                : "What do you back? What's your angle? Be specific."}
+            />
+            <p className="mt-2 text-[11px] text-zinc-500">
+              {thesis.trim().length === 0
+                ? "We'll read this to auto-classify the dimensions we don't ask about — works best with 2-3 sentences of detail."
+                : thesis.trim().length < 200
+                ? "Short thesis — auto-classification will be light. The deep section below tightens it."
+                : "Looks substantive — auto-classification should land most details. Refine in the deep section if you want full control."}
+            </p>
+          </Field>
+
+          <Field label="How do you choose investments? *">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {(["sector_driven", "sector_agnostic"] as const).map((opt) => (
                 <button
-                  key={s}
+                  key={opt}
                   type="button"
-                  disabled={atCap}
-                  onClick={() => setSectorExpertise((cur) => toggle(cur, s))}
-                  className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                    selected
-                      ? "border-emerald-500 bg-emerald-950/40 text-emerald-200"
-                      : atCap
-                      ? "border-zinc-800 bg-zinc-950 text-zinc-600 cursor-not-allowed"
-                      : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
+                  onClick={() => {
+                    setThesisType(opt);
+                    if (opt === "sector_agnostic") setSectors([]);
+                  }}
+                  className={`text-left rounded-lg border p-4 transition-all ${
+                    thesisType === opt ? "border-teal-500 bg-teal-950/30" : "border-zinc-700 bg-zinc-900/50 hover:border-zinc-500"
                   }`}
                 >
-                  {s.replace(/_/g, " ")}
+                  <p className="text-sm font-semibold text-white mb-1">
+                    {opt === "sector_driven" ? "Sector-driven" : "Sector-agnostic"}
+                  </p>
+                  <p className="text-xs text-zinc-500">
+                    {opt === "sector_driven"
+                      ? "I invest in specific sectors."
+                      : "Team, traction, market — not sector — decide."}
+                  </p>
                 </button>
-              );
-            })}
-          </div>
-        </Field>
+              ))}
+            </div>
+          </Field>
 
-        <Field label="Focus stages *">
-          <div className="flex flex-wrap gap-2">
-            {STAGES.map((s) => (
+          {thesisType === "sector_driven" && (
+            <Field label="Focus sectors *">
+              <ChipGroup options={SECTORS_TOP} selected={sectors} onToggle={toggle(setSectors)} />
+            </Field>
+          )}
+
+          <Field label="Focus stages *">
+            <ChipGroup options={STAGES} selected={stages} onToggle={toggle(setStages)} />
+          </Field>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Check size — min" hint="USD">
+              <input type="number" value={checkMin} onChange={(e) => setCheckMin(e.target.value)} className={inputClass} placeholder="50000" />
+            </Field>
+            <Field label="Check size — max" hint="USD">
+              <input type="number" value={checkMax} onChange={(e) => setCheckMax(e.target.value)} className={inputClass} placeholder="500000" />
+            </Field>
+          </div>
+
+          {isVcType && (
+            <Field label="Fund size" hint="USD — current fund">
+              <input type="number" value={fundSize} onChange={(e) => setFundSize(e.target.value)} className={inputClass} placeholder="50000000" />
+            </Field>
+          )}
+
+          <Field label="B2B, B2C, or both?" hint="Top-level audience">
+            <div className="grid grid-cols-3 gap-3">
+              {(["b2b", "b2c", "both"] as const).map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => setAudienceSimple(opt)}
+                  className={`text-center rounded-lg border p-3 text-sm font-semibold transition-all uppercase ${
+                    audienceSimple === opt ? "border-teal-500 bg-teal-950/30 text-teal-200" : "border-zinc-700 bg-zinc-900/50 text-zinc-400 hover:border-zinc-500"
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          <Field label="Regions you invest in" hint="High-level — refine to specific countries in the deep section if needed">
+            <ChipGroup options={REGIONS} selected={regions} onToggle={toggle(setRegions)} />
+          </Field>
+
+          <Field label="Hard nos" hint="Sectors you'll never invest in regardless of fit">
+            <ChipGroup options={SECTORS_TOP} selected={hardNoBasic} onToggle={toggle(setHardNoBasic)} color="rose" />
+          </Field>
+
+          {/* Turnstile + CTAs */}
+          {TURNSTILE_SITE_KEY && (
+            <div className="pt-2">
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={TURNSTILE_SITE_KEY}
+                onSuccess={(t) => setTurnstileToken(t)}
+                onError={() => setTurnstileToken(null)}
+                onExpire={() => setTurnstileToken(null)}
+                options={{ theme: "dark", size: "flexible" }}
+              />
+            </div>
+          )}
+
+          {submitError && (
+            <div className="rounded-lg border border-rose-700/50 bg-rose-950/30 p-3 text-sm text-rose-300">
+              {submitError}
+            </div>
+          )}
+
+          <div className="pt-2">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
-                key={s}
-                type="button"
-                onClick={() => setStages((cur) => toggle(cur, s))}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                  stages.includes(s)
-                    ? "border-teal-500 bg-teal-950/40 text-teal-200"
-                    : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
-                }`}
+                type="submit"
+                disabled={submitDisabled || submitState === "submitting"}
+                className="flex-1 rounded-full bg-teal-600 py-3 text-sm font-semibold text-white hover:bg-teal-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {s.replace(/_/g, "-")}
+                {submitState === "submitting" ? "Submitting..." : "Submit profile"}
               </button>
-            ))}
-          </div>
-        </Field>
-
-        <Field label="Hard no (optional — sectors you'll never invest in, regardless of fit)">
-          <div className="flex flex-wrap gap-2">
-            {SECTORS.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setHardNo((cur) => toggle(cur, s))}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                  hardNo.includes(s)
-                    ? "border-rose-500 bg-rose-950/40 text-rose-200"
-                    : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
-                }`}
-              >
-                {s.replace(/_/g, " ")}
-              </button>
-            ))}
-          </div>
-        </Field>
-
-        <Field label="Hard requirements (optional — must-haves for any investment)">
-          <div className="flex flex-col gap-2">
-            {HARD_REQUIREMENTS.map((r) => (
-              <button
-                key={r.key}
-                type="button"
-                onClick={() => setHardRequirements((cur) => toggle(cur, r.key))}
-                className={`text-left text-xs px-3 py-2 rounded-md border transition-all ${
-                  hardRequirements.includes(r.key)
-                    ? "border-teal-500 bg-teal-950/40 text-teal-200"
-                    : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
-                }`}
-              >
-                <span className="mr-2">{hardRequirements.includes(r.key) ? "✓" : "○"}</span>
-                {r.label}
-              </button>
-            ))}
-          </div>
-        </Field>
-
-        {localRequired && (
-          <Field label="Where is local for you? (e.g., California, NYC metro)">
-            <input
-              value={geoScope}
-              onChange={(e) => setGeoScope(e.target.value)}
-              className={inputClass}
-              placeholder="California"
-            />
-          </Field>
-        )}
-
-        <Field label="Decision cadence (optional)">
-          <div className="flex gap-2">
-            {CADENCES.map((c) => (
-              <button
-                key={c.key}
-                type="button"
-                onClick={() =>
-                  setCommitteeCadence((cur) => (cur === c.key ? null : c.key))
-                }
-                className={`text-xs px-3 py-1.5 rounded-md border transition-all ${
-                  committeeCadence === c.key
-                    ? "border-teal-500 bg-teal-950/40 text-teal-200"
-                    : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
-                }`}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
-        </Field>
-
-        <Field label="Countries you invest in (optional — leave blank for no geo filter)">
-          <div className="flex flex-wrap gap-2">
-            {COUNTRIES.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setCountries((cur) => toggle(cur, c))}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                  countries.includes(c)
-                    ? "border-teal-500 bg-teal-950/40 text-teal-200"
-                    : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
-                }`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        </Field>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Check size min (USD)">
-            <input type="number" value={checkMin} onChange={(e) => setCheckMin(e.target.value)} className={inputClass} placeholder="100000" />
-          </Field>
-          <Field label="Check size max (USD)">
-            <input type="number" value={checkMax} onChange={(e) => setCheckMax(e.target.value)} className={inputClass} placeholder="500000" />
-          </Field>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Currently deploying?">
-            <TriToggle value={isDeploying} onChange={setIsDeploying} />
-          </Field>
-          <Field label="Leads rounds?">
-            <TriToggle value={leadsRounds} onChange={setLeadsRounds} />
-          </Field>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Fund size (USD)">
-            <input type="number" value={fundSize} onChange={(e) => setFundSize(e.target.value)} className={inputClass} placeholder="50000000" />
-          </Field>
-          <Field label="Location">
-            <input value={location} onChange={(e) => setLocation(e.target.value)} className={inputClass} placeholder="San Francisco, CA" />
-          </Field>
-        </div>
-
-        <Field label="Additional contacts at your firm (optional)">
-          <div className="space-y-2">
-            {additionalContacts.map((c, idx) => (
-              <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                <input
-                  value={c.name}
-                  onChange={(e) => updateContact(idx, "name", e.target.value)}
-                  className={`${inputClass} col-span-4`}
-                  placeholder="Name"
-                />
-                <input
-                  type="email"
-                  value={c.email}
-                  onChange={(e) => updateContact(idx, "email", e.target.value)}
-                  className={`${inputClass} col-span-4`}
-                  placeholder="Email"
-                />
-                <input
-                  value={c.role}
-                  onChange={(e) => updateContact(idx, "role", e.target.value)}
-                  className={`${inputClass} col-span-3`}
-                  placeholder="Role"
-                />
+              {!showDeep && (
                 <button
                   type="button"
-                  onClick={() => removeContact(idx)}
-                  className="col-span-1 text-zinc-500 hover:text-red-400 text-sm"
-                  aria-label="Remove contact"
+                  onClick={openDeep}
+                  className={`flex-1 rounded-full border py-3 text-sm font-semibold transition-all ${
+                    shouldNudgeStrongly
+                      ? "border-amber-500 bg-gradient-to-r from-amber-900/60 to-amber-800/50 text-amber-100 hover:from-amber-800/70 hover:to-amber-700/60 shadow-lg shadow-amber-900/30"
+                      : "border-amber-500/60 bg-gradient-to-r from-amber-950/40 to-amber-900/30 text-amber-200 hover:from-amber-900/50 hover:to-amber-800/40"
+                  }`}
                 >
-                  ✕
+                  ↓ Go deeper for sharper matches
+                </button>
+              )}
+            </div>
+            {shouldNudgeStrongly && !showDeep && (
+              <p className="mt-3 text-xs text-amber-300/90 leading-relaxed text-center">
+                {typeIsThinThesis
+                  ? `${INVESTOR_TYPES.find((t) => t.key === investorType)?.label}s typically have shorter theses — going deeper meaningfully tightens your matches.`
+                  : "Short thesis means lighter auto-classification — going deeper helps."}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {showDeep && (
+          <div className="mt-12 flex flex-col items-center gap-2 animate-fade-in">
+            <div className="text-amber-400 text-2xl animate-bounce">↓</div>
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-700/60 to-transparent" />
+          </div>
+        )}
+
+        {/* ── DEEP SECTION ─────────────────────────────────────────────── */}
+        {showDeep && (
+          <div ref={deepRef} className="mt-8 scroll-mt-8 animate-fade-in">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="w-7 h-7 rounded-full border-2 border-amber-500 bg-amber-950/30 text-amber-300 text-xs font-bold flex items-center justify-center">2</span>
+              <h2 className="text-xl font-bold text-amber-100">Go deeper · refine the matching</h2>
+            </div>
+            <p className="text-sm text-zinc-400 mb-8 max-w-prose">
+              Every section below is optional. Fill in what you want to set yourself — leave the rest to the auto-classification.
+            </p>
+
+            <div className="space-y-7 rounded-2xl border border-amber-700/40 bg-gradient-to-b from-amber-950/10 to-zinc-950/40 p-6 shadow-2xl shadow-amber-900/10">
+              <Field label="Sector expertise" hint="Areas of deep domain knowledge — focused theses outrank generalist ones">
+                <ChipGroup options={SECTORS_TOP} selected={sectorExpertise} onToggle={toggle(setSectorExpertise)} color="emerald" />
+              </Field>
+
+              <div className="pt-2 border-t border-zinc-800/60">
+                <p className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Refine the auto-classification</p>
+                <p className="text-xs text-zinc-600 mb-6 max-w-prose">
+                  The matcher considers four dimensions beyond sectors. Set them yourself for full control.
+                </p>
+
+                <div className="space-y-6">
+                  <Field label="Modality" hint="How the businesses you back deliver value — SaaS, marketplace, hardware, services, etc.">
+                    <ChipGroup options={MODALITY} selected={modality} onToggle={toggle(setModality)} color="emerald" />
+                  </Field>
+
+                  <Field label="Technology" hint="What they're built on — beyond AI">
+                    <ChipGroup options={TECHNOLOGY} selected={technology} onToggle={toggle(setTechnology)} color="cyan" />
+                  </Field>
+
+                  <Field label="Specific audience" hint="Refine beyond B2B / B2C — household, SMB, enterprise, developer, etc.">
+                    <ChipGroup options={AUDIENCE_DEEP} selected={audienceDeep} onToggle={toggle(setAudienceDeep)} color="violet" />
+                  </Field>
+
+                  <Field label="Business model" hint="How they make money — subscription, marketplace take-rate, transactional, etc.">
+                    <ChipGroup options={BUSINESS} selected={business} onToggle={toggle(setBusiness)} color="amber" />
+                  </Field>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-zinc-800/60">
+                <p className="text-xs font-bold uppercase tracking-widest text-rose-300 mb-1">Hard nos · more granular</p>
+                <p className="text-xs text-zinc-600 mb-6 max-w-prose">
+                  Beyond sectors — stages you don&apos;t play in, founder profiles you avoid, and any other dealbreakers.
+                </p>
+
+                <div className="space-y-6">
+                  <Field label="Stages I don't play in">
+                    <ChipGroup options={STAGES} selected={hardNoStages} onToggle={toggle(setHardNoStages)} color="rose" />
+                  </Field>
+
+                  <Field label="Founder profiles I avoid">
+                    <ChipGroup options={ANTI_PATTERNS} selected={antiPatterns} onToggle={toggle(setAntiPatterns)} color="rose" format={(s) => String(s)} />
+                  </Field>
+
+                  <Field label="Other deal breakers" hint="Free text — anything else that's a no for you">
+                    <textarea
+                      rows={2}
+                      value={otherDealBreakers}
+                      onChange={(e) => setOtherDealBreakers(e.target.value)}
+                      className={inputClass}
+                      placeholder="e.g. flat valuations, no IP, prior litigation, etc."
+                    />
+                  </Field>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-zinc-800/60">
+                <p className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Country-level geography</p>
+                <p className="text-xs text-zinc-600 mb-6 max-w-prose">
+                  Override your regional defaults with specific countries — useful if you operate in a subset of a region.
+                </p>
+
+                <Field label="Specific countries">
+                  <ChipGroup options={COUNTRIES_OVERRIDE} selected={countriesOverride} onToggle={toggle(setCountriesOverride)} />
+                </Field>
+              </div>
+
+              <div className="pt-3 flex gap-3">
+                <button
+                  type="submit"
+                  disabled={submitDisabled || submitState === "submitting"}
+                  className="flex-1 rounded-full bg-teal-600 py-3 text-sm font-semibold text-white hover:bg-teal-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submitState === "submitting" ? "Submitting..." : "Submit profile · sharper matches"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDeep(false)}
+                  className="rounded-full border border-zinc-700 bg-zinc-900/50 px-6 py-3 text-sm font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
+                >
+                  ↑ Collapse
                 </button>
               </div>
-            ))}
-            <button
-              type="button"
-              onClick={addContact}
-              className="text-xs text-teal-400 hover:text-teal-300"
-            >
-              + Add contact
-            </button>
-          </div>
-        </Field>
-
-        <Field label="Bio (optional)">
-          <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={2} className={inputClass} placeholder="Background, prior firms, notable bets…" />
-        </Field>
-
-        {TURNSTILE_SITE_KEY && (
-          <div className="flex justify-center">
-            <Turnstile
-              ref={turnstileRef}
-              siteKey={TURNSTILE_SITE_KEY}
-              options={{ theme: "dark", size: "normal" }}
-              onSuccess={(token) => setTurnstileToken(token)}
-              onError={() => setTurnstileToken(null)}
-              onExpire={() => setTurnstileToken(null)}
-            />
+            </div>
           </div>
         )}
 
-        {submitError && (
-          <div className="rounded-md border border-red-700/40 bg-red-950/20 p-3 text-xs text-red-300">
-            {submitError}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={submitDisabled || submitState === "submitting"}
-          className="w-full rounded-full border border-orange-700/50 bg-orange-950/30 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {submitState === "submitting" ? "Submitting…" : "Join the network"}
-        </button>
-
-        <p className="text-center text-xs text-zinc-600">
-          Questions? <a href="mailto:team@raisefn.com" className="text-teal-400 hover:text-teal-300">team@raisefn.com</a>
+        <p className="mt-16 text-center text-xs text-zinc-600">
+          Read more on{" "}
+          <Link href="/how-we-match" className="text-teal-400 hover:text-teal-300 underline">how we match</Link>
+          {" "}or{" "}
+          <Link href="/how-we-learn" className="text-teal-400 hover:text-teal-300 underline">how we learn</Link>.
         </p>
       </form>
     </div>
-  );
-}
-
-const inputClass =
-  "w-full rounded-md bg-zinc-900 border border-zinc-700 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:border-teal-500 focus:outline-none";
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <div className="text-xs uppercase tracking-wider text-zinc-500 mb-1.5">{label}</div>
-      {children}
-    </label>
-  );
-}
-
-function TriToggle({ value, onChange }: { value: boolean | null; onChange: (v: boolean | null) => void }) {
-  return (
-    <div className="flex gap-1.5">
-      {[
-        { key: true, label: "Yes" },
-        { key: false, label: "No" },
-        { key: null, label: "Unknown" },
-      ].map((opt) => (
-        <button
-          key={String(opt.key)}
-          type="button"
-          onClick={() => onChange(opt.key)}
-          className={`text-xs px-3 py-1.5 rounded-md border ${
-            value === opt.key
-              ? "border-teal-500 bg-teal-950/40 text-teal-200"
-              : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function RadioCard({
-  selected,
-  onClick,
-  title,
-  body,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  title: string;
-  body: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`text-left px-3 py-3 rounded-md border transition-all ${
-        selected
-          ? "border-teal-500 bg-teal-950/40"
-          : "border-zinc-700 bg-zinc-900 hover:border-zinc-500"
-      }`}
-    >
-      <div className={`text-sm font-medium mb-1 ${selected ? "text-teal-200" : "text-zinc-300"}`}>
-        {title}
-      </div>
-      <div className="text-xs text-zinc-500 leading-relaxed">{body}</div>
-    </button>
   );
 }
