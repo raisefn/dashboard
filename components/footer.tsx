@@ -56,6 +56,7 @@ export default function Footer() {
               {[
                 { href: "/brain", label: "The Brain" },
                 { href: "/tracker", label: "The Tracker" },
+                { href: "/raise-intel", label: "Raise Intel" },
                 { href: "/roadmap", label: "Roadmap" },
                 { href: "/pricing", label: "Pricing" },
               ].map((l) => (

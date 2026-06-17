@@ -69,9 +69,15 @@ export function extractFaqs(body: string): Array<{ q: string; a: string }> {
 // Parse a single article from disk. Returns null if the file doesn't
 // exist — callers decide how to handle 404 (article detail page renders
 // notFound(), index just skips it).
+//
+// Underscore- and dot-prefixed slugs are reserved for editorial-only
+// files (voice spec, templates, etc) and are never publicly readable
+// even if someone guesses the URL. Returning null here makes the route
+// 404, which is what we want.
 export async function getArticleBySlug(
   slug: string,
 ): Promise<RaiseIntelArticle | null> {
+  if (slug.startsWith("_") || slug.startsWith(".")) return null;
   const file = path.join(CONTENT_DIR, `${slug}.md`);
   let raw: string;
   try {
@@ -94,6 +100,9 @@ export async function listArticles(): Promise<RaiseIntelArticle[]> {
   }
   const articles: RaiseIntelArticle[] = [];
   for (const name of files) {
+    // Skip editorial-only files (voice spec, templates) prefixed with
+    // _ or . — they live alongside articles but never publish.
+    if (name.startsWith("_") || name.startsWith(".")) continue;
     if (!name.endsWith(".md")) continue;
     const slug = name.replace(/\.md$/, "");
     const article = await getArticleBySlug(slug);
