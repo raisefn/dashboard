@@ -97,7 +97,7 @@ const COMBOS = [
   { name: "Creator subscription tools", tags: ["creator_economy", "creator_tools", "subscription"] },
 ];
 
-function Lattice() {
+function DimensionsView() {
   const [comboIdx, setComboIdx] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setComboIdx((i) => (i + 1) % COMBOS.length), 3200);
@@ -107,7 +107,7 @@ function Lattice() {
   const active = COMBOS[comboIdx];
   const activeSet = new Set(active.tags);
 
-  // Tight column spacing so the lattice fits the viewport without horizontal
+  // Tight column spacing so the columns fit the viewport without horizontal
   // scroll. 5 cols × 172px + 32 padding ≈ 892px — comfortably under typical
   // content widths (max-w-6xl ≈ 1152px).
   const COL_GAP = 172;
@@ -260,14 +260,14 @@ export default function HowWeMatchPage() {
     <div className="relative">
       <div className="grid-bg" />
 
-      {/* The hero IS the lattice. Words wait below. */}
+      {/* Hero — the dimensions visualization. Words wait below. */}
       <section className="relative pt-16 pb-8 px-4">
         <div className="mx-auto max-w-7xl">
-          <Lattice />
+          <DimensionsView />
         </div>
       </section>
 
-      {/* Single statement under the lattice — tight, punchy, no five-section template */}
+      {/* Single statement under the visualization — tight, punchy */}
       <section className="relative py-20 px-4">
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="text-5xl sm:text-6xl font-bold text-white leading-[1.05] tracking-tight mb-8">
@@ -284,18 +284,17 @@ export default function HowWeMatchPage() {
         </div>
       </section>
 
-      {/* Beyond the lattice — full matching stack. The 5 dims are the
-          FOUNDATION. The matcher also weighs check size, stage, geo,
-          deployment cadence, network signal, behavioral profile, hard nos,
-          and human curation. Make all of this visible. */}
+      {/* The full matching stack — five dims are the foundation; check size,
+          stage, geo, deployment cadence, behavioral profile, network signal,
+          hard nos, and human curation layer on top. */}
       <section className="relative py-20 px-4 border-t border-zinc-900/60">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-bold mb-3">
-              Beyond the lattice
+              Beyond the dimensions
             </p>
             <h2 className="text-4xl sm:text-5xl font-bold text-white leading-[1.05] tracking-tight mb-6">
-              The lattice is the <span className="text-teal-300">foundation</span>.
+              Five dimensions are the <span className="text-teal-300">foundation</span>.
             </h2>
             <p className="text-lg text-zinc-400 max-w-3xl mx-auto leading-relaxed">
               Then we layer everything else investors actually care about — stage adjacency,
@@ -382,7 +381,7 @@ export default function HowWeMatchPage() {
                 kind: "the final gate",
                 color: "#fde68a",
                 title: "Every warm intro brokered by a person.",
-                desc: "The lattice surfaces signal. A human decides what becomes an intro. No auto-fired emails. No abused inboxes. Ever.",
+                desc: "The system surfaces signal. A human decides what becomes an intro. No auto-fired emails. No abused inboxes. Ever.",
               },
             ].map((layer) => (
               <div
@@ -412,9 +411,10 @@ export default function HowWeMatchPage() {
           </div>
 
           <p className="mt-12 text-center text-sm text-zinc-500 max-w-2xl mx-auto leading-relaxed">
-            <span className="text-zinc-300 font-semibold">Eleven layers</span> applied to every founder, every investor,
-            every match. The score you don&apos;t see is the score we engineered to make sure
-            the names you DO see are the ones worth your time.
+            <span className="text-zinc-300 font-semibold">Eleven layers</span>
+            {" "}applied to every founder, every investor, every match. The score
+            you don&apos;t see is the score we engineered to make sure the names
+            you DO see are the ones worth your time.
           </p>
         </div>
       </section>
@@ -433,7 +433,7 @@ export default function HowWeMatchPage() {
               href="/how-we-learn"
               className="text-sm font-medium text-zinc-400 hover:text-teal-300 transition-colors"
             >
-              See how the lattice learns →
+              See how the matching learns →
             </Link>
           </div>
         </div>

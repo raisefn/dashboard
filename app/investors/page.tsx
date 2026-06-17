@@ -209,17 +209,6 @@ export default function InvestorsPage() {
               How it works →
             </a>
           </div>
-          <p className="text-xs text-zinc-500 mt-6">
-            Read more on{" "}
-            <Link href="/how-we-match" className="text-teal-400 hover:text-teal-300 underline underline-offset-2">
-              how we match
-            </Link>
-            {" "}or{" "}
-            <Link href="/how-we-learn" className="text-teal-400 hover:text-teal-300 underline underline-offset-2">
-              how we learn
-            </Link>
-            {" "}from every interaction.
-          </p>
         </div>
       </section>
 
@@ -275,6 +264,22 @@ export default function InvestorsPage() {
                 When a founder hits your thesis, we tell you. Tight matches
                 only — no scattershot.
               </p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Link
+                  href="/how-we-match"
+                  className="inline-flex items-center gap-2 rounded-lg border border-teal-700/50 bg-teal-950/40 px-4 py-2.5 text-xs font-semibold text-teal-200 hover:bg-teal-900/40 hover:border-teal-600/70 transition-all"
+                >
+                  How we match
+                  <span aria-hidden className="text-teal-400">→</span>
+                </Link>
+                <Link
+                  href="/how-we-learn"
+                  className="inline-flex items-center gap-2 rounded-lg border border-teal-700/50 bg-teal-950/40 px-4 py-2.5 text-xs font-semibold text-teal-200 hover:bg-teal-900/40 hover:border-teal-600/70 transition-all"
+                >
+                  How we learn
+                  <span aria-hidden className="text-teal-400">→</span>
+                </Link>
+              </div>
             </div>
             <div className="md:order-1">
               <ThesisMatchCard />

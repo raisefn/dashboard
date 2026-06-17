@@ -114,9 +114,9 @@ const EPICENTERS = [10, 47, 88, 132, 175, 220].map((i) => i % NEURONS.length);
 
 function Brain() {
   // Bigger canvas. Inputs go to LEFT half, outputs exit RIGHT half. Center
-  // pushed slightly low so top labels never crop.
+  // pushed down + viewBox extended top so top input label never crops.
   const CX = 700;
-  const CY = 600;
+  const CY = 680;
   const INPUT_DIST = 460;
   const OUTPUT_DIST = 460;
 
@@ -136,7 +136,7 @@ function Brain() {
   return (
     <div className="relative w-full">
       <svg
-        viewBox="0 0 1400 1200"
+        viewBox="0 0 1400 1320"
         className="w-full h-auto"
         style={{ maxHeight: "92vh" }}
       >
@@ -361,7 +361,7 @@ export default function HowWeLearnPage() {
           </h1>
           <p className="text-xl text-zinc-400 leading-relaxed max-w-3xl mx-auto">
             Five categories of signal. Every email sent, every meeting taken, every term sheet
-            signed, every soft pass — all of it. The lattice gets denser. The matches get sharper.
+            signed, every soft pass — all of it. The matching gets sharper.
             The next founder benefits from yours.
           </p>
         </div>
@@ -424,7 +424,7 @@ export default function HowWeLearnPage() {
               href="/how-we-match"
               className="text-sm font-medium text-zinc-400 hover:text-teal-300 transition-colors"
             >
-              ← See the lattice
+              ← See how we match
             </Link>
           </div>
         </div>
