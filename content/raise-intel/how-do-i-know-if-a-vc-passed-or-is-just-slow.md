@@ -9,7 +9,7 @@ tags: ["investor-signals", "fundraising-tactics", "vc-process", "pipeline-manage
 fund_slugs: []
 sector_slugs: []
 tldr: "Slow is a pass. A VC who's interested moves fast and asks specifically. A VC who's polite but slow has already mentally said no. The five hard signals: 5+ business days to reply, second ask for 'more data,' offers of help unrelated to investing, no follow-up question in 72 hours, vague timing on next steps. Two of those = pass."
-cta_text: "Build a pipeline where every investor is filtered for fit before you pitch. Free, 50 matches/month."
+cta_text: "Open raise(fn) — get matched with investors who fund your space."
 cta_href: "/signup"
 ---
 

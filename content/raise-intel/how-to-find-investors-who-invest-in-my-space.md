@@ -9,7 +9,7 @@ tags: ["investor-discovery", "fundraising", "pre-seed", "seed", "vc-fit"]
 fund_slugs: []
 sector_slugs: []
 tldr: "Pull each fund's last 30 checks. That's their real thesis. Filter to ones that match your sector, stage, and check size. Throw out anyone who hasn't deployed in 12+ months. What's left is your list. Stated thesis is marketing. Observed thesis is signal."
-cta_text: "Get a ranked list of investors actually funding companies like yours. Free, 50 matches/month."
+cta_text: "Open raise(fn) — get matched with investors who fund your space."
 cta_href: "/signup"
 ---
 
@@ -57,7 +57,7 @@ The above is 6-8 hours of manual work to build a list of 50 well-filtered candid
 
 We index 17,000+ investors. We've classified 4,331 of them against a 5-dimensional ontology — industry, modality, technology, audience, business model. 892 have observed thesis pulled from real check data, not what they claim on their site.
 
-You answer a 5-minute intake. raise(fn) returns a ranked list of investors whose actual check behavior matches your raise. Free tier: 50 matches a month.
+You answer a 5-minute intake. raise(fn) returns a ranked list of investors whose actual check behavior matches your raise.
 
 ## What to skip
 

@@ -9,7 +9,7 @@ tags: ["active-investors", "fundraising-2026", "vc-deployment", "investor-discov
 fund_slugs: []
 sector_slugs: []
 tldr: "A fund is actively deploying if they've filed an SEC Form D, closed a publicly reported round, or made a portfolio announcement in the last 6 months. Anything older than 12 months — treat as cold. VC websites are unreliable. Form D filings aren't. raise(fn) tracks deployment status automatically."
-cta_text: "Get a list of investors actively writing checks in your space. Free, 50 matches/month."
+cta_text: "Open raise(fn) — get matched with investors who fund your space."
 cta_href: "/signup"
 ---
 
@@ -76,7 +76,7 @@ Five minutes for the first fund. 30 seconds each after that.
 
 ## The shortcut
 
-We do this automatically across 17,000+ investors and refresh continuously. Every fund in raise(fn)'s index carries a deployment-activity flag, so you can filter to "Active" before any outreach. 4,331 of those investors are classified by sector ontology, 892 of those have observed thesis from actual check data. Free tier: 50 matches a month.
+We do this automatically across 17,000+ investors and refresh continuously. Every fund in raise(fn)'s index carries a deployment-activity flag, so you can filter to "Active" before any outreach. 4,331 of those investors are classified by sector ontology, 892 of those have observed thesis from actual check data.
 
 ## FAQ
 

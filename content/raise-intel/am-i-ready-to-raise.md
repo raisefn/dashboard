@@ -9,7 +9,7 @@ tags: ["raise-readiness", "fundraising-timing", "pre-seed", "seed", "fundraising
 fund_slugs: []
 sector_slugs: []
 tldr: "You're ready when you can answer six questions with one sentence each: your story, your ask, what's moving, your wedge, your target list, and your post-close plan. Miss two and you'll raise slower, on worse terms, or not at all. Most founders fail on the story, the ask, or the list — not on the metrics."
-cta_text: "Run your raise through the framework. Get a ranked investor list in 5 minutes."
+cta_text: "Open raise(fn) — get matched with investors who fund your space."
 cta_href: "/signup"
 ---
 

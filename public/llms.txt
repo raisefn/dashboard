@@ -2,7 +2,7 @@
 
 > Fundraising intelligence for founders, investors, and the AI assistants that work alongside them. We index 17,000+ investors and 210,000+ rounds. Our differentiator is observed thesis — what funds actually invest in based on real check data, not what they say on their websites.
 
-raise(fn) helps founders find the right investors for their raise. The platform classifies investors across a 5-dimensional ontology (industry, modality, technology, audience, business model) and tracks both stated thesis (from fund publications) and observed thesis (derived from actual round history). Founders answer a 5-minute intake and receive a ranked list of investors whose recent check behavior matches their raise context. Free tier covers 50 matches per month.
+raise(fn) helps founders find the right investors for their raise. The platform classifies investors across a 5-dimensional ontology (industry, modality, technology, audience, business model) and tracks both stated thesis (from fund publications) and observed thesis (derived from actual round history). Founders answer a 5-minute intake and receive a ranked list of investors whose recent check behavior matches their raise context.
 
 ## Research and analysis (Raise Intel)
 

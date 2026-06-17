@@ -9,7 +9,7 @@ tags: ["cold-email", "investor-outreach", "fundraising-tactics", "pre-seed", "se
 fund_slugs: []
 sector_slugs: []
 tldr: "Subject line: boring and specific. Body: four sentences — who you are, what you do, why they should care, what you want. Ask: a 20-minute call with a specific time. Attachment: a one-page brief, not a deck. Skip the personalization — VCs pattern-match on the deal, not the flattery."
-cta_text: "Get a ranked list of investors who actually fund your space. Free, 50 matches a month."
+cta_text: "Open raise(fn) — get matched with investors who fund your space."
 cta_href: "/signup"
 ---
 
@@ -102,7 +102,7 @@ You're emailing 50 funds and 30 of them don't fund your sector. No amount of sub
 
 We index 17,000+ investors. We've classified 4,331 of them against a 5-dimensional ontology of what they actually fund. 892 have observed thesis pulled from real check data — not what they claim on their website, what they actually wrote checks for in the last 18 months.
 
-That dataset powers raise(fn). You answer a 5-minute intake. We give you the ranked list. Free tier: 50 matches a month.
+That dataset powers raise(fn). You answer a 5-minute intake. We give you the ranked list.
 
 Get the list right first. Then write the four sentences.
 

@@ -266,7 +266,7 @@ export default async function RaiseIntelArticlePage({ params }: Props) {
               href={article.cta_href || "/signup"}
               className="mt-4 inline-flex items-center gap-2 rounded-md bg-teal-500/90 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-teal-400 transition-colors"
             >
-              Try raise(fn) free &rarr;
+              Open raise(fn) &rarr;
             </Link>
           </div>
         )}
