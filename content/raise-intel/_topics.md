@@ -9,8 +9,8 @@ voice, ship.
 
 ## Status
 
-- ✅ done: 5
-- ⏳ pending: 15
+- ✅ done: 6
+- ⏳ pending: 14
 - 🎯 cadence target: daily (~1/day)
 
 ## Workflow
@@ -36,6 +36,8 @@ voice, ship.
   → [/raise-intel/who-is-actually-writing-checks-right-now](/raise-intel/who-is-actually-writing-checks-right-now)
 - [x] **How do I know if a VC passed — or is just slow?**
   → [/raise-intel/how-do-i-know-if-a-vc-passed-or-is-just-slow](/raise-intel/how-do-i-know-if-a-vc-passed-or-is-just-slow)
+- [x] **How do I create urgency without lying about having other offers?**
+  → [/raise-intel/how-do-i-create-urgency-without-lying](/raise-intel/how-do-i-create-urgency-without-lying)
 
 ## Pending — priority order
 
@@ -43,10 +45,6 @@ These come from Justin's "what founders actually search and ask most"
 list. Priorities are loose — pick anything in the top tier.
 
 ### Tier 1 — sharp / contrarian / decision-relevant
-
-- [ ] **How do I create urgency without lying about having other offers?**
-  Category: tactics. Angle: real urgency comes from a deadline, a
-  competitive process, or a closed lead. Faking it gets caught fast.
 - [ ] **What questions will VCs ask me in a pre-seed meeting?**
   Category: meeting-prep. Angle: the 12 questions every partner asks,
   the 3 that decide it, what they're actually testing for.
