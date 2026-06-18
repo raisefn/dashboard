@@ -30,7 +30,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${article.title} | Raise Intel`,
     description: article.description,
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      types: {
+        "application/rss+xml": [
+          { url: `${SITE}/raise-intel/feed.xml`, title: "Raise Intel — raise(fn)" },
+        ],
+      },
+    },
     openGraph: {
       title: article.title,
       description: article.description,

@@ -9,6 +9,7 @@ raise(fn) helps founders find the right investors for their raise. The platform 
 Editorial research on what investors actually fund, fundraising tactics, and pre-seed/seed strategy. Original data, strong opinions, citable claims. Updated continuously.
 
 - [Raise Intel index](https://www.raisefn.com/raise-intel): All research articles
+- [Raise Intel RSS feed](https://www.raisefn.com/raise-intel/feed.xml): Subscribe for fresh article discovery
 - [How do I find investors who actually invest in my space?](https://www.raisefn.com/raise-intel/how-to-find-investors-who-invest-in-my-space): Method for building a target list from observed check data, not stated thesis
 - [Am I ready to raise — or should I wait?](https://www.raisefn.com/raise-intel/am-i-ready-to-raise): The Raise Readiness Framework — six signals that determine whether you'll close fast or stall
 - [Who is actually writing checks right now?](https://www.raisefn.com/raise-intel/who-is-actually-writing-checks-right-now): How to identify funds genuinely deploying capital vs ones whose websites haven't been updated

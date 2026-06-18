@@ -8,7 +8,14 @@ export const metadata: Metadata = {
   title: "Raise Intel — investor research, observed thesis data | raise(fn)",
   description:
     "Research on what investors actually fund versus what they say. Stated thesis vs observed portfolio, sector deep-dives, and fund-by-fund analysis sourced from real round data.",
-  alternates: { canonical: `${SITE}/raise-intel` },
+  alternates: {
+    canonical: `${SITE}/raise-intel`,
+    types: {
+      "application/rss+xml": [
+        { url: `${SITE}/raise-intel/feed.xml`, title: "Raise Intel — raise(fn)" },
+      ],
+    },
+  },
   openGraph: {
     title: "Raise Intel — investor research from raise(fn)",
     description:
