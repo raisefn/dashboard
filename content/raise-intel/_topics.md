@@ -9,8 +9,8 @@ voice, ship.
 
 ## Status
 
-- ✅ done: 6
-- ⏳ pending: 14
+- ✅ done: 7
+- ⏳ pending: 13
 - 🎯 cadence target: daily (~1/day)
 
 ## Workflow
@@ -48,10 +48,8 @@ list. Priorities are loose — pick anything in the top tier.
 - [ ] **What questions will VCs ask me in a pre-seed meeting?**
   Category: meeting-prep. Angle: the 12 questions every partner asks,
   the 3 that decide it, what they're actually testing for.
-- [ ] **How do I get a warm intro to a VC?**
-  Category: outreach. Angle: cold outreach gets ignored. Warm intros
-  don't. Here's the actual method — mapping the network, the ask
-  pattern, the follow-through.
+- [x] **How do I get a warm intro to a VC?** ✅ published 2026-06-18
+  → [/raise-intel/how-do-i-get-a-warm-intro-to-a-vc](/raise-intel/how-do-i-get-a-warm-intro-to-a-vc)
 - [ ] **How do I close the round faster?**
   Category: process. Angle: speed is mostly about pipeline density
   + commitment language, not "creating urgency" theater.
