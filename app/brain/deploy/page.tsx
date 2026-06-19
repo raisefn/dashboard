@@ -318,7 +318,7 @@ function formatMarkdown(text: string): string {
   t = t.replace(/^## (.+)$/gm, "<h2>$1</h2>");
   t = t.replace(/^# (.+)$/gm, "<h1>$1</h1>");
   // Differentiate bold-labels ("Thesis:", "Check:", "Geo:") from bold-names
-  // ("GSR Ventures", "Vinnie Lauria") so the rendered chat has real visual
+  // ("GSR Ventures", "Avery Tanaka") so the rendered chat has real visual
   // hierarchy. Label = bold text ending in a colon → muted gray. Anything
   // else → the brand teal we use for investor names.
   t = t.replace(/\*\*(.+?)\*\*/g, (_match, content: string) => {

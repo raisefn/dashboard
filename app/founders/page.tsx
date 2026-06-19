@@ -13,7 +13,7 @@ import FadeInSection from "@/components/fade-in-section";
 function FounderMatchCard() {
   const investors = [
     { name: "First Round Capital", tag: "Sector + stage fit", color: "#2dd4bf", note: "Active in your ARR range — partner engaged" },
-    { name: "Vinnie Lauria · Golden Gate", tag: "Solo angel", color: "#34d399", note: "SEA + thesis fit; fast mover" },
+    { name: "Avery Tanaka · Pacific Bridge", tag: "Solo angel", color: "#34d399", note: "SEA + thesis fit; fast mover" },
     { name: "Bessemer Venture Partners", tag: "Portfolio gap", color: "#fbbf24", note: "B2B payments thesis, no current portco overlap" },
     { name: "Manny Medina (angel)", tag: "Operator empathy", color: "#fb923c", note: "Built Outreach; angel-checks in your range" },
   ];
@@ -50,7 +50,7 @@ function FounderMatchCard() {
 /* ── Visual: pipeline memory snippet ── */
 function PipelineMemoryCard() {
   const items = [
-    { name: "Vinnie Lauria", status: "Replied — wants intro deck", color: "#34d399", last: "2h ago" },
+    { name: "Avery Tanaka", status: "Replied — wants intro deck", color: "#34d399", last: "2h ago" },
     { name: "First Round (Bill Trenchard)", status: "Met Mon — second meeting requested", color: "#2dd4bf", last: "1d ago" },
     { name: "Manny Medina", status: "Soft committed $50K — needs SAFE", color: "#fb923c", last: "3d ago" },
     { name: "Bessemer (Byron Deeter)", status: "Passed — portfolio overlap", color: "#71717a", last: "1w ago" },
@@ -82,7 +82,7 @@ function BriefPreviewCard() {
   return (
     <div className="rounded-2xl border border-zinc-800 overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(24,24,27,0.95), rgba(9,9,11,0.98))" }}>
       <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/80">
-        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">Brief — Vinnie Lauria, Golden Gate Ventures</span>
+        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">Brief — Avery Tanaka, Pacific Bridge</span>
         <span className="text-[10px] text-orange-400/70 font-semibold tracking-widest uppercase">Tailored</span>
       </div>
       <div className="p-5 space-y-4 text-sm">
@@ -97,16 +97,16 @@ function BriefPreviewCard() {
         <div className="border-t border-zinc-800/60 pt-4">
           <p className="text-[10px] uppercase tracking-wider text-teal-400/80 mb-1.5">Why this fits</p>
           <p className="text-zinc-300 leading-relaxed">
-            Two of his last four publicly-announced checks were
+            Two of their last four publicly-announced checks were
             US-headquartered founders raising their A — pattern fits your
             geography + stage. Your MRR ($18K) and growth rate (22% MoM)
-            land in his preferred traction band.
+            land in their preferred traction band.
           </p>
         </div>
         <div className="border-t border-zinc-800/60 pt-4">
           <p className="text-[10px] uppercase tracking-wider text-orange-400/80 mb-1.5">What to watch</p>
           <p className="text-zinc-300 leading-relaxed">
-            He typically passes if there&apos;s no clear path to APAC
+            They typically pass if there&apos;s no clear path to APAC
             expansion within 18 months. Worth surfacing your SEA
             partnership pipeline up front. Also passes on founders who
             can&apos;t articulate post-seed milestones in the first 10 minutes.
@@ -142,7 +142,7 @@ function BriefPreviewCard() {
             </li>
             <li className="flex gap-2">
               <span className="text-teal-400/80">·</span>
-              <span>Don&apos;t pitch lead-investor status — he co-invests.</span>
+              <span>Don&apos;t pitch lead-investor status — they co-invest.</span>
             </li>
           </ul>
         </div>

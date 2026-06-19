@@ -372,7 +372,7 @@ function CaptureBriefModal({
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="Vinnie Lauria"
+              placeholder="Avery Tanaka"
               className="w-full rounded-md bg-zinc-900 border border-zinc-800 px-3 py-2 text-sm focus:border-zinc-600 outline-none"
             />
           </div>
@@ -383,7 +383,7 @@ function CaptureBriefModal({
               <input
                 value={form.firm}
                 onChange={(e) => setForm({ ...form, firm: e.target.value })}
-                placeholder="Golden Gate Ventures"
+                placeholder="Pacific Bridge"
                 className="w-full rounded-md bg-zinc-900 border border-zinc-800 px-3 py-2 text-sm focus:border-zinc-600 outline-none"
               />
             </div>
@@ -406,7 +406,7 @@ function CaptureBriefModal({
               <input
                 value={form.website}
                 onChange={(e) => setForm({ ...form, website: e.target.value })}
-                placeholder="https://goldengate.vc"
+                placeholder="https://pacificbridge.example"
                 className="flex-1 rounded-md bg-zinc-900 border border-zinc-800 px-3 py-2 text-sm focus:border-zinc-600 outline-none"
               />
               <button
