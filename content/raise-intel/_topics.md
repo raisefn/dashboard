@@ -9,8 +9,8 @@ voice, ship.
 
 ## Status
 
-- ✅ done: 7
-- ⏳ pending: 13
+- ✅ done: 8
+- ⏳ pending: 12
 - 🎯 cadence target: daily (~1/day)
 
 ## Workflow
@@ -45,9 +45,8 @@ These come from Justin's "what founders actually search and ask most"
 list. Priorities are loose — pick anything in the top tier.
 
 ### Tier 1 — sharp / contrarian / decision-relevant
-- [ ] **What questions will VCs ask me in a pre-seed meeting?**
-  Category: meeting-prep. Angle: the 12 questions every partner asks,
-  the 3 that decide it, what they're actually testing for.
+- [x] **What questions will VCs ask me in a pre-seed meeting?** ✅ published 2026-06-19
+  → [/raise-intel/what-questions-will-vcs-ask-me-in-a-pre-seed-meeting](/raise-intel/what-questions-will-vcs-ask-me-in-a-pre-seed-meeting)
 - [x] **How do I get a warm intro to a VC?** ✅ published 2026-06-18
   → [/raise-intel/how-do-i-get-a-warm-intro-to-a-vc](/raise-intel/how-do-i-get-a-warm-intro-to-a-vc)
 - [ ] **How do I close the round faster?**
