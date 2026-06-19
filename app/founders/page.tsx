@@ -77,78 +77,152 @@ function PipelineMemoryCard() {
   );
 }
 
-/* ── Visual: full brief preview — the actual artifact you'd send ── */
+/* ── Visual: full brief preview — the actual artifact raise(fn) generates
+   and sends to an investor about a matched founder. Structure matches
+   the real BRIEF_SYSTEM_PROMPT in brain/admin.py: founder-centric,
+   addressed to the investor by first name, voice rules per system prompt
+   (contractions, fragments, no em-dashes, no hype words). All names
+   fictional. ── */
 function BriefPreviewCard() {
   return (
     <div className="rounded-2xl border border-zinc-800 overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(24,24,27,0.95), rgba(9,9,11,0.98))" }}>
       <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/80">
-        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">Brief — Avery Tanaka, Pacific Bridge</span>
-        <span className="text-[10px] text-orange-400/70 font-semibold tracking-widest uppercase">Tailored</span>
+        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">Prepared for Avery Tanaka · Confidential</span>
+        <span className="text-[10px] text-teal-400/70 font-semibold tracking-widest uppercase">Brief</span>
       </div>
       <div className="p-5 space-y-4 text-sm">
+        {/* Title block — company + one-line positioning */}
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5">What they fund</p>
-          <p className="text-zinc-300 leading-relaxed">
-            Solo angel checks of <span className="text-white font-semibold">$25-100K</span> across SEA
-            B2B SaaS. Sweet spot is post-revenue seed, $500K-$2M rounds.
-            Doesn&apos;t lead. Strong preference for technical founders.
+          <h3 className="text-base font-bold text-white">Halcyon Mail</h3>
+          <p className="text-zinc-400 text-xs mt-1 leading-snug">
+            B2B email reputation engine for high-volume senders.
           </p>
         </div>
+
+        {/* Stat table — stage / sector / HQ / round info */}
+        <div className="grid grid-cols-3 gap-x-4 gap-y-3 rounded-lg border border-zinc-800/60 bg-zinc-900/30 p-3 text-[11px]">
+          <div>
+            <span className="text-zinc-500 block uppercase tracking-wider text-[9px] mb-0.5">Stage</span>
+            <span className="text-zinc-200 font-medium">Seed</span>
+          </div>
+          <div>
+            <span className="text-zinc-500 block uppercase tracking-wider text-[9px] mb-0.5">Sector</span>
+            <span className="text-zinc-200 font-medium">B2B SaaS</span>
+          </div>
+          <div>
+            <span className="text-zinc-500 block uppercase tracking-wider text-[9px] mb-0.5">HQ</span>
+            <span className="text-zinc-200 font-medium">Singapore</span>
+          </div>
+          <div>
+            <span className="text-zinc-500 block uppercase tracking-wider text-[9px] mb-0.5">Round</span>
+            <span className="text-zinc-200 font-medium">$1.8M / $14M cap</span>
+          </div>
+          <div>
+            <span className="text-zinc-500 block uppercase tracking-wider text-[9px] mb-0.5">Committed</span>
+            <span className="text-zinc-200 font-medium">$1.2M (67%)</span>
+          </div>
+          <div>
+            <span className="text-zinc-500 block uppercase tracking-wider text-[9px] mb-0.5">Close</span>
+            <span className="text-zinc-200 font-medium">4 weeks</span>
+          </div>
+        </div>
+
+        {/* Why we think this fits Avery */}
         <div className="border-t border-zinc-800/60 pt-4">
-          <p className="text-[10px] uppercase tracking-wider text-teal-400/80 mb-1.5">Why this fits</p>
-          <p className="text-zinc-300 leading-relaxed">
-            Two of their last four publicly-announced checks were
-            US-headquartered founders raising their A — pattern fits your
-            geography + stage. Your MRR ($18K) and growth rate (22% MoM)
-            land in their preferred traction band.
+          <p className="text-[10px] uppercase tracking-wider text-teal-400/80 mb-1.5">Why we think this fits Avery</p>
+          <p className="text-zinc-300 leading-relaxed text-[13px]">
+            Avery, you&apos;ve backed three SEA-headquartered B2B SaaS founders in the last 12 months at the $25-75K solo-angel band. Halcyon&apos;s at $22K MRR, 28% MoM for three months straight, Singapore-based but selling US-first. Fits your geo and stage band cleanly. Round&apos;s 67% committed already, closing in 4 weeks.
           </p>
         </div>
+
+        {/* Where they are */}
         <div className="border-t border-zinc-800/60 pt-4">
-          <p className="text-[10px] uppercase tracking-wider text-orange-400/80 mb-1.5">What to watch</p>
-          <p className="text-zinc-300 leading-relaxed">
-            They typically pass if there&apos;s no clear path to APAC
-            expansion within 18 months. Worth surfacing your SEA
-            partnership pipeline up front. Also passes on founders who
-            can&apos;t articulate post-seed milestones in the first 10 minutes.
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5">Where they are</p>
+          <p className="text-zinc-300 leading-relaxed text-[13px]">
+            $22K MRR. 28% MoM growth, three months running. 14 paying customers, two of them Fortune 500 (Maersk, a top-10 US bank). The other 12 split US enterprise (8) and APAC (4). No churn in the last 90 days. Pipeline shows 31 active conversations, 11 in late-stage trials.
           </p>
         </div>
+
+        {/* The team */}
         <div className="border-t border-zinc-800/60 pt-4">
-          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">Recent moves</p>
-          <ul className="space-y-1.5 text-zinc-400 text-[13px]">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">The team</p>
+          <ul className="space-y-1.5 text-zinc-300 text-[13px]">
             <li className="flex gap-2">
               <span className="text-zinc-600">›</span>
-              <span><span className="text-zinc-300">Nimble Edge</span> — $75K, Mar 2026 (B2B AI ops, US/SG)</span>
+              <span><span className="text-white font-semibold">Lena Park</span> (CEO). 4 years at SendGrid running the deliverability platform team. Then Twilio infra.</span>
             </li>
             <li className="flex gap-2">
               <span className="text-zinc-600">›</span>
-              <span><span className="text-zinc-300">Kestrel Health</span> — $50K, Feb 2026 (B2B SaaS, US/PH)</span>
+              <span><span className="text-white font-semibold">Marcus Rhee</span> (CTO). 3 years at Mailgun building their reputation-scoring engine. Then Stripe.</span>
             </li>
             <li className="flex gap-2">
               <span className="text-zinc-600">›</span>
-              <span><span className="text-zinc-300">Tapestry Books</span> — $40K, Jan 2026 (B2B SaaS, US)</span>
+              <span>Both have personally shipped the infrastructure they&apos;re now selling.</span>
             </li>
           </ul>
         </div>
+
+        {/* What's working */}
         <div className="border-t border-zinc-800/60 pt-4">
-          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">Talking points</p>
-          <ul className="space-y-1.5 text-zinc-400 text-[13px]">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">What&apos;s working</p>
+          <ul className="space-y-1.5 text-zinc-300 text-[13px]">
             <li className="flex gap-2">
               <span className="text-teal-400/80">·</span>
-              <span>Lead with the 22% MoM growth — that&apos;s in his sweet spot.</span>
+              <span>28% MoM growth for three months straight. No anomalous spikes.</span>
             </li>
             <li className="flex gap-2">
               <span className="text-teal-400/80">·</span>
-              <span>Mention your existing Manila design-partner pipeline.</span>
+              <span>Two Fortune 500 contracts signed in the last 90 days.</span>
             </li>
             <li className="flex gap-2">
               <span className="text-teal-400/80">·</span>
-              <span>Don&apos;t pitch lead-investor status — they co-invest.</span>
+              <span>Anti-spam algorithm patent filed last month. Two incumbents have already replicated parts of it.</span>
             </li>
           </ul>
         </div>
+
+        {/* What to watch */}
+        <div className="border-t border-zinc-800/60 pt-4">
+          <p className="text-[10px] uppercase tracking-wider text-orange-400/80 mb-2">What to watch</p>
+          <ul className="space-y-1.5 text-zinc-300 text-[13px]">
+            <li className="flex gap-2">
+              <span className="text-orange-400/60">·</span>
+              <span>14 customers is concentrated. Top 3 are 41% of MRR. Worth asking about expansion inside those accounts.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-orange-400/60">·</span>
+              <span>Singapore HQ, mostly remote team. Worth asking how they&apos;re handling org growth at this distribution.</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Founder quote */}
+        <div className="border-t border-zinc-800/60 pt-4">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">Lena, in her own words</p>
+          <blockquote className="border-l-2 border-teal-400/50 pl-3 italic text-zinc-300 text-[13px] leading-relaxed">
+            &ldquo;Email deliverability hasn&apos;t been re-architected in fifteen years. We&apos;ve been quietly fixing it for two.&rdquo;
+          </blockquote>
+        </div>
+
+        {/* What they're asking for */}
+        <div className="border-t border-zinc-800/60 pt-4">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5">What they&apos;re asking for</p>
+          <p className="text-zinc-300 leading-relaxed text-[13px]">
+            $25-100K check on the SAFE. Decision by week 3 if possible. Internal lead identified, room for two more named angels.
+          </p>
+        </div>
+
+        {/* Closing */}
+        <div className="border-t border-zinc-800/60 pt-4">
+          <p className="text-zinc-400 text-[13px] italic">
+            Let us know if you&apos;d like an intro.
+          </p>
+        </div>
+
+        {/* Action buttons */}
         <div className="pt-2 flex gap-2 border-t border-zinc-800/60">
           <button className="text-xs font-semibold px-3 py-1.5 rounded-md border border-teal-700/40 bg-teal-950/40 text-teal-300 mt-3">
-            Draft outreach
+            Send intro
           </button>
           <button className="text-xs font-semibold px-3 py-1.5 rounded-md border border-zinc-700/60 bg-zinc-900/40 text-zinc-300 mt-3">
             Share link
