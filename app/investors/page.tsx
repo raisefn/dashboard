@@ -403,6 +403,58 @@ export default function InvestorsPage() {
         </FadeInSection>
       </section>
 
+      {/* ── FAQ (cherry-picked from /faq — no FAQPage JSON-LD here; the
+           canonical schema lives on /faq) ── */}
+      <section className="relative py-20 px-4 bg-zinc-950/40">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-wider text-teal-400/80 mb-2">
+              Common questions
+            </p>
+            <h2 className="text-3xl font-bold text-white sm:text-4xl mb-8">
+              For investors.
+            </h2>
+            <div className="space-y-8">
+              {[
+                {
+                  q: "How does raise(fn) help me as an investor?",
+                  a: "Surfaces founders that actually match your check behavior — what your portfolio reveals, not what your website says. Hand-curated. No bulk feeds, no daily deal-flow firehose. Quality over volume.",
+                },
+                {
+                  q: "Will founders see me before I want to engage?",
+                  a: "No. Investors are invisible to founders by default. No public ratings, no 'passed on' lists, no exposure of who turned down what. Engagement is private and happens only when you signal it.",
+                },
+                {
+                  q: "Can I connect raise(fn) to my own agent?",
+                  a: "MCP support coming soon. You'll be able to connect your investor agent directly and have raise(fn) deal flow surface inside your existing workflow — your agent gets the matches, you stay in your tools.",
+                },
+                {
+                  q: "What does raise(fn) cost an investor?",
+                  a: "Free, for now. Won't always be — pricing will come once the platform matures. Founders fund the platform today.",
+                },
+              ].map((qa) => (
+                <div key={qa.q}>
+                  <h3 className="text-lg font-semibold text-white leading-snug mb-2">
+                    {qa.q}
+                  </h3>
+                  <p className="text-zinc-300 leading-relaxed text-sm sm:text-base">
+                    {qa.a}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8">
+              <Link
+                href="/faq"
+                className="text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors"
+              >
+                Read the full FAQ →
+              </Link>
+            </div>
+          </div>
+        </FadeInSection>
+      </section>
+
       {/* ── CTA ── */}
       <section className="relative py-24 px-4">
         <FadeInSection>

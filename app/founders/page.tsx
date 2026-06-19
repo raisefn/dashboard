@@ -402,6 +402,58 @@ export default function FoundersPage() {
         </FadeInSection>
       </section>
 
+      {/* ── FAQ (cherry-picked from /faq — no FAQPage JSON-LD here; the
+           canonical schema lives on /faq) ── */}
+      <section className="relative py-20 px-4 bg-zinc-950/40">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-wider text-teal-400/80 mb-2">
+              Common questions
+            </p>
+            <h2 className="text-3xl font-bold text-white sm:text-4xl mb-8">
+              For founders.
+            </h2>
+            <div className="space-y-8">
+              {[
+                {
+                  q: "What does my raise look like with raise(fn)?",
+                  a: "You talk to it. No forms. No dashboard. You tell it what you're building, where you are, what you're trying to do — it captures the company, the team, the metrics, the wedge, the round shape. Then it runs your raise: builds the investor list ranked by who actually deploys into your space, critiques your deck slide-by-slide, writes briefs for every match, preps you for every meeting, tracks the pipeline, debriefs after each conversation, brokers warm intros where there's a relationship in the network, and walks you through the term sheet when one lands. One conversation. Replaces the database, the CRM, the spreadsheet, the slide-critique service, and the strategy session — all of it.",
+                },
+                {
+                  q: "Can raise(fn) help if I'm not raising yet?",
+                  a: "Yes. It runs a readiness check — six signals across story, ask, motion, wedge, target list, post-close plan. Tells you which ones are weak. Helps you sharpen them. Premature outreach burns the best investors first. Getting to 'ready' before opening conversations is half the game.",
+                },
+                {
+                  q: "How is raise(fn) different from a fundraising coach?",
+                  a: "Coaches charge retainer or hourly to give advice — the advice is generic, the work is still yours. raise(fn) doesn't give advice. It does the work — builds the list, writes the briefs, preps the meetings, tracks the pipeline, brokers the intros, walks you through the term sheet. Fixed-fee, fixed-scope, no success fee, no equity.",
+                },
+                {
+                  q: "If I'm on the free plan, why would I pay?",
+                  a: "Free gives you the matching engine with a use cap. Paid removes the cap and unlocks the full system across your raise — deeper meeting prep, debrief support, pipeline tracking, deck critique, pitch refinement, term sheet walkthrough, warm intros. If your round is small and the cap covers it, free is enough. If you're running an active raise with 20+ parallel investor conversations, paid is built for that.",
+                },
+              ].map((qa) => (
+                <div key={qa.q}>
+                  <h3 className="text-lg font-semibold text-white leading-snug mb-2">
+                    {qa.q}
+                  </h3>
+                  <p className="text-zinc-300 leading-relaxed text-sm sm:text-base">
+                    {qa.a}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8">
+              <Link
+                href="/faq"
+                className="text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors"
+              >
+                Read the full FAQ →
+              </Link>
+            </div>
+          </div>
+        </FadeInSection>
+      </section>
+
       {/* ── CTA ── */}
       <section className="relative py-24 px-4">
         <FadeInSection>

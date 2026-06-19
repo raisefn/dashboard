@@ -227,8 +227,8 @@ export default function FAQPage() {
         </header>
 
         {FAQ_SECTIONS.map((section) => (
-          <section key={section.title} className="mb-16">
-            <div className="mb-8 border-b border-zinc-800 pb-4">
+          <section key={section.title} className="mb-12">
+            <div className="mb-6">
               {section.eyebrow && (
                 <p className="text-xs font-semibold uppercase tracking-wider text-teal-400/80 mb-1.5">
                   {section.eyebrow}
@@ -236,14 +236,31 @@ export default function FAQPage() {
               )}
               <h2 className="text-2xl font-bold text-white">{section.title}</h2>
             </div>
-            <div className="space-y-10">
+            <div className="border-t border-zinc-800/60">
               {section.questions.map((qa) => (
-                <div key={qa.q}>
-                  <h3 className="text-lg font-semibold text-white leading-snug mb-3">
-                    {qa.q}
-                  </h3>
-                  <p className="text-zinc-300 leading-relaxed">{qa.a}</p>
-                </div>
+                // Native <details> for click-to-open behavior. No JS, no
+                // hydration cost, and the answer text stays in the DOM
+                // (just visually collapsed) so AI search crawlers + the
+                // FAQPage JSON-LD see the same content as the user.
+                <details
+                  key={qa.q}
+                  className="group border-b border-zinc-800/60"
+                >
+                  <summary className="cursor-pointer list-none py-5 flex items-start justify-between gap-4">
+                    <h3 className="text-base sm:text-lg font-semibold text-white leading-snug group-hover:text-teal-300 transition-colors">
+                      {qa.q}
+                    </h3>
+                    <span
+                      className="text-2xl leading-none text-zinc-500 group-open:rotate-45 transition-transform select-none mt-0.5 shrink-0"
+                      aria-hidden="true"
+                    >
+                      +
+                    </span>
+                  </summary>
+                  <div className="pb-5 pr-8">
+                    <p className="text-zinc-300 leading-relaxed">{qa.a}</p>
+                  </div>
+                </details>
               ))}
             </div>
           </section>
