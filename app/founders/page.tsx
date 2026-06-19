@@ -133,7 +133,7 @@ function BriefPreviewCard() {
           <div className="border-t border-zinc-800/60 pt-4">
             <p className="text-[10px] uppercase tracking-wider text-teal-400/80 mb-1.5">Why we think this fits</p>
             <p className="text-zinc-300 leading-relaxed text-[13px]">
-              Three SEA-headquartered B2B SaaS bets in your last 12 months sit in the $25-75K solo-angel band. Halcyon&apos;s at $22K MRR, 28% MoM for three months straight. Singapore HQ, US-first GTM. Fits the geo and stage cleanly. Round&apos;s 67% committed, closing in 4 weeks.
+              Three SEA-headquartered B2B SaaS bets in your last 12 months sit in the solo-angel band. Halcyon&apos;s an enterprise email infrastructure play, Singapore HQ, US-first GTM. Sits cleanly inside your geo and stage. Round&apos;s well underway.
             </p>
           </div>
 
@@ -141,7 +141,7 @@ function BriefPreviewCard() {
           <div className="border-t border-zinc-800/60 pt-4">
             <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5">Where they are</p>
             <p className="text-zinc-300 leading-relaxed text-[13px]">
-              $22K MRR. 28% MoM growth, three months running. 14 paying customers, two of them Fortune 500. The other 12 split US enterprise (8) and APAC (4). No churn in 90 days. Pipeline shows 31 active conversations, 11 in late-stage trials.
+              $22K MRR, averaging ~24% MoM over the last three months. 14 paying customers, two of them Fortune 500. No churn this quarter. Pipeline&apos;s healthy with several late-stage trials.
             </p>
           </div>
 
@@ -164,19 +164,38 @@ function BriefPreviewCard() {
             </ul>
           </div>
 
-          {/* Hint that there's more below the fold */}
-          <div className="border-t border-zinc-800/60 pt-4 pb-2 opacity-60">
+          {/* What's working */}
+          <div className="border-t border-zinc-800/60 pt-4">
             <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">What&apos;s working</p>
+            <ul className="space-y-1.5 text-zinc-300 text-[13px]">
+              <li className="flex gap-2">
+                <span className="text-teal-400/80">·</span>
+                <span>Real growth without anomalous spikes. Repeatable inbound from a couple of channels.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-teal-400/80">·</span>
+                <span>Two Fortune 500 contracts signed in the last quarter.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-teal-400/80">·</span>
+                <span>Anti-spam algorithm patent filed recently. Two incumbents have already replicated parts.</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* What to watch — faded, implies more below */}
+          <div className="border-t border-zinc-800/60 pt-4 pb-2 opacity-60">
+            <p className="text-[10px] uppercase tracking-wider text-orange-400/80 mb-2">What to watch</p>
             <p className="text-zinc-300 leading-relaxed text-[13px]">
-              28% MoM growth for three months straight. Two Fortune 500 contracts signed in the last 90 days. Anti-spam algorithm patent filed last month.
+              Customer base is concentrated in the top accounts. Worth asking how they&apos;re thinking about expansion inside those before pushing for net-new logos.
             </p>
           </div>
         </div>
 
-        {/* Fade-out — implies the brief continues with What's working / What
-           to watch / Founder quote / What they're asking for below */}
+        {/* Fade-out — implies the brief continues with Founder quote /
+           What they're asking for below */}
         <div
-          className="pointer-events-none absolute bottom-0 left-0 right-0 h-24"
+          className="pointer-events-none absolute bottom-0 left-0 right-0 h-20"
           style={{
             background:
               "linear-gradient(180deg, rgba(9,9,11,0) 0%, rgba(9,9,11,0.95) 80%, rgba(9,9,11,1) 100%)",
