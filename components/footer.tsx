@@ -105,6 +105,7 @@ export default function Footer() {
               {[
                 { href: "/how-we-match", label: "How we match" },
                 { href: "/how-we-learn", label: "How we learn" },
+                { href: "/faq", label: "FAQ" },
                 { href: "/privacy", label: "Privacy" },
                 { href: "/terms", label: "Terms" },
                 { href: "mailto:team@raisefn.com", label: "Contact" },

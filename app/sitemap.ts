@@ -38,6 +38,7 @@ const STATIC_PAGES: MetadataRoute.Sitemap = [
   // backlinks from /founders, /investors, and footer Company section.
   { url: `${SITE}/how-we-match`, lastModified: NOW, changeFrequency: "monthly", priority: 0.7 },
   { url: `${SITE}/how-we-learn`, lastModified: NOW, changeFrequency: "monthly", priority: 0.7 },
+  { url: `${SITE}/faq`, lastModified: NOW, changeFrequency: "monthly", priority: 0.8 },
   { url: `${SITE}/raise-intel`, lastModified: NOW, changeFrequency: "weekly", priority: 0.8 },
   { url: `${SITE}/roadmap`, lastModified: NOW, changeFrequency: "weekly", priority: 0.5 },
   { url: `${SITE}/investors/join`, lastModified: NOW, changeFrequency: "monthly", priority: 0.7 },
