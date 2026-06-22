@@ -67,6 +67,14 @@ export interface AgentPlanData {
  */
 export type AppendChatBubble = () => HTMLElement;
 
+/**
+ * Plan status strip mount point: the chat page exposes a container DIV
+ * above the input area; agent-ui owns its contents. Empty when no
+ * active plan, populated with "Plan: N of M done · ⏸ on X [Stop]" while
+ * a plan is running.
+ */
+export type PlanStripMount = HTMLElement | null;
+
 interface ExecutionState {
   planId: string;
   steps: AgentPlanStep[];
@@ -76,6 +84,10 @@ interface ExecutionState {
   /** DOM elements for in-flight approval bubbles, keyed by step.id, so we
    *  can swap "[Do it] / [Skip]" buttons for the result when execution moves on. */
   approvalBubbles: Map<string, HTMLElement>;
+  /** Mount point for the persistent plan status strip above the chat input. */
+  stripMount: PlanStripMount;
+  /** id of the step currently paused awaiting approval, if any. */
+  pendingApprovalStepId: string | null;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -92,9 +104,21 @@ export function renderAgentPlanPanel(
   contentEl: HTMLElement,
   session: Session | null,
   appendBubble?: AppendChatBubble,
+  stripMount?: PlanStripMount,
 ): void {
   if (!session || !appendBubble) return;
   void contentEl; // legacy param, unused in chat-turn surface
+
+  // No-actionable-steps fallback: if planner returned only advice steps
+  // (no work to execute, just a synthesis read), skip the executor
+  // entirely. The brain's chat narration already rendered the synthesis
+  // and the advice content. Don't write more.
+  const actionable = data.steps.filter((s) => s.step_type !== "advice");
+  if (actionable.length === 0) {
+    clearActivePlan(); // no executor to track
+    return;
+  }
+
   setActivePlan(data.plan_id);
   const state: ExecutionState = {
     planId: data.plan_id,
@@ -103,7 +127,10 @@ export function renderAgentPlanPanel(
     appendBubble,
     session,
     approvalBubbles: new Map(),
+    stripMount: stripMount ?? null,
+    pendingApprovalStepId: null,
   };
+  refreshPlanStrip(state);
   void startExecutionStream(state);
 }
 
@@ -115,6 +142,7 @@ export function renderAgentPlanPanel(
 export async function maybeResumeActivePlan(
   appendBubble: AppendChatBubble,
   session: Session | null,
+  stripMount?: PlanStripMount,
 ): Promise<boolean> {
   if (!session) return false;
   let planId: string | null = null;
@@ -152,9 +180,17 @@ export async function maybeResumeActivePlan(
     appendBubble,
     session,
     approvalBubbles: new Map(),
+    stripMount: stripMount ?? null,
+    pendingApprovalStepId: null,
   };
+  refreshPlanStrip(state);
   void startExecutionStream(state);
   return true;
+}
+
+/** Clear the plan strip — call from page.tsx if the page unmounts cleanly. */
+export function clearPlanStrip(stripMount: PlanStripMount): void {
+  if (stripMount) stripMount.innerHTML = "";
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -165,6 +201,7 @@ async function startExecutionStream(state: ExecutionState): Promise<void> {
   if (state.controller) return;
   const controller = new AbortController();
   state.controller = controller;
+  let receivedTerminalEvent = false;
 
   try {
     const res = await fetch("/v1/brain/agent/execute", {
@@ -194,19 +231,62 @@ async function startExecutionStream(state: ExecutionState): Promise<void> {
         if (!trimmed.startsWith("data: ")) continue;
         try {
           const event = JSON.parse(trimmed.slice(6));
+          // Track whether we got a real terminal event so we know
+          // when "stream closed without event" means something went
+          // wrong vs. it ended cleanly.
+          const t = event.type as string;
+          if (t === "plan_complete" || t === "plan_paused"
+              || t === "plan_exhausted" || t === "plan_abandoned" || t === "error") {
+            receivedTerminalEvent = true;
+          }
           handleExecutorEvent(event, state);
         } catch { /* ignore parse errors */ }
       }
     }
   } catch (err) {
     if ((err as Error).name === "AbortError") {
-      appendChatText(state.appendBubble, "_Stopped._");
+      // Founder-initiated stop — surface elsewhere; don't render here
     } else {
-      appendChatText(state.appendBubble, `_Stream error: ${(err as Error).message}_`);
+      // Mid-stream error (network, brain restart). Attempt reconnect
+      // before surfacing failure.
+      state.controller = null;
+      void attemptReconnect(state, (err as Error).message);
+      return;
     }
   } finally {
     state.controller = null;
   }
+
+  // Stream closed without a terminal event — likely brain redeploy or
+  // network drop. Try a single graceful reconnect via /status.
+  if (!receivedTerminalEvent) {
+    void attemptReconnect(state, "stream_closed_without_terminal_event");
+  }
+}
+
+async function attemptReconnect(state: ExecutionState, reason: string): Promise<void> {
+  // Give the brain a moment to come back up (Railway redeploys are ~30s).
+  await new Promise((r) => setTimeout(r, 2000));
+  const status = await fetchPlanStatus(state.planId, state.session);
+  if (!status) {
+    appendChatText(state.appendBubble, `_I lost the connection (${reason}). Refresh to pick up where we left off._`);
+    return;
+  }
+  if (TERMINAL_STATUSES.has(status.status)) {
+    clearActivePlan();
+    if (state.stripMount) state.stripMount.innerHTML = "";
+    appendChatText(state.appendBubble, `_Plan ended (${status.status}) while we were disconnected._`);
+    return;
+  }
+  if (status.status === "exhausted") {
+    clearActivePlan();
+    if (state.stripMount) state.stripMount.innerHTML = "";
+    appendChatText(state.appendBubble, "_We hit the budget while we were disconnected. The work that ran is saved._");
+    return;
+  }
+  // Plan is still alive — reopen the stream silently.
+  appendChatText(state.appendBubble, "_Reconnecting..._");
+  void startExecutionStream(state);
 }
 
 function handleExecutorEvent(event: Record<string, unknown>, state: ExecutionState): void {
@@ -225,8 +305,11 @@ function handleExecutorEvent(event: Record<string, unknown>, state: ExecutionSta
     const localStep = state.steps.find((s) => s.id === stepId);
     const targetName = localStep?.target_display || localStep?.target;
     const prompt = buildApprovalPromptText(description, targetName ?? null);
-    const bubble = renderApprovalBubble(state, stepId, prompt);
+    const workingText = workingOnItText(localStep?.step_type, targetName);
+    const bubble = renderApprovalBubble(state, stepId, prompt, workingText);
     state.approvalBubbles.set(stepId, bubble);
+    state.pendingApprovalStepId = stepId;
+    refreshPlanStrip(state);
     return;
   }
 
@@ -236,6 +319,8 @@ function handleExecutorEvent(event: Record<string, unknown>, state: ExecutionSta
     const skipped = event.skipped as boolean | undefined;
     const localStep = state.steps.find((s) => s.id === stepId);
     if (localStep) localStep.status = skipped ? "skipped" : "complete";
+    if (state.pendingApprovalStepId === stepId) state.pendingApprovalStepId = null;
+    refreshPlanStrip(state);
 
     // Lock the approval bubble's buttons (replace with confirmed state)
     const approvalBubble = state.approvalBubbles.get(stepId);
@@ -259,33 +344,46 @@ function handleExecutorEvent(event: Record<string, unknown>, state: ExecutionSta
       finalizeApprovalBubble(approvalBubble, "failed");
       state.approvalBubbles.delete(stepId);
     }
+    const localStep = state.steps.find((s) => s.id === stepId);
+    if (localStep) localStep.status = "failed";
+    if (state.pendingApprovalStepId === stepId) state.pendingApprovalStepId = null;
+    refreshPlanStrip(state);
     const bubble = state.appendBubble();
     bubble.innerHTML = `<div class="agent-md" style="font-size:13px;color:#fca5a5;">I hit an error on this step: <code class="inline-code">${escapeHtml(error)}</code></div>`;
     const retryRow = document.createElement("div");
     retryRow.style.cssText = "margin-top:8px;display:flex;gap:6px;";
     retryRow.appendChild(makeRetryButton(state, stepId));
+    retryRow.appendChild(makeSkipAndContinueButton(state, stepId, retryRow));
     bubble.appendChild(retryRow);
     return;
   }
 
   if (type === "plan_complete") {
     clearActivePlan();
-    appendChatText(state.appendBubble, "_All done. What's next?_");
+    if (state.stripMount) state.stripMount.innerHTML = "";
+    void renderClosingSummary(state);
     return;
   }
   if (type === "plan_paused") {
     appendChatText(state.appendBubble, "_Paused — I'll wait for your call._");
+    refreshPlanStrip(state);
     return;
   }
   if (type === "plan_exhausted") {
     clearActivePlan();
-    const reason = (event.reason as string) === "token_budget" ? "token" : "wall-clock";
-    appendChatText(state.appendBubble, `_Hit the ${reason} budget for this plan. The work that ran is saved._`);
+    if (state.stripMount) state.stripMount.innerHTML = "";
+    renderExhaustedRecovery(state, event);
     return;
   }
   if (type === "plan_abandoned") {
     clearActivePlan();
-    appendChatText(state.appendBubble, `_Plan abandoned: ${(event.reason as string) ?? "unknown"}_`);
+    if (state.stripMount) state.stripMount.innerHTML = "";
+    const reason = (event.reason as string) ?? "unknown";
+    if (reason === "founder_stopped") {
+      appendChatText(state.appendBubble, "_Stopped. What do you want to do instead?_");
+    } else {
+      appendChatText(state.appendBubble, `_Plan abandoned: ${reason}_`);
+    }
     return;
   }
   if (type === "error") {
@@ -303,7 +401,12 @@ function buildApprovalPromptText(description: string, target: string | null): st
   return lead;
 }
 
-function renderApprovalBubble(state: ExecutionState, stepId: string, promptText: string): HTMLElement {
+function renderApprovalBubble(
+  state: ExecutionState,
+  stepId: string,
+  promptText: string,
+  workingText: string,
+): HTMLElement {
   const bubble = state.appendBubble();
   bubble.classList.add("agent-md");
 
@@ -317,7 +420,7 @@ function renderApprovalBubble(state: ExecutionState, stepId: string, promptText:
 
   const doBtn = makeButton("Do it", primaryBtnStyle());
   doBtn.onclick = async () => {
-    lockApprovalRow(row, "Working on it…");
+    lockApprovalRow(row, workingText);
     void submitApproval(state.planId, stepId, "approved", state.session);
   };
   row.appendChild(doBtn);
@@ -331,6 +434,25 @@ function renderApprovalBubble(state: ExecutionState, stepId: string, promptText:
 
   bubble.appendChild(row);
   return bubble;
+}
+
+function workingOnItText(stepType?: string, target?: string | null): string {
+  const t = target ? ` ${target}` : "";
+  switch (stepType) {
+    case "match": return "Pulling matches for you…";
+    case "brief": return `Pulling a brief on${t}…`;
+    case "meeting_prep": return `Prepping you for${t}…`;
+    case "research": return `Researching${t}…`;
+    case "deck_analysis": return "Reading your deck…";
+    case "term_analysis": return "Reading the terms…";
+    case "signal_read": return `Reading the signals on${t}…`;
+    case "pipeline_update": return `Updating your pipeline${target ? ` for${t}` : ""}…`;
+    case "followup_check": return `Checking status on${t}…`;
+    case "draft_email": return `Drafting the email${target ? ` to${t}` : ""}…`;
+    case "draft_message": return `Drafting the message${target ? ` to${t}` : ""}…`;
+    case "advice": return "Thinking this through with you…";
+    default: return "Working on it…";
+  }
 }
 
 function finalizeApprovalBubble(bubble: HTMLElement, status: "done" | "skipped" | "failed"): void {
@@ -348,6 +470,35 @@ function lockApprovalRow(row: HTMLElement, label: string): void {
   row.dataset.approvalRow = "1";
   row.textContent = label;
   row.style.cssText = "margin-top:8px;font-size:11px;color:#71717a;";
+}
+
+function makeSkipAndContinueButton(state: ExecutionState, stepId: string, row: HTMLElement): HTMLButtonElement {
+  const btn = makeButton("Skip and continue", secondaryBtnStyle());
+  btn.onclick = async () => {
+    btn.disabled = true;
+    btn.textContent = "Skipping…";
+    // Mark the step skipped via the retry-step + immediate-skip-approval pattern:
+    // retry-step resets the step to 'pending', then we submit a skip approval,
+    // then resume execution which will hit the skipped step's approval (already
+    // set) and move on.
+    const reset = await fetch(`/v1/brain/agent/plans/${state.planId}/retry-step`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${state.session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ step_id: stepId }),
+    });
+    if (!reset.ok) {
+      btn.textContent = `Skip failed (HTTP ${reset.status})`;
+      btn.disabled = false;
+      return;
+    }
+    await submitApproval(state.planId, stepId, "skipped", state.session);
+    row.remove();
+    void startExecutionStream(state);
+  };
+  return btn;
 }
 
 function makeRetryButton(state: ExecutionState, stepId: string): HTMLButtonElement {
@@ -377,6 +528,131 @@ function makeRetryButton(state: ExecutionState, stepId: string): HTMLButtonEleme
 // ─────────────────────────────────────────────────────────────
 // Approval submission
 // ─────────────────────────────────────────────────────────────
+
+/**
+ * Render the persistent plan status strip above the chat input.
+ * "Plan: 2 of 5 done · ⏸ on Travis follow-up · [Stop]"
+ * Hidden when no plan or plan terminal.
+ */
+function refreshPlanStrip(state: ExecutionState): void {
+  if (!state.stripMount) return;
+  const total = state.steps.length;
+  const done = state.steps.filter((s) => s.status === "complete" || s.status === "skipped").length;
+  const pendingStep = state.pendingApprovalStepId
+    ? state.steps.find((s) => s.id === state.pendingApprovalStepId)
+    : null;
+  const onLabel = pendingStep
+    ? `⏸ on ${pendingStep.target_display ?? pendingStep.target ?? pendingStep.step_type}`
+    : "running";
+
+  state.stripMount.style.cssText = [
+    "display:flex",
+    "align-items:center",
+    "gap:12px",
+    "padding:8px 14px",
+    "background:rgba(24,24,27,0.85)",
+    "border-top:1px solid #27272a",
+    "border-bottom:1px solid #27272a",
+    "font-size:12px",
+    "color:#a1a1aa",
+  ].join(";");
+  state.stripMount.innerHTML = "";
+
+  const status = document.createElement("div");
+  status.style.cssText = "flex:1;";
+  status.innerHTML = `<span style="color:#e4e4e7;font-weight:500;">Plan in progress</span> &nbsp;·&nbsp; ${done} of ${total} done &nbsp;·&nbsp; ${onLabel}`;
+  state.stripMount.appendChild(status);
+
+  const stopBtn = document.createElement("button");
+  stopBtn.type = "button";
+  stopBtn.textContent = "Stop";
+  stopBtn.style.cssText = [
+    "background:transparent",
+    "color:#71717a",
+    "border:1px solid #3f3f46",
+    "padding:4px 10px",
+    "border-radius:4px",
+    "font-family:inherit",
+    "font-size:11px",
+    "cursor:pointer",
+  ].join(";");
+  stopBtn.onmouseenter = () => { stopBtn.style.color = "#fca5a5"; stopBtn.style.borderColor = "#fca5a5"; };
+  stopBtn.onmouseleave = () => { stopBtn.style.color = "#71717a"; stopBtn.style.borderColor = "#3f3f46"; };
+  stopBtn.onclick = async () => {
+    if (!window.confirm("Stop this plan? Any completed steps stay saved.")) return;
+    stopBtn.disabled = true;
+    stopBtn.textContent = "Stopping…";
+    state.controller?.abort();
+    await submitAbandon(state.planId, state.session);
+  };
+  state.stripMount.appendChild(stopBtn);
+}
+
+async function submitAbandon(planId: string, session: Session): Promise<void> {
+  try {
+    await fetch(`/v1/brain/agent/plans/${planId}/abandon`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+  } catch { /* executor sees status next budget check */ }
+}
+
+function renderExhaustedRecovery(state: ExecutionState, event: Record<string, unknown>): void {
+  const reason = event.reason as string;
+  const reasonText = reason === "token_budget"
+    ? "We've used the token budget for this plan"
+    : "We've been at this a while";
+  const nextStep = event.next_step as { target_display?: string; description?: string } | undefined;
+  const nextLine = nextStep ? `\n\n⏸ Paused at: ${nextStep.target_display ?? "next step"}` : "";
+
+  const bubble = state.appendBubble();
+  bubble.classList.add("agent-md");
+  bubble.innerHTML = formatMarkdown(
+    `${reasonText} — I'm pausing the plan here so we don't waste tokens. The work that ran is saved.${nextLine}`
+  );
+
+  const row = document.createElement("div");
+  row.style.cssText = "margin-top:10px;display:flex;gap:8px;align-items:center;";
+  const keepBtn = makeButton("Keep going", primaryBtnStyle());
+  keepBtn.onclick = () => {
+    row.remove();
+    void startExecutionStream({
+      ...state,
+      controller: null,
+    });
+    refreshPlanStrip(state);
+  };
+  row.appendChild(keepBtn);
+
+  const laterBtn = makeButton("Save and continue later", secondaryBtnStyle());
+  laterBtn.onclick = () => {
+    row.remove();
+    appendChatText(state.appendBubble, "_Saved. We can pick this up next time._");
+  };
+  row.appendChild(laterBtn);
+  bubble.appendChild(row);
+}
+
+async function renderClosingSummary(state: ExecutionState): Promise<void> {
+  // Drop a "thinking" placeholder bubble while raise(fn) writes the summary
+  const bubble = state.appendBubble();
+  bubble.classList.add("agent-md");
+  bubble.innerHTML = `<div style="font-size:12px;color:#71717a;">_Wrapping up..._</div>`;
+  try {
+    const res = await fetch(`/v1/brain/agent/plans/${state.planId}/closing-summary`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${state.session.access_token}` },
+    });
+    if (!res.ok) {
+      bubble.innerHTML = formatMarkdown(`_All done. What's next?_`);
+      return;
+    }
+    const data = await res.json();
+    bubble.innerHTML = formatMarkdown(data.summary || "_All done. What's next?_");
+  } catch {
+    bubble.innerHTML = formatMarkdown(`_All done. What's next?_`);
+  }
+}
 
 async function submitApproval(
   planId: string,

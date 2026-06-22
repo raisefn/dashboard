@@ -918,6 +918,7 @@ function BrainDeployInner() {
   const messagesRef = useRef<HTMLDivElement>(null);
   const messagesInnerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const planStripRef = useRef<HTMLDivElement>(null);
   const sendBtnRef = useRef<HTMLButtonElement>(null);
 
   // Canvas state (refs for animation loop)
@@ -1174,6 +1175,20 @@ function BrainDeployInner() {
       messagesRef.current?.classList.add("active");
     }
 
+    // ── Redirect handling: founder typed during an active plan ──
+    // Auto-pause so the executor stops between steps and we don't burn
+    // budget mid-redirect. After the chat reply finishes, offer a Resume
+    // bubble (rendered in the SSE done handler below).
+    const activePlanId = !silent ? safeLocalStorageGet("raisefn_active_plan_id") : null;
+    if (activePlanId && message !== "[session_open]") {
+      try {
+        await fetch(`/v1/brain/agent/plans/${activePlanId}/pause`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+      } catch { /* defensive — executor sees status on next poll either way */ }
+    }
+
     // Add user message to DOM (skip if silent — auto-probe)
     const displayText = opts?.displayMessage || message;
     if (!silent) addMessageToDOM("user", displayText);
@@ -1304,6 +1319,12 @@ function BrainDeployInner() {
               if (event.conversation_id) conversationIdRef.current = event.conversation_id;
               brainStateRef.current = "idle";
               activeColorRef.current = null;
+              // Redirect tail: if we auto-paused a plan when this message
+              // was sent, offer a Resume bubble after the reply lands.
+              const pausedFor = !silent ? safeLocalStorageGet("raisefn_active_plan_id") : null;
+              if (pausedFor && message !== "[session_open]") {
+                renderResumePrompt(pausedFor);
+              }
             } else if (event.type === "usage") {
               // Track usage state for nav Upgrade button + soft card.
               // Mirror tier to localStorage so the Nav component (which
@@ -1467,10 +1488,16 @@ function BrainDeployInner() {
         // [Skip] buttons.
         if (agentPlanData) {
           try {
-            renderAgentPlanPanel(agentPlanData, contentEl, session, () => {
-              const el = addMessageToDOM("assistant", "");
-              return el.querySelector(".content") as HTMLElement;
-            });
+            renderAgentPlanPanel(
+              agentPlanData,
+              contentEl,
+              session,
+              () => {
+                const el = addMessageToDOM("assistant", "");
+                return el.querySelector(".content") as HTMLElement;
+              },
+              planStripRef.current,
+            );
           } catch (e) {
             console.error("Failed to start agent execution:", e);
           }
@@ -1938,10 +1965,14 @@ function BrainDeployInner() {
     if (!session || !chatStarted || hasResumedAgentPlan.current) return;
     hasResumedAgentPlan.current = true;
     void (async () => {
-      const resumed = await maybeResumeActivePlan(() => {
-        const el = addMessageToDOM("assistant", "");
-        return el.querySelector(".content") as HTMLElement;
-      }, session);
+      const resumed = await maybeResumeActivePlan(
+        () => {
+          const el = addMessageToDOM("assistant", "");
+          return el.querySelector(".content") as HTMLElement;
+        },
+        session,
+        planStripRef.current,
+      );
       if (!resumed) {
         // No in-progress plan — fire the auto-trigger so raise(fn)
         // leads with action steps for this session.
@@ -1950,6 +1981,36 @@ function BrainDeployInner() {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, chatStarted]);
+
+  /* ── Pause plan on tab close / navigate-away ────────────────
+   *
+   * If founder leaves while a plan is running, fire POST /pause so the
+   * executor stops between steps rather than burning budget without an
+   * audience. Resume kicks in on next mount via maybeResumeActivePlan. */
+  useEffect(() => {
+    if (!session) return;
+    const pauseActivePlan = () => {
+      try {
+        const planId = localStorage.getItem("raisefn_active_plan_id");
+        if (!planId) return;
+        // sendBeacon for reliability during unload (fetch with keepalive
+        // is also fine and what we actually need for the auth header).
+        void fetch(`/v1/brain/agent/plans/${planId}/pause`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          keepalive: true,
+        });
+      } catch { /* never block unload */ }
+    };
+    window.addEventListener("beforeunload", pauseActivePlan);
+    window.addEventListener("pagehide", pauseActivePlan);
+    return () => {
+      window.removeEventListener("beforeunload", pauseActivePlan);
+      window.removeEventListener("pagehide", pauseActivePlan);
+      // Component unmount (Next.js client-side navigation) — also pause
+      pauseActivePlan();
+    };
+  }, [session]);
 
   /* ── DOM helpers (imperative, like the original) ── */
   function addMessageToDOM(role: string, content: string): HTMLDivElement {
@@ -1971,6 +2032,55 @@ function BrainDeployInner() {
   function scrollToBottom() {
     const m = messagesRef.current;
     if (m) m.scrollTop = m.scrollHeight + 200;
+  }
+
+  function safeLocalStorageGet(key: string): string | null {
+    try { return localStorage.getItem(key); } catch { return null; }
+  }
+
+  function renderResumePrompt(planId: string) {
+    if (!session) return;
+    const el = addMessageToDOM("assistant", "");
+    const content = el.querySelector(".content") as HTMLElement | null;
+    if (!content) return;
+    content.classList.add("agent-md");
+    content.innerHTML = `<div style="font-size:12px;color:#a1a1aa;">Your plan is paused. Want me to keep going?</div>`;
+    const row = document.createElement("div");
+    row.style.cssText = "margin-top:8px;display:flex;gap:8px;align-items:center;";
+    const resumeBtn = document.createElement("button");
+    resumeBtn.type = "button";
+    resumeBtn.textContent = "Resume plan";
+    resumeBtn.style.cssText = "background:#27272a;color:#f4f4f5;border:1px solid #52525b;padding:6px 12px;border-radius:6px;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;";
+    resumeBtn.onclick = async () => {
+      resumeBtn.disabled = true;
+      resumeBtn.textContent = "Resuming…";
+      const status = await fetch(`/v1/brain/agent/plans/${planId}/status`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!status.ok) {
+        content.innerHTML = `<div style="font-size:11px;color:#fca5a5;">Couldn't reach raise(fn) — try again in a moment.</div>`;
+        return;
+      }
+      row.remove();
+      // Reload page-level state and let maybeResumeActivePlan re-attach
+      void maybeResumeActivePlan(
+        () => {
+          const e = addMessageToDOM("assistant", "");
+          return e.querySelector(".content") as HTMLElement;
+        },
+        session,
+        planStripRef.current,
+      );
+    };
+    row.appendChild(resumeBtn);
+    const dismissBtn = document.createElement("button");
+    dismissBtn.type = "button";
+    dismissBtn.textContent = "Not yet";
+    dismissBtn.style.cssText = "background:transparent;color:#71717a;border:none;padding:6px 10px;font-family:inherit;font-size:12px;cursor:pointer;";
+    dismissBtn.onclick = () => row.remove();
+    row.appendChild(dismissBtn);
+    content.appendChild(row);
+    scrollToBottom();
   }
 
   function scrollToElement(el: HTMLElement) {
@@ -2258,7 +2368,7 @@ function BrainDeployInner() {
 
         <div className="center-ui" ref={centerUiRef} style={{ opacity: sessionReady ? 1 : 0 }}>
           <div className="center-label">
-            <span className="o">raise</span><span className="t">(fn)</span> brain
+            <span className="o">raise</span><span className="t">(fn)</span>
           </div>
           <div className="welcome-text">
             <h2>Tell me about your raise <span className="t">(or paste anything).</span></h2>
@@ -2269,6 +2379,7 @@ function BrainDeployInner() {
               <button key={s} className="starter" onClick={() => send(s)}>{s}</button>
             ))}
           </div>
+          <div ref={planStripRef} className="agent-plan-strip" />
           <div className="input-bar">
             {attachedFile && (
               <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 12px", fontSize: "12px", color: "#2dd4bf", background: "#18181b", borderRadius: "8px", marginBottom: "6px" }}>
@@ -2289,7 +2400,7 @@ function BrainDeployInner() {
               onChange={handleTextareaInput}
               onKeyDown={handleKeyDown}
               onPaste={handlePaste}
-              placeholder="Ask the Brain..."
+              placeholder="Ask raise(fn)..."
               rows={1}
             />
             <button
