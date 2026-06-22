@@ -15,6 +15,8 @@
  *   - GET  /v1/brain/agent/plans/{id}/status
  */
 
+import { formatMarkdown } from "@/lib/format-markdown";
+
 const ACTIVE_PLAN_LS_KEY = "raisefn_active_plan_id";
 const TERMINAL_STATUSES = new Set(["complete", "abandoned"]);
 
@@ -326,11 +328,11 @@ function buildStepRow(step: AgentPlanStep, n: number): HTMLElement {
 
   // Result block (hidden until step has output)
   const resultEl = document.createElement("div");
-  resultEl.className = "step-result";
-  resultEl.style.cssText = "display: none; margin-top: 8px; padding: 8px 10px; background: rgba(9, 9, 11, 0.6); border-radius: 4px; font-size: 12px; color: #d4d4d8; white-space: pre-wrap; line-height: 1.5;";
+  resultEl.className = "step-result agent-md";
+  resultEl.style.cssText = "display: none; margin-top: 8px; padding: 10px 12px; background: rgba(9, 9, 11, 0.6); border-radius: 4px; font-size: 12px; color: #d4d4d8; line-height: 1.55;";
   main.appendChild(resultEl);
   if (step.result?.output_text) {
-    resultEl.textContent = step.result.output_text;
+    resultEl.innerHTML = formatMarkdown(step.result.output_text);
     resultEl.style.display = "block";
   }
 
@@ -364,11 +366,11 @@ function buildAdviceCallout(step: AgentPlanStep): HTMLElement {
   // returning the planner-authored description as output_text, so this
   // typically only fills in for short descriptions that needed expansion.
   const resultEl = document.createElement("div");
-  resultEl.className = "step-result";
-  resultEl.style.cssText = "display: none; margin-top: 8px; padding: 8px 10px; background: rgba(9, 9, 11, 0.4); border-radius: 4px; font-size: 12px; color: #d4d4d8; white-space: pre-wrap; line-height: 1.5;";
+  resultEl.className = "step-result agent-md";
+  resultEl.style.cssText = "display: none; margin-top: 8px; padding: 10px 12px; background: rgba(9, 9, 11, 0.4); border-radius: 4px; font-size: 12px; color: #d4d4d8; line-height: 1.55;";
   callout.appendChild(resultEl);
   if (step.result?.output_text && step.result.output_text !== step.description) {
-    resultEl.textContent = step.result.output_text;
+    resultEl.innerHTML = formatMarkdown(step.result.output_text);
     resultEl.style.display = "block";
   }
 
@@ -518,7 +520,7 @@ function handleExecutorEvent(
       if (output && (!localStep || output !== localStep.description)) {
         const resultEl = row.querySelector(".step-result") as HTMLElement | null;
         if (resultEl) {
-          resultEl.textContent = output;
+          resultEl.innerHTML = formatMarkdown(output);
           resultEl.style.display = "block";
         }
       }
