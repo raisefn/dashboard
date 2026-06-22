@@ -1743,6 +1743,9 @@ function BrainDeployInner() {
     }
 
     function showWelcomeThenAutoPlan(firstName: string, message: string) {
+      // Greeting bubble lands first. The hasResumedAgentPlan effect below
+      // handles the [session_open] auto-trigger after chatStarted=true —
+      // this runs for both fresh-conversation and session-restore paths.
       setChatStarted(true);
       setSessionReady(true);
       centerUiRef.current?.classList.add("at-bottom");
@@ -1755,13 +1758,6 @@ function BrainDeployInner() {
         setTimeout(() => {
           typingContent.innerHTML = formatMarkdown(message);
           requestAnimationFrame(() => scrollToBottom());
-          // After greeting lands, silently trigger the session-open auto-plan.
-          // Brain's PAID_SYSTEM_PROMPT rule 21 routes this: eligible founders
-          // get plan_my_raise + a plan card; ineligible get a graceful question
-          // prompt as the next bubble (no error surfaced).
-          setTimeout(() => {
-            void send("[session_open]", { silent: true });
-          }, 700);
         }, 800);
       }
     }
@@ -1922,24 +1918,36 @@ function BrainDeployInner() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, loading, impersonating]);
 
-  /* ── Resume in-progress agent plan on reload ──────────────
+  /* ── Session-open: every time founder opens raise(fn) ──────
    *
-   * If localStorage has an active plan_id AND the brain says it's not
-   * in a terminal state, drop a fresh assistant bubble into the chat
-   * with the rehydrated plan panel + re-opened execution stream.
-   * One-shot per session — same gating pattern as hasAutoProbed. */
+   * Fires once per browser session (chat page mount), after the welcome
+   * OR a session restore lands. Two paths:
+   *
+   * 1. If there's an in-progress plan in localStorage → resume it
+   *    (replay completed step bubbles + reopen the SSE stream so the
+   *    next approval gate appears in chat).
+   * 2. Otherwise → fire a silent `[session_open]` message. Brain rule 21
+   *    routes it: advisor + active campaign → plan_my_raise + chat-turn
+   *    execution. Ineligible → graceful "What are we working on today,
+   *    or would you like me to suggest?"
+   *
+   * Runs even when a prior conversation was restored — the founder still
+   * opens raise(fn) and should get action steps (Justin's directive). */
   const hasResumedAgentPlan = useRef(false);
   useEffect(() => {
     if (!session || !chatStarted || hasResumedAgentPlan.current) return;
     hasResumedAgentPlan.current = true;
-    // Resume on reload: agent-ui will render prior step results as
-    // chat turns + reopen the SSE stream so the next approval gate
-    // appears in chat. appendBubble() returns a fresh assistant
-    // .content element each call.
-    void maybeResumeActivePlan(() => {
-      const el = addMessageToDOM("assistant", "");
-      return el.querySelector(".content") as HTMLElement;
-    }, session);
+    void (async () => {
+      const resumed = await maybeResumeActivePlan(() => {
+        const el = addMessageToDOM("assistant", "");
+        return el.querySelector(".content") as HTMLElement;
+      }, session);
+      if (!resumed) {
+        // No in-progress plan — fire the auto-trigger so raise(fn)
+        // leads with action steps for this session.
+        void send("[session_open]", { silent: true });
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, chatStarted]);
 
