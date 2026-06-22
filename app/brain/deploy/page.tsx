@@ -1372,10 +1372,11 @@ function BrainDeployInner() {
         historyRef.current.push({ role: "assistant", content: fullText });
 
         if (matchesPanelData || agentPlanData) {
-          // Immediate render path — no animation, buttons + plan card
-          // visible alongside the intro sentence. The brain's intro is
-          // 1-2 sentences (rule 9 for matches, rule 20 for plans), so
-          // there's no value in delaying it via typewriter.
+          // Immediate render path — for matches the panel buttons need
+          // to appear with the text; for agent plans the synthesis is
+          // longer-form (rule 20 — paragraph + action list) so a 15s
+          // typewriter feels artificial. Render full markdown immediately,
+          // then auto-execute spins up below as chat-turn approval bubbles.
           contentEl.innerHTML = formatMarkdown(fullText);
           scrollToElement(assistantEl);
         } else {
@@ -1458,16 +1459,20 @@ function BrainDeployInner() {
           }
         }
 
-        // ── Inline agent plan panel ─────────────────────────────────
-        // When plan_my_raise fired, brain emitted agent_plan via SSE.
-        // Render the structured plan card with Execute button + per-step
-        // approval marks. Clicking Execute opens the /agent/execute SSE
-        // stream and renders step-by-step progress in the same panel.
+        // ── Auto-execute on agent plan ──────────────────────────────
+        // When plan_my_raise fired, brain emits agent_plan via SSE.
+        // No card renders — raise(fn) narrated the synthesis as its own
+        // chat turn (rule 20). We auto-fire /execute and let the executor
+        // SSE stream surface each step as inline chat turns with [Do it] /
+        // [Skip] buttons.
         if (agentPlanData) {
           try {
-            renderAgentPlanPanel(agentPlanData, contentEl, session);
+            renderAgentPlanPanel(agentPlanData, contentEl, session, () => {
+              const el = addMessageToDOM("assistant", "");
+              return el.querySelector(".content") as HTMLElement;
+            });
           } catch (e) {
-            console.error("Failed to render agent plan panel:", e);
+            console.error("Failed to start agent execution:", e);
           }
         }
 
@@ -1927,13 +1932,13 @@ function BrainDeployInner() {
   useEffect(() => {
     if (!session || !chatStarted || hasResumedAgentPlan.current) return;
     hasResumedAgentPlan.current = true;
+    // Resume on reload: agent-ui will render prior step results as
+    // chat turns + reopen the SSE stream so the next approval gate
+    // appears in chat. appendBubble() returns a fresh assistant
+    // .content element each call.
     void maybeResumeActivePlan(() => {
       const el = addMessageToDOM("assistant", "");
-      const content = el.querySelector(".content") as HTMLElement;
-      if (content) {
-        content.innerHTML = `<div style="font-size: 12px; color: #a1a1aa;">Picking up where we left off…</div>`;
-      }
-      return content;
+      return el.querySelector(".content") as HTMLElement;
     }, session);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, chatStarted]);
