@@ -68,6 +68,10 @@ interface ExecutionState {
 /**
  * Render the agent plan card inline beneath an assistant message.
  * Wires Execute button to begin streaming execution into the same panel.
+ *
+ * Also bumps the parent .message.assistant max-width so the card has
+ * room to breathe (default chat bubble caps at 65%, too cramped for
+ * a structured 5-step plan with rationale + descriptions).
  */
 export function renderAgentPlanPanel(
   data: AgentPlanData,
@@ -76,7 +80,14 @@ export function renderAgentPlanPanel(
 ): void {
   if (!session) return;
   const panel = buildPlanPanel(data, session);
-  contentEl.parentElement?.appendChild(panel);
+  const messageEl = contentEl.parentElement;
+  messageEl?.appendChild(panel);
+  // Override the default 65% cap so the plan card can use more horizontal
+  // space. Targets the panel-carrying message bubble only.
+  if (messageEl) {
+    messageEl.style.maxWidth = "92%";
+    messageEl.style.width = "92%";
+  }
 }
 
 /**
@@ -172,16 +183,39 @@ function buildPlanPanel(data: AgentPlanData, session: Session): HTMLElement {
     panel.appendChild(rationale);
   }
 
-  // Steps list
+  // Split into action steps (numbered + executed) and advice steps
+  // (rendered separately as a "Discussion" callout). Advice steps are
+  // strategic questions the planner surfaces — same shape as action
+  // steps in the DB and executor, but visually distinct so the founder
+  // doesn't read them as "checkbox to tick" alongside actions.
+  const actionSteps = data.steps.filter((s) => s.step_type !== "advice");
+  const adviceSteps = data.steps.filter((s) => s.step_type === "advice");
+
   const stepsList = document.createElement("div");
   stepsList.style.cssText = "display: flex; flex-direction: column; gap: 6px;";
   const stepRows = new Map<string, HTMLElement>();
-  data.steps.forEach((step, idx) => {
+  actionSteps.forEach((step, idx) => {
     const row = buildStepRow(step, idx + 1);
     stepRows.set(step.id, row);
     stepsList.appendChild(row);
   });
   panel.appendChild(stepsList);
+
+  // Advice callout — only renders if planner included any advice steps.
+  if (adviceSteps.length > 0) {
+    const adviceSection = document.createElement("div");
+    adviceSection.style.cssText = "margin-top: 16px; padding-top: 14px; border-top: 1px dashed #3f3f46;";
+    const heading = document.createElement("div");
+    heading.textContent = adviceSteps.length === 1 ? "Strategic question to think through" : "Strategic questions to think through";
+    heading.style.cssText = "font-size: 11px; font-weight: 600; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;";
+    adviceSection.appendChild(heading);
+    adviceSteps.forEach((step) => {
+      const row = buildAdviceCallout(step);
+      stepRows.set(step.id, row);
+      adviceSection.appendChild(row);
+    });
+    panel.appendChild(adviceSection);
+  }
 
   // Footer: action buttons (Execute + Discard) — replaced by execution footer once running
   const footer = document.createElement("div");
@@ -316,6 +350,45 @@ function buildStepRow(step: AgentPlanStep, n: number): HTMLElement {
   return row;
 }
 
+function buildAdviceCallout(step: AgentPlanStep): HTMLElement {
+  const callout = document.createElement("div");
+  callout.dataset.stepId = step.id;
+  callout.style.cssText = "padding: 12px 14px; background: rgba(45, 212, 191, 0.04); border: 1px solid rgba(45, 212, 191, 0.2); border-left: 3px solid #2dd4bf; border-radius: 6px; font-size: 13px; margin-bottom: 6px;";
+
+  const desc = document.createElement("div");
+  desc.style.cssText = "color: #d4d4d8; line-height: 1.55;";
+  desc.textContent = step.description ?? "";
+  callout.appendChild(desc);
+
+  // Result block (hidden until step has output). Advice "executes" by
+  // returning the planner-authored description as output_text, so this
+  // typically only fills in for short descriptions that needed expansion.
+  const resultEl = document.createElement("div");
+  resultEl.className = "step-result";
+  resultEl.style.cssText = "display: none; margin-top: 8px; padding: 8px 10px; background: rgba(9, 9, 11, 0.4); border-radius: 4px; font-size: 12px; color: #d4d4d8; white-space: pre-wrap; line-height: 1.5;";
+  callout.appendChild(resultEl);
+  if (step.result?.output_text && step.result.output_text !== step.description) {
+    resultEl.textContent = step.result.output_text;
+    resultEl.style.display = "block";
+  }
+
+  // step-icon stub so handleExecutorEvent's selectors don't error on advice
+  // steps. We don't render the icon for advice — the callout styling is
+  // its visual treatment — but the slot needs to exist.
+  const iconStub = document.createElement("span");
+  iconStub.className = "step-icon";
+  iconStub.style.display = "none";
+  callout.appendChild(iconStub);
+
+  // Same with step-action: retry on failure should still work for advice.
+  const actionEl = document.createElement("div");
+  actionEl.className = "step-action";
+  actionEl.style.cssText = "margin-top: 8px; display: flex; gap: 6px;";
+  callout.appendChild(actionEl);
+
+  return callout;
+}
+
 function renderStatusIcon(iconEl: HTMLElement, status?: AgentPlanStep["status"]): void {
   if (status === "complete") {
     iconEl.innerHTML = `<span style="color: #4ade80;">✓</span>`;
@@ -438,10 +511,14 @@ function handleExecutorEvent(
     if (row) {
       const icon = row.querySelector(".step-icon") as HTMLElement | null;
       if (icon) renderStatusIcon(icon, event.skipped ? "skipped" : "complete");
-      if (event.output_text) {
+      // For advice steps, output_text is usually a passthrough of the
+      // description (planner-authored). Don't duplicate it in the result
+      // block — the callout already shows the description.
+      const output = event.output_text as string | undefined;
+      if (output && (!localStep || output !== localStep.description)) {
         const resultEl = row.querySelector(".step-result") as HTMLElement | null;
         if (resultEl) {
-          resultEl.textContent = event.output_text as string;
+          resultEl.textContent = output;
           resultEl.style.display = "block";
         }
       }
@@ -669,8 +746,12 @@ function secondaryBtnStyle(): string {
 }
 
 function formatPlanMeta(data: AgentPlanData): string {
-  const parts: string[] = [`${data.step_count} step${data.step_count === 1 ? "" : "s"}`];
-  if (data.approval_count > 0) parts.push(`${data.approval_count} approval`);
+  const actionCount = data.steps.filter((s) => s.step_type !== "advice").length;
+  const adviceCount = data.steps.filter((s) => s.step_type === "advice").length;
+  const parts: string[] = [];
+  if (actionCount > 0) parts.push(`${actionCount} action${actionCount === 1 ? "" : "s"}`);
+  if (adviceCount > 0) parts.push(`${adviceCount} question${adviceCount === 1 ? "" : "s"}`);
+  if (data.approval_count > 0) parts.push(`${data.approval_count} approval${data.approval_count === 1 ? "" : "s"}`);
   if (data.estimated_total_minutes > 0) parts.push(`~${data.estimated_total_minutes}m`);
   return parts.join(" · ");
 }
