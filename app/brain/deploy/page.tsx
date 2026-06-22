@@ -1726,13 +1726,38 @@ function BrainDeployInner() {
           "Tell me about your investment thesis — sectors, stages, and the types of companies you back."
         );
       } else if (role === "founder" || !role) {
-        showWelcomeTwoBubbles(
-          firstName,
-          buildWelcomeMessage(firstName),
-          "Tell me about your raise. Drop your deck, paste an investor list, share your company URL — or just describe what you're building."
-        );
+        // Founders get the greeting bubble, then raise(fn) auto-fires a
+        // session-open trigger (silent [session_open] message). Brain
+        // calls plan_my_raise; eligible founders get an action-step card,
+        // ineligible get the default "What's on your mind today?" reply.
+        // Either way the second bubble comes from raise(fn), not local copy.
+        showWelcomeThenAutoPlan(firstName, buildWelcomeMessage(firstName));
       } else {
         showWelcomeWithMessage(firstName, buildWelcomeMessage(firstName));
+      }
+    }
+
+    function showWelcomeThenAutoPlan(firstName: string, message: string) {
+      setChatStarted(true);
+      setSessionReady(true);
+      centerUiRef.current?.classList.add("at-bottom");
+      messagesRef.current?.classList.add("active");
+
+      const typingEl = addMessageToDOM("assistant", "");
+      const typingContent = typingEl.querySelector(".content") as HTMLElement;
+      if (typingContent) {
+        typingContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+        setTimeout(() => {
+          typingContent.innerHTML = formatMarkdown(message);
+          requestAnimationFrame(() => scrollToBottom());
+          // After greeting lands, silently trigger the session-open auto-plan.
+          // Brain's PAID_SYSTEM_PROMPT rule 21 routes this: eligible founders
+          // get plan_my_raise + a plan card; ineligible get a graceful question
+          // prompt as the next bubble (no error surfaced).
+          setTimeout(() => {
+            void send("[session_open]", { silent: true });
+          }, 700);
+        }, 800);
       }
     }
 
