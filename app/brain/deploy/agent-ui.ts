@@ -27,6 +27,8 @@ export interface AgentPlanStep {
   id: string;
   step_type: string;
   target?: string | null;
+  /** Brain-resolved display name for `target` (e.g. "Travis Lindsay (Titan Angels)" not "travis-lindsay-titan-angels"). Falls back to title-cased slug. */
+  target_display?: string | null;
   description?: string;
   requires_approval?: boolean;
   est_minutes?: number;
@@ -235,7 +237,12 @@ function renderInitialFooter(state: ExecutionState, session: Session, data: Agen
 function buildStepRow(step: AgentPlanStep, n: number): HTMLElement {
   const row = document.createElement("div");
   row.dataset.stepId = step.id;
-  row.style.cssText = "display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; background: rgba(9, 9, 11, 0.4); border: 1px solid #27272a; border-radius: 6px; font-size: 13px;";
+  // Approval-gated rows get a distinct tint + amber left border so the
+  // founder can see at a glance which steps will pause for their review.
+  const baseBg = step.requires_approval ? "rgba(202, 138, 4, 0.06)" : "rgba(9, 9, 11, 0.4)";
+  const baseBorder = step.requires_approval ? "1px solid rgba(202, 138, 4, 0.35)" : "1px solid #27272a";
+  const leftAccent = step.requires_approval ? "border-left: 3px solid #facc15;" : "";
+  row.style.cssText = `display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: ${baseBg}; border: ${baseBorder}; ${leftAccent} border-radius: 6px; font-size: 13px;`;
 
   // Status icon column
   const icon = document.createElement("div");
@@ -249,26 +256,26 @@ function buildStepRow(step: AgentPlanStep, n: number): HTMLElement {
   main.style.cssText = "flex: 1; min-width: 0;";
 
   const head = document.createElement("div");
-  head.style.cssText = "display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;";
+  head.style.cssText = "display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;";
   const num = document.createElement("span");
   num.textContent = `${n}.`;
   num.style.cssText = "color: #71717a; font-weight: 500; flex: 0 0 auto;";
   head.appendChild(num);
-  const typeBadge = document.createElement("span");
-  typeBadge.textContent = step.step_type.replace(/_/g, " ");
-  typeBadge.style.cssText = "font-size: 10px; padding: 2px 7px; background: #27272a; color: #a1a1aa; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;";
-  head.appendChild(typeBadge);
+  // step_type badge intentionally dropped — internal taxonomy that adds
+  // visual noise without informing the founder. The description carries
+  // the verb; the row's left-accent + tint signal "needs approval."
+  const displayName = step.target_display ?? step.target;
+  if (displayName) {
+    const target = document.createElement("span");
+    target.textContent = displayName;
+    target.style.cssText = "color: #e4e4e7; font-size: 13px; font-weight: 500;";
+    head.appendChild(target);
+  }
   if (step.requires_approval) {
     const badge = document.createElement("span");
-    badge.textContent = "approval needed";
-    badge.style.cssText = "font-size: 10px; padding: 2px 7px; background: rgba(202, 138, 4, 0.15); color: #facc15; border-radius: 4px; font-weight: 600; letter-spacing: 0.03em;";
+    badge.textContent = "you'll review before this fires";
+    badge.style.cssText = "font-size: 11px; color: #facc15; font-weight: 500;";
     head.appendChild(badge);
-  }
-  if (step.target) {
-    const target = document.createElement("span");
-    target.textContent = `→ ${step.target}`;
-    target.style.cssText = "color: #a1a1aa; font-size: 11px;";
-    head.appendChild(target);
   }
   if (step.est_minutes) {
     const est = document.createElement("span");
