@@ -7,6 +7,7 @@ import BrainTabs from "@/components/brain-tabs";
 import { supabase } from "@/lib/supabase-browser";
 import { wallCardLeadin } from "@/lib/upgrade-card-copy";
 import type { Session } from "@supabase/supabase-js";
+import { renderAgentPlanPanel, maybeResumeActivePlan, type AgentPlanData } from "./agent-ui";
 
 const ADMIN_EMAILS = ["justin@raisefn.com", "justinpetsche@gmail.com"];
 
@@ -1257,6 +1258,7 @@ function BrainDeployInner() {
         firms_to_consider?: Array<Record<string, unknown>>;
         generated_at?: string;
       } | null = null;
+      let agentPlanData: AgentPlanData | null = null;
       const READ_TIMEOUT_MS = 60_000;
 
       while (true) {
@@ -1354,6 +1356,10 @@ function BrainDeployInner() {
               try {
                 window.dispatchEvent(new CustomEvent("raisefn:matches_updated"));
               } catch { /* defensive */ }
+            } else if (event.type === "agent_plan") {
+              // Capture the structured plan payload — rendered after
+              // typewriter completes, same pattern as matches_panel.
+              agentPlanData = event as AgentPlanData;
             }
           } catch { /* ignore parse errors */ }
         }
@@ -1370,8 +1376,11 @@ function BrainDeployInner() {
       if (fullText) {
         historyRef.current.push({ role: "assistant", content: fullText });
 
-        if (matchesPanelData) {
-          // Immediate render path — no animation, buttons visible with text.
+        if (matchesPanelData || agentPlanData) {
+          // Immediate render path — no animation, buttons + plan card
+          // visible alongside the intro sentence. The brain's intro is
+          // 1-2 sentences (rule 9 for matches, rule 20 for plans), so
+          // there's no value in delaying it via typewriter.
           contentEl.innerHTML = formatMarkdown(fullText);
           scrollToElement(assistantEl);
         } else {
@@ -1451,6 +1460,19 @@ function BrainDeployInner() {
             );
           } catch (e) {
             console.error("Failed to render matches panel:", e);
+          }
+        }
+
+        // ── Inline agent plan panel ─────────────────────────────────
+        // When plan_my_raise fired, brain emitted agent_plan via SSE.
+        // Render the structured plan card with Execute button + per-step
+        // approval marks. Clicking Execute opens the /agent/execute SSE
+        // stream and renders step-by-step progress in the same panel.
+        if (agentPlanData) {
+          try {
+            renderAgentPlanPanel(agentPlanData, contentEl, session);
+          } catch (e) {
+            console.error("Failed to render agent plan panel:", e);
           }
         }
 
@@ -1874,6 +1896,27 @@ function BrainDeployInner() {
   // restored on dropdown switch).
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, loading, impersonating]);
+
+  /* ── Resume in-progress agent plan on reload ──────────────
+   *
+   * If localStorage has an active plan_id AND the brain says it's not
+   * in a terminal state, drop a fresh assistant bubble into the chat
+   * with the rehydrated plan panel + re-opened execution stream.
+   * One-shot per session — same gating pattern as hasAutoProbed. */
+  const hasResumedAgentPlan = useRef(false);
+  useEffect(() => {
+    if (!session || !chatStarted || hasResumedAgentPlan.current) return;
+    hasResumedAgentPlan.current = true;
+    void maybeResumeActivePlan(() => {
+      const el = addMessageToDOM("assistant", "");
+      const content = el.querySelector(".content") as HTMLElement;
+      if (content) {
+        content.innerHTML = `<div style="font-size: 12px; color: #a1a1aa;">Picking up where we left off…</div>`;
+      }
+      return content;
+    }, session);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, chatStarted]);
 
   /* ── DOM helpers (imperative, like the original) ── */
   function addMessageToDOM(role: string, content: string): HTMLDivElement {
