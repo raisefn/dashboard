@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase-browser";
 import { wallCardLeadin } from "@/lib/upgrade-card-copy";
 import type { Session } from "@supabase/supabase-js";
 import { renderAgentPlanPanel, maybeResumeActivePlan, type AgentPlanData } from "./agent-ui";
+import { formatMarkdown } from "@/lib/format-markdown";
 
 const ADMIN_EMAILS = ["justin@raisefn.com", "justinpetsche@gmail.com"];
 
@@ -307,40 +308,8 @@ function renderMatchesPanel(
   contentEl.parentElement?.appendChild(summary);
 }
 
-function formatMarkdown(text: string): string {
-  if (!text) return "";
-  let t = text;
-  t = t.replace(/```(\w*)\n([\s\S]*?)```/g, (_, _lang, code) => {
-    const escaped = code.replace(/</g, "&lt;").replace(/>/g, "&gt;").trimEnd();
-    return `<pre class="code-block"><code>${escaped}</code></pre>`;
-  });
-  t = t.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
-  t = t.replace(/^### (.+)$/gm, "<h3>$1</h3>");
-  t = t.replace(/^## (.+)$/gm, "<h2>$1</h2>");
-  t = t.replace(/^# (.+)$/gm, "<h1>$1</h1>");
-  // Differentiate bold-labels ("Thesis:", "Check:", "Geo:") from bold-names
-  // ("GSR Ventures", "Avery Tanaka") so the rendered chat has real visual
-  // hierarchy. Label = bold text ending in a colon → muted gray. Anything
-  // else → the brand teal we use for investor names.
-  t = t.replace(/\*\*(.+?)\*\*/g, (_match, content: string) => {
-    if (/:\s*$/.test(content)) {
-      return `<strong class="label">${content}</strong>`;
-    }
-    return `<strong>${content}</strong>`;
-  });
-  t = t.replace(/\*(.+?)\*/g, "<em>$1</em>");
-  t = t.replace(/^(\d+)\. (.+)$/gm, '<li class="numbered"><span class="li-num">$1.</span> $2</li>');
-  t = t.replace(/^- (.+)$/gm, '<li class="bulleted">$1</li>');
-  t = t.replace(/((?:<li class="numbered">[\s\S]*?<\/li>\n?)+)/g, "<ol>$1</ol>");
-  t = t.replace(/((?:<li class="bulleted">[\s\S]*?<\/li>\n?)+)/g, "<ul>$1</ul>");
-  t = t.replace(/^---$/gm, "<hr>");
-  t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-  t = t.replace(/(^|[^"=])(https?:\/\/[^\s<]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
-  t = t.replace(/\n/g, "<br>");
-  t = t.replace(/<br>\s*(<\/?(?:ol|ul|li|pre|h[1-3]|hr))/g, "$1");
-  t = t.replace(/(<\/(?:ol|ul|pre|h[1-3]|hr)>)\s*<br>/g, "$1");
-  return t;
-}
+// formatMarkdown moved to @/lib/format-markdown so the agent execution
+// panel can render step results with the same renderer the chat uses.
 
 /* ── CSS (exact copy from chat.html, minus api-key styles, plus admin bar) ── */
 const BRAIN_CSS = `
@@ -665,6 +634,32 @@ const BRAIN_CSS = `
     font-size: 12px;
     color: #2dd4bf;
   }
+  .md-table {
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 12px;
+    width: 100%;
+  }
+  .md-table th, .md-table td {
+    border: 1px solid #27272a;
+    padding: 6px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .md-table th { background: rgba(39, 39, 42, 0.6); color: #e4e4e7; font-weight: 600; }
+  .md-table td { color: #d4d4d8; }
+  /* agent-md scope so .md-table can pick up scoped styles if we ever specialize */
+  .agent-md h1, .agent-md h2, .agent-md h3 { margin: 8px 0 4px; color: #e4e4e7; }
+  .agent-md h1 { font-size: 14px; }
+  .agent-md h2 { font-size: 13px; }
+  .agent-md h3 { font-size: 12px; color: #a1a1aa; }
+  .agent-md ul, .agent-md ol { margin: 4px 0 4px 18px; }
+  .agent-md li { margin: 2px 0; }
+  .agent-md hr { border: none; border-top: 1px solid #27272a; margin: 8px 0; }
+  .agent-md strong { color: #e4e4e7; font-weight: 600; }
+  .agent-md strong.label { color: #a1a1aa; font-weight: 500; }
+  .agent-md a { color: #2dd4bf; text-decoration: none; }
+  .agent-md a:hover { text-decoration: underline; }
 
   /* Lists */
   .message.assistant ol,
