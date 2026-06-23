@@ -8,6 +8,7 @@ import { BriefsPanel } from "./briefs-panel";
 import { BriefDetailPanel } from "./brief-detail-panel";
 import { PipelinePanel } from "./pipeline-panel";
 import { DocumentPanel } from "./document-panel";
+import { DocumentsPanel } from "./documents-panel";
 import type { Panel } from "./use-panel-state";
 
 /**
@@ -108,8 +109,25 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
           />
         );
         break;
-      case "document":
+      case "documents":
+        title = "Documents";
+        body = (
+          <DocumentsPanel
+            session={session}
+            impersonating={impersonating}
+            onOpenPanel={onOpenPanel}
+          />
+        );
+        break;
+      case "document": {
         title = "Document";
+        const from = panel.from;
+        breadcrumbs = from
+          ? [
+              { label: panelLabel(from), onClick: () => onPopPanel(panel) },
+              { label: "Document" },
+            ]
+          : undefined;
         body = (
           <DocumentPanel
             id={panel.id}
@@ -119,6 +137,7 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
           />
         );
         break;
+      }
     }
   }
 
@@ -138,6 +157,7 @@ function panelLabel(p: Panel): string {
   switch (p.kind) {
     case "matches": return "Matches";
     case "briefs": return "Briefs";
+    case "documents": return "Documents";
     case "pipeline": return "Pipeline";
     case "investor": return p.slug;
     case "brief": return "Brief";

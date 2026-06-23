@@ -12,7 +12,8 @@ export type Panel =
   | { kind: "investor"; slug: string; from?: Panel }
   | { kind: "briefs" }
   | { kind: "brief"; token: string; from?: Panel }
-  | { kind: "document"; id: string }
+  | { kind: "documents" }
+  | { kind: "document"; id: string; from?: Panel }
   | { kind: "pipeline" };
 
 /**
@@ -94,6 +95,8 @@ function panelFromSearchParams(sp: URLSearchParams | ReturnType<typeof useSearch
       return { kind: "matches" };
     case "briefs":
       return { kind: "briefs" };
+    case "documents":
+      return { kind: "documents" };
     case "pipeline":
       return { kind: "pipeline" };
     case "investor": {

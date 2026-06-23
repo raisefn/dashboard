@@ -152,6 +152,7 @@ export function FounderSidebar({
       <SidebarSection
         title="Documents"
         count={state?.documents?.length ?? 0}
+        onTitleClick={() => openPanel({ kind: "documents" })}
       >
         {state?.documents?.length ? (
           <>
