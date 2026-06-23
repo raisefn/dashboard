@@ -1,6 +1,7 @@
 "use client";
 
 import type { SidebarPipelineInvestor } from "./types";
+import type { Panel } from "../panels";
 
 /**
  * PIPELINE section — investors the founder is currently engaging with.
@@ -19,6 +20,7 @@ interface PipelineProps {
   onFilterChange: (f: PipelineFilter) => void;
   showFilters: boolean;                        // hide pills when pipeline is tiny
   onInjectPrompt: (prompt: string) => void;
+  onOpenPanel: (p: Panel) => void;
 }
 
 const STATUS_DOT: Record<string, string> = {
@@ -69,7 +71,7 @@ function formatAge(days: number | null): string {
 
 const VISIBLE_CAP = 15;
 
-export function Pipeline({ pipeline, filter, onFilterChange, showFilters, onInjectPrompt }: PipelineProps) {
+export function Pipeline({ pipeline, filter, onFilterChange, showFilters, onInjectPrompt, onOpenPanel }: PipelineProps) {
   const visible = pipeline.slice(0, VISIBLE_CAP);
   const overflow = pipeline.length - visible.length;
 
@@ -94,18 +96,21 @@ export function Pipeline({ pipeline, filter, onFilterChange, showFilters, onInje
           const dotClass = STATUS_DOT[inv.status || ""] || "status-cold";
           const statusLabel = STATUS_SHORT[inv.status || ""] || inv.status || "";
           const age = formatAge(inv.days_since_update);
-          const prompt =
-            `Looking at ${inv.name}${inv.firm ? ` (${inv.firm})` : ""}` +
-            ` — status: ${inv.status || "unknown"}` +
-            (age ? `, ${age} since last activity` : "") +
-            `. What do you want to do?`;
           return (
             <button
               key={inv.id}
               type="button"
               className="sb-row"
-              onClick={() => onInjectPrompt(prompt)}
-              title="Click to focus chat on this investor"
+              onClick={() => {
+                if (inv.slug) {
+                  onOpenPanel({ kind: "investor", slug: inv.slug });
+                } else {
+                  // No slug → can't load detail. Fall back to chat injection
+                  // so the founder can talk about them by name.
+                  onInjectPrompt(`Looking at ${inv.name}. What do you want to do?`);
+                }
+              }}
+              title="Click to view full profile"
             >
               <div className="sb-row-line1">
                 <span className="sb-row-name">{inv.name}</span>

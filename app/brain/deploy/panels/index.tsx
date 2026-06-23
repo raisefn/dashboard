@@ -3,6 +3,7 @@
 import type { Session } from "@supabase/supabase-js";
 import { PanelShell } from "./panel-shell";
 import { MatchesPanel } from "./matches-panel";
+import { InvestorPanel } from "./investor-panel";
 import type { Panel } from "./use-panel-state";
 
 /**
@@ -46,15 +47,27 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
         );
         break;
       case "investor": {
-        title = panel.slug;
+        // Title falls back to slug pretty-cased until the investor data
+        // loads; once it loads, the InvestorPanel component renders its
+        // own H1 with the canonical display name. Keeping the shell
+        // title minimal here to avoid double-rendering the name.
+        title = panel.slug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
         const from = panel.from;
         breadcrumbs = from
           ? [
               { label: panelLabel(from), onClick: () => onPopPanel(panel) },
-              { label: panel.slug },
+              { label: title },
             ]
           : undefined;
-        body = <PanelStub label={`Investor detail: ${panel.slug}`} hint="Coming in v3 step 6" />;
+        body = (
+          <InvestorPanel
+            slug={panel.slug}
+            session={session}
+            impersonating={impersonating}
+            injectChatPrompt={injectChatPrompt}
+            onOpenPanel={onOpenPanel}
+          />
+        );
         break;
       }
       case "briefs":
@@ -83,10 +96,6 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
         break;
     }
   }
-  // Suppress unused-param warning until the rest of the panels land
-  // and start using injectChatPrompt (e.g. investor panel's "Draft
-  // follow-up" action).
-  void injectChatPrompt;
 
   return (
     <PanelShell

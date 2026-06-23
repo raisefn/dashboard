@@ -108,6 +108,7 @@ export function FounderSidebar({
                 onFilterChange={setPipelineFilter}
                 showFilters={allPipeline.length > 8}
                 onInjectPrompt={injectChatPrompt}
+                onOpenPanel={openPanel}
               />
             ) : null}
           </SidebarSection>
