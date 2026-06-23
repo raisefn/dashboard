@@ -1989,6 +1989,15 @@ function BrainDeployInner() {
         },
         session,
         planStripRef.current,
+        () => {
+          // Clear stale chat content (old "Welcome back" lines etc.)
+          // before resume bubbles render. Brain DB keeps full history
+          // for LLM context.
+          if (messagesInnerRef.current) {
+            messagesInnerRef.current.innerHTML = "";
+            historyRef.current = [];
+          }
+        },
       );
       if (!resumed) {
         // No in-progress plan — fire the auto-trigger so raise(fn)
