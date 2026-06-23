@@ -57,6 +57,10 @@ export function MyRaise({ campaign, onInjectPrompt }: MyRaiseProps) {
 
   const statusLabel = STATUS_LABEL[campaign.status] || campaign.status;
 
+  const daysIn = typeof campaign.days_in === "number" && campaign.days_in > 0
+    ? ` · ${campaign.days_in}d in`
+    : "";
+
   return (
     <button
       type="button"
@@ -65,16 +69,7 @@ export function MyRaise({ campaign, onInjectPrompt }: MyRaiseProps) {
       title="Click to focus chat on this raise"
     >
       <div className="sb-my-raise-line">
-        <span className="sb-my-raise-headline">{headline}</span>
-      </div>
-      <div className="sb-my-raise-meta">
-        <span className="sb-my-raise-status">{statusLabel}</span>
-        {typeof campaign.days_in === "number" && campaign.days_in > 0 && (
-          <>
-            <span className="sb-my-raise-sep">·</span>
-            <span className="sb-my-raise-days">{campaign.days_in}d in</span>
-          </>
-        )}
+        {headline} · <span className="sb-my-raise-status">{statusLabel}</span>{daysIn}
       </div>
     </button>
   );

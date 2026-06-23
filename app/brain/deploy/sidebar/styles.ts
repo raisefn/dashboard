@@ -32,177 +32,89 @@ export const SIDEBAR_CSS = `
 
 .sb-section {
   padding: 0 8px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
+/* Header shared base — same shape regardless of empty/filled. */
 .sb-section-header {
   width: 100%;
   display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  padding: 6px 12px 8px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
   background: none;
   border: none;
-  cursor: pointer;
   font-family: inherit;
-  color: #a1a1aa;
-  transition: color 150ms ease;
-}
-.sb-section-header:hover {
-  color: #e4e4e7;
-}
-.sb-section-header-text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.sb-section-header-title-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.15em;
+  text-align: left;
+  color: #71717a;
+  transition: color 150ms ease, background 150ms ease;
+  border-radius: 6px;
 }
 
-.sb-section-chevron {
-  font-size: 8px;
-  display: inline-block;
-  transition: transform 200ms ease;
+/* Empty: dim, not clickable. */
+.sb-section-header-empty {
   color: #52525b;
+  cursor: default;
 }
-.sb-section-chevron.open {
-  transform: rotate(90deg);
+
+/* Clickable (filled with onTitleClick): bright + hover + arrow. */
+.sb-section-header-clickable {
+  color: #e4e4e7;
+  cursor: pointer;
+}
+.sb-section-header-clickable:hover {
+  background: rgba(63, 63, 70, 0.4);
+  color: #f4f4f5;
+}
+.sb-section-header-clickable:hover .sb-section-arrow {
+  color: #5eead4;
+  transform: translateX(2px);
 }
 
 .sb-section-title {
   flex: 1;
-  text-align: left;
 }
 
-.sb-section-subtitle {
-  font-size: 11px;
-  font-weight: 400;
-  color: #71717a;
-  text-transform: none;
-  letter-spacing: 0;
-  padding-left: 14px; /* aligns with title after chevron */
-  line-height: 1.3;
-}
-.sb-section-header:hover .sb-section-subtitle {
-  color: #a1a1aa;
-}
-
-/* Split-control variant: chevron and title are independent buttons. */
-.sb-section-header-split {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 12px 8px;
-  width: 100%;
-}
-.sb-section-chevron-btn {
+.sb-section-right {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  color: #52525b;
-  transition: color 150ms ease;
+  gap: 8px;
 }
-.sb-section-chevron-btn:hover { color: #a1a1aa; }
-.sb-section-title-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #a1a1aa;
-  text-align: left;
-  transition: color 150ms ease;
-}
-.sb-section-title-btn:hover { color: #f4f4f5; }
-.sb-section-title-btn:hover .sb-section-open-hint { opacity: 1; }
-.sb-section-title-btn-active { color: #e4e4e7; }
-.sb-section-title-btn-active .sb-section-open-hint { opacity: 0.6; color: #2dd4bf; }
-.sb-section-title-btn-active:hover .sb-section-open-hint { opacity: 1; color: #2dd4bf; }
-.sb-section-open-hint {
-  font-size: 11px;
-  color: #52525b;
-  opacity: 0;
-  transition: opacity 150ms ease;
-  margin-left: auto;
-}
-.sb-section-subtitle-indent {
-  padding-left: 32px; /* aligns under the title button text */
-  margin: -4px 0 4px;
+
+.sb-section-arrow {
+  font-size: 12px;
+  color: #2dd4bf;
+  transition: transform 150ms ease, color 150ms ease;
+  display: inline-block;
 }
 
 .sb-section-count {
   font-size: 11px;
   font-weight: 500;
-  color: #a1a1aa;
+  color: #d4d4d8;
   background: #27272a;
-  padding: 1px 7px;
+  padding: 2px 8px;
   border-radius: 999px;
   text-transform: none;
   letter-spacing: 0;
 }
 
 .sb-section-body {
-  padding: 4px 4px 0;
+  padding: 6px 4px 0;
 }
 
-.sb-section-empty,
-.sb-empty {
-  padding: 6px 12px 4px;
-}
-.sb-section-empty-msg {
-  font-size: 13px;
-  color: #71717a;
-  margin: 0 0 6px;
-  line-height: 1.5;
-}
-.sb-section-empty-btn {
-  background: rgba(45, 212, 191, 0.08);
-  border: 1px solid rgba(45, 212, 191, 0.2);
-  color: #2dd4bf;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 5px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 150ms ease;
-}
-.sb-section-empty-btn:hover {
-  background: rgba(45, 212, 191, 0.15);
-  border-color: rgba(45, 212, 191, 0.4);
-}
-
-/* MY RAISE — special rendering for the active campaign */
+/* MY RAISE — single-line summary, hover-glow button */
 .sb-my-raise {
   width: 100%;
   text-align: left;
   background: none;
   border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 10px 12px;
+  border-radius: 6px;
+  padding: 6px 12px;
   cursor: pointer;
   font-family: inherit;
   transition: all 150ms ease;
@@ -212,28 +124,14 @@ export const SIDEBAR_CSS = `
   border-color: rgba(45, 212, 191, 0.15);
 }
 .sb-my-raise-line {
-  margin-bottom: 4px;
-}
-.sb-my-raise-headline {
-  color: #f4f4f5;
+  color: #e4e4e7;
   font-size: 13px;
   font-weight: 500;
-}
-.sb-my-raise-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: #71717a;
+  line-height: 1.4;
 }
 .sb-my-raise-status {
   color: #a1a1aa;
-}
-.sb-my-raise-sep {
-  color: #3f3f46;
-}
-.sb-my-raise-days {
-  color: #71717a;
+  font-weight: 400;
 }
 
 /* Generic row — used by pipeline, briefs, documents, activity */
@@ -354,41 +252,6 @@ export const SIDEBAR_CSS = `
 .sb-matches-batches {
   color: #71717a;
   font-size: 11px;
-}
-/* Empty section: dim, non-clickable label only. */
-.sb-section-empty-state { margin-bottom: 12px; }
-.sb-section-header-static {
-  display: flex;
-  align-items: center;
-  padding: 6px 12px 8px;
-}
-.sb-section-title-dim {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #52525b;
-}
-
-.sb-matches-cta {
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: rgba(45, 212, 191, 0.08);
-  color: #2dd4bf;
-  border: 1px solid rgba(45, 212, 191, 0.25);
-  border-radius: 6px;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: all 150ms ease;
-}
-.sb-matches-cta:hover {
-  background: rgba(45, 212, 191, 0.15);
-  border-color: rgba(45, 212, 191, 0.5);
-  color: #5eead4;
 }
 
 /* Admin "Acting as" header */

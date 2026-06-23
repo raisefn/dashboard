@@ -84,7 +84,7 @@ export function FounderSidebar({
 
       {adminHeader && <div className="sb-admin-header">{adminHeader}</div>}
 
-      <SidebarSection title="My Raise" defaultOpen>
+      <SidebarSection title="My Raise">
         <MyRaise campaign={state?.campaign || null} onInjectPrompt={injectChatPrompt} />
       </SidebarSection>
 
@@ -95,7 +95,6 @@ export function FounderSidebar({
           <SidebarSection
             title="Pipeline"
             count={filteredPipeline.length}
-            defaultOpen
             onTitleClick={() => openPanel({ kind: "pipeline" })}
           >
             {allPipeline.length > 0 ? (
@@ -115,24 +114,12 @@ export function FounderSidebar({
       <SidebarSection
         title="Matches"
         count={state?.matches?.total_unique ?? 0}
-        defaultOpen
         onTitleClick={() => openPanel({ kind: "matches" })}
-      >
-        {state?.matches?.latest_batch ? (
-          <button
-            type="button"
-            className="sb-matches-cta"
-            onClick={() => openPanel({ kind: "matches" })}
-          >
-            View {state.matches.total_unique} match{state.matches.total_unique === 1 ? "" : "es"} →
-          </button>
-        ) : null}
-      </SidebarSection>
+      />
 
       <SidebarSection
         title="Briefs"
         count={state?.briefs?.length ?? 0}
-        defaultOpen={false}
         onTitleClick={() => openPanel({ kind: "briefs" })}
       >
         {state?.briefs?.length ? (
@@ -165,7 +152,6 @@ export function FounderSidebar({
       <SidebarSection
         title="Documents"
         count={state?.documents?.length ?? 0}
-        defaultOpen={false}
       >
         {state?.documents?.length ? (
           <>
@@ -189,10 +175,7 @@ export function FounderSidebar({
         ) : null}
       </SidebarSection>
 
-      <SidebarSection
-        title="Connections"
-        defaultOpen={false}
-      >
+      <SidebarSection title="Connections">
         <div className="sb-connections">
           <div className="sb-conn-row sb-conn-disabled" title="Phase 5 — send outreach + auto-detect replies">
             <span className="sb-conn-dot" />
