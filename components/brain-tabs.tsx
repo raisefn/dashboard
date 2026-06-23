@@ -1,138 +1,49 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
 
 /**
- * The brain product's single top bar — shown on /brain/deploy,
- * /brain/matches, /brain/briefs. The marketing-style global Nav is
- * suppressed on these paths (see components/nav.tsx) so this is the
- * ONLY top-level navigation the founder sees while working.
+ * The brain product's top bar — shown on /brain/deploy + legacy
+ * /brain/matches + /brain/briefs. The marketing global nav is suppressed
+ * on these paths.
  *
- * Layout (two flex groups, justify-content: space-between):
- *
- *   [raise(fn)  Chat  Matches (51)  Briefs (2)]      [Upgrade  user  Sign out]
- *
- * Active tab has a solid teal pill background + white text. Counts pulled
- * live from /v1/brain/matches/mine on mount.
+ * Layout (logo left, account/tier/upgrade/sign-out right). The
+ * Chat/Matches/Briefs tabs were removed in Phase 2 v2 — the founder
+ * sidebar surfaces match/brief counts directly with click-through to
+ * the same views, so the top tabs were pure duplication.
  */
-type Counts = { matches: number; briefs: number };
-
-const TABS: Array<{ key: "chat" | "matches" | "briefs"; label: string; href: string }> = [
-  { key: "chat", label: "Chat", href: "/brain/deploy" },
-  { key: "matches", label: "Matches", href: "/brain/matches" },
-  { key: "briefs", label: "Briefs", href: "/brain/briefs" },
-];
-
 export default function BrainTabs() {
   const router = useRouter();
-  const pathname = usePathname();
-  const [counts, setCounts] = useState<Counts | null>(null);
   const [tier, setTier] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
-  const [impersonating, setImpersonating] = useState<string>("");
 
   useEffect(() => {
     try {
       setTier(localStorage.getItem("raisefn_user_tier"));
-      // Shared with deploy/page.tsx — the "Acting as" dropdown writes this
-      // key. Without reading it here, the counts always reflect the admin's
-      // own data even while they're acting as a managed founder.
-      setImpersonating(localStorage.getItem("raisefn_impersonating") || "");
-    } catch {
-      /* private browsing */
-    }
-    // Listen for changes from deploy/page.tsx so the tabs update when the
-    // dropdown is switched mid-session.
-    function onImpersonate(e: Event) {
-      const ce = e as CustomEvent<{ email?: string | null }>;
-      setImpersonating(ce.detail?.email || "");
-    }
-    window.addEventListener("raisefn:impersonate", onImpersonate);
-    return () => window.removeEventListener("raisefn:impersonate", onImpersonate);
+    } catch { /* private browsing */ }
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    async function load() {
+    async function loadSession() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-        if (!cancelled) setEmail(session.user.email || null);
-        const headers: Record<string, string> = {
-          Authorization: `Bearer ${session.access_token}`,
-        };
-        if (impersonating) headers["X-Impersonate"] = impersonating;
-        const res = await fetch("/v1/brain/matches/mine", { headers });
-        if (!res.ok || cancelled) return;
-        const data = await res.json();
-        // Count UNIQUE investors across all batches (not just the latest)
-        // so the number grows as the founder pulls more batches. Dedup by
-        // lowercase trimmed name; falls back to firm_name when name is
-        // missing.
-        const batches = Array.isArray(data.batches) ? data.batches : [];
-        const seen = new Set<string>();
-        for (const b of batches) {
-          const all = [
-            ...(Array.isArray(b.individuals_to_target) ? b.individuals_to_target : []),
-            ...(Array.isArray(b.firms_to_consider) ? b.firms_to_consider : []),
-          ];
-          for (const inv of all) {
-            const i = inv as { name?: string; firm_name?: string };
-            const key = (i.name || i.firm_name || "").toLowerCase().trim();
-            if (key) seen.add(key);
-          }
-        }
-        const matchCount = seen.size;
-        const briefCount = Array.isArray(data.briefs) ? data.briefs.length : 0;
-        if (!cancelled) setCounts({ matches: matchCount, briefs: briefCount });
-      } catch {
-        /* counts are best-effort */
-      }
+        if (!session || cancelled) return;
+        setEmail(session.user.email || null);
+      } catch { /* defensive */ }
     }
-    load();
-
-    // Refresh on custom events fired by the chat page when new matches
-    // or briefs land. Lets the count update without polling.
-    function onUpdate() { load(); }
-    window.addEventListener("raisefn:matches_updated", onUpdate);
-    window.addEventListener("raisefn:briefs_updated", onUpdate);
-
-    return () => {
-      cancelled = true;
-      window.removeEventListener("raisefn:matches_updated", onUpdate);
-      window.removeEventListener("raisefn:briefs_updated", onUpdate);
-    };
-  }, [pathname, impersonating]);
-
-  function isActive(href: string): boolean {
-    if (href === "/brain/deploy") return pathname?.startsWith("/brain/deploy") ?? false;
-    return pathname === href;
-  }
-
-  function countFor(key: "chat" | "matches" | "briefs"): number | null {
-    if (!counts) return null;
-    if (key === "matches") return counts.matches;
-    if (key === "briefs") return counts.briefs;
-    return null;
-  }
+    loadSession();
+    return () => { cancelled = true; };
+  }, []);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
     router.replace("/login");
   }
 
-  // Show upgrade unless we KNOW the user is on a paid tier. Includes the
-  // null/undefined case (fresh login before the chat usage SSE has written
-  // tier to localStorage) — better to invite an upgrade than silently hide
-  // it for someone who would have qualified.
-  //
-  // Current paid tiers (post-v4 pricing, 2026-06): 'pro', 'advisor'.
-  // Legacy strings ('concierge', 'lifetime', 'lifetime_advisor') were
-  // never current — Lifetime Advisor was a pre-v4 marketing pitch that
-  // never shipped as a tier value. Removed 2026-06-16.
   const PAID_TIERS = new Set(["pro", "advisor"]);
   const showUpgrade = !PAID_TIERS.has(tier || "");
   const TIER_LABEL: Record<string, string> = { pro: "Pro", advisor: "Advisor" };
@@ -158,109 +69,26 @@ export default function BrainTabs() {
           padding: "10px 24px",
           display: "flex",
           alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        {/* LEFT: logo, flex column with left-aligned content */}
-        <div
+        <Link
+          href="/"
           style={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-start",
+            fontSize: "18px",
+            fontWeight: 700,
+            textDecoration: "none",
+            letterSpacing: "-0.01em",
           }}
         >
-          <Link
-            href="/"
-            style={{
-              fontSize: "18px",
-              fontWeight: 700,
-              textDecoration: "none",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            <span style={{ color: "#f97316" }}>raise</span>
-            <span style={{ color: "#2dd4bf" }}>(fn)</span>
-          </Link>
-        </div>
+          <span style={{ color: "#f97316" }}>raise</span>
+          <span style={{ color: "#2dd4bf" }}>(fn)</span>
+        </Link>
 
-        {/* CENTER: tabs, centered in the bar */}
         <div
           style={{
-            flex: "0 0 auto",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <nav style={{ display: "flex", alignItems: "center", gap: "2px" }}>
-            {TABS.map((tab) => {
-              const active = isActive(tab.href);
-              const count = countFor(tab.key);
-              return (
-                <Link
-                  key={tab.key}
-                  href={tab.href}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "7px 14px",
-                    fontSize: "14px",
-                    fontWeight: active ? 600 : 500,
-                    color: active ? "#ffffff" : "#a1a1aa",
-                    textDecoration: "none",
-                    borderRadius: "7px",
-                    background: active ? "#14b8a6" : "transparent",
-                    transition: "background-color 0.15s ease, color 0.15s ease",
-                    lineHeight: 1.2,
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.background = "rgba(39, 39, 42, 0.7)";
-                      e.currentTarget.style.color = "#f4f4f5";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.background = "transparent";
-                      e.currentTarget.style.color = "#a1a1aa";
-                    }
-                  }}
-                >
-                  <span>{tab.label}</span>
-                  {count !== null && count > 0 && (
-                    <span
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        minWidth: "20px",
-                        height: "18px",
-                        padding: "0 6px",
-                        borderRadius: "9999px",
-                        fontSize: "11px",
-                        fontWeight: 600,
-                        background: active
-                          ? "rgba(255, 255, 255, 0.22)"
-                          : "rgba(63, 63, 70, 0.85)",
-                        color: active ? "#ffffff" : "#d4d4d8",
-                      }}
-                    >
-                      {count}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* RIGHT: upgrade + user + sign out, flex column with right-aligned content */}
-        <div
-          style={{
-            flex: 1,
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-end",
             gap: "14px",
           }}
         >

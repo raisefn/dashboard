@@ -2148,92 +2148,8 @@ function BrainDeployInner() {
         </div>
       )}
 
-      {/* Unified product top bar — logo + tabs + account */}
+      {/* Unified product top bar — logo + account (tabs removed in v2 — sidebar surfaces matches/briefs directly) */}
       <BrainTabs />
-
-      {/* Admin impersonation bar */}
-      {isAdmin && (
-        <div className="admin-bar">
-          <div className="admin-bar-inner">
-            <span className="admin-label">Acting as</span>
-            {adminUsers.length > 0 ? (
-              <select
-                value={impersonating}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val) switchClient(val);
-                  else {
-                    setImpersonating("");
-                    setImpersonateInput("");
-                    if (messagesInnerRef.current) messagesInnerRef.current.innerHTML = "";
-                    historyRef.current = [];
-                    raiseIdRef.current = null;
-                    conversationIdRef.current = null;
-                    setChatStarted(false);
-                    hasAutoProbed.current = false;
-                    centerUiRef.current?.classList.remove("at-bottom");
-                    messagesRef.current?.classList.remove("active");
-                  }
-                }}
-                className="admin-input"
-              >
-                <option value="">Myself</option>
-                {adminUsers
-                  .filter((u) => {
-                    const e = (u.email || "").toLowerCase();
-                    if (e.startsWith("demo+")) return false;
-                    if (e === "service@raisefn.com") return false;
-                    return true;
-                  })
-                  .map((u) => (
-                  <option key={u.email} value={u.email}>
-                    {u.name || u.email} — {u.role}{u.campaign ? ` — ${u.campaign.company || "no company"}` : ""} ({u.events} events)
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <>
-                <input
-                  type="email"
-                  value={impersonateInput}
-                  onChange={(e) => setImpersonateInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") switchClient(impersonateInput.trim().toLowerCase());
-                  }}
-                  placeholder="client@email.com"
-                  className="admin-input"
-                />
-                <button
-                  onClick={() => switchClient(impersonateInput.trim().toLowerCase())}
-                  disabled={!impersonateInput.trim()}
-                  className="admin-btn"
-                >
-                  Switch
-                </button>
-              </>
-            )}
-            {impersonating && (
-              <button
-                onClick={() => {
-                  setImpersonating("");
-                  setImpersonateInput("");
-                  if (messagesInnerRef.current) messagesInnerRef.current.innerHTML = "";
-                  historyRef.current = [];
-                  raiseIdRef.current = null;
-                  conversationIdRef.current = null;
-                  setChatStarted(false);
-                  hasAutoProbed.current = false;
-                  centerUiRef.current?.classList.remove("at-bottom");
-                  messagesRef.current?.classList.remove("active");
-                }}
-                className="admin-clear"
-              >
-                Back to me
-              </button>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Surface grid: sidebar (260px) + main chat */}
       <div className={`surface-grid${mobileSidebarOpen ? " mobile-sidebar-open" : ""}`}>
@@ -2251,6 +2167,80 @@ function BrainDeployInner() {
             session={session}
             impersonating={impersonating}
             injectChatPrompt={injectChatPrompt}
+            adminHeader={
+              isAdmin ? (
+                <>
+                  <span className="sb-admin-label">Acting as</span>
+                  {adminUsers.length > 0 ? (
+                    <select
+                      value={impersonating}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val) {
+                          switchClient(val);
+                        } else {
+                          setImpersonating("");
+                          setImpersonateInput("");
+                          if (messagesInnerRef.current) messagesInnerRef.current.innerHTML = "";
+                          historyRef.current = [];
+                          raiseIdRef.current = null;
+                          conversationIdRef.current = null;
+                          setChatStarted(false);
+                          hasAutoProbed.current = false;
+                          centerUiRef.current?.classList.remove("at-bottom");
+                          messagesRef.current?.classList.remove("active");
+                        }
+                      }}
+                      className="sb-admin-select"
+                    >
+                      <option value="">Myself</option>
+                      {adminUsers
+                        .filter((u) => {
+                          const e = (u.email || "").toLowerCase();
+                          if (e.startsWith("demo+")) return false;
+                          if (e === "service@raisefn.com") return false;
+                          return true;
+                        })
+                        .map((u) => (
+                          <option key={u.email} value={u.email}>
+                            {u.name || u.email} — {u.role}
+                          </option>
+                        ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="email"
+                      value={impersonateInput}
+                      onChange={(e) => setImpersonateInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") switchClient(impersonateInput.trim().toLowerCase());
+                      }}
+                      placeholder="client@email.com"
+                      className="sb-admin-select"
+                    />
+                  )}
+                  {impersonating && (
+                    <button
+                      onClick={() => {
+                        setImpersonating("");
+                        setImpersonateInput("");
+                        if (messagesInnerRef.current) messagesInnerRef.current.innerHTML = "";
+                        historyRef.current = [];
+                        raiseIdRef.current = null;
+                        conversationIdRef.current = null;
+                        setChatStarted(false);
+                        hasAutoProbed.current = false;
+                        centerUiRef.current?.classList.remove("at-bottom");
+                        messagesRef.current?.classList.remove("active");
+                      }}
+                      className="sb-admin-clear"
+                    >
+                      Back to me
+                    </button>
+                  )}
+                </>
+              ) : null
+            }
           />
         </div>
 

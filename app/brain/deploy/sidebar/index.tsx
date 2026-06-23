@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 
 import { SidebarSection } from "./section";
@@ -13,6 +13,9 @@ interface FounderSidebarProps {
   session: Session | null;
   impersonating: string;
   injectChatPrompt: (prompt: string) => void;
+  /** Admin slot: rendered at the top of the sidebar when present.
+   * Used for the "Acting as" impersonation select. */
+  adminHeader?: ReactNode;
 }
 
 /**
@@ -26,7 +29,7 @@ interface FounderSidebarProps {
  * For Phase 2 v1, refetch is the simplest robust path; we'll move to
  * granular optimistic mutations once we see real founder usage.
  */
-export function FounderSidebar({ session, impersonating, injectChatPrompt }: FounderSidebarProps) {
+export function FounderSidebar({ session, impersonating, injectChatPrompt, adminHeader }: FounderSidebarProps) {
   const [state, setState] = useState<SidebarState | null>(null);
 
   useEffect(() => {
@@ -66,6 +69,8 @@ export function FounderSidebar({ session, impersonating, injectChatPrompt }: Fou
   return (
     <aside className="founder-sidebar">
       <style>{SIDEBAR_CSS}</style>
+
+      {adminHeader && <div className="sb-admin-header">{adminHeader}</div>}
 
       <SidebarSection title="My Raise" defaultOpen>
         <MyRaise campaign={state?.campaign || null} onInjectPrompt={injectChatPrompt} />
@@ -167,29 +172,38 @@ export function FounderSidebar({ session, impersonating, injectChatPrompt }: Fou
       </SidebarSection>
 
       <SidebarSection
-        title="Activity"
+        title="Connections"
         defaultOpen={false}
-        emptyMessage="No activity yet."
       >
-        {state?.activity?.length ? (
-          <>
-            {state.activity.slice(0, 8).map(e => (
-              <div key={e.id} className="sb-row sb-row-static">
-                <div className="sb-row-line1">
-                  <span className="sb-row-name">
-                    {e.event_type.replace(/_/g, " ")}
-                    {e.investor_name ? `: ${e.investor_name}` : ""}
-                  </span>
-                </div>
-                {e.summary && (
-                  <div className="sb-row-line2">
-                    <span className="sb-row-secondary">{e.summary}</span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </>
-        ) : null}
+        <div className="sb-connections">
+          <div className="sb-conn-row sb-conn-disabled" title="Coming soon — Phase 5 wire-up">
+            <span className="sb-conn-dot" />
+            <span className="sb-conn-label">Gmail</span>
+            <span className="sb-conn-status">Coming soon</span>
+          </div>
+          <div className="sb-conn-row sb-conn-disabled" title="Coming soon — Phase 6 wire-up">
+            <span className="sb-conn-dot" />
+            <span className="sb-conn-label">Calendar</span>
+            <span className="sb-conn-status">Coming soon</span>
+          </div>
+          <button
+            type="button"
+            className="sb-conn-row sb-conn-deck"
+            onClick={() => injectChatPrompt(
+              (state?.documents?.length || 0) > 0
+                ? "Take another look at my deck"
+                : "I want to upload my deck"
+            )}
+          >
+            <span className={`sb-conn-dot${(state?.documents?.length || 0) > 0 ? " on" : ""}`} />
+            <span className="sb-conn-label">Deck</span>
+            <span className="sb-conn-status">
+              {(state?.documents?.length || 0) > 0
+                ? `${state!.documents.filter(d => d.doc_type === "deck").length || state!.documents.length} on file`
+                : "Drop in chat"}
+            </span>
+          </button>
+        </div>
       </SidebarSection>
     </aside>
   );
