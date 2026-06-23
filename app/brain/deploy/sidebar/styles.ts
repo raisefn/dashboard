@@ -355,6 +355,21 @@ export const SIDEBAR_CSS = `
   color: #71717a;
   font-size: 11px;
 }
+/* Empty section: dim, non-clickable label only. */
+.sb-section-empty-state { margin-bottom: 12px; }
+.sb-section-header-static {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px 8px;
+}
+.sb-section-title-dim {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #52525b;
+}
+
 .sb-matches-cta {
   display: block;
   width: 100%;

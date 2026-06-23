@@ -40,26 +40,20 @@ function formatSector(sectors: string[]): string {
 }
 
 export function MyRaise({ campaign, onInjectPrompt }: MyRaiseProps) {
-  if (!campaign) {
-    return (
-      <div className="sb-empty">
-        <p className="sb-section-empty-msg">No active raise.</p>
-        <button
-          type="button"
-          className="sb-section-empty-btn"
-          onClick={() => onInjectPrompt("I'm raising — let me tell you about it")}
-        >
-          Tell raise(fn) about it
-        </button>
-      </div>
-    );
-  }
+  // Sidebar mirrors state. Tutoring lives in chat. No campaign yet OR
+  // a skeleton campaign with no real fields → render nothing, the
+  // SidebarSection will collapse to a dim label.
+  if (!campaign) return null;
 
   const headline = [
     formatAmount(campaign.target_amount_usd),
     formatStage(campaign.stage),
     formatSector(campaign.sectors),
-  ].filter(Boolean).join(" · ");
+  ].filter(Boolean).filter(s => s !== "—").join(" · ");
+
+  // If we have a campaign row but no real data on it yet, also render
+  // nothing — looks the same as no campaign at all.
+  if (!headline) return null;
 
   const statusLabel = STATUS_LABEL[campaign.status] || campaign.status;
 
@@ -75,7 +69,7 @@ export function MyRaise({ campaign, onInjectPrompt }: MyRaiseProps) {
       </div>
       <div className="sb-my-raise-meta">
         <span className="sb-my-raise-status">{statusLabel}</span>
-        {typeof campaign.days_in === "number" && (
+        {typeof campaign.days_in === "number" && campaign.days_in > 0 && (
           <>
             <span className="sb-my-raise-sep">·</span>
             <span className="sb-my-raise-days">{campaign.days_in}d in</span>

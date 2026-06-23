@@ -96,8 +96,6 @@ export function FounderSidebar({
             title="Pipeline"
             count={filteredPipeline.length}
             defaultOpen
-            emptyMessage="Investors you're actively pursuing show here."
-            onInjectPrompt={injectChatPrompt}
             onTitleClick={() => openPanel({ kind: "pipeline" })}
           >
             {allPipeline.length > 0 ? (
@@ -118,12 +116,6 @@ export function FounderSidebar({
         title="Matches"
         count={state?.matches?.total_unique ?? 0}
         defaultOpen
-        emptyMessage="No matches yet."
-        emptyAction={{
-          label: "Ask for matches",
-          injectPrompt: "Pull me investor matches",
-        }}
-        onInjectPrompt={injectChatPrompt}
         onTitleClick={() => openPanel({ kind: "matches" })}
       >
         {state?.matches?.latest_batch ? (
@@ -141,7 +133,6 @@ export function FounderSidebar({
         title="Briefs"
         count={state?.briefs?.length ?? 0}
         defaultOpen={false}
-        emptyMessage="No briefs yet."
         onTitleClick={() => openPanel({ kind: "briefs" })}
       >
         {state?.briefs?.length ? (
@@ -175,7 +166,6 @@ export function FounderSidebar({
         title="Documents"
         count={state?.documents?.length ?? 0}
         defaultOpen={false}
-        emptyMessage="No documents yet. Drop your deck in chat."
       >
         {state?.documents?.length ? (
           <>

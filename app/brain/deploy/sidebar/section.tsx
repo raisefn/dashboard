@@ -3,48 +3,50 @@
 import { useState, type ReactNode } from "react";
 
 /**
- * Generic collapsible section shell for the founder sidebar.
- * Per phase_2_design_language.md:
- *   - Section header: text-muted, size-xs, uppercase, letterspaced
- *   - Count chip: text-default, size-sm, pill with bg #27272a
- *   - Chevron: text-faint, rotates on collapse
- *   - Items: text-default, 13px, two-line by default
- *   - Empty state: muted sentence + optional inject-prompt button
+ * Sidebar section. Two states by design:
+ *
+ *   - EMPTY (no content): renders a dim, non-clickable label only.
+ *     The sidebar is a state mirror; tutoring lives in chat. No
+ *     empty-state copy, no inline CTAs.
+ *
+ *   - FILLED (has content): renders an interactive header. If
+ *     onTitleClick is set, the title is a button that opens a
+ *     slide-over panel. Chevron always toggles collapse.
  */
 
 interface SectionProps {
   title: string;
-  /** Short subtitle (3-6 words) telling new users what this section is. */
-  subtitle?: string;
   count?: number | null;
   defaultOpen?: boolean;
-  emptyMessage?: string;
-  emptyAction?: { label: string; injectPrompt: string };
-  onInjectPrompt?: (prompt: string) => void;
-  /**
-   * When set, clicking the section TITLE opens a slide-over panel
-   * (the chevron handles collapse independently). When unset, clicking
-   * anywhere in the header toggles collapse (legacy behavior).
-   */
+  /** When set AND the section has content, clicking the title opens
+   *  a slide-over panel. Ignored when empty. */
   onTitleClick?: () => void;
   children?: ReactNode;
 }
 
 export function SidebarSection({
   title,
-  subtitle,
   count,
   defaultOpen = true,
-  emptyMessage,
-  emptyAction,
-  onInjectPrompt,
   onTitleClick,
   children,
 }: SectionProps) {
   const [open, setOpen] = useState(defaultOpen);
   const hasChildren = !!children && (!Array.isArray(children) || children.length > 0);
+  const hasContent = hasChildren || (typeof count === "number" && count > 0);
 
-  // Split-control mode: chevron toggles collapse, title opens panel.
+  // Empty state: dim, non-interactive label only.
+  if (!hasContent) {
+    return (
+      <div className="sb-section sb-section-empty-state">
+        <div className="sb-section-header sb-section-header-static">
+          <span className="sb-section-title sb-section-title-dim">{title}</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Filled state with split-control (chevron collapse, title opens panel).
   if (onTitleClick) {
     return (
       <div className="sb-section">
@@ -60,7 +62,7 @@ export function SidebarSection({
           </button>
           <button
             type="button"
-            className={`sb-section-title-btn${typeof count === "number" && count > 0 ? " sb-section-title-btn-active" : ""}`}
+            className="sb-section-title-btn sb-section-title-btn-active"
             onClick={onTitleClick}
             aria-label={`Open ${title}`}
           >
@@ -71,32 +73,15 @@ export function SidebarSection({
             <span className="sb-section-open-hint">→</span>
           </button>
         </div>
-        {subtitle && <div className="sb-section-subtitle sb-section-subtitle-indent">{subtitle}</div>}
-        {open && (
-          <div className="sb-section-body">
-            {hasChildren ? (
-              children
-            ) : (
-              <div className="sb-section-empty">
-                {emptyMessage && <p className="sb-section-empty-msg">{emptyMessage}</p>}
-                {emptyAction && onInjectPrompt && (
-                  <button
-                    type="button"
-                    className="sb-section-empty-btn"
-                    onClick={() => onInjectPrompt(emptyAction.injectPrompt)}
-                  >
-                    {emptyAction.label}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+        {open && hasChildren && (
+          <div className="sb-section-body">{children}</div>
         )}
       </div>
     );
   }
 
-  // Legacy single-button mode: whole header toggles collapse.
+  // Filled state without onTitleClick (e.g. MY RAISE, CONNECTIONS):
+  // whole header toggles collapse.
   return (
     <div className="sb-section">
       <button
@@ -113,28 +98,10 @@ export function SidebarSection({
               <span className="sb-section-count">{count}</span>
             )}
           </div>
-          {subtitle && <div className="sb-section-subtitle">{subtitle}</div>}
         </div>
       </button>
-      {open && (
-        <div className="sb-section-body">
-          {hasChildren ? (
-            children
-          ) : (
-            <div className="sb-section-empty">
-              {emptyMessage && <p className="sb-section-empty-msg">{emptyMessage}</p>}
-              {emptyAction && onInjectPrompt && (
-                <button
-                  type="button"
-                  className="sb-section-empty-btn"
-                  onClick={() => onInjectPrompt(emptyAction.injectPrompt)}
-                >
-                  {emptyAction.label}
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+      {open && hasChildren && (
+        <div className="sb-section-body">{children}</div>
       )}
     </div>
   );
