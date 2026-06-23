@@ -25,6 +25,12 @@ const nextConfig: NextConfig = {
       { source: "/brain/entrepreneurs", destination: "/founders", permanent: true },
       { source: "/brain/investors", destination: "/investors", permanent: true },
       { source: "/brain/agents", destination: "/agents", permanent: true },
+      // Phase 2 v3 (2026-06-23): legacy founder pages consolidate into
+      // slide-over panels on /brain/deploy. Temporary 307 redirects so
+      // we can roll back if a regression surfaces during smoke. Public
+      // brief route /brief/[token] is unaffected.
+      { source: "/brain/matches", destination: "/brain/deploy?panel=matches", permanent: false },
+      { source: "/brain/briefs", destination: "/brain/deploy?panel=briefs", permanent: false },
     ];
   },
   async headers() {
