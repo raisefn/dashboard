@@ -548,36 +548,36 @@ function refreshPlanStrip(state: ExecutionState): void {
   state.stripMount.style.cssText = [
     "display:flex",
     "align-items:center",
-    "gap:12px",
-    "padding:8px 14px",
-    "background:rgba(24,24,27,0.85)",
-    "border-top:1px solid #27272a",
-    "border-bottom:1px solid #27272a",
-    "font-size:12px",
-    "color:#a1a1aa",
+    "gap:8px",
+    "padding:4px 0 6px 0",
+    "font-size:11px",
+    "color:#52525b",
+    "border:none",
+    "background:transparent",
   ].join(";");
   state.stripMount.innerHTML = "";
 
   const status = document.createElement("div");
-  status.style.cssText = "flex:1;";
-  status.innerHTML = `<span style="color:#e4e4e7;font-weight:500;">Plan in progress</span> &nbsp;·&nbsp; ${done} of ${total} done &nbsp;·&nbsp; ${onLabel}`;
+  status.style.cssText = "flex:1;letter-spacing:0.02em;";
+  status.innerHTML = `${done}/${total} done &nbsp;·&nbsp; ${onLabel}`;
   state.stripMount.appendChild(status);
 
   const stopBtn = document.createElement("button");
   stopBtn.type = "button";
-  stopBtn.textContent = "Stop";
+  stopBtn.textContent = "Stop plan";
   stopBtn.style.cssText = [
     "background:transparent",
-    "color:#71717a",
-    "border:1px solid #3f3f46",
-    "padding:4px 10px",
-    "border-radius:4px",
+    "color:#52525b",
+    "border:none",
+    "padding:0",
     "font-family:inherit",
     "font-size:11px",
     "cursor:pointer",
+    "text-decoration:underline",
+    "text-underline-offset:2px",
   ].join(";");
-  stopBtn.onmouseenter = () => { stopBtn.style.color = "#fca5a5"; stopBtn.style.borderColor = "#fca5a5"; };
-  stopBtn.onmouseleave = () => { stopBtn.style.color = "#71717a"; stopBtn.style.borderColor = "#3f3f46"; };
+  stopBtn.onmouseenter = () => { stopBtn.style.color = "#fca5a5"; };
+  stopBtn.onmouseleave = () => { stopBtn.style.color = "#52525b"; };
   stopBtn.onclick = async () => {
     if (!window.confirm("Stop this plan? Any completed steps stay saved.")) return;
     stopBtn.disabled = true;
