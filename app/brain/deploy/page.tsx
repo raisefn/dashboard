@@ -897,6 +897,10 @@ function BrainDeployInner() {
   // after 30 min of inactivity, so next-day restore returns zero turns
   // and synthesis fires correctly.
   const restoredAssistantCountRef = useRef(0);
+  // Per-round flag: set when SSE matches_updated event arrives, consumed on
+  // SSE done event to fire the BrainTabs badge refresh. Defers the refresh
+  // until after the brain has fully committed the new match batch.
+  const matchesUpdatedThisRoundRef = useRef(false);
   // Per-message rate-limit signals captured from SSE events
   const limitReachedRef = useRef<null | {
     tier: string;
@@ -1324,6 +1328,17 @@ function BrainDeployInner() {
               if (pausedFor && message !== "[session_open]") {
                 renderResumePrompt(pausedFor);
               }
+              // If a match_investors call happened this round, refresh the
+              // Matches count badge now — done event fires after the brain
+              // has fully committed the new batch to user_documents. The
+              // earlier matches_updated SSE event sometimes raced ahead of
+              // commit; this is the reliable trigger.
+              if (matchesUpdatedThisRoundRef.current) {
+                matchesUpdatedThisRoundRef.current = false;
+                try {
+                  window.dispatchEvent(new CustomEvent("raisefn:matches_updated"));
+                } catch { /* defensive */ }
+              }
             } else if (event.type === "usage") {
               // Track usage state for nav Upgrade button + soft card.
               // Mirror tier to localStorage so the Nav component (which
@@ -1363,10 +1378,11 @@ function BrainDeployInner() {
               };
             } else if (event.type === "matches_updated") {
               // Brain emits this after match_investors runs successfully.
-              // Tell BrainTabs to refresh its Matches count badge.
-              try {
-                window.dispatchEvent(new CustomEvent("raisefn:matches_updated"));
-              } catch { /* defensive */ }
+              // Defer the badge refresh to the `done` event so the brain
+              // has fully committed before BrainTabs re-fetches /matches/mine.
+              // Without the defer, badge sometimes read stale data because
+              // the SSE event was emitted before the savepoint flushed.
+              matchesUpdatedThisRoundRef.current = true;
             }
             // Note: `matches_panel` + `agent_plan` event handlers removed.
             // Match data lives in user_documents + Matches tab. The LLM
