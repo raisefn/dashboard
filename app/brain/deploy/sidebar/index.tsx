@@ -73,7 +73,7 @@ export function FounderSidebar({ session, impersonating, injectChatPrompt, admin
 
       {adminHeader && <div className="sb-admin-header">{adminHeader}</div>}
 
-      <SidebarSection title="My Raise" subtitle="your active fundraise" defaultOpen>
+      <SidebarSection title="My Raise" defaultOpen>
         <MyRaise campaign={state?.campaign || null} onInjectPrompt={injectChatPrompt} />
       </SidebarSection>
 
@@ -83,7 +83,6 @@ export function FounderSidebar({ session, impersonating, injectChatPrompt, admin
         return (
           <SidebarSection
             title="Pipeline"
-            subtitle="active investor conversations"
             count={filteredPipeline.length}
             defaultOpen
             emptyMessage="No pipeline yet."
@@ -108,7 +107,6 @@ export function FounderSidebar({ session, impersonating, injectChatPrompt, admin
 
       <SidebarSection
         title="Matches"
-        subtitle="investors raise(fn) thinks fit"
         count={state?.matches?.total_unique ?? 0}
         defaultOpen={false}
         emptyMessage="No matches yet."
@@ -132,7 +130,6 @@ export function FounderSidebar({ session, impersonating, injectChatPrompt, admin
 
       <SidebarSection
         title="Briefs"
-        subtitle="one-page investor briefs you can send"
         count={state?.briefs?.length ?? 0}
         defaultOpen={false}
         emptyMessage="No briefs yet."
@@ -161,7 +158,6 @@ export function FounderSidebar({ session, impersonating, injectChatPrompt, admin
 
       <SidebarSection
         title="Documents"
-        subtitle="your deck and other files"
         count={state?.documents?.length ?? 0}
         defaultOpen={false}
         emptyMessage="No documents yet. Drop your deck in chat."
@@ -190,7 +186,6 @@ export function FounderSidebar({ session, impersonating, injectChatPrompt, admin
 
       <SidebarSection
         title="Connections"
-        subtitle="external tools + built-in signal"
         defaultOpen={false}
       >
         <div className="sb-connections">
