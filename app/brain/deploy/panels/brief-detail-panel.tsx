@@ -75,8 +75,8 @@ export function BriefDetailPanel({ token, session, impersonating }: BriefDetailP
   useEffect(() => { void load(); }, [load]);
 
   const publicUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/brain/briefs/${token}`
-    : `/brain/briefs/${token}`;
+    ? `${window.location.origin}/brief/${token}`
+    : `/brief/${token}`;
 
   async function copyLink() {
     try {
