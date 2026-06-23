@@ -88,6 +88,9 @@ interface ExecutionState {
   stripMount: PlanStripMount;
   /** id of the step currently paused awaiting approval, if any. */
   pendingApprovalStepId: string | null;
+  /** How many times we've auto-reconnected on this state. Capped at
+   *  MAX_RECONNECT_ATTEMPTS to prevent infinite loops on bad stream state. */
+  reconnectAttempts?: number;
 }
 
 // ─────────────────────────────────────────────────────────────
