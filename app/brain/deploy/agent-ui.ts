@@ -146,6 +146,7 @@ export async function maybeResumeActivePlan(
   appendBubble: AppendChatBubble,
   session: Session | null,
   stripMount?: PlanStripMount,
+  clearVisibleHistory?: () => void,
 ): Promise<boolean> {
   if (!session) return false;
   let planId: string | null = null;
@@ -159,6 +160,11 @@ export async function maybeResumeActivePlan(
   const status = await fetchPlanStatus(planId, session);
   if (!status) { clearActivePlan(); return false; }
   if (TERMINAL_STATUSES.has(status.status)) { clearActivePlan(); return false; }
+
+  // Clear stale chat content (old "Welcome back" lines etc.) before
+  // we render the resume bubbles. Brain DB still has history for LLM
+  // context — only the visible canvas resets.
+  if (clearVisibleHistory) clearVisibleHistory();
 
   // Render prior completed steps as chat turns so the founder sees what
   // already happened. Then reopen SSE for the next pending step.
