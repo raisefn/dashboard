@@ -188,9 +188,9 @@ export function FounderSidebar({
             <span className="sb-conn-label">Calendar</span>
             <span className="sb-conn-status">Coming soon</span>
           </div>
-          <div className="sb-conn-row sb-conn-disabled" title="Phase 6.5 — auto-sync MRR / growth / runway">
+          <div className="sb-conn-row sb-conn-disabled" title="Warm intro mapping + 2nd-degree network introspection">
             <span className="sb-conn-dot" />
-            <span className="sb-conn-label">Mercury</span>
+            <span className="sb-conn-label">LinkedIn</span>
             <span className="sb-conn-status">Coming soon</span>
           </div>
           <div className="sb-conn-row sb-conn-on" title="Built in — brief view counts surface in chat">
