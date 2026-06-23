@@ -6,6 +6,7 @@ import { MatchesPanel } from "./matches-panel";
 import { InvestorPanel } from "./investor-panel";
 import { BriefsPanel } from "./briefs-panel";
 import { BriefDetailPanel } from "./brief-detail-panel";
+import { PipelinePanel } from "./pipeline-panel";
 import type { Panel } from "./use-panel-state";
 
 /**
@@ -102,7 +103,14 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
       }
       case "pipeline":
         title = "Pipeline";
-        body = <PanelStub label="Full pipeline" hint="Coming in v3 step 9" />;
+        body = (
+          <PipelinePanel
+            session={session}
+            impersonating={impersonating}
+            onInjectPrompt={injectChatPrompt}
+            onOpenPanel={onOpenPanel}
+          />
+        );
         break;
       case "document":
         title = "Document";
