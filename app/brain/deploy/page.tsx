@@ -1175,16 +1175,6 @@ function BrainDeployInner() {
       messagesRef.current?.classList.add("active");
     }
 
-    // Session-open trigger: clear visible chat history so the founder
-    // opens with a clean canvas for today's plan. The brain DB keeps
-    // all history for LLM context; only the visible DOM resets. Stops
-    // stale lines like "Welcome back, Justin!" (generated before voice
-    // rules tightened) from cluttering the new session.
-    if (message === "[session_open]" && messagesInnerRef.current) {
-      messagesInnerRef.current.innerHTML = "";
-      historyRef.current = [];
-    }
-
     // ── Redirect handling: founder typed during an active plan ──
     // Auto-pause so the executor stops between steps and we don't burn
     // budget mid-redirect. After the chat reply finishes, offer a Resume
@@ -1889,32 +1879,24 @@ function BrainDeployInner() {
             historyRef.current.push({ role: msg.role, content: msg.content });
           }
 
-          // Welcome back message — upgrade celebration or normal return
-          const isCheckoutSuccess = new URLSearchParams(window.location.search).get("checkout") === "success";
-          const welcomeBack = isCheckoutSuccess
-            ? `${firstName}, hell yeah, let's do this. All tools unlocked. How can I help?`
-            : `Welcome back, ${firstName}! Pick up where we left off, or where should we focus today?`;
-          if (isCheckoutSuccess) window.history.replaceState({}, "", "/brain/deploy");
-          const welcomeEl = addMessageToDOM("assistant", "");
-          const welcomeContent = welcomeEl.querySelector(".content") as HTMLElement;
-          if (welcomeContent) {
-            welcomeContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-            requestAnimationFrame(() => scrollToBottom());
-            setTimeout(() => {
-              welcomeContent.innerHTML = formatMarkdown(welcomeBack);
-              requestAnimationFrame(() => scrollToBottom());
+          // Claude Code-style persistent thread: restore renders the prior
+          // bubbles, then the autoProbe useEffect fires [session_open] and
+          // raise(fn) appends a synthesis turn at the bottom (per system
+          // prompt rule 20). No hardcoded "Welcome back" line — that
+          // violates rule 2's active-voice principle.
+          requestAnimationFrame(() => scrollToBottom());
 
-              // Auto-retry the message that was blocked before upgrade
-              if (isCheckoutSuccess) {
-                try {
-                  const retryMsg = sessionStorage.getItem("raisefn_retry_msg");
-                  if (retryMsg) {
-                    sessionStorage.removeItem("raisefn_retry_msg");
-                    setTimeout(() => send(retryMsg), 1200);
-                  }
-                } catch {}
+          // Auto-retry the message that was blocked before upgrade
+          const isCheckoutSuccess = new URLSearchParams(window.location.search).get("checkout") === "success";
+          if (isCheckoutSuccess) {
+            window.history.replaceState({}, "", "/brain/deploy");
+            try {
+              const retryMsg = sessionStorage.getItem("raisefn_retry_msg");
+              if (retryMsg) {
+                sessionStorage.removeItem("raisefn_retry_msg");
+                setTimeout(() => send(retryMsg), 1200);
               }
-            }, 800);
+            } catch {}
           }
           return;
         }
@@ -1968,15 +1950,6 @@ function BrainDeployInner() {
         },
         session,
         planStripRef.current,
-        () => {
-          // Clear stale chat content (old "Welcome back" lines etc.)
-          // before resume bubbles render. Brain DB keeps full history
-          // for LLM context.
-          if (messagesInnerRef.current) {
-            messagesInnerRef.current.innerHTML = "";
-            historyRef.current = [];
-          }
-        },
       );
       if (!resumed) {
         // No in-progress plan — fire the auto-trigger so raise(fn)
