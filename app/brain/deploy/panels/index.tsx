@@ -4,6 +4,8 @@ import type { Session } from "@supabase/supabase-js";
 import { PanelShell } from "./panel-shell";
 import { MatchesPanel } from "./matches-panel";
 import { InvestorPanel } from "./investor-panel";
+import { BriefsPanel } from "./briefs-panel";
+import { BriefDetailPanel } from "./brief-detail-panel";
 import type { Panel } from "./use-panel-state";
 
 /**
@@ -72,7 +74,13 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
       }
       case "briefs":
         title = "Briefs";
-        body = <PanelStub label="Briefs list" hint="Coming in v3 step 7" />;
+        body = (
+          <BriefsPanel
+            session={session}
+            impersonating={impersonating}
+            onOpenPanel={onOpenPanel}
+          />
+        );
         break;
       case "brief": {
         title = "Brief";
@@ -83,7 +91,13 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
               { label: "Brief" },
             ]
           : undefined;
-        body = <PanelStub label={`Brief: ${panel.token}`} hint="Coming in v3 step 8" />;
+        body = (
+          <BriefDetailPanel
+            token={panel.token}
+            session={session}
+            impersonating={impersonating}
+          />
+        );
         break;
       }
       case "pipeline":
