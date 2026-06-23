@@ -8,11 +8,14 @@ import { MyRaise } from "./my-raise";
 import { Pipeline, applyPipelineFilter, type PipelineFilter } from "./pipeline";
 import { SIDEBAR_CSS } from "./styles";
 import type { SidebarState } from "./types";
+import type { Panel } from "../panels";
 
 interface FounderSidebarProps {
   session: Session | null;
   impersonating: string;
   injectChatPrompt: (prompt: string) => void;
+  /** Open a slide-over panel by setting its state. Wired in v3. */
+  openPanel: (p: Panel) => void;
   /** Admin slot: rendered at the top of the sidebar when present.
    * Used for the "Acting as" impersonation select. */
   adminHeader?: ReactNode;
@@ -29,7 +32,13 @@ interface FounderSidebarProps {
  * For Phase 2 v1, refetch is the simplest robust path; we'll move to
  * granular optimistic mutations once we see real founder usage.
  */
-export function FounderSidebar({ session, impersonating, injectChatPrompt, adminHeader }: FounderSidebarProps) {
+export function FounderSidebar({
+  session,
+  impersonating,
+  injectChatPrompt,
+  openPanel,
+  adminHeader,
+}: FounderSidebarProps) {
   const [state, setState] = useState<SidebarState | null>(null);
   const [pipelineFilter, setPipelineFilter] = useState<PipelineFilter>("active");
 

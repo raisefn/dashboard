@@ -9,6 +9,7 @@ import { wallCardLeadin } from "@/lib/upgrade-card-copy";
 import type { Session } from "@supabase/supabase-js";
 import { formatMarkdown } from "@/lib/format-markdown";
 import { FounderSidebar } from "./sidebar";
+import { PanelHost, usePanelState } from "./panels";
 
 const ADMIN_EMAILS = ["justin@raisefn.com", "justinpetsche@gmail.com"];
 
@@ -870,6 +871,7 @@ function BrainDeployInner() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [input, setInput] = useState("");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const { panel, openPanel, closePanel, popPanel } = usePanelState();
   // Attached file may be a text-extracted document (gets injected into the
   // user message), an image (sent as a multimodal content block via `images`),
   // or a raw PDF document (sent as an Anthropic document content block via
@@ -2151,8 +2153,11 @@ function BrainDeployInner() {
       {/* Unified product top bar — logo + account (tabs removed in v2 — sidebar surfaces matches/briefs directly) */}
       <BrainTabs />
 
-      {/* Surface grid: sidebar (260px) + main chat */}
-      <div className={`surface-grid${mobileSidebarOpen ? " mobile-sidebar-open" : ""}`}>
+      {/* Surface grid: sidebar (260px) + main chat + optional panel.
+          Grid columns shift when a panel is open — chat compresses from
+          flex-1 to ~40% so the panel can take ~60%. CSS transition the
+          column widths so the chat doesn't jump. */}
+      <div className={`surface-grid${mobileSidebarOpen ? " mobile-sidebar-open" : ""}${panel ? " panel-open" : ""}`}>
         {/* Mobile sidebar backdrop */}
         {mobileSidebarOpen && (
           <div
@@ -2167,6 +2172,7 @@ function BrainDeployInner() {
             session={session}
             impersonating={impersonating}
             injectChatPrompt={injectChatPrompt}
+            openPanel={openPanel}
             adminHeader={
               isAdmin ? (
                 <>
@@ -2317,6 +2323,17 @@ function BrainDeployInner() {
           </div>
         </div>
       </div>
+
+      {/* Slide-over panel — third grid column, only present when state.panel is set */}
+      <div className="panel-col">
+        <PanelHost
+          panel={panel}
+          onClose={closePanel}
+          onOpenPanel={openPanel}
+          onPopPanel={popPanel}
+          injectChatPrompt={injectChatPrompt}
+        />
+      </div>
       </div>{/* /surface-grid */}
 
     </div>
@@ -2327,10 +2344,20 @@ const SURFACE_GRID_CSS = `
   .surface-grid {
     flex: 1;
     display: grid;
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: 260px 1fr 0fr;
     min-height: 0;
     position: relative;
     z-index: 1;
+    transition: grid-template-columns 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .surface-grid.panel-open {
+    grid-template-columns: 260px minmax(360px, 40fr) minmax(480px, 60fr);
+  }
+  .panel-col {
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
   .sidebar-wrap {
     min-height: 0;
@@ -2350,6 +2377,17 @@ const SURFACE_GRID_CSS = `
   @media (max-width: 768px) {
     .surface-grid {
       grid-template-columns: 1fr;
+    }
+    .surface-grid.panel-open {
+      grid-template-columns: 1fr;
+    }
+    .panel-col {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 70;
     }
     .sidebar-wrap {
       position: fixed;
