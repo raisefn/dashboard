@@ -1,33 +1,34 @@
 "use client";
 
-import { useState } from "react";
 import type { SidebarPipelineInvestor } from "./types";
 
 /**
  * PIPELINE section — investors the founder is currently engaging with.
  * Each row click injects a "Looking at <name>" prompt into chat.
  *
- * Scales to many investors via status filter pills + scrollable list
- * with a soft cap. "Show all in chat" overflow injects a query the
- * LLM handles.
+ * Filter state is OWNED BY THE PARENT (index.tsx) so the section badge
+ * count tracks the visible filtered list. The pills here just bubble the
+ * change up via onFilterChange.
  */
 
+export type PipelineFilter = "active" | "all" | "stale";
+
 interface PipelineProps {
-  pipeline: SidebarPipelineInvestor[];
+  pipeline: SidebarPipelineInvestor[];        // already filtered
+  filter: PipelineFilter;
+  onFilterChange: (f: PipelineFilter) => void;
+  showFilters: boolean;                        // hide pills when pipeline is tiny
   onInjectPrompt: (prompt: string) => void;
 }
 
 const STATUS_DOT: Record<string, string> = {
-  // warm / committed signals — teal
   committed: "status-warm",
   term_sheet: "status-warm",
   met: "status-warm",
   diligence: "status-warm",
-  // active / in motion — amber
   meeting_scheduled: "status-active",
   follow_up: "status-active",
   outreached: "status-active",
-  // stale / passed — cool gray
   ghosted: "status-cool",
   soft_pass: "status-cool",
   hard_pass: "status-cool",
@@ -50,27 +51,7 @@ const STATUS_SHORT: Record<string, string> = {
   rejected: "Rejected",
 };
 
-const ACTIVE_STATUSES = new Set([
-  "outreached",
-  "meeting_scheduled",
-  "met",
-  "follow_up",
-  "diligence",
-  "term_sheet",
-  "committed",
-]);
-
-const STALE_STATUSES = new Set([
-  "ghosted",
-  "soft_pass",
-  "hard_pass",
-  "passed",
-  "rejected",
-]);
-
-type Filter = "active" | "all" | "stale";
-
-const FILTERS: { key: Filter; label: string }[] = [
+const FILTERS: { key: PipelineFilter; label: string }[] = [
   { key: "active", label: "Active" },
   { key: "all", label: "All" },
   { key: "stale", label: "Stale" },
@@ -88,22 +69,9 @@ function formatAge(days: number | null): string {
 
 const VISIBLE_CAP = 15;
 
-export function Pipeline({ pipeline, onInjectPrompt }: PipelineProps) {
-  const [filter, setFilter] = useState<Filter>("active");
-
-  const filtered = pipeline.filter(inv => {
-    const s = inv.status || "";
-    if (filter === "active") return ACTIVE_STATUSES.has(s) || !s;
-    if (filter === "stale") return STALE_STATUSES.has(s);
-    return true; // "all"
-  });
-
-  const visible = filtered.slice(0, VISIBLE_CAP);
-  const overflow = filtered.length - visible.length;
-
-  // Hide filter pills entirely when pipeline is small — they're scale UX
-  // and would feel like ceremony with <8 entries.
-  const showFilters = pipeline.length > 8;
+export function Pipeline({ pipeline, filter, onFilterChange, showFilters, onInjectPrompt }: PipelineProps) {
+  const visible = pipeline.slice(0, VISIBLE_CAP);
+  const overflow = pipeline.length - visible.length;
 
   return (
     <>
@@ -114,7 +82,7 @@ export function Pipeline({ pipeline, onInjectPrompt }: PipelineProps) {
               key={f.key}
               type="button"
               className={`sb-pipeline-filter${filter === f.key ? " active" : ""}`}
-              onClick={() => setFilter(f.key)}
+              onClick={() => onFilterChange(f.key)}
             >
               {f.label}
             </button>
@@ -181,4 +149,37 @@ export function Pipeline({ pipeline, onInjectPrompt }: PipelineProps) {
       </div>
     </>
   );
+}
+
+// Shared filter logic — kept here so the parent can apply the same predicate
+// when computing the badge count.
+const ACTIVE_STATUSES = new Set([
+  "outreached",
+  "meeting_scheduled",
+  "met",
+  "follow_up",
+  "diligence",
+  "term_sheet",
+  "committed",
+]);
+
+const STALE_STATUSES = new Set([
+  "ghosted",
+  "soft_pass",
+  "hard_pass",
+  "passed",
+  "rejected",
+]);
+
+export function applyPipelineFilter(
+  pipeline: SidebarPipelineInvestor[],
+  filter: PipelineFilter,
+): SidebarPipelineInvestor[] {
+  if (filter === "all") return pipeline;
+  return pipeline.filter(inv => {
+    const s = inv.status || "";
+    if (filter === "active") return ACTIVE_STATUSES.has(s) || !s;
+    if (filter === "stale") return STALE_STATUSES.has(s);
+    return true;
+  });
 }

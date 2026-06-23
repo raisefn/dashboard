@@ -5,7 +5,7 @@ import type { Session } from "@supabase/supabase-js";
 
 import { SidebarSection } from "./section";
 import { MyRaise } from "./my-raise";
-import { Pipeline } from "./pipeline";
+import { Pipeline, applyPipelineFilter, type PipelineFilter } from "./pipeline";
 import { SIDEBAR_CSS } from "./styles";
 import type { SidebarState } from "./types";
 
@@ -31,6 +31,7 @@ interface FounderSidebarProps {
  */
 export function FounderSidebar({ session, impersonating, injectChatPrompt, adminHeader }: FounderSidebarProps) {
   const [state, setState] = useState<SidebarState | null>(null);
+  const [pipelineFilter, setPipelineFilter] = useState<PipelineFilter>("active");
 
   useEffect(() => {
     let cancelled = false;
@@ -76,21 +77,33 @@ export function FounderSidebar({ session, impersonating, injectChatPrompt, admin
         <MyRaise campaign={state?.campaign || null} onInjectPrompt={injectChatPrompt} />
       </SidebarSection>
 
-      <SidebarSection
-        title="Pipeline"
-        count={state?.pipeline?.length ?? 0}
-        defaultOpen
-        emptyMessage="No pipeline yet."
-        emptyAction={{
-          label: "Ask for matches",
-          injectPrompt: "Pull me investor matches",
-        }}
-        onInjectPrompt={injectChatPrompt}
-      >
-        {state?.pipeline?.length ? (
-          <Pipeline pipeline={state.pipeline} onInjectPrompt={injectChatPrompt} />
-        ) : null}
-      </SidebarSection>
+      {(() => {
+        const allPipeline = state?.pipeline || [];
+        const filteredPipeline = applyPipelineFilter(allPipeline, pipelineFilter);
+        return (
+          <SidebarSection
+            title="Pipeline"
+            count={filteredPipeline.length}
+            defaultOpen
+            emptyMessage="No pipeline yet."
+            emptyAction={{
+              label: "Ask for matches",
+              injectPrompt: "Pull me investor matches",
+            }}
+            onInjectPrompt={injectChatPrompt}
+          >
+            {allPipeline.length > 0 ? (
+              <Pipeline
+                pipeline={filteredPipeline}
+                filter={pipelineFilter}
+                onFilterChange={setPipelineFilter}
+                showFilters={allPipeline.length > 8}
+                onInjectPrompt={injectChatPrompt}
+              />
+            ) : null}
+          </SidebarSection>
+        );
+      })()}
 
       <SidebarSection
         title="Matches"
