@@ -200,23 +200,6 @@ export function FounderSidebar({ session, impersonating, injectChatPrompt, admin
                 : "On"}
             </span>
           </div>
-          <button
-            type="button"
-            className="sb-conn-row sb-conn-deck"
-            onClick={() => injectChatPrompt(
-              (state?.documents?.length || 0) > 0
-                ? "Take another look at my deck"
-                : "I want to upload my deck"
-            )}
-          >
-            <span className={`sb-conn-dot${(state?.documents?.length || 0) > 0 ? " on" : ""}`} />
-            <span className="sb-conn-label">Deck</span>
-            <span className="sb-conn-status">
-              {(state?.documents?.length || 0) > 0
-                ? `${state!.documents.filter(d => d.doc_type === "deck").length || state!.documents.length} on file`
-                : "Drop in chat"}
-            </span>
-          </button>
         </div>
       </SidebarSection>
     </aside>
