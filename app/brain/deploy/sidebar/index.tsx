@@ -66,6 +66,7 @@ export function FounderSidebar({
     window.addEventListener("raisefn:pipeline_updated", onUpdate);
     window.addEventListener("raisefn:profile_updated", onUpdate);
     window.addEventListener("raisefn:briefs_updated", onUpdate);
+    window.addEventListener("raisefn:documents_updated", onUpdate);
 
     return () => {
       cancelled = true;
@@ -73,6 +74,7 @@ export function FounderSidebar({
       window.removeEventListener("raisefn:pipeline_updated", onUpdate);
       window.removeEventListener("raisefn:profile_updated", onUpdate);
       window.removeEventListener("raisefn:briefs_updated", onUpdate);
+      window.removeEventListener("raisefn:documents_updated", onUpdate);
     };
   }, [session, impersonating]);
 

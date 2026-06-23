@@ -904,6 +904,11 @@ function BrainDeployInner() {
   // SSE done event to fire the BrainTabs badge refresh. Defers the refresh
   // until after the brain has fully committed the new match batch.
   const matchesUpdatedThisRoundRef = useRef(false);
+  // Set when the user sends a message with an attached document/image
+  // (deck, term sheet, etc.). On the `done` event we dispatch
+  // raisefn:documents_updated so the sidebar refetches and the new
+  // document row appears under DOCUMENTS.
+  const documentUploadedThisRoundRef = useRef(false);
   // Per-message rate-limit signals captured from SSE events
   const limitReachedRef = useRef<null | {
     tier: string;
@@ -1319,6 +1324,12 @@ function BrainDeployInner() {
                 matchesUpdatedThisRoundRef.current = false;
                 try {
                   window.dispatchEvent(new CustomEvent("raisefn:matches_updated"));
+                } catch { /* defensive */ }
+              }
+              if (documentUploadedThisRoundRef.current) {
+                documentUploadedThisRoundRef.current = false;
+                try {
+                  window.dispatchEvent(new CustomEvent("raisefn:documents_updated"));
                 } catch { /* defensive */ }
               }
             } else if (event.type === "usage") {
@@ -2041,6 +2052,12 @@ function BrainDeployInner() {
   function sendFromInput() {
     const userText = input.trim();
     if ((!userText && !attachedFile) || isStreaming) return;
+
+    // Flag the round so the `done` handler dispatches documents_updated
+    // and the sidebar refetches once the attachment is persisted.
+    if (attachedFile && (attachedFile.kind === "document" || attachedFile.kind === "text")) {
+      documentUploadedThisRoundRef.current = true;
+    }
 
     // Build display message (what the user sees) and brain message (what gets sent)
     let displayMsg = userText;
