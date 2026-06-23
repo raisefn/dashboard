@@ -7,17 +7,13 @@ import { InvestorPanel } from "./investor-panel";
 import { BriefsPanel } from "./briefs-panel";
 import { BriefDetailPanel } from "./brief-detail-panel";
 import { PipelinePanel } from "./pipeline-panel";
+import { DocumentPanel } from "./document-panel";
 import type { Panel } from "./use-panel-state";
 
 /**
  * Panel router — picks the right component for the active panel state.
  * Renders nothing when panel is null (the shell remains in the DOM
  * with slide-out transform so the close animation runs).
- *
- * Panel content components (Matches list, Investor detail, etc.) will
- * be added in Steps 5-10 of v3. For now this is a stub that renders
- * a placeholder so we can verify the shell + state + layout work end
- * to end.
  */
 interface PanelHostProps {
   panel: Panel | null;
@@ -114,7 +110,14 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
         break;
       case "document":
         title = "Document";
-        body = <PanelStub label={`Document: ${panel.id}`} hint="Coming in v3 step 10" />;
+        body = (
+          <DocumentPanel
+            id={panel.id}
+            session={session}
+            impersonating={impersonating}
+            injectChatPrompt={injectChatPrompt}
+          />
+        );
         break;
     }
   }
@@ -140,15 +143,6 @@ function panelLabel(p: Panel): string {
     case "brief": return "Brief";
     case "document": return "Document";
   }
-}
-
-function PanelStub({ label, hint }: { label: string; hint: string }) {
-  return (
-    <div style={{ padding: "8px 0", color: "#a1a1aa" }}>
-      <div style={{ fontSize: "13px", marginBottom: "4px" }}>{label}</div>
-      <div style={{ fontSize: "11px", color: "#71717a" }}>{hint}</div>
-    </div>
-  );
 }
 
 export { type Panel } from "./use-panel-state";

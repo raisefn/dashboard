@@ -190,8 +190,8 @@ export function FounderSidebar({
                 key={d.id}
                 type="button"
                 className="sb-row"
-                onClick={() => injectChatPrompt(`Take another look at ${d.filename}`)}
-                title="Click to re-analyze"
+                onClick={() => openPanel({ kind: "document", id: d.id })}
+                title="Open document"
               >
                 <div className="sb-row-line1">
                   <span className="sb-row-name">{d.filename}</span>
