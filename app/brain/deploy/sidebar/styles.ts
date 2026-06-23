@@ -1,0 +1,288 @@
+// Sidebar CSS — locked to phase_2_design_language.md tokens.
+// Inlined so the sidebar renders the same in dev + prod without depending
+// on Tailwind config OR risking class-name collisions with the chat surface.
+
+export const SIDEBAR_CSS = `
+.founder-sidebar {
+  background: rgba(24, 24, 27, 0.6);
+  border-right: 1px solid #27272a;
+  width: 260px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 16px 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #d4d4d8;
+}
+
+@media (max-width: 768px) {
+  .founder-sidebar {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    bottom: 0;
+    z-index: 60;
+    transform: translateX(-100%);
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.6);
+  }
+  .founder-sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+.sb-section {
+  padding: 0 8px;
+  margin-bottom: 24px;
+}
+
+.sb-section-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  color: #a1a1aa;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  transition: color 150ms ease;
+}
+.sb-section-header:hover {
+  color: #e4e4e7;
+}
+
+.sb-section-chevron {
+  font-size: 8px;
+  display: inline-block;
+  transition: transform 200ms ease;
+  color: #52525b;
+}
+.sb-section-chevron.open {
+  transform: rotate(90deg);
+}
+
+.sb-section-title {
+  flex: 1;
+  text-align: left;
+}
+
+.sb-section-count {
+  font-size: 11px;
+  font-weight: 500;
+  color: #a1a1aa;
+  background: #27272a;
+  padding: 1px 7px;
+  border-radius: 999px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.sb-section-body {
+  padding: 4px 4px 0;
+}
+
+.sb-section-empty,
+.sb-empty {
+  padding: 6px 12px 4px;
+}
+.sb-section-empty-msg {
+  font-size: 13px;
+  color: #71717a;
+  margin: 0 0 6px;
+  line-height: 1.5;
+}
+.sb-section-empty-btn {
+  background: rgba(45, 212, 191, 0.08);
+  border: 1px solid rgba(45, 212, 191, 0.2);
+  color: #2dd4bf;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.sb-section-empty-btn:hover {
+  background: rgba(45, 212, 191, 0.15);
+  border-color: rgba(45, 212, 191, 0.4);
+}
+
+/* MY RAISE — special rendering for the active campaign */
+.sb-my-raise {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 150ms ease;
+}
+.sb-my-raise:hover {
+  background: rgba(45, 212, 191, 0.04);
+  border-color: rgba(45, 212, 191, 0.15);
+}
+.sb-my-raise-line {
+  margin-bottom: 4px;
+}
+.sb-my-raise-headline {
+  color: #f4f4f5;
+  font-size: 13px;
+  font-weight: 500;
+}
+.sb-my-raise-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #71717a;
+}
+.sb-my-raise-status {
+  color: #a1a1aa;
+}
+.sb-my-raise-sep {
+  color: #3f3f46;
+}
+.sb-my-raise-days {
+  color: #71717a;
+}
+
+/* Generic row — used by pipeline, briefs, documents, activity */
+.sb-row {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 12px;
+  margin-bottom: 1px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 150ms ease;
+  text-decoration: none;
+}
+.sb-row:hover {
+  background: rgba(45, 212, 191, 0.04);
+}
+.sb-row-static {
+  cursor: default;
+}
+.sb-row-static:hover {
+  background: none;
+}
+.sb-row-link {
+  display: block;
+}
+.sb-row-line1 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.sb-row-name {
+  flex: 1;
+  color: #d4d4d8;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-row:hover .sb-row-name {
+  color: #f4f4f5;
+}
+.sb-row-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #52525b;
+}
+.sb-row-dot.status-warm { background: #2dd4bf; box-shadow: 0 0 6px rgba(45, 212, 191, 0.5); }
+.sb-row-dot.status-active { background: #fdba74; }
+.sb-row-dot.status-cool { background: #71717a; }
+.sb-row-dot.status-cold { background: #52525b; }
+.sb-row-age {
+  font-size: 11px;
+  color: #71717a;
+  flex-shrink: 0;
+}
+.sb-row-line2 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #71717a;
+  line-height: 1.4;
+}
+.sb-row-secondary {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-row-sep {
+  color: #3f3f46;
+}
+
+.sb-overflow {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: #71717a;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+.sb-overflow:hover {
+  color: #a1a1aa;
+}
+
+/* MATCHES summary block */
+.sb-matches-summary {
+  padding: 4px 12px 8px;
+}
+.sb-matches-line1 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #d4d4d8;
+  margin-bottom: 6px;
+}
+.sb-matches-count {
+  color: #f4f4f5;
+  font-weight: 500;
+}
+.sb-matches-sep {
+  color: #3f3f46;
+}
+.sb-matches-batches {
+  color: #71717a;
+  font-size: 11px;
+}
+.sb-matches-link {
+  color: #2dd4bf;
+  text-decoration: none;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 150ms ease;
+}
+.sb-matches-link:hover {
+  color: #5eead4;
+}
+`;

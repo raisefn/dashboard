@@ -7,8 +7,8 @@ import BrainTabs from "@/components/brain-tabs";
 import { supabase } from "@/lib/supabase-browser";
 import { wallCardLeadin } from "@/lib/upgrade-card-copy";
 import type { Session } from "@supabase/supabase-js";
-import { renderAgentPlanPanel, maybeResumeActivePlan, type AgentPlanData } from "./agent-ui";
 import { formatMarkdown } from "@/lib/format-markdown";
+import { FounderSidebar } from "./sidebar";
 
 const ADMIN_EMAILS = ["justin@raisefn.com", "justinpetsche@gmail.com"];
 
@@ -869,6 +869,7 @@ function BrainDeployInner() {
   const [chatStarted, setChatStarted] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [input, setInput] = useState("");
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   // Attached file may be a text-extracted document (gets injected into the
   // user message), an image (sent as a multimodal content block via `images`),
   // or a raw PDF document (sent as an Anthropic document content block via
@@ -931,7 +932,6 @@ function BrainDeployInner() {
   const messagesRef = useRef<HTMLDivElement>(null);
   const messagesInnerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const planStripRef = useRef<HTMLDivElement>(null);
   const sendBtnRef = useRef<HTMLButtonElement>(null);
 
   // Canvas state (refs for animation loop)
@@ -1188,20 +1188,6 @@ function BrainDeployInner() {
       messagesRef.current?.classList.add("active");
     }
 
-    // ── Redirect handling: founder typed during an active plan ──
-    // Auto-pause so the executor stops between steps and we don't burn
-    // budget mid-redirect. After the chat reply finishes, offer a Resume
-    // bubble (rendered in the SSE done handler below).
-    const activePlanId = !silent ? safeLocalStorageGet("raisefn_active_plan_id") : null;
-    if (activePlanId && message !== "[session_open]") {
-      try {
-        await fetch(`/v1/brain/agent/plans/${activePlanId}/pause`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        });
-      } catch { /* defensive — executor sees status on next poll either way */ }
-    }
-
     // Add user message to DOM (skip if silent — auto-probe)
     const displayText = opts?.displayMessage || message;
     if (!silent) addMessageToDOM("user", displayText);
@@ -1322,12 +1308,6 @@ function BrainDeployInner() {
               if (event.conversation_id) conversationIdRef.current = event.conversation_id;
               brainStateRef.current = "idle";
               activeColorRef.current = null;
-              // Redirect tail: if we auto-paused a plan when this message
-              // was sent, offer a Resume bubble after the reply lands.
-              const pausedFor = !silent ? safeLocalStorageGet("raisefn_active_plan_id") : null;
-              if (pausedFor && message !== "[session_open]") {
-                renderResumePrompt(pausedFor);
-              }
               // If a match_investors call happened this round, refresh the
               // Matches count badge now — done event fires after the brain
               // has fully committed the new batch to user_documents. The
@@ -1722,9 +1702,10 @@ function BrainDeployInner() {
     }
 
     function showWelcomeThenAutoPlan(firstName: string, message: string) {
-      // Greeting bubble lands first. The hasResumedAgentPlan effect below
-      // handles the [session_open] auto-trigger after chatStarted=true —
-      // this runs for both fresh-conversation and session-restore paths.
+      // Greeting bubble lands first. The session_open auto-fire useEffect
+      // below handles the [session_open] silent trigger after chatStarted
+      // flips true — runs for both fresh-conversation and session-restore
+      // paths, then skips when restored thread already has assistant turns.
       setChatStarted(true);
       setSessionReady(true);
       centerUiRef.current?.classList.add("at-bottom");
@@ -1840,8 +1821,8 @@ function BrainDeployInner() {
 
           // Render previous messages + track timestamp of the latest
           // assistant turn (drives the session_open auto-fire gate so we
-          // don't stack synthesis on every refresh — see the
-          // hasResumedAgentPlan useEffect below).
+          // don't stack synthesis on every refresh — see the session_open
+          // useEffect below).
           for (const msg of realMessages) {
             let displayContent = msg.content;
             if (msg.role === "user" && typeof msg.content === "string" && msg.content.startsWith("[Attached file:")) {
@@ -1917,62 +1898,31 @@ function BrainDeployInner() {
    *
    * Runs even when a prior conversation was restored — the founder still
    * opens raise(fn) and should get action steps (Justin's directive). */
-  const hasResumedAgentPlan = useRef(false);
+  /* ── Session-open auto-fire ────────────────────────────────
+   * Fires a silent [session_open] message once per mount after the
+   * greeting bubble lands. Skipped when the restored conversation
+   * already has any assistant turn (founder is mid-session; the
+   * thread itself is the continuity). Next-day sessions still get
+   * synthesis because brain auto-rotates inactive conversations,
+   * so restore returns zero turns next day. */
+  const hasFiredSessionOpen = useRef(false);
   useEffect(() => {
-    if (!session || !chatStarted || hasResumedAgentPlan.current) return;
-    hasResumedAgentPlan.current = true;
-    void (async () => {
-      const resumed = await maybeResumeActivePlan(
-        () => {
-          const el = addMessageToDOM("assistant", "");
-          return el.querySelector(".content") as HTMLElement;
-        },
-        session,
-        planStripRef.current,
-      );
-      if (resumed) return;
-      // Skip the [session_open] auto-fire when ANY assistant turn was
-      // restored. The previous timestamp-cooldown approach didn't work
-      // because older DB rows have missing/invalid timestamps. The
-      // simpler rule: if the founder has a thread visible, that IS the
-      // continuity — don't re-emit synthesis on every refresh. Next-day
-      // sessions still get synthesis because brain auto-rotates inactive
-      // conversations, so restore returns zero turns next day.
-      if (restoredAssistantCountRef.current > 0) return;
-      void send("[session_open]", { silent: true });
-    })();
+    if (!session || !chatStarted || hasFiredSessionOpen.current) return;
+    hasFiredSessionOpen.current = true;
+    if (restoredAssistantCountRef.current > 0) return;
+    void send("[session_open]", { silent: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, chatStarted]);
 
-  /* ── Pause plan on tab close / navigate-away ────────────────
-   *
-   * If founder leaves while a plan is running, fire POST /pause so the
-   * executor stops between steps rather than burning budget without an
-   * audience. Resume kicks in on next mount via maybeResumeActivePlan. */
+  /* ── One-time cleanup of stale agent-loop localStorage ────────
+   * The agent loop wrote raisefn_active_plan_id when a plan was
+   * mid-execution. Phase 1 deletion removed the plan tool entirely;
+   * this cleans up the key so it doesn't sit forever in returning
+   * founders' browsers. Safe to remove this effect after a few weeks
+   * of post-Phase-1 traffic. */
   useEffect(() => {
-    if (!session) return;
-    const pauseActivePlan = () => {
-      try {
-        const planId = localStorage.getItem("raisefn_active_plan_id");
-        if (!planId) return;
-        // sendBeacon for reliability during unload (fetch with keepalive
-        // is also fine and what we actually need for the auth header).
-        void fetch(`/v1/brain/agent/plans/${planId}/pause`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${session.access_token}` },
-          keepalive: true,
-        });
-      } catch { /* never block unload */ }
-    };
-    window.addEventListener("beforeunload", pauseActivePlan);
-    window.addEventListener("pagehide", pauseActivePlan);
-    return () => {
-      window.removeEventListener("beforeunload", pauseActivePlan);
-      window.removeEventListener("pagehide", pauseActivePlan);
-      // Component unmount (Next.js client-side navigation) — also pause
-      pauseActivePlan();
-    };
-  }, [session]);
+    try { localStorage.removeItem("raisefn_active_plan_id"); } catch { /* private browsing */ }
+  }, []);
 
   /* ── DOM helpers (imperative, like the original) ── */
   function addMessageToDOM(role: string, content: string): HTMLDivElement {
@@ -1998,51 +1948,6 @@ function BrainDeployInner() {
 
   function safeLocalStorageGet(key: string): string | null {
     try { return localStorage.getItem(key); } catch { return null; }
-  }
-
-  function renderResumePrompt(planId: string) {
-    if (!session) return;
-    const el = addMessageToDOM("assistant", "");
-    const content = el.querySelector(".content") as HTMLElement | null;
-    if (!content) return;
-    content.classList.add("agent-md");
-    content.innerHTML = `<div style="font-size:12px;color:#a1a1aa;">Your plan is paused. Want me to keep going?</div>`;
-    const row = document.createElement("div");
-    row.style.cssText = "margin-top:8px;display:flex;gap:8px;align-items:center;";
-    const resumeBtn = document.createElement("button");
-    resumeBtn.type = "button";
-    resumeBtn.textContent = "Resume plan";
-    resumeBtn.style.cssText = "background:#27272a;color:#f4f4f5;border:1px solid #52525b;padding:6px 12px;border-radius:6px;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;";
-    resumeBtn.onclick = async () => {
-      resumeBtn.disabled = true;
-      resumeBtn.textContent = "Resuming…";
-      const status = await fetch(`/v1/brain/agent/plans/${planId}/status`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (!status.ok) {
-        content.innerHTML = `<div style="font-size:11px;color:#fca5a5;">Couldn't reach raise(fn) — try again in a moment.</div>`;
-        return;
-      }
-      row.remove();
-      // Reload page-level state and let maybeResumeActivePlan re-attach
-      void maybeResumeActivePlan(
-        () => {
-          const e = addMessageToDOM("assistant", "");
-          return e.querySelector(".content") as HTMLElement;
-        },
-        session,
-        planStripRef.current,
-      );
-    };
-    row.appendChild(resumeBtn);
-    const dismissBtn = document.createElement("button");
-    dismissBtn.type = "button";
-    dismissBtn.textContent = "Not yet";
-    dismissBtn.style.cssText = "background:transparent;color:#71717a;border:none;padding:6px 10px;font-family:inherit;font-size:12px;cursor:pointer;";
-    dismissBtn.onclick = () => row.remove();
-    row.appendChild(dismissBtn);
-    content.appendChild(row);
-    scrollToBottom();
   }
 
   function scrollToElement(el: HTMLElement) {
@@ -2222,9 +2127,19 @@ function BrainDeployInner() {
   const userName = profileName || session.user?.user_metadata?.name || session.user?.email?.split("@")[0] || "";
   const displayName = impersonating ? `${impersonating} (via ${userName})` : userName;
 
+  // Inject a prompt into the chat input from the sidebar. Founder still
+  // hits send — the sidebar never sends on its own ("chat is the verb").
+  const injectChatPrompt = (prompt: string) => {
+    setInput(prompt);
+    textareaRef.current?.focus();
+    // If we're on mobile and the sidebar drawer is open, close it.
+    setMobileSidebarOpen(false);
+  };
+
   return (
     <div className="brain-root">
       <style>{BRAIN_CSS}</style>
+      <style>{SURFACE_GRID_CSS}</style>
 
       {/* Checkout success banner */}
       {checkoutSuccess && (
@@ -2320,9 +2235,37 @@ function BrainDeployInner() {
         </div>
       )}
 
-      {/* Main */}
-      <div className="brain-main" ref={mainRef}>
-        <canvas className="brain-canvas" ref={canvasRef} />
+      {/* Surface grid: sidebar (260px) + main chat */}
+      <div className={`surface-grid${mobileSidebarOpen ? " mobile-sidebar-open" : ""}`}>
+        {/* Mobile sidebar backdrop */}
+        {mobileSidebarOpen && (
+          <div
+            className="sidebar-backdrop"
+            onClick={() => setMobileSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
+        <div className={`sidebar-wrap${mobileSidebarOpen ? " open" : ""}`}>
+          <FounderSidebar
+            session={session}
+            impersonating={impersonating}
+            injectChatPrompt={injectChatPrompt}
+          />
+        </div>
+
+        {/* Main */}
+        <div className="brain-main" ref={mainRef}>
+          {/* Mobile sidebar toggle */}
+          <button
+            type="button"
+            className="mobile-sidebar-toggle"
+            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+            aria-label="Toggle sidebar"
+          >
+            ☰
+          </button>
+          <canvas className="brain-canvas" ref={canvasRef} />
 
         <div className="messages-container" ref={messagesRef}>
           <div className="messages-inner" ref={messagesInnerRef} />
@@ -2341,7 +2284,6 @@ function BrainDeployInner() {
               <button key={s} className="starter" onClick={() => send(s)}>{s}</button>
             ))}
           </div>
-          <div ref={planStripRef} className="agent-plan-strip" />
           <div className="input-bar">
             {attachedFile && (
               <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 12px", fontSize: "12px", color: "#2dd4bf", background: "#18181b", borderRadius: "8px", marginBottom: "6px" }}>
@@ -2385,7 +2327,84 @@ function BrainDeployInner() {
           </div>
         </div>
       </div>
+      </div>{/* /surface-grid */}
 
     </div>
   );
 }
+
+const SURFACE_GRID_CSS = `
+  .surface-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .sidebar-wrap {
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+  }
+  .sidebar-wrap > aside {
+    flex: 1;
+    min-height: 0;
+  }
+  .mobile-sidebar-toggle {
+    display: none;
+  }
+  .sidebar-backdrop {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .surface-grid {
+      grid-template-columns: 1fr;
+    }
+    .sidebar-wrap {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      bottom: 0;
+      width: 260px;
+      z-index: 60;
+      transform: translateX(-100%);
+      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sidebar-wrap.open {
+      transform: translateX(0);
+      box-shadow: 0 0 24px rgba(0, 0, 0, 0.6);
+    }
+    .mobile-sidebar-open .sidebar-backdrop {
+      display: block;
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 55;
+    }
+    .mobile-sidebar-toggle {
+      display: flex;
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      z-index: 30;
+      background: rgba(24, 24, 27, 0.8);
+      border: 1px solid #27272a;
+      color: #a1a1aa;
+      width: 32px;
+      height: 32px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .mobile-sidebar-toggle:hover {
+      color: #e4e4e7;
+      border-color: #3f3f46;
+    }
+  }
+`;
