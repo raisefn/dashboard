@@ -176,15 +176,29 @@ export function FounderSidebar({ session, impersonating, injectChatPrompt, admin
         defaultOpen={false}
       >
         <div className="sb-connections">
-          <div className="sb-conn-row sb-conn-disabled" title="Coming soon — Phase 5 wire-up">
+          <div className="sb-conn-row sb-conn-disabled" title="Phase 5 — send outreach + auto-detect replies">
             <span className="sb-conn-dot" />
             <span className="sb-conn-label">Gmail</span>
             <span className="sb-conn-status">Coming soon</span>
           </div>
-          <div className="sb-conn-row sb-conn-disabled" title="Coming soon — Phase 6 wire-up">
+          <div className="sb-conn-row sb-conn-disabled" title="Phase 6 — auto-prep + auto-debrief on each meeting">
             <span className="sb-conn-dot" />
             <span className="sb-conn-label">Calendar</span>
             <span className="sb-conn-status">Coming soon</span>
+          </div>
+          <div className="sb-conn-row sb-conn-disabled" title="Phase 6.5 — auto-sync MRR / growth / runway">
+            <span className="sb-conn-dot" />
+            <span className="sb-conn-label">Mercury</span>
+            <span className="sb-conn-status">Coming soon</span>
+          </div>
+          <div className="sb-conn-row sb-conn-on" title="Built in — brief view counts surface in chat">
+            <span className="sb-conn-dot on" />
+            <span className="sb-conn-label">Link tracking</span>
+            <span className="sb-conn-status">
+              {(state?.briefs?.length || 0) > 0
+                ? `${state!.briefs.length} brief${state!.briefs.length === 1 ? "" : "s"} tracked`
+                : "On"}
+            </span>
           </div>
           <button
             type="button"
