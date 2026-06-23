@@ -1175,6 +1175,16 @@ function BrainDeployInner() {
       messagesRef.current?.classList.add("active");
     }
 
+    // Session-open trigger: clear visible chat history so the founder
+    // opens with a clean canvas for today's plan. The brain DB keeps
+    // all history for LLM context; only the visible DOM resets. Stops
+    // stale lines like "Welcome back, Justin!" (generated before voice
+    // rules tightened) from cluttering the new session.
+    if (message === "[session_open]" && messagesInnerRef.current) {
+      messagesInnerRef.current.innerHTML = "";
+      historyRef.current = [];
+    }
+
     // ── Redirect handling: founder typed during an active plan ──
     // Auto-pause so the executor stops between steps and we don't burn
     // budget mid-redirect. After the chat reply finishes, offer a Resume
@@ -1860,7 +1870,14 @@ function BrainDeployInner() {
         if (data.conversation && data.conversation.message_count > 0) {
           const realMessages = (data.conversation.messages || []).filter(
             (msg: { role: string; content: string }) =>
-              msg.content && msg.content.trim() !== "" && msg.content !== "__init__"
+              msg.content
+              && msg.content.trim() !== ""
+              && msg.content !== "__init__"
+              // Filter out the dashboard's silent session-open trigger —
+              // it's a system marker, not a user message. Brain now skips
+              // persisting it (conversation.append_messages), but old DB
+              // rows still have it.
+              && msg.content.trim() !== "[session_open]"
           );
 
           // If no real messages after filtering, treat as new user
