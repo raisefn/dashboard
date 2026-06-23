@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-browser";
 
@@ -17,8 +17,14 @@ import { supabase } from "@/lib/supabase-browser";
  */
 export default function BrainTabs() {
   const router = useRouter();
+  const pathname = usePathname();
   const [tier, setTier] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+
+  // When the founder is NOT on /brain/deploy (e.g. on the legacy
+  // /brain/matches or /brain/briefs page), surface a Back-to-Chat link
+  // so they can get back. The sidebar lives only on /brain/deploy.
+  const showBackToChat = !!pathname && !pathname.startsWith("/brain/deploy");
 
   useEffect(() => {
     try {
@@ -72,18 +78,46 @@ export default function BrainTabs() {
           justifyContent: "space-between",
         }}
       >
-        <Link
-          href="/"
-          style={{
-            fontSize: "18px",
-            fontWeight: 700,
-            textDecoration: "none",
-            letterSpacing: "-0.01em",
-          }}
-        >
-          <span style={{ color: "#f97316" }}>raise</span>
-          <span style={{ color: "#2dd4bf" }}>(fn)</span>
-        </Link>
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+          <Link
+            href="/brain/deploy"
+            style={{
+              fontSize: "18px",
+              fontWeight: 700,
+              textDecoration: "none",
+              letterSpacing: "-0.01em",
+            }}
+          >
+            <span style={{ color: "#f97316" }}>raise</span>
+            <span style={{ color: "#2dd4bf" }}>(fn)</span>
+          </Link>
+          {showBackToChat && (
+            <Link
+              href="/brain/deploy"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "13px",
+                color: "#a1a1aa",
+                textDecoration: "none",
+                padding: "5px 10px",
+                borderRadius: "6px",
+                transition: "color 0.15s ease, background-color 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#e4e4e7";
+                e.currentTarget.style.background = "rgba(39, 39, 42, 0.6)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#a1a1aa";
+                e.currentTarget.style.background = "transparent";
+              }}
+            >
+              ← Back to Chat
+            </Link>
+          )}
+        </div>
 
         <div
           style={{

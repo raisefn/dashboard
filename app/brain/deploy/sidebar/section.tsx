@@ -14,6 +14,8 @@ import { useState, type ReactNode } from "react";
 
 interface SectionProps {
   title: string;
+  /** Short subtitle (3-6 words) telling new users what this section is. */
+  subtitle?: string;
   count?: number | null;
   defaultOpen?: boolean;
   emptyMessage?: string;
@@ -24,6 +26,7 @@ interface SectionProps {
 
 export function SidebarSection({
   title,
+  subtitle,
   count,
   defaultOpen = true,
   emptyMessage,
@@ -42,11 +45,16 @@ export function SidebarSection({
         onClick={() => setOpen(!open)}
         aria-expanded={open}
       >
-        <span className={`sb-section-chevron${open ? " open" : ""}`}>▸</span>
-        <span className="sb-section-title">{title}</span>
-        {typeof count === "number" && count > 0 && (
-          <span className="sb-section-count">{count}</span>
-        )}
+        <div className="sb-section-header-text">
+          <div className="sb-section-header-title-row">
+            <span className={`sb-section-chevron${open ? " open" : ""}`}>▸</span>
+            <span className="sb-section-title">{title}</span>
+            {typeof count === "number" && count > 0 && (
+              <span className="sb-section-count">{count}</span>
+            )}
+          </div>
+          {subtitle && <div className="sb-section-subtitle">{subtitle}</div>}
+        </div>
       </button>
       {open && (
         <div className="sb-section-body">

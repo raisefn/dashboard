@@ -38,22 +38,33 @@ export const SIDEBAR_CSS = `
 .sb-section-header {
   width: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 6px 12px 8px;
   background: none;
   border: none;
   cursor: pointer;
   font-family: inherit;
   color: #a1a1aa;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
   transition: color 150ms ease;
 }
 .sb-section-header:hover {
   color: #e4e4e7;
+}
+.sb-section-header-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sb-section-header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
 }
 
 .sb-section-chevron {
@@ -69,6 +80,19 @@ export const SIDEBAR_CSS = `
 .sb-section-title {
   flex: 1;
   text-align: left;
+}
+
+.sb-section-subtitle {
+  font-size: 11px;
+  font-weight: 400;
+  color: #71717a;
+  text-transform: none;
+  letter-spacing: 0;
+  padding-left: 14px; /* aligns with title after chevron */
+  line-height: 1.3;
+}
+.sb-section-header:hover .sb-section-subtitle {
+  color: #a1a1aa;
 }
 
 .sb-section-count {
