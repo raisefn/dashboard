@@ -197,11 +197,14 @@ export function clearPlanStrip(stripMount: PlanStripMount): void {
 // Internal: execution stream
 // ─────────────────────────────────────────────────────────────
 
+const MAX_RECONNECT_ATTEMPTS = 2;
+
 async function startExecutionStream(state: ExecutionState): Promise<void> {
   if (state.controller) return;
   const controller = new AbortController();
   state.controller = controller;
   let receivedTerminalEvent = false;
+  let receivedApprovalNeeded = false;
 
   try {
     const res = await fetch("/v1/brain/agent/execute", {
@@ -231,13 +234,13 @@ async function startExecutionStream(state: ExecutionState): Promise<void> {
         if (!trimmed.startsWith("data: ")) continue;
         try {
           const event = JSON.parse(trimmed.slice(6));
-          // Track whether we got a real terminal event so we know
-          // when "stream closed without event" means something went
-          // wrong vs. it ended cleanly.
           const t = event.type as string;
           if (t === "plan_complete" || t === "plan_paused"
               || t === "plan_exhausted" || t === "plan_abandoned" || t === "error") {
             receivedTerminalEvent = true;
+          }
+          if (t === "approval_needed") {
+            receivedApprovalNeeded = true;
           }
           handleExecutorEvent(event, state);
         } catch { /* ignore parse errors */ }
@@ -245,27 +248,43 @@ async function startExecutionStream(state: ExecutionState): Promise<void> {
     }
   } catch (err) {
     if ((err as Error).name === "AbortError") {
-      // Founder-initiated stop — surface elsewhere; don't render here
+      // Founder-initiated stop — handled by the [Stop] button path
     } else {
-      // Mid-stream error (network, brain restart). Attempt reconnect
-      // before surfacing failure.
       state.controller = null;
-      void attemptReconnect(state, (err as Error).message);
+      void attemptReconnect(state, (err as Error).message, receivedApprovalNeeded);
       return;
     }
   } finally {
     state.controller = null;
   }
 
-  // Stream closed without a terminal event — likely brain redeploy or
-  // network drop. Try a single graceful reconnect via /status.
-  if (!receivedTerminalEvent) {
-    void attemptReconnect(state, "stream_closed_without_terminal_event");
+  // Stream closed. Only auto-reconnect when there's actual work for the
+  // dashboard to do. If the last event was approval_needed, the executor
+  // is paused on the founder's click — the bubble is already rendered;
+  // a reconnect would just spam a duplicate. The next [Do it] click
+  // submits approval via /approve; executor resumes; founder reloads if
+  // they want a live stream of the next step.
+  if (!receivedTerminalEvent && !receivedApprovalNeeded) {
+    void attemptReconnect(state, "stream_closed_without_terminal_event", false);
   }
 }
 
-async function attemptReconnect(state: ExecutionState, reason: string): Promise<void> {
-  // Give the brain a moment to come back up (Railway redeploys are ~30s).
+async function attemptReconnect(
+  state: ExecutionState,
+  reason: string,
+  followedApprovalNeeded: boolean,
+): Promise<void> {
+  // Hard guard: never reconnect if we just emitted approval_needed.
+  // The bubble is on screen; reconnecting would render a duplicate AND
+  // hit the same approval-wait timeout in a loop.
+  if (followedApprovalNeeded) return;
+
+  state.reconnectAttempts = (state.reconnectAttempts ?? 0) + 1;
+  if (state.reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+    appendChatText(state.appendBubble, `_I lost the connection (${reason}). Refresh to pick up where we left off._`);
+    return;
+  }
+
   await new Promise((r) => setTimeout(r, 2000));
   const status = await fetchPlanStatus(state.planId, state.session);
   if (!status) {
@@ -284,7 +303,11 @@ async function attemptReconnect(state: ExecutionState, reason: string): Promise<
     appendChatText(state.appendBubble, "_We hit the budget while we were disconnected. The work that ran is saved._");
     return;
   }
-  // Plan is still alive — reopen the stream silently.
+  // Paused = waiting for founder's [Do it] click. There's already an
+  // approval bubble on screen. Do NOT reconnect; the next /approve POST
+  // wakes the executor up.
+  if (status.status === "paused") return;
+  // Plan is still alive AND running — reopen the stream silently.
   appendChatText(state.appendBubble, "_Reconnecting..._");
   void startExecutionStream(state);
 }
