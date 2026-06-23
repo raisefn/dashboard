@@ -138,6 +138,9 @@ export const SIDEBAR_CSS = `
 }
 .sb-section-title-btn:hover { color: #f4f4f5; }
 .sb-section-title-btn:hover .sb-section-open-hint { opacity: 1; }
+.sb-section-title-btn-active { color: #e4e4e7; }
+.sb-section-title-btn-active .sb-section-open-hint { opacity: 0.6; color: #2dd4bf; }
+.sb-section-title-btn-active:hover .sb-section-open-hint { opacity: 1; color: #2dd4bf; }
 .sb-section-open-hint {
   font-size: 11px;
   color: #52525b;
@@ -351,6 +354,26 @@ export const SIDEBAR_CSS = `
 .sb-matches-batches {
   color: #71717a;
   font-size: 11px;
+}
+.sb-matches-cta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: rgba(45, 212, 191, 0.08);
+  color: #2dd4bf;
+  border: 1px solid rgba(45, 212, 191, 0.25);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.sb-matches-cta:hover {
+  background: rgba(45, 212, 191, 0.15);
+  border-color: rgba(45, 212, 191, 0.5);
+  color: #5eead4;
 }
 
 /* Admin "Acting as" header */

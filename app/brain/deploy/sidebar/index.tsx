@@ -96,11 +96,7 @@ export function FounderSidebar({
             title="Pipeline"
             count={filteredPipeline.length}
             defaultOpen
-            emptyMessage="No pipeline yet."
-            emptyAction={{
-              label: "Ask for matches",
-              injectPrompt: "Pull me investor matches",
-            }}
+            emptyMessage="Investors you're actively pursuing show here."
             onInjectPrompt={injectChatPrompt}
             onTitleClick={() => openPanel({ kind: "pipeline" })}
           >
@@ -121,7 +117,7 @@ export function FounderSidebar({
       <SidebarSection
         title="Matches"
         count={state?.matches?.total_unique ?? 0}
-        defaultOpen={false}
+        defaultOpen
         emptyMessage="No matches yet."
         emptyAction={{
           label: "Ask for matches",
@@ -131,13 +127,13 @@ export function FounderSidebar({
         onTitleClick={() => openPanel({ kind: "matches" })}
       >
         {state?.matches?.latest_batch ? (
-          <div className="sb-matches-summary">
-            <div className="sb-matches-line1">
-              <span className="sb-matches-count">{state.matches.total_unique} unique</span>
-              <span className="sb-matches-sep">·</span>
-              <span className="sb-matches-batches">{state.matches.batches_count} run{state.matches.batches_count === 1 ? "" : "s"}</span>
-            </div>
-          </div>
+          <button
+            type="button"
+            className="sb-matches-cta"
+            onClick={() => openPanel({ kind: "matches" })}
+          >
+            View {state.matches.total_unique} match{state.matches.total_unique === 1 ? "" : "es"} →
+          </button>
         ) : null}
       </SidebarSection>
 

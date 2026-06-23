@@ -60,7 +60,7 @@ export function SidebarSection({
           </button>
           <button
             type="button"
-            className="sb-section-title-btn"
+            className={`sb-section-title-btn${typeof count === "number" && count > 0 ? " sb-section-title-btn-active" : ""}`}
             onClick={onTitleClick}
             aria-label={`Open ${title}`}
           >
