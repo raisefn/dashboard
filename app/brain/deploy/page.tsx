@@ -1278,7 +1278,7 @@ function BrainDeployInner() {
         firms_to_consider?: Array<Record<string, unknown>>;
         generated_at?: string;
       } | null = null;
-      let agentPlanData: AgentPlanData | null = null;
+      // agentPlanData removed — brain no longer emits agent_plan events
       const READ_TIMEOUT_MS = 60_000;
 
       while (true) {
@@ -1382,11 +1382,10 @@ function BrainDeployInner() {
               try {
                 window.dispatchEvent(new CustomEvent("raisefn:matches_updated"));
               } catch { /* defensive */ }
-            } else if (event.type === "agent_plan") {
-              // Capture the structured plan payload — rendered after
-              // typewriter completes, same pattern as matches_panel.
-              agentPlanData = event as AgentPlanData;
             }
+            // Note: `agent_plan` event handling removed — brain no longer
+            // emits structured plans. Session-open responses are normal
+            // chat text per system prompt rule 20 (chat-first model).
           } catch { /* ignore parse errors */ }
         }
       }
@@ -1402,7 +1401,7 @@ function BrainDeployInner() {
       if (fullText) {
         historyRef.current.push({ role: "assistant", content: fullText });
 
-        if (matchesPanelData || agentPlanData) {
+        if (matchesPanelData) {
           // Immediate render path — for matches the panel buttons need
           // to appear with the text; for agent plans the synthesis is
           // longer-form (rule 20 — paragraph + action list) so a 15s
@@ -1490,28 +1489,8 @@ function BrainDeployInner() {
           }
         }
 
-        // ── Auto-execute on agent plan ──────────────────────────────
-        // When plan_my_raise fired, brain emits agent_plan via SSE.
-        // No card renders — raise(fn) narrated the synthesis as its own
-        // chat turn (rule 20). We auto-fire /execute and let the executor
-        // SSE stream surface each step as inline chat turns with [Do it] /
-        // [Skip] buttons.
-        if (agentPlanData) {
-          try {
-            renderAgentPlanPanel(
-              agentPlanData,
-              contentEl,
-              session,
-              () => {
-                const el = addMessageToDOM("assistant", "");
-                return el.querySelector(".content") as HTMLElement;
-              },
-              planStripRef.current,
-            );
-          } catch (e) {
-            console.error("Failed to start agent execution:", e);
-          }
-        }
+        // Note: agent_plan auto-execute block removed in chat-first migration.
+        // Session-open responses are plain chat now (system prompt rule 20).
 
         // ── Limit signals ─────────────────────────────────────────
         // Render the soft warning chip above the response (one-shot at 80%).
