@@ -888,6 +888,12 @@ function BrainDeployInner() {
   );
   const conversationIdRef = useRef<string | null>(null);
   const historyRef = useRef<{ role: string; content: string }[]>([]);
+  // Timestamp (ms since epoch) of the most recent assistant turn from the
+  // restored conversation. Used by the [session_open] auto-fire gate so we
+  // don't stack synthesis turns when the founder is mid-session (refresh,
+  // tab switch, navigate-and-back). Null = no prior assistant turn within
+  // a recent window → fire synthesis normally.
+  const lastAssistantAtRef = useRef<number | null>(null);
   // Per-message rate-limit signals captured from SSE events
   const limitReachedRef = useRef<null | {
     tier: string;
@@ -1352,11 +1358,16 @@ function BrainDeployInner() {
                 next_reset: event.next_reset ?? null,
                 reset_label: event.reset_label ?? null,
               };
+            } else if (event.type === "matches_updated") {
+              // Brain emits this after match_investors runs successfully.
+              // Tell BrainTabs to refresh its Matches count badge.
+              try {
+                window.dispatchEvent(new CustomEvent("raisefn:matches_updated"));
+              } catch { /* defensive */ }
             }
             // Note: `matches_panel` + `agent_plan` event handlers removed.
-            // Match data lives in user_documents + Matches tab (top nav badge
-            // auto-refreshes via the page's own poll). The LLM writes a
-            // self-contained summary per system prompt rule 9.
+            // Match data lives in user_documents + Matches tab. The LLM
+            // writes a self-contained summary per system prompt rule 9.
           } catch { /* ignore parse errors */ }
         }
       }
@@ -1808,7 +1819,10 @@ function BrainDeployInner() {
             raiseIdRef.current = data.conversation.campaign_id;
           }
 
-          // Render previous messages
+          // Render previous messages + track timestamp of the latest
+          // assistant turn (drives the session_open auto-fire gate so we
+          // don't stack synthesis on every refresh — see the
+          // hasResumedAgentPlan useEffect below).
           for (const msg of realMessages) {
             let displayContent = msg.content;
             if (msg.role === "user" && typeof msg.content === "string" && msg.content.startsWith("[Attached file:")) {
@@ -1820,6 +1834,10 @@ function BrainDeployInner() {
             }
             addMessageToDOM(msg.role, displayContent);
             historyRef.current.push({ role: msg.role, content: msg.content });
+            if (msg.role === "assistant" && msg.timestamp) {
+              const t = Date.parse(msg.timestamp);
+              if (!Number.isNaN(t)) lastAssistantAtRef.current = t;
+            }
           }
 
           // Claude Code-style persistent thread: restore renders the prior
@@ -1894,9 +1912,17 @@ function BrainDeployInner() {
         session,
         planStripRef.current,
       );
-      if (!resumed) {
-        // No in-progress plan — fire the auto-trigger so raise(fn)
-        // leads with action steps for this session.
+      if (resumed) return;
+      // No in-progress plan. Time-gate the [session_open] auto-fire so
+      // mid-session refreshes (tab refresh, navigate-and-back from
+      // Matches, etc.) don't stack synthesis turns. If the prior
+      // assistant turn was within the last 30 minutes, the founder is
+      // in an active session — no need for a fresh synthesis.
+      const SESSION_OPEN_COOLDOWN_MS = 30 * 60 * 1000;
+      const lastAt = lastAssistantAtRef.current;
+      const isActive =
+        lastAt !== null && Date.now() - lastAt < SESSION_OPEN_COOLDOWN_MS;
+      if (!isActive) {
         void send("[session_open]", { silent: true });
       }
     })();
