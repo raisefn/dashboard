@@ -95,6 +95,61 @@ export const SIDEBAR_CSS = `
   color: #a1a1aa;
 }
 
+/* Split-control variant: chevron and title are independent buttons. */
+.sb-section-header-split {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px 8px;
+  width: 100%;
+}
+.sb-section-chevron-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  color: #52525b;
+  transition: color 150ms ease;
+}
+.sb-section-chevron-btn:hover { color: #a1a1aa; }
+.sb-section-title-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #a1a1aa;
+  text-align: left;
+  transition: color 150ms ease;
+}
+.sb-section-title-btn:hover { color: #f4f4f5; }
+.sb-section-title-btn:hover .sb-section-open-hint { opacity: 1; }
+.sb-section-open-hint {
+  font-size: 11px;
+  color: #52525b;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  margin-left: auto;
+}
+.sb-section-subtitle-indent {
+  padding-left: 32px; /* aligns under the title button text */
+  margin: -4px 0 4px;
+}
+
 .sb-section-count {
   font-size: 11px;
   font-weight: 500;
@@ -296,18 +351,6 @@ export const SIDEBAR_CSS = `
 .sb-matches-batches {
   color: #71717a;
   font-size: 11px;
-}
-.sb-matches-link {
-  color: #2dd4bf;
-  text-decoration: none;
-  font-size: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  transition: color 150ms ease;
-}
-.sb-matches-link:hover {
-  color: #5eead4;
 }
 
 /* Admin "Acting as" header */

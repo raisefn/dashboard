@@ -100,6 +100,7 @@ export function FounderSidebar({
               injectPrompt: "Pull me investor matches",
             }}
             onInjectPrompt={injectChatPrompt}
+            onTitleClick={() => openPanel({ kind: "pipeline" })}
           >
             {allPipeline.length > 0 ? (
               <Pipeline
@@ -125,6 +126,7 @@ export function FounderSidebar({
           injectPrompt: "Pull me investor matches",
         }}
         onInjectPrompt={injectChatPrompt}
+        onTitleClick={() => openPanel({ kind: "matches" })}
       >
         {state?.matches?.latest_batch ? (
           <div className="sb-matches-summary">
@@ -133,13 +135,6 @@ export function FounderSidebar({
               <span className="sb-matches-sep">·</span>
               <span className="sb-matches-batches">{state.matches.batches_count} run{state.matches.batches_count === 1 ? "" : "s"}</span>
             </div>
-            <button
-              type="button"
-              className="sb-matches-link"
-              onClick={() => openPanel({ kind: "matches" })}
-            >
-              Open Matches →
-            </button>
           </div>
         ) : null}
       </SidebarSection>
@@ -149,6 +144,7 @@ export function FounderSidebar({
         count={state?.briefs?.length ?? 0}
         defaultOpen={false}
         emptyMessage="No briefs yet."
+        onTitleClick={() => openPanel({ kind: "briefs" })}
       >
         {state?.briefs?.length ? (
           <>

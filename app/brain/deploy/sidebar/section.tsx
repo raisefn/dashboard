@@ -21,6 +21,12 @@ interface SectionProps {
   emptyMessage?: string;
   emptyAction?: { label: string; injectPrompt: string };
   onInjectPrompt?: (prompt: string) => void;
+  /**
+   * When set, clicking the section TITLE opens a slide-over panel
+   * (the chevron handles collapse independently). When unset, clicking
+   * anywhere in the header toggles collapse (legacy behavior).
+   */
+  onTitleClick?: () => void;
   children?: ReactNode;
 }
 
@@ -32,11 +38,65 @@ export function SidebarSection({
   emptyMessage,
   emptyAction,
   onInjectPrompt,
+  onTitleClick,
   children,
 }: SectionProps) {
   const [open, setOpen] = useState(defaultOpen);
   const hasChildren = !!children && (!Array.isArray(children) || children.length > 0);
 
+  // Split-control mode: chevron toggles collapse, title opens panel.
+  if (onTitleClick) {
+    return (
+      <div className="sb-section">
+        <div className="sb-section-header sb-section-header-split">
+          <button
+            type="button"
+            className="sb-section-chevron-btn"
+            onClick={() => setOpen(!open)}
+            aria-expanded={open}
+            aria-label={open ? `Collapse ${title}` : `Expand ${title}`}
+          >
+            <span className={`sb-section-chevron${open ? " open" : ""}`}>▸</span>
+          </button>
+          <button
+            type="button"
+            className="sb-section-title-btn"
+            onClick={onTitleClick}
+            aria-label={`Open ${title}`}
+          >
+            <span className="sb-section-title">{title}</span>
+            {typeof count === "number" && count > 0 && (
+              <span className="sb-section-count">{count}</span>
+            )}
+            <span className="sb-section-open-hint">→</span>
+          </button>
+        </div>
+        {subtitle && <div className="sb-section-subtitle sb-section-subtitle-indent">{subtitle}</div>}
+        {open && (
+          <div className="sb-section-body">
+            {hasChildren ? (
+              children
+            ) : (
+              <div className="sb-section-empty">
+                {emptyMessage && <p className="sb-section-empty-msg">{emptyMessage}</p>}
+                {emptyAction && onInjectPrompt && (
+                  <button
+                    type="button"
+                    className="sb-section-empty-btn"
+                    onClick={() => onInjectPrompt(emptyAction.injectPrompt)}
+                  >
+                    {emptyAction.label}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Legacy single-button mode: whole header toggles collapse.
   return (
     <div className="sb-section">
       <button
