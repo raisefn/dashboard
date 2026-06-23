@@ -2332,6 +2332,8 @@ function BrainDeployInner() {
           onOpenPanel={openPanel}
           onPopPanel={popPanel}
           injectChatPrompt={injectChatPrompt}
+          session={session}
+          impersonating={impersonating}
         />
       </div>
       </div>{/* /surface-grid */}

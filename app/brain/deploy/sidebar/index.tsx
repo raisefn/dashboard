@@ -132,7 +132,13 @@ export function FounderSidebar({
               <span className="sb-matches-sep">·</span>
               <span className="sb-matches-batches">{state.matches.batches_count} run{state.matches.batches_count === 1 ? "" : "s"}</span>
             </div>
-            <a className="sb-matches-link" href="/brain/matches">Open Matches →</a>
+            <button
+              type="button"
+              className="sb-matches-link"
+              onClick={() => openPanel({ kind: "matches" })}
+            >
+              Open Matches →
+            </button>
           </div>
         ) : null}
       </SidebarSection>
@@ -146,20 +152,25 @@ export function FounderSidebar({
         {state?.briefs?.length ? (
           <>
             {state.briefs.slice(0, 6).map(b => (
-              <a
+              <button
                 key={b.token}
+                type="button"
                 className="sb-row sb-row-link"
-                href={`/brain/briefs/${b.token}`}
-                target="_blank"
-                rel="noopener noreferrer"
+                onClick={() => openPanel({ kind: "brief", token: b.token })}
               >
                 <div className="sb-row-line1">
                   <span className="sb-row-name">{b.investor_full_name || b.investor_first_name || "Brief"}</span>
                 </div>
-              </a>
+              </button>
             ))}
             {state.briefs.length > 6 && (
-              <a className="sb-overflow" href="/brain/briefs">+ {state.briefs.length - 6} more</a>
+              <button
+                type="button"
+                className="sb-overflow"
+                onClick={() => openPanel({ kind: "briefs" })}
+              >
+                + {state.briefs.length - 6} more
+              </button>
             )}
           </>
         ) : null}

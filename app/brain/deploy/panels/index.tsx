@@ -1,6 +1,8 @@
 "use client";
 
+import type { Session } from "@supabase/supabase-js";
 import { PanelShell } from "./panel-shell";
+import { MatchesPanel } from "./matches-panel";
 import type { Panel } from "./use-panel-state";
 
 /**
@@ -19,9 +21,11 @@ interface PanelHostProps {
   onOpenPanel: (p: Panel) => void;
   onPopPanel: (p: Panel) => void;
   injectChatPrompt: (prompt: string) => void;
+  session: Session | null;
+  impersonating: string;
 }
 
-export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatPrompt }: PanelHostProps) {
+export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatPrompt, session, impersonating }: PanelHostProps) {
   // Compute title + breadcrumbs based on panel kind. Will be replaced
   // by per-panel components once those land (each will own its own
   // title/breadcrumb logic).
@@ -33,7 +37,13 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
     switch (panel.kind) {
       case "matches":
         title = "Matches";
-        body = <PanelStub label="Matches list" hint="Coming in v3 step 5" />;
+        body = (
+          <MatchesPanel
+            session={session}
+            impersonating={impersonating}
+            onOpenPanel={onOpenPanel}
+          />
+        );
         break;
       case "investor": {
         title = panel.slug;
@@ -73,9 +83,9 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
         break;
     }
   }
-  // Suppress unused-param warnings until the per-panel components land
-  // and start using these wiring callbacks.
-  void onOpenPanel;
+  // Suppress unused-param warning until the rest of the panels land
+  // and start using injectChatPrompt (e.g. investor panel's "Draft
+  // follow-up" action).
   void injectChatPrompt;
 
   return (
