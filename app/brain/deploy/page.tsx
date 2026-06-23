@@ -888,12 +888,15 @@ function BrainDeployInner() {
   );
   const conversationIdRef = useRef<string | null>(null);
   const historyRef = useRef<{ role: string; content: string }[]>([]);
-  // Timestamp (ms since epoch) of the most recent assistant turn from the
-  // restored conversation. Used by the [session_open] auto-fire gate so we
-  // don't stack synthesis turns when the founder is mid-session (refresh,
-  // tab switch, navigate-and-back). Null = no prior assistant turn within
-  // a recent window → fire synthesis normally.
-  const lastAssistantAtRef = useRef<number | null>(null);
+  // Count of assistant turns restored from prior conversation. Drives the
+  // [session_open] auto-fire gate. > 0 means the founder is in an active
+  // session (refresh / navigate-and-back / tab switch); firing synthesis
+  // again would stack the same priority turn on top of itself. 0 = brand-
+  // new conversation, fire synthesis normally.
+  // Continuity for next-day sessions: brain auto-rotates conversations
+  // after 30 min of inactivity, so next-day restore returns zero turns
+  // and synthesis fires correctly.
+  const restoredAssistantCountRef = useRef(0);
   // Per-message rate-limit signals captured from SSE events
   const limitReachedRef = useRef<null | {
     tier: string;
@@ -1834,9 +1837,8 @@ function BrainDeployInner() {
             }
             addMessageToDOM(msg.role, displayContent);
             historyRef.current.push({ role: msg.role, content: msg.content });
-            if (msg.role === "assistant" && msg.timestamp) {
-              const t = Date.parse(msg.timestamp);
-              if (!Number.isNaN(t)) lastAssistantAtRef.current = t;
+            if (msg.role === "assistant") {
+              restoredAssistantCountRef.current += 1;
             }
           }
 
@@ -1913,18 +1915,15 @@ function BrainDeployInner() {
         planStripRef.current,
       );
       if (resumed) return;
-      // No in-progress plan. Time-gate the [session_open] auto-fire so
-      // mid-session refreshes (tab refresh, navigate-and-back from
-      // Matches, etc.) don't stack synthesis turns. If the prior
-      // assistant turn was within the last 30 minutes, the founder is
-      // in an active session — no need for a fresh synthesis.
-      const SESSION_OPEN_COOLDOWN_MS = 30 * 60 * 1000;
-      const lastAt = lastAssistantAtRef.current;
-      const isActive =
-        lastAt !== null && Date.now() - lastAt < SESSION_OPEN_COOLDOWN_MS;
-      if (!isActive) {
-        void send("[session_open]", { silent: true });
-      }
+      // Skip the [session_open] auto-fire when ANY assistant turn was
+      // restored. The previous timestamp-cooldown approach didn't work
+      // because older DB rows have missing/invalid timestamps. The
+      // simpler rule: if the founder has a thread visible, that IS the
+      // continuity — don't re-emit synthesis on every refresh. Next-day
+      // sessions still get synthesis because brain auto-rotates inactive
+      // conversations, so restore returns zero turns next day.
+      if (restoredAssistantCountRef.current > 0) return;
+      void send("[session_open]", { silent: true });
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, chatStarted]);
