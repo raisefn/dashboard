@@ -1259,16 +1259,6 @@ function BrainDeployInner() {
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();
       let fullText = "", buffer = "";
-      // Capture the match panel payload when the brain emits it mid-stream.
-      // We render it INLINE after the typewriter completes so the cards
-      // appear right under the brain's text response with per-row "Generate
-      // brief" buttons. V1 step 3 take-aways surface.
-      let matchesPanelData: {
-        individuals_to_target?: Array<Record<string, unknown>>;
-        firms_to_consider?: Array<Record<string, unknown>>;
-        generated_at?: string;
-      } | null = null;
-      // agentPlanData removed — brain no longer emits agent_plan events
       const READ_TIMEOUT_MS = 60_000;
 
       while (true) {
@@ -1362,125 +1352,78 @@ function BrainDeployInner() {
                 next_reset: event.next_reset ?? null,
                 reset_label: event.reset_label ?? null,
               };
-            } else if (event.type === "matches_panel") {
-              matchesPanelData = {
-                individuals_to_target: event.individuals_to_target || [],
-                firms_to_consider: event.firms_to_consider || [],
-                generated_at: event.generated_at,
-              };
-              // Tell BrainTabs to refresh its match count badge.
-              try {
-                window.dispatchEvent(new CustomEvent("raisefn:matches_updated"));
-              } catch { /* defensive */ }
             }
-            // Note: `agent_plan` event handling removed — brain no longer
-            // emits structured plans. Session-open responses are normal
-            // chat text per system prompt rule 20 (chat-first model).
+            // Note: `matches_panel` + `agent_plan` event handlers removed.
+            // Match data lives in user_documents + Matches tab (top nav badge
+            // auto-refreshes via the page's own poll). The LLM writes a
+            // self-contained summary per system prompt rule 9.
           } catch { /* ignore parse errors */ }
         }
       }
 
-      // Show response with typewriter effect — UNLESS this response carries
-      // matches_panel data. Match responses need their inline "Generate
-      // brief" buttons to appear WITH the text, not after a 15-20 second
-      // typewriter animation finishes. Justin's observation: the buttons
-      // were placed correctly per investor but became visible all at once
-      // at the end (because the text revealing them was blanked until the
-      // typewriter caught up). Match responses get rendered immediately;
-      // every other response keeps the typewriter for chat-feel.
+      // Show response with typewriter effect.
       if (fullText) {
         historyRef.current.push({ role: "assistant", content: fullText });
 
-        if (matchesPanelData) {
-          // Immediate render path — for matches the panel buttons need
-          // to appear with the text; for agent plans the synthesis is
-          // longer-form (rule 20 — paragraph + action list) so a 15s
-          // typewriter feels artificial. Render full markdown immediately,
-          // then auto-execute spins up below as chat-turn approval bubbles.
-          contentEl.innerHTML = formatMarkdown(fullText);
-          scrollToElement(assistantEl);
-        } else {
-          // Render markdown once into a temp container
-          const temp = document.createElement("div");
-          temp.innerHTML = formatMarkdown(fullText);
+        // Render markdown once into a temp container
+        const temp = document.createElement("div");
+        temp.innerHTML = formatMarkdown(fullText);
 
-          // Collect all text nodes and their parent elements
-          contentEl.innerHTML = "";
-          const nodes = Array.from(temp.childNodes);
+        // Collect all text nodes and their parent elements
+        contentEl.innerHTML = "";
+        const nodes = Array.from(temp.childNodes);
 
-          // Clone the structure but empty all text
-          for (const node of nodes) {
-            contentEl.appendChild(node.cloneNode(true));
-          }
-
-          // Get all text nodes in the rendered content
-          const walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT);
-          const textNodes: Text[] = [];
-          let tn: Text | null;
-          while ((tn = walker.nextNode() as Text | null)) textNodes.push(tn);
-
-          // Store original text and blank them
-          const originals = textNodes.map(t => t.textContent || "");
-          textNodes.forEach(t => { t.textContent = ""; });
-
-          // Scroll to TOP of the response
-          scrollToElement(assistantEl);
-
-          // Reveal text character by character across all text nodes
-          const TICK_MS = 15;
-          const charsPerTick = 1;
-          let nodeIdx = 0;
-          let charIdx = 0;
-
-          await new Promise<void>((resolve) => {
-            const timer = setInterval(() => {
-              for (let c = 0; c < charsPerTick; c++) {
-                if (nodeIdx >= textNodes.length) {
-                  clearInterval(timer);
-                  // Ensure final state is perfect
-                  contentEl.innerHTML = formatMarkdown(fullText);
-                  resolve();
-                  return;
-                }
-                const orig = originals[nodeIdx];
-                charIdx++;
-                textNodes[nodeIdx].textContent = orig.slice(0, charIdx);
-                if (charIdx >= orig.length) {
-                  nodeIdx++;
-                  charIdx = 0;
-                }
-              }
-
-              // Scroll to keep latest text visible — scroll container, not to bottom
-              const m = messagesRef.current;
-              if (m) {
-                const nearBottom = m.scrollHeight - m.scrollTop - m.clientHeight < 200;
-                if (nearBottom) m.scrollTop = m.scrollHeight;
-              }
-            }, TICK_MS);
-          });
+        // Clone the structure but empty all text
+        for (const node of nodes) {
+          contentEl.appendChild(node.cloneNode(true));
         }
 
-        // ── Inline matches panel (V1 step 3 take-aways surface) ────
-        // When match_investors fired, brain emitted matches_panel via SSE.
-        // Render structured cards under the brain's text response with
-        // one-click "Generate brief" per row. This is where the founder
-        // ACTS on matches — no nav to /brain/matches required, no form.
-        if (matchesPanelData) {
-          try {
-            renderMatchesPanel(
-              matchesPanelData,
-              contentEl,
-              session,
-              impersonating,
-            );
-          } catch (e) {
-            console.error("Failed to render matches panel:", e);
-          }
-        }
+        // Get all text nodes in the rendered content
+        const walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT);
+        const textNodes: Text[] = [];
+        let tn: Text | null;
+        while ((tn = walker.nextNode() as Text | null)) textNodes.push(tn);
 
-        // Note: agent_plan auto-execute block removed in chat-first migration.
-        // Session-open responses are plain chat now (system prompt rule 20).
+        // Store original text and blank them
+        const originals = textNodes.map(t => t.textContent || "");
+        textNodes.forEach(t => { t.textContent = ""; });
+
+        // Scroll to TOP of the response
+        scrollToElement(assistantEl);
+
+        // Reveal text character by character across all text nodes
+        const TICK_MS = 15;
+        const charsPerTick = 1;
+        let nodeIdx = 0;
+        let charIdx = 0;
+
+        await new Promise<void>((resolve) => {
+          const timer = setInterval(() => {
+            for (let c = 0; c < charsPerTick; c++) {
+              if (nodeIdx >= textNodes.length) {
+                clearInterval(timer);
+                // Ensure final state is perfect
+                contentEl.innerHTML = formatMarkdown(fullText);
+                resolve();
+                return;
+              }
+              const orig = originals[nodeIdx];
+              charIdx++;
+              textNodes[nodeIdx].textContent = orig.slice(0, charIdx);
+              if (charIdx >= orig.length) {
+                nodeIdx++;
+                charIdx = 0;
+              }
+            }
+
+            // Scroll to keep latest text visible — scroll container, not to bottom
+            const m = messagesRef.current;
+            if (m) {
+              const nearBottom = m.scrollHeight - m.scrollTop - m.clientHeight < 200;
+              if (nearBottom) m.scrollTop = m.scrollHeight;
+            }
+          }, TICK_MS);
+        });
 
         // ── Limit signals ─────────────────────────────────────────
         // Render the soft warning chip above the response (one-shot at 80%).
