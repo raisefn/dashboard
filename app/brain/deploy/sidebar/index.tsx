@@ -5,7 +5,6 @@ import type { Session } from "@supabase/supabase-js";
 
 import { SidebarSection } from "./section";
 import { MyRaise } from "./my-raise";
-import { Pipeline, applyPipelineFilter, type PipelineFilter } from "./pipeline";
 import { SIDEBAR_CSS } from "./styles";
 import type { SidebarState } from "./types";
 import type { Panel } from "../panels";
@@ -40,7 +39,6 @@ export function FounderSidebar({
   adminHeader,
 }: FounderSidebarProps) {
   const [state, setState] = useState<SidebarState | null>(null);
-  const [pipelineFilter, setPipelineFilter] = useState<PipelineFilter>("active");
 
   useEffect(() => {
     let cancelled = false;
@@ -88,28 +86,13 @@ export function FounderSidebar({
         <MyRaise campaign={state?.campaign || null} onInjectPrompt={injectChatPrompt} />
       </SidebarSection>
 
-      {(() => {
-        const allPipeline = state?.pipeline || [];
-        const filteredPipeline = applyPipelineFilter(allPipeline, pipelineFilter);
-        return (
-          <SidebarSection
-            title="Pipeline"
-            count={filteredPipeline.length}
-            onTitleClick={() => openPanel({ kind: "pipeline" })}
-          >
-            {allPipeline.length > 0 ? (
-              <Pipeline
-                pipeline={filteredPipeline}
-                filter={pipelineFilter}
-                onFilterChange={setPipelineFilter}
-                showFilters={allPipeline.length > 8}
-                onInjectPrompt={injectChatPrompt}
-                onOpenPanel={openPanel}
-              />
-            ) : null}
-          </SidebarSection>
-        );
-      })()}
+      {/* Strict rule: every section with an aggregating panel collapses to
+       * header + count + arrow. The panel IS the list — sidebar is the door. */}
+      <SidebarSection
+        title="Pipeline"
+        count={state?.pipeline?.length ?? 0}
+        onTitleClick={() => openPanel({ kind: "pipeline" })}
+      />
 
       <SidebarSection
         title="Matches"
@@ -121,60 +104,13 @@ export function FounderSidebar({
         title="Briefs"
         count={state?.briefs?.length ?? 0}
         onTitleClick={() => openPanel({ kind: "briefs" })}
-      >
-        {state?.briefs?.length ? (
-          <>
-            {state.briefs.slice(0, 6).map(b => (
-              <button
-                key={b.token}
-                type="button"
-                className="sb-row sb-row-link"
-                onClick={() => openPanel({ kind: "brief", token: b.token })}
-              >
-                <div className="sb-row-line1">
-                  <span className="sb-row-name">{b.investor_full_name || b.investor_first_name || "Brief"}</span>
-                </div>
-              </button>
-            ))}
-            {state.briefs.length > 6 && (
-              <button
-                type="button"
-                className="sb-overflow"
-                onClick={() => openPanel({ kind: "briefs" })}
-              >
-                + {state.briefs.length - 6} more
-              </button>
-            )}
-          </>
-        ) : null}
-      </SidebarSection>
+      />
 
       <SidebarSection
         title="Documents"
         count={state?.documents?.length ?? 0}
         onTitleClick={() => openPanel({ kind: "documents" })}
-      >
-        {state?.documents?.length ? (
-          <>
-            {state.documents.slice(0, 6).map(d => (
-              <button
-                key={d.id}
-                type="button"
-                className="sb-row"
-                onClick={() => openPanel({ kind: "document", id: d.id })}
-                title="Open document"
-              >
-                <div className="sb-row-line1">
-                  <span className="sb-row-name">{d.filename}</span>
-                </div>
-                <div className="sb-row-line2">
-                  <span className="sb-row-secondary">{d.doc_type.replace(/_/g, " ")}</span>
-                </div>
-              </button>
-            ))}
-          </>
-        ) : null}
-      </SidebarSection>
+      />
 
       <SidebarSection title="Connections">
         <div className="sb-connections">

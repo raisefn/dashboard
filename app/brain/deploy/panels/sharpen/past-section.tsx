@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { SectionCard } from "./section-card";
 import { useSharpenSave, FORM_LABEL_CSS } from "./use-sharpen-save";
+import { SuggestPill } from "./suggest-pill";
 import type { SharpenSection } from "./sharpen-types";
 
 interface Props {
@@ -18,7 +19,6 @@ export function PastSection({ section, session, impersonating, onSaved }: Props)
   const [priorRaiseNotes, setPriorRaiseNotes] = useState((data.prior_raise_notes as string) || "");
   const [advisorFeedback, setAdvisorFeedback] = useState((data.advisor_feedback as string) || "");
   const [savedNote, setSavedNote] = useState<string | null>(null);
-  const transcripts = Array.isArray(data.transcripts) ? data.transcripts : [];
 
   const { save, saving, error } = useSharpenSave(session, impersonating);
 
@@ -42,22 +42,20 @@ export function PastSection({ section, session, impersonating, onSaved }: Props)
     >
       <style>{FORM_LABEL_CSS}</style>
 
+      <SuggestPill
+        sectionId="past"
+        session={session}
+        impersonating={impersonating}
+        fields={[
+          { name: "prior_raise_notes", live: priorRaiseNotes, setter: setPriorRaiseNotes },
+          { name: "advisor_feedback", live: advisorFeedback, setter: setAdvisorFeedback },
+        ]}
+      />
+
       <div className="sf-current">
         <p className="sf-current-label">Privacy</p>
         <p className="sf-current-value text-sm">
           Everything in this section stays private. Never shared. Never used to train.
-        </p>
-      </div>
-
-      <div className="sf-field">
-        <label className="sf-label">Investor call transcripts</label>
-        {transcripts.length > 0 ? (
-          <div className="text-sm text-zinc-300 mb-2">{transcripts.length} uploaded ✓</div>
-        ) : (
-          <p className="text-sm text-zinc-500 mb-2 italic">No transcripts uploaded yet.</p>
-        )}
-        <p className="sf-hint">
-          Upload via chat: drop a transcript file and say &quot;here&apos;s a transcript from my call with [investor].&quot; The agent extracts signals, objections, and next-step commitments.
         </p>
       </div>
 

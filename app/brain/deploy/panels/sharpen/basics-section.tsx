@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { SectionCard } from "./section-card";
 import { useSharpenSave, FORM_LABEL_CSS } from "./use-sharpen-save";
+import { SuggestPill } from "./suggest-pill";
 import type { SharpenSection } from "./sharpen-types";
 
 interface Props {
@@ -41,6 +42,17 @@ export function BasicsSection({ section, session, impersonating, onSaved }: Prop
       status={section.status}
     >
       <style>{FORM_LABEL_CSS}</style>
+
+      <SuggestPill
+        sectionId="basics"
+        session={session}
+        impersonating={impersonating}
+        fields={[
+          { name: "timeline", live: timeline, setter: setTimeline },
+          { name: "cohort", live: cohort, setter: setCohort },
+          { name: "hard_requirements", live: hardReqs, setter: setHardReqs },
+        ]}
+      />
 
       {/* Current canonical state, read-only — captured by the agent in chat */}
       <div className="sf-current">

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { SectionCard } from "./section-card";
-import { useSharpenSave, useSharpenSuggest, FORM_LABEL_CSS } from "./use-sharpen-save";
+import { useSharpenSave, FORM_LABEL_CSS } from "./use-sharpen-save";
+import { SuggestPill } from "./suggest-pill";
 import type { SharpenSection } from "./sharpen-types";
 
 interface Props {
@@ -13,8 +14,6 @@ interface Props {
   onSaved: () => void;
 }
 
-const STORY_SUGGEST_FIELDS = ["why_now", "wedge", "post_raise_vision", "market_positioning"] as const;
-
 export function StorySection({ section, session, impersonating, onSaved }: Props) {
   const data = section.data as Record<string, string | boolean | null>;
   const [whyNow, setWhyNow] = useState((data.why_now as string) || "");
@@ -22,53 +21,8 @@ export function StorySection({ section, session, impersonating, onSaved }: Props
   const [postVision, setPostVision] = useState((data.post_raise_vision as string) || "");
   const [market, setMarket] = useState((data.market_positioning as string) || "");
   const [savedNote, setSavedNote] = useState<string | null>(null);
-  const [suggestNote, setSuggestNote] = useState<string | null>(null);
 
   const { save, saving, error } = useSharpenSave(session, impersonating);
-  const { suggest, suggesting, error: suggestErr } = useSharpenSuggest(session, impersonating);
-
-  // Live values per field so we don't overwrite something the founder
-  // typed in this session but hasn't saved yet.
-  const liveValues: Record<string, string> = {
-    why_now: whyNow,
-    wedge,
-    post_raise_vision: postVision,
-    market_positioning: market,
-  };
-  const setters: Record<string, (v: string) => void> = {
-    why_now: setWhyNow,
-    wedge: setWedge,
-    post_raise_vision: setPostVision,
-    market_positioning: setMarket,
-  };
-  const emptyCount = STORY_SUGGEST_FIELDS.filter((f) => !(liveValues[f] || "").trim()).length;
-  const canSuggest = emptyCount > 0;
-
-  async function handleSuggest() {
-    setSuggestNote(null);
-    const result = await suggest("story");
-    if (!result) return;
-    if (result.message && !Object.keys(result.suggestions).length) {
-      setSuggestNote(result.message);
-      return;
-    }
-    // Only populate fields that are currently empty in the form — never
-    // overwrite something the founder just typed.
-    let filled = 0;
-    for (const field of STORY_SUGGEST_FIELDS) {
-      const suggested = result.suggestions[field];
-      const live = (liveValues[field] || "").trim();
-      if (suggested && !live) {
-        setters[field](suggested);
-        filled += 1;
-      }
-    }
-    setSuggestNote(
-      filled > 0
-        ? `Drafted ${filled} field${filled === 1 ? "" : "s"} from your deck. Review and save.`
-        : "Nothing new to add — your deck didn't cover the empty fields.",
-    );
-  }
 
   async function handleSave() {
     const ok = await save("story", {
@@ -92,32 +46,17 @@ export function StorySection({ section, session, impersonating, onSaved }: Props
     >
       <style>{FORM_LABEL_CSS}</style>
 
-      {/* Agent fill-from-deck — only shown when there's something to fill */}
-      {canSuggest && (
-        <div className="sf-suggest">
-          <button
-            type="button"
-            className="sf-suggest-btn"
-            onClick={() => void handleSuggest()}
-            disabled={suggesting}
-          >
-            {suggesting ? "Reading your deck…" : "Fill from your deck"}
-          </button>
-          <span className="sf-suggest-text">
-            {suggestNote ? (
-              <span className={
-                suggestErr
-                  ? "sf-suggest-status sf-suggest-status-error"
-                  : "sf-suggest-status sf-suggest-status-ok"
-              }>{suggestNote}</span>
-            ) : suggestErr ? (
-              <span className="sf-suggest-status sf-suggest-status-error">{suggestErr}</span>
-            ) : (
-              <>Agent reads your uploaded docs and drafts the empty fields. You edit, then save.</>
-            )}
-          </span>
-        </div>
-      )}
+      <SuggestPill
+        sectionId="story"
+        session={session}
+        impersonating={impersonating}
+        fields={[
+          { name: "why_now", live: whyNow, setter: setWhyNow },
+          { name: "wedge", live: wedge, setter: setWedge },
+          { name: "post_raise_vision", live: postVision, setter: setPostVision },
+          { name: "market_positioning", live: market, setter: setMarket },
+        ]}
+      />
 
       {/* Founder background pulled from canonical */}
       <div className="sf-current">

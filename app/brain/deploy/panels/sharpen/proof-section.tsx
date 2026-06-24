@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { SectionCard } from "./section-card";
 import { useSharpenSave, FORM_LABEL_CSS } from "./use-sharpen-save";
+import { SuggestPill } from "./suggest-pill";
 import type { SharpenSection } from "./sharpen-types";
 
 interface Props {
@@ -18,7 +19,6 @@ export function ProofSection({ section, session, impersonating, onSaved }: Props
   const [pressLinks, setPressLinks] = useState((data.press_links as string) || "");
   const [dataRoom, setDataRoom] = useState((data.data_room_url as string) || "");
   const [savedNote, setSavedNote] = useState<string | null>(null);
-  const customerRefDocs = Array.isArray(data.customer_reference_doc) ? data.customer_reference_doc : [];
 
   const { save, saving, error } = useSharpenSave(session, impersonating);
 
@@ -38,6 +38,16 @@ export function ProofSection({ section, session, impersonating, onSaved }: Props
       status={section.status}
     >
       <style>{FORM_LABEL_CSS}</style>
+
+      <SuggestPill
+        sectionId="proof"
+        session={session}
+        impersonating={impersonating}
+        fields={[
+          { name: "press_links", live: pressLinks, setter: setPressLinks },
+          { name: "data_room_url", live: dataRoom, setter: setDataRoom },
+        ]}
+      />
 
       {/* MRR — canonical from chat */}
       <div className="sf-current">
@@ -60,18 +70,6 @@ export function ProofSection({ section, session, impersonating, onSaved }: Props
             One OAuth connection. MRR shows up in your profile and every brief automatically. Investors see real revenue, not your verbal estimate.
           </p>
         </div>
-      </div>
-
-      <div className="sf-field">
-        <label className="sf-label">Customer reference document</label>
-        {customerRefDocs.length > 0 ? (
-          <div className="text-sm text-zinc-300 mb-2">
-            {customerRefDocs.length} uploaded ✓
-          </div>
-        ) : (
-          <p className="text-sm text-zinc-500 mb-2 italic">No customer reference document uploaded yet.</p>
-        )}
-        <p className="sf-hint">Upload via chat: paste or drop a PDF/Word doc and say &quot;this is my customer reference.&quot;</p>
       </div>
 
       <div className="sf-field">

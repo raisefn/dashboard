@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { SectionCard } from "./section-card";
 import { useSharpenSave, FORM_LABEL_CSS } from "./use-sharpen-save";
+import { SuggestPill } from "./suggest-pill";
 import type { SharpenSection } from "./sharpen-types";
 
 interface Founder {
@@ -65,6 +66,16 @@ export function TeamSection({ section, session, impersonating, onSaved }: Props)
       status={section.status}
     >
       <style>{FORM_LABEL_CSS}</style>
+
+      <SuggestPill
+        sectionId="team"
+        session={session}
+        impersonating={impersonating}
+        fields={[
+          { name: "cap_table_summary", live: capTable, setter: setCapTable },
+          { name: "hiring_plan", live: hiringPlan, setter: setHiringPlan },
+        ]}
+      />
 
       {/* Canonical summary */}
       <div className="sf-current">
