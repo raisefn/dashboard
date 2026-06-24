@@ -46,7 +46,7 @@ const FAQ_SECTIONS: FAQSection[] = [
     questions: [
       {
         q: "What does my raise look like with raise(fn)?",
-        a: "You talk to it. No forms. No dashboard. No menus. You tell it what you're building, where you are, what you're trying to do — it captures the company, the team, the metrics, the wedge, the round shape. All in conversation. Persistent. It remembers everything across every session. Then it runs your raise: builds the investor list (ranked by who actually deploys into your space, sourced from real check behavior across 17,000+ funds, not website copy), critiques your deck slide-by-slide, writes the brief for every match, preps you for every meeting, tracks the pipeline, debriefs after each conversation, brokers warm intros where there's a relationship in the network, notifies you when new investors come online who fit your raise, and walks you through the term sheet when one lands. One conversation. Replaces the database, the CRM, the spreadsheet, the slide-critique service, the meeting-prep doc, the debrief notes, the warm-intro broker, and the strategy session — all of it.",
+        a: "You talk to it. No forms. No dashboard. No menus. You tell it what you're building, where you are, what you're trying to do — it captures the company, the team, the metrics, the wedge, the round shape. All in conversation. Persistent. It remembers everything across every session. Then it runs your raise: builds the investor list (ranked by who actually deploys into your space, sourced from real check behavior across 17,000+ funds, not website copy), critiques your deck slide-by-slide, writes the brief for every match, preps you for every meeting, tracks the pipeline, debriefs after each conversation, brokers warm intros where there's a relationship in the network, notifies you when new investors come online who fit your raise, and walks you through the term sheet when one lands. One conversation. Replaces the database, the CRM, the spreadsheet, the slide-critique service, the meeting-prep doc, the debrief notes, and the warm-intro broker — all of it.",
       },
       {
         q: "What can a founder actually do with raise(fn)?",
@@ -126,7 +126,7 @@ const FAQ_SECTIONS: FAQSection[] = [
     questions: [
       {
         q: "What does raise(fn) cost a founder?",
-        a: "Free for limited use. Paid for full-raise concierge support across your entire round. No success fee, no equity, no transaction-based compensation. See /pricing for current rates.",
+        a: "Free for limited use. Paid unlocks the full agent across your entire raise. No success fee, no equity, no transaction-based compensation. See /pricing for current rates.",
       },
       {
         q: "Is there a success fee?",
@@ -138,7 +138,7 @@ const FAQ_SECTIONS: FAQSection[] = [
       },
       {
         q: "If I'm on the free plan, why would I pay?",
-        a: "Free gives you the matching engine with a use cap. Paid removes the cap and unlocks the full system across your raise — deeper meeting prep, debrief support, pipeline tracking, deck critique, pitch refinement, term sheet walkthrough, warm intros. If your round is small and the cap covers it, free is enough. If you're running an active raise across 20+ parallel investor conversations, paid is built for that.",
+        a: "Free gives you the matching engine with a use cap. Paid removes the cap and unlocks everything else the agent does — drafts your outreach, preps every meeting, captures every debrief, tracks your full pipeline automatically, walks you through term sheets, and brokers warm intros when there's a path in the network. If your round is small and the cap covers it, free is enough. If you're running an active raise across 20+ parallel investor conversations, paid is built for that.",
       },
     ],
   },
@@ -148,7 +148,7 @@ const FAQ_SECTIONS: FAQSection[] = [
     questions: [
       {
         q: "How does raise(fn) help me as an investor?",
-        a: "Surfaces founders that actually match your check behavior — what your portfolio reveals, not what your website says. Hand-curated. No bulk feeds, no daily deal-flow firehose. Quality over volume.",
+        a: "Surfaces founders that actually match your check behavior — what your portfolio reveals, not what your website says. Surfaced when there's an actual fit, not bulk-fed. No daily deal-flow firehose. Quality over volume.",
       },
       {
         q: "What does raise(fn) cost an investor?",
