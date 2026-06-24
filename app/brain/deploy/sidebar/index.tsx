@@ -205,17 +205,46 @@ export function FounderSidebar({
         </div>
       </SidebarSection>
 
-      <div className="sb-sharpen-link-wrap">
-        <a
-          href="/brain/sharpen"
-          className="sb-sharpen-link"
-          title="Fine tune your agent — stronger inputs, sharper outputs"
-        >
-          <span className="sb-sharpen-icon">⚙</span>
-          <span className="sb-sharpen-label">Sharpen</span>
-          <span className="sb-sharpen-arrow">→</span>
-        </a>
-      </div>
+      {/* SHARPEN — fine tune the agent. 5 sections; each row opens a panel. */}
+      <SidebarSection title="Sharpen">
+        <div className="sb-connections">
+          {(state?.sharpen || DEFAULT_SHARPEN_ROWS).map((row) => (
+            <button
+              key={row.id}
+              type="button"
+              className="sb-conn-row sb-sharpen-row"
+              onClick={() => openPanel({ kind: "sharpen", section: row.id })}
+              title={`Fine tune your agent — ${row.title}`}
+            >
+              <span
+                className="sb-conn-dot"
+                style={{ background: STATUS_DOT_COLOR[row.status] }}
+              />
+              <span className="sb-conn-label">{row.title}</span>
+              <span className="sb-conn-status sb-sharpen-status" data-status={row.status}>
+                {row.status}
+              </span>
+            </button>
+          ))}
+        </div>
+      </SidebarSection>
     </aside>
   );
 }
+
+const STATUS_DOT_COLOR: Record<string, string> = {
+  strong: "#2dd4bf",
+  solid: "#34d399",
+  gap: "#fbbf24",
+  empty: "#52525b",
+};
+
+// Fallback shown when /sidebar-state hasn't returned sharpen rows yet
+// (older API response or pre-deploy snapshot).
+const DEFAULT_SHARPEN_ROWS: { id: "basics" | "story" | "team" | "proof" | "past"; title: string; status: "empty" }[] = [
+  { id: "basics", title: "Basics", status: "empty" },
+  { id: "story", title: "Story", status: "empty" },
+  { id: "team", title: "Team & cap", status: "empty" },
+  { id: "proof", title: "Proof", status: "empty" },
+  { id: "past", title: "Past convos", status: "empty" },
+];

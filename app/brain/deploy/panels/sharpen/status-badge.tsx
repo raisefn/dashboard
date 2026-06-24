@@ -1,4 +1,4 @@
-import type { SharpenStatus } from "../types";
+import type { SharpenStatus } from "./sharpen-types";
 
 const LABEL: Record<SharpenStatus, string> = {
   strong: "STRONG",

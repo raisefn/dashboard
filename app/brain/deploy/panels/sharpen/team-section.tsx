@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { SectionCard } from "./section-card";
 import { useSharpenSave, FORM_LABEL_CSS } from "./use-sharpen-save";
-import type { SharpenSection } from "../types";
+import type { SharpenSection } from "./sharpen-types";
 
 interface Founder {
   name: string;

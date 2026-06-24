@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation";
  * The set of slide-over panels v3 supports. Adding a new panel means
  * extending this union + updating the URL serialization below.
  */
+export type SharpenSectionId = "basics" | "story" | "team" | "proof" | "past";
+
 export type Panel =
   | { kind: "matches" }
   | { kind: "investor"; slug: string; from?: Panel }
@@ -14,7 +16,8 @@ export type Panel =
   | { kind: "brief"; token: string; from?: Panel }
   | { kind: "documents" }
   | { kind: "document"; id: string; from?: Panel }
-  | { kind: "pipeline" };
+  | { kind: "pipeline" }
+  | { kind: "sharpen"; section: SharpenSectionId };
 
 /**
  * Hook owning the active panel state + URL sync.
@@ -114,6 +117,11 @@ function panelFromSearchParams(sp: URLSearchParams | ReturnType<typeof useSearch
       if (!id) return null;
       return { kind: "document", id };
     }
+    case "sharpen": {
+      const section = get("section") as SharpenSectionId | null;
+      if (!section || !["basics", "story", "team", "proof", "past"].includes(section)) return null;
+      return { kind: "sharpen", section };
+    }
     default:
       return null;
   }
@@ -125,6 +133,7 @@ function buildHrefForPanel(p: Panel): string {
   if (p.kind === "investor") params.set("slug", p.slug);
   if (p.kind === "brief") params.set("token", p.token);
   if (p.kind === "document") params.set("id", p.id);
+  if (p.kind === "sharpen") params.set("section", p.section);
   return `/brain/deploy?${params.toString()}`;
 }
 
@@ -133,5 +142,6 @@ function samePanelIdentity(a: Panel, b: Panel): boolean {
   if (a.kind === "investor" && b.kind === "investor") return a.slug === b.slug;
   if (a.kind === "brief" && b.kind === "brief") return a.token === b.token;
   if (a.kind === "document" && b.kind === "document") return a.id === b.id;
+  if (a.kind === "sharpen" && b.kind === "sharpen") return a.section === b.section;
   return true;
 }

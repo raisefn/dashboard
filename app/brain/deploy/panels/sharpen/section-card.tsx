@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { StatusBadge } from "./status-badge";
-import type { SharpenStatus } from "../types";
+import type { SharpenStatus } from "./sharpen-types";
 
 interface SectionCardProps {
   title: string;

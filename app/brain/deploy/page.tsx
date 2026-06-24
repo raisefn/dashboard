@@ -2351,9 +2351,16 @@ function BrainDeployInner() {
             <div className="sharpen-nudge">
               <span className="sharpen-nudge-text">
                 Want sharper outputs?{" "}
-                <a href="/brain/sharpen" className="sharpen-nudge-link">
+                <button
+                  type="button"
+                  onClick={() => {
+                    dismissSharpenNudge();
+                    openPanel({ kind: "sharpen", section: "basics" });
+                  }}
+                  className="sharpen-nudge-link"
+                >
                   Fine tune your agent →
-                </a>
+                </button>
               </span>
               <button
                 onClick={dismissSharpenNudge}

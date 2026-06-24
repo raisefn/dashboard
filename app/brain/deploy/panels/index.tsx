@@ -9,7 +9,16 @@ import { BriefDetailPanel } from "./brief-detail-panel";
 import { PipelinePanel } from "./pipeline-panel";
 import { DocumentPanel } from "./document-panel";
 import { DocumentsPanel } from "./documents-panel";
+import { SharpenPanel } from "./sharpen-panel";
 import type { Panel } from "./use-panel-state";
+
+const SHARPEN_SECTION_TITLES: Record<string, string> = {
+  basics: "Your raise basics",
+  story: "Your story",
+  team: "Your team & cap table",
+  proof: "Your proof",
+  past: "Past conversations",
+};
 
 /**
  * Panel router — picks the right component for the active panel state.
@@ -138,6 +147,18 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
         );
         break;
       }
+      case "sharpen": {
+        title = SHARPEN_SECTION_TITLES[panel.section] || "Sharpen";
+        breadcrumbs = [{ label: "Sharpen" }, { label: title }];
+        body = (
+          <SharpenPanel
+            sectionId={panel.section}
+            session={session}
+            impersonating={impersonating}
+          />
+        );
+        break;
+      }
     }
   }
 
@@ -162,6 +183,7 @@ function panelLabel(p: Panel): string {
     case "investor": return p.slug;
     case "brief": return "Brief";
     case "document": return "Document";
+    case "sharpen": return "Sharpen";
   }
 }
 

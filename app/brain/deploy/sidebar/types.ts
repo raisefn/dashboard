@@ -56,6 +56,14 @@ export interface SidebarActivity {
   created_at: string | null;
 }
 
+export type SharpenSidebarStatus = "strong" | "solid" | "gap" | "empty";
+
+export interface SharpenSidebarRow {
+  id: "basics" | "story" | "team" | "proof" | "past";
+  title: string;
+  status: SharpenSidebarStatus;
+}
+
 export interface SidebarState {
   campaign: SidebarCampaign | null;
   pipeline: SidebarPipelineInvestor[];
@@ -63,5 +71,6 @@ export interface SidebarState {
   briefs: SidebarBrief[];
   documents: SidebarDocument[];
   activity: SidebarActivity[];
+  sharpen?: SharpenSidebarRow[];
   acting_as_email: string | null;
 }
