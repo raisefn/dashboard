@@ -5,17 +5,17 @@ import FadeInSection from "@/components/fade-in-section";
 
 // Marketing v3 — /founders landing.
 // Audience: founders actively raising or about to. Pitch: raise(fn) is
-// the brain that does the hard parts (targeting, briefs, memory) so you
-// can spend time on the parts that actually move a raise (calls, deck,
-// product).
+// the AI fundraising agent that does the hard parts (matching, briefs,
+// outreach, follow-ups, closing) so the founder can stay on the calls
+// and the product. All investor names FICTIONAL per the marketing rule.
 
 /* ── Visual: match output mock card (founder POV) ── */
 function FounderMatchCard() {
   const investors = [
-    { name: "First Round Capital", tag: "Sector + stage fit", color: "#2dd4bf", note: "Active in your ARR range — partner engaged" },
-    { name: "Avery Tanaka · Pacific Bridge", tag: "Solo angel", color: "#34d399", note: "SEA + thesis fit; fast mover" },
-    { name: "Bessemer Venture Partners", tag: "Portfolio gap", color: "#fbbf24", note: "B2B payments thesis, no current portco overlap" },
-    { name: "Manny Medina (angel)", tag: "Operator empathy", color: "#fb923c", note: "Built Outreach; angel-checks in your range" },
+    { name: "Compass Partners", tag: "Sector + stage fit", color: "#2dd4bf", note: "Active in your ARR range — partner engaged" },
+    { name: "Avery Tanaka · Northstar Angels", tag: "Solo angel", color: "#34d399", note: "SEA + thesis fit; fast mover" },
+    { name: "Aperture Capital", tag: "Portfolio gap", color: "#fbbf24", note: "B2B payments thesis, no current portco overlap" },
+    { name: "James Park (angel)", tag: "Operator empathy", color: "#fb923c", note: "Ex-CEO sales-tech exit; angel-checks in your range" },
   ];
 
   return (
@@ -51,9 +51,9 @@ function FounderMatchCard() {
 function PipelineMemoryCard() {
   const items = [
     { name: "Avery Tanaka", status: "Replied — wants intro deck", color: "#34d399", last: "2h ago" },
-    { name: "First Round (Bill Trenchard)", status: "Met Mon — second meeting requested", color: "#2dd4bf", last: "1d ago" },
-    { name: "Manny Medina", status: "Soft committed $50K — needs SAFE", color: "#fb923c", last: "3d ago" },
-    { name: "Bessemer (Byron Deeter)", status: "Passed — portfolio overlap", color: "#71717a", last: "1w ago" },
+    { name: "Compass (Maya Okonkwo)", status: "Met Mon — second meeting requested", color: "#2dd4bf", last: "1d ago" },
+    { name: "James Park", status: "Soft committed $50K — needs SAFE", color: "#fb923c", last: "3d ago" },
+    { name: "Aperture (David Liu)", status: "Passed — portfolio overlap", color: "#71717a", last: "1w ago" },
   ];
   return (
     <div className="rounded-2xl border border-zinc-800 overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(24,24,27,0.95), rgba(9,9,11,0.98))" }}>
@@ -206,7 +206,7 @@ function BriefPreviewCard() {
   );
 }
 
-/* ── Capability grid — everything else the brain handles ── */
+/* ── Capability grid — everything else the agent handles ── */
 const CAPABILITIES = [
   { icon: "📑", name: "Deck extraction", desc: "Drop a PDF — sector, stage, MRR, team, raise size auto-populated." },
   { icon: "🔎", name: "Investor research", desc: "GP-level detail — recent checks, sweet spots, what they pass on." },
@@ -247,19 +247,20 @@ export default function FoundersPage() {
             For Founders
           </p>
           <h1 className="text-4xl font-bold text-white sm:text-5xl mb-6 leading-tight">
-            Run your raise like the operators do.
+            The agent that runs your raise alongside you.
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            raise(fn) is the brain that remembers every investor, drafts
-            every email, scores every fit, and tells you what to do next.
-            You stay on the calls and the product. We handle the rest.
+            raise(fn) matches you to the right investors, drafts the briefs,
+            drafts the outreach, preps every meeting, captures every debrief,
+            and tracks your pipeline. You stay on the calls and the product.
+            The agent does the rest.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
             <Link
               href="/signup"
               className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
             >
-              Set Up Your Raise
+              Drop your deck →
             </Link>
             <Link
               href="/pricing"
@@ -284,9 +285,9 @@ export default function FoundersPage() {
               </h2>
               <p className="text-zinc-400 leading-relaxed mb-4">
                 Not an alphabetical list of every VC on the internet. The
-                brain knows your sector, stage, check size, geography, and
-                cap table — and surfaces investors whose thesis,
-                deployment cadence, and history actually fit.
+                agent reads your sector, stage, check size, geography, and
+                cap table, then ranks investors whose thesis, deployment
+                cadence, and history actually fit.
               </p>
               <p className="text-zinc-400 leading-relaxed">
                 Including the angels and family offices nobody else
@@ -322,7 +323,7 @@ export default function FoundersPage() {
                 02 — Memory
               </p>
               <h2 className="text-3xl font-bold text-white mb-5 leading-tight">
-                A brain that doesn&apos;t forget.
+                Tracks every conversation. Forgets nothing.
               </h2>
               <p className="text-zinc-400 leading-relaxed mb-4">
                 Every conversation, meeting note, commitment, and decision
@@ -331,7 +332,7 @@ export default function FoundersPage() {
                 meeting.
               </p>
               <p className="text-zinc-400 leading-relaxed">
-                When you come back tomorrow, the brain knows where you
+                When you come back tomorrow, the agent knows where you
                 left off. When you come back next month, it still knows.
               </p>
             </div>
@@ -360,7 +361,7 @@ export default function FoundersPage() {
                 outreach, or send to your advisors.
               </p>
               <p className="text-zinc-400 leading-relaxed">
-                Works for investors the brain matched you with — and for
+                Works for investors the agent matched you with — and for
                 anyone you already know. Drop in a name, get a brief.
               </p>
             </div>
@@ -371,7 +372,7 @@ export default function FoundersPage() {
         </FadeInSection>
       </section>
 
-      {/* ── Capability grid — everything else the brain does ── */}
+      {/* ── Capability grid — everything else the agent does ── */}
       <section className="relative py-24 px-4 bg-zinc-950/40">
         <FadeInSection>
           <div className="mx-auto max-w-6xl">
@@ -380,11 +381,11 @@ export default function FoundersPage() {
                 Everything else
               </p>
               <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4 leading-tight">
-                The full brain, not a feature wedge.
+                The whole raise. In one agent.
               </h2>
               <p className="text-zinc-400 max-w-2xl mx-auto">
-                Targeting, briefs, and memory are the headline acts.
-                Every other part of running a raise is in the same brain.
+                Matching, briefs, and memory are the headline acts.
+                Every other part of running a raise lives in the same agent.
               </p>
             </div>
             <CapabilityGrid />
@@ -431,7 +432,7 @@ export default function FoundersPage() {
                 {[
                   "Investors ranked by actual fit — sector, stage, check, geo",
                   "Briefs and outreach tailored to your specific raise",
-                  "Pipeline captured automatically as you talk to the brain",
+                  "Pipeline captured automatically as you talk to the agent",
                   "Memory across sessions — pick up exactly where you left off",
                   "Gets sharper as more founders raise on raise(fn)",
                 ].map((text) => (
@@ -503,18 +504,17 @@ export default function FoundersPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
-              Ready to raise smarter?
+              Drop your deck. The agent takes it from there.
             </h2>
             <p className="text-zinc-400 mb-8 max-w-xl mx-auto">
-              Sign up free. Drop your deck or just describe your raise.
-              The brain takes it from there.
+              Free to start. No credit card. The agent gets to work the second you upload.
             </p>
             <div className="flex items-center justify-center gap-4">
               <Link
                 href="/signup"
                 className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
               >
-                Set Up Your Raise
+                Drop your deck →
               </Link>
               <Link
                 href="/pricing"
