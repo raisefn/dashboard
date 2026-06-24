@@ -38,6 +38,52 @@ export function useSharpenSave(session: Session | null, impersonating: string) {
   return { save, saving, error };
 }
 
+export interface SuggestResult {
+  suggestions: Record<string, string>;
+  message?: string;
+  doc_count?: number;
+}
+
+export function useSharpenSuggest(session: Session | null, impersonating: string) {
+  const [suggesting, setSuggesting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function suggest(sectionId: string): Promise<SuggestResult | null> {
+    if (!session) return null;
+    setSuggesting(true);
+    setError(null);
+    try {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch(`/v1/brain/sharpen/section/${sectionId}/suggest`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Suggest failed (${res.status})`);
+      }
+      const data = await res.json();
+      return {
+        suggestions: data.suggestions || {},
+        message: data.message,
+        doc_count: data.doc_count,
+      };
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Suggest failed.");
+      return null;
+    } finally {
+      setSuggesting(false);
+    }
+  }
+
+  return { suggest, suggesting, error };
+}
+
 export const FORM_LABEL_CSS = `
   .sf-label {
     display: block;
@@ -134,4 +180,47 @@ export const FORM_LABEL_CSS = `
     background: rgba(45, 212, 191, 0.15);
     border-color: rgba(45, 212, 191, 0.5);
   }
+  .sf-suggest {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border: 1px dashed rgba(45, 212, 191, 0.3);
+    background: rgba(45, 212, 191, 0.04);
+    border-radius: 8px;
+  }
+  .sf-suggest-btn {
+    background: rgba(45, 212, 191, 0.1);
+    border: 1px solid rgba(45, 212, 191, 0.4);
+    color: #2dd4bf;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 150ms ease;
+    white-space: nowrap;
+  }
+  .sf-suggest-btn:hover {
+    background: rgba(45, 212, 191, 0.18);
+    border-color: rgba(45, 212, 191, 0.6);
+  }
+  .sf-suggest-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .sf-suggest-text {
+    flex: 1;
+    font-size: 12px;
+    color: #a1a1aa;
+    line-height: 1.4;
+  }
+  .sf-suggest-status {
+    font-size: 12px;
+    color: #71717a;
+  }
+  .sf-suggest-status-ok { color: #2dd4bf; }
+  .sf-suggest-status-error { color: #fca5a5; }
 `;
