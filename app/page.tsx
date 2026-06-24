@@ -58,8 +58,8 @@ function HeroRings() {
   );
 }
 
-/* ── Brain Demo ── */
-function BrainDemo() {
+/* ── Execution Demo ── */
+function ExecutionDemo() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState(0);
@@ -78,11 +78,13 @@ function BrainDemo() {
   useEffect(() => {
     if (!visible) return;
     const timers = [
-      setTimeout(() => setStep(1), 400),   // question appears
-      setTimeout(() => setStep(2), 1800),  // thinking
-      setTimeout(() => setStep(3), 2800),  // readiness
-      setTimeout(() => setStep(4), 3600),  // investors
-      setTimeout(() => setStep(5), 4400),  // strategy
+      setTimeout(() => setStep(1), 400),   // founder question
+      setTimeout(() => setStep(2), 1800),  // working indicator
+      setTimeout(() => setStep(3), 2800),  // overdue list
+      setTimeout(() => setStep(4), 4200),  // founder picks Sarah
+      setTimeout(() => setStep(5), 5400),  // draft card appears
+      setTimeout(() => setStep(6), 7200),  // founder says send
+      setTimeout(() => setStep(7), 8200),  // sent confirmation
     ];
     return () => timers.forEach(clearTimeout);
   }, [visible]);
@@ -100,124 +102,134 @@ function BrainDemo() {
             <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
             <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
           </div>
-          <span className="ml-2 text-[11px] text-zinc-600 font-medium tracking-wide">raise(fn) brain</span>
-          <span className="ml-auto text-[10px] text-orange-500/60 font-semibold tracking-widest uppercase">live</span>
+          <span className="ml-2 text-[11px] text-zinc-600 font-medium tracking-wide">raise(fn) · live</span>
+          <span className="ml-auto text-[10px] text-orange-500/60 font-semibold tracking-widest uppercase">agent</span>
         </div>
 
-        <div className="p-5 sm:p-7 space-y-5">
-          {/* Question */}
+        <div className="p-5 sm:p-7 space-y-4">
+          {/* Founder Q1 */}
           <div
-            className="transition-all duration-700"
+            className="flex justify-end transition-all duration-500"
             style={{ opacity: step >= 1 ? 1 : 0, transform: step >= 1 ? "translateY(0)" : "translateY(8px)" }}
           >
-            <div className="flex items-start gap-3">
-              <span className="shrink-0 mt-0.5 h-5 w-5 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[10px] text-zinc-500">Q</span>
-              <p className="text-sm text-zinc-300 leading-relaxed">
-                We&apos;re building an AI code review platform. $1.8M ARR, 45% MoM growth, 2,400 GitHub stars,
-                npm package at 52K weekly downloads. We want to raise a $12M Series A.
-                <span className="text-white font-medium"> Are we actually ready? What&apos;s the strongest way to position this, and what are we not seeing?</span>
-              </p>
+            <div className="rounded-2xl bg-orange-950/40 border border-orange-900/40 px-4 py-2.5 max-w-[80%]">
+              <p className="text-sm text-zinc-200">who do I owe a reply to?</p>
             </div>
           </div>
 
-          {/* Thinking indicator */}
+          {/* Working indicator */}
           {step === 2 && (
-            <div className="flex items-center gap-2 pl-8">
+            <div className="flex items-center gap-2 pl-1">
               <span className="flex gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-orange-500/60 animate-pulse" />
-                <span className="h-1.5 w-1.5 rounded-full bg-orange-500/40 animate-pulse" style={{ animationDelay: "0.2s" }} />
-                <span className="h-1.5 w-1.5 rounded-full bg-orange-500/20 animate-pulse" style={{ animationDelay: "0.4s" }} />
+                <span className="h-1.5 w-1.5 rounded-full bg-teal-400/70 animate-pulse" />
+                <span className="h-1.5 w-1.5 rounded-full bg-teal-400/50 animate-pulse" style={{ animationDelay: "0.2s" }} />
+                <span className="h-1.5 w-1.5 rounded-full bg-teal-400/30 animate-pulse" style={{ animationDelay: "0.4s" }} />
               </span>
-              <span className="text-[11px] text-zinc-500">benchmarking against 1,847 dev-tools Series As from the last 24 months...</span>
+              <span className="text-[11px] text-zinc-500">scanning your pipeline…</span>
             </div>
           )}
 
-          {/* Response */}
+          {/* Agent reply 1: overdue list */}
           {step >= 3 && (
-            <div className="space-y-5 pl-8">
-              {/* Readiness Evaluation */}
-              <div
-                className="transition-all duration-700"
-                style={{ opacity: step >= 3 ? 1 : 0, transform: step >= 3 ? "translateY(0)" : "translateY(8px)" }}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-teal-400">Readiness evaluation</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950/50 text-emerald-400 border border-emerald-800/30 font-semibold">READY — WITH FLAGS</span>
-                </div>
-                {/* Metric benchmarks */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+            <div
+              className="flex justify-start transition-all duration-500"
+              style={{ opacity: step >= 3 ? 1 : 0, transform: step >= 3 ? "translateY(0)" : "translateY(8px)" }}
+            >
+              <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 px-4 py-3 max-w-[88%]">
+                <p className="text-sm text-zinc-300 leading-relaxed mb-3">Three replies overdue:</p>
+                <div className="space-y-2 mb-3">
                   {[
-                    { metric: "ARR", value: "$1.8M", percentile: "top 18%", status: "strong" },
-                    { metric: "Growth", value: "45% MoM", percentile: "top 4%", status: "flag" },
-                    { metric: "Dev adoption", value: "52K/wk npm", percentile: "top 11%", status: "strong" },
-                    { metric: "Community", value: "2,400 stars", percentile: "top 22%", status: "moderate" },
-                  ].map((m) => (
-                    <div key={m.metric} className="rounded border border-zinc-800/50 bg-zinc-900/20 px-3 py-2">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">{m.metric}</span>
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${
-                          m.status === "strong" ? "bg-emerald-950/50 text-emerald-400 border border-emerald-800/30" :
-                          m.status === "flag" ? "bg-amber-950/50 text-amber-400 border border-amber-800/30" :
-                          "bg-zinc-800/50 text-zinc-400 border border-zinc-700/30"
-                        }`}>{m.percentile}</span>
+                    { name: "Sarah Chen", firm: "Greenoak Capital", days: 9, ask: "asked for cohort retention" },
+                    { name: "Marcus Hill", firm: "Vault Ventures", days: 6, ask: "wants the deeper financial model" },
+                    { name: "Priya Sharma", firm: "Hummingbird Partners", days: 4, ask: "wanted three founder references" },
+                  ].map((p) => (
+                    <div key={p.name} className="rounded border border-zinc-800/60 bg-zinc-900/30 px-3 py-2 flex items-start gap-3">
+                      <span className="shrink-0 mt-1 inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs">
+                          <span className="text-zinc-200 font-semibold">{p.name}</span>
+                          <span className="text-zinc-500"> · {p.firm}</span>
+                        </p>
+                        <p className="text-[11px] text-zinc-500 mt-0.5">{p.days} days · {p.ask}</p>
                       </div>
-                      <span className="text-sm font-semibold text-zinc-200">{m.value}</span>
                     </div>
                   ))}
                 </div>
-                <p className="text-sm text-zinc-400 leading-relaxed">
-                  <span className="text-amber-400 font-medium">Growth flag:</span> 45% MoM is exceptional
-                  but only 2 months sustained. Of dev-tools companies that showed 40%+ growth
-                  for &lt;3 months, <span className="text-zinc-200">61% saw it moderate to 15–25% by month 4.</span>{" "}
-                  Investors will probe this hard. Prepare the cohort curve and leading indicators
-                  that suggest this holds — daily active users, expansion revenue, or usage frequency.
-                </p>
+                <p className="text-sm text-zinc-300 leading-relaxed">I drafted all three. Want to look at Sarah&apos;s first?</p>
               </div>
+            </div>
+          )}
 
-              {/* Narrative Analysis */}
-              <div
-                className="transition-all duration-700"
-                style={{ opacity: step >= 4 ? 1 : 0, transform: step >= 4 ? "translateY(0)" : "translateY(8px)" }}
-              >
-                <p className="text-[10px] font-bold uppercase tracking-widest text-orange-400 mb-3">Narrative analysis</p>
-                <div className="rounded-lg border border-zinc-800/60 bg-zinc-900/30 px-4 py-3 mb-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-950/50 text-red-400 border border-red-800/30 font-semibold">WEAK FRAME</span>
-                    <span className="text-xs text-zinc-400">&quot;AI code review platform&quot;</span>
+          {/* Founder Q2 */}
+          {step >= 4 && (
+            <div
+              className="flex justify-end transition-all duration-500"
+              style={{ opacity: step >= 4 ? 1 : 0, transform: step >= 4 ? "translateY(0)" : "translateY(8px)" }}
+            >
+              <div className="rounded-2xl bg-orange-950/40 border border-orange-900/40 px-4 py-2.5 max-w-[80%]">
+                <p className="text-sm text-zinc-200">yes show me Sarah&apos;s</p>
+              </div>
+            </div>
+          )}
+
+          {/* Agent reply 2: draft card */}
+          {step >= 5 && (
+            <div
+              className="flex justify-start transition-all duration-500"
+              style={{ opacity: step >= 5 ? 1 : 0, transform: step >= 5 ? "translateY(0)" : "translateY(8px)" }}
+            >
+              <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 px-4 py-3 max-w-[88%]">
+                <div className="rounded-lg border border-teal-800/40 bg-zinc-950/60 overflow-hidden">
+                  <div className="px-3 py-2 border-b border-teal-800/30 flex items-center justify-between">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-teal-400">Draft</span>
+                    <span className="text-[10px] text-zinc-500">to sarah@greenoak.vc</span>
                   </div>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    14 companies pitched &quot;AI code review&quot; in the last 6 months. 3 raised. Category is crowded
-                    and the framing triggers pattern matching against CodeRabbit, Codium, and Qodo.
-                  </p>
+                  <div className="px-3 py-3 space-y-1.5">
+                    <p className="text-[11px] text-zinc-500"><span className="text-zinc-600">Subject —</span> Cohort retention follow-up</p>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      Sarah,<br/>
+                      Thanks for the conversation Tuesday. You asked about 3/6/12-month cohort retention from the early-adopter cohort.
+                      Here&apos;s the breakdown: <span className="text-zinc-200">87% / 73% / 68% retained.</span> The drop between 3 and 6 months
+                      is concentrated in two specific use cases — happy to walk through the segmentation when you have 15 minutes…
+                    </p>
+                  </div>
                 </div>
-                <div className="rounded-lg border border-zinc-800/60 bg-zinc-900/30 px-4 py-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-950/50 text-emerald-400 border border-emerald-800/30 font-semibold">STRONGER FRAME</span>
-                    <span className="text-xs text-zinc-400">&quot;Developer workflow intelligence&quot;</span>
-                  </div>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Your npm adoption data tells a different story — developers are using this <span className="text-zinc-200">inside CI/CD pipelines,
-                    not just for reviews.</span> That&apos;s infrastructure, not tooling. Infrastructure companies
-                    raised at <span className="text-zinc-200">1.8x higher valuations</span> than point solutions in this sector last quarter. Reframe around
-                    where the usage actually lives.
-                  </p>
+                <div className="mt-3 flex gap-2">
+                  <button className="text-[11px] font-semibold px-3 py-1.5 rounded border border-teal-700/50 bg-teal-950/40 text-teal-300">
+                    Approve and send
+                  </button>
+                  <button className="text-[11px] font-semibold px-3 py-1.5 rounded border border-zinc-800 bg-zinc-900/40 text-zinc-400">
+                    Edit
+                  </button>
                 </div>
               </div>
+            </div>
+          )}
 
-              {/* Signal reading */}
-              <div
-                className="transition-all duration-700"
-                style={{ opacity: step >= 5 ? 1 : 0, transform: step >= 5 ? "translateY(0)" : "translateY(8px)" }}
-              >
-                <p className="text-[10px] font-bold uppercase tracking-widest text-violet-400 mb-2">What you&apos;re not seeing</p>
-                <p className="text-sm text-zinc-400 leading-relaxed">
-                  <span className="text-zinc-200">Two competitors in your space filed Form Ds in the last 45 days</span> —
-                  one for $8M (Seed extension), one for $18M (Series A). The $18M raise hasn&apos;t been
-                  announced yet. This creates urgency: investors who passed on those deals are actively
-                  looking for an alternative bet in this category right now. But it also means you&apos;ll be
-                  compared on metrics. Your npm traction is <span className="text-zinc-200">3x stronger</span> than
-                  both — lead with that.
+          {/* Founder Q3 */}
+          {step >= 6 && (
+            <div
+              className="flex justify-end transition-all duration-500"
+              style={{ opacity: step >= 6 ? 1 : 0, transform: step >= 6 ? "translateY(0)" : "translateY(8px)" }}
+            >
+              <div className="rounded-2xl bg-orange-950/40 border border-orange-900/40 px-4 py-2.5 max-w-[80%]">
+                <p className="text-sm text-zinc-200">send it</p>
+              </div>
+            </div>
+          )}
+
+          {/* Agent reply 3: sent confirmation */}
+          {step >= 7 && (
+            <div
+              className="flex justify-start transition-all duration-500"
+              style={{ opacity: step >= 7 ? 1 : 0, transform: step >= 7 ? "translateY(0)" : "translateY(8px)" }}
+            >
+              <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 px-4 py-3 max-w-[88%]">
+                <p className="text-sm text-zinc-300 leading-relaxed mb-2">
+                  <span className="inline-block mr-1.5 text-teal-400">✓</span>
+                  Sent to Sarah at 11:42 AM.
                 </p>
+                <p className="text-[11px] text-zinc-500">Logged in pipeline · set follow-up check for 7 days · queued the same review for Marcus and Priya.</p>
               </div>
             </div>
           )}
@@ -436,11 +448,11 @@ export default function LandingPage() {
               See it work
             </p>
             <h2 className="text-3xl font-bold sm:text-4xl">
-              <span className="text-white">Ask a real question.</span>{" "}
-              <span className="text-teal-400">Get a real answer.</span>
+              <span className="text-white">The agent doesn&apos;t advise.</span>{" "}
+              <span className="text-teal-400">It executes.</span>
             </h2>
           </div>
-          <BrainDemo />
+          <ExecutionDemo />
         </FadeInSection>
       </section>
 
@@ -698,17 +710,17 @@ export default function LandingPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
-              Start your raise.
+              Drop your deck. The agent takes it from there.
             </h2>
             <p className="text-zinc-500 mb-10">
-              Free to start. The agent gets to work as soon as you upload your deck.
+              Free to start. No credit card. The agent gets to work the second you upload.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="/signup"
                 className="rounded-full border border-orange-700/50 bg-orange-950/30 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/40 hover:text-orange-200"
               >
-                Start your raise
+                Drop your deck →
               </Link>
               <Link
                 href="/agents"
