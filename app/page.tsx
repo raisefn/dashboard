@@ -408,20 +408,17 @@ export default function LandingPage() {
               { verb: "Analyzes", title: "your deck", desc: "Slide-by-slide critique. Narrative gaps. Comp rounds at your stage." },
               { verb: "Matches", title: "you to 17K investors", desc: "Ranked by actual fit. Stage, sector, check size, who's deploying right now." },
               { verb: "Drafts", title: "investor briefs", desc: "One-page founder briefs with your traction, narrative, and ask. Shareable link." },
-              { verb: "Drafts + sends", title: "outreach", desc: "Per-investor angle. Warm-intro path if one exists. You approve, agent sends.", soon: true },
-              { verb: "Preps", title: "your meetings", desc: "Brief on the investor, prior notes, what they'll probe. 24h before each call.", soon: true },
-              { verb: "Debriefs", title: "after each meeting", desc: "Captures what they asked, what they liked, what they passed on. Updates pipeline.", soon: true },
-              { verb: "Tracks", title: "your pipeline", desc: "Every status, every commitment, every follow-up due. Auto-updated from chat + email." },
-              { verb: "Closes", title: "the round with you", desc: "Term sheet review. Term comparison. Comms with the room. Cap table updates.", soon: true },
+              { verb: "Drafts", title: "your outreach", desc: "Per-investor angle. Warm-intro path if one exists. Approve and send." },
+              { verb: "Preps", title: "every meeting", desc: "Brief on the investor, prior conversation notes, what they'll probe." },
+              { verb: "Debriefs", title: "after each call", desc: "Captures what they asked, what they liked, what they passed on. Updates your pipeline." },
+              { verb: "Tracks", title: "your pipeline", desc: "Every status, every commitment, every follow-up. Auto-updated from your conversations." },
+              { verb: "Closes", title: "the round with you", desc: "Term sheet review. Term comparison. Comms with the room. The whole close." },
             ].map((cap) => (
               <div key={cap.title} className="flex items-start gap-3">
                 <span className="shrink-0 mt-0.5 inline-flex items-center justify-center w-1.5 h-1.5 rounded-full bg-teal-400" />
                 <div className="flex-1 min-w-0">
                   <p className="text-base font-semibold text-white leading-snug">
                     <span className="text-teal-400">{cap.verb}</span> {cap.title}
-                    {cap.soon && (
-                      <span className="ml-2 text-[9px] font-bold uppercase tracking-widest text-orange-400/70 align-middle">Soon</span>
-                    )}
                   </p>
                   <p className="text-sm text-zinc-500 leading-relaxed mt-0.5">{cap.desc}</p>
                 </div>
@@ -660,17 +657,17 @@ export default function LandingPage() {
             {[
               {
                 who: "Today",
-                what: "The agent matches, briefs, and tracks. You upload your deck, it gets to work — and gets sharper with every raise that runs through it.",
+                what: "The agent runs your raise. Every raise that runs through it makes the next one sharper — observed-truth data on who actually writes checks, how long they take, and what makes them move.",
                 color: "#2dd4bf",
               },
               {
-                who: "Tomorrow",
-                what: "The agent sends outreach, preps and debriefs meetings, and closes the round with you. Gmail + Calendar integration ships next.",
+                who: "Next",
+                what: "Deeper integration with your stack. Gmail and Calendar so the agent sends from your inbox, schedules from your calendar, debriefs from your meetings — your tools, the agent's reach.",
                 color: "#a78bfa",
               },
               {
-                who: "The future",
-                what: "raise(fn) is the platform that powers fundraising AI. Any agent, any assistant, queries raise(fn) for the data and intelligence underneath.",
+                who: "Then",
+                what: "raise(fn) becomes the platform that powers fundraising AI. Any agent, any assistant, queries raise(fn) for the data and intelligence underneath.",
                 color: "#f97316",
               },
             ].map((item) => (
