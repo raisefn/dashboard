@@ -467,6 +467,48 @@ const BRAIN_CSS = `
   }
   .at-bottom .welcome-text { opacity: 0; height: 0; margin: 0; overflow: hidden; }
 
+  /* First-time Sharpen nudge in chat welcome */
+  .sharpen-nudge {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    margin: 16px auto 0;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(45, 212, 191, 0.06);
+    border: 1px solid rgba(45, 212, 191, 0.25);
+    font-size: 13px;
+    color: #a1a1aa;
+    transition: opacity 300ms ease, height 300ms ease, margin 300ms ease, padding 300ms ease;
+    overflow: hidden;
+  }
+  .sharpen-nudge-text { white-space: nowrap; }
+  .sharpen-nudge-link {
+    color: #2dd4bf;
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 4px;
+  }
+  .sharpen-nudge-link:hover { color: #5eead4; }
+  .sharpen-nudge-close {
+    background: none;
+    border: none;
+    color: #52525b;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color 150ms ease;
+  }
+  .sharpen-nudge-close:hover { color: #a1a1aa; }
+  .at-bottom .sharpen-nudge {
+    opacity: 0;
+    height: 0;
+    margin: 0;
+    padding: 0 16px;
+    border-width: 0;
+  }
+
   .starters {
     display: flex; flex-wrap: wrap; gap: 8px;
     justify-content: center; margin-bottom: 24px;
@@ -871,6 +913,19 @@ function BrainDeployInner() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [input, setInput] = useState("");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  // First-time Sharpen nudge — shown in chat welcome until the founder
+  // dismisses it or visits /brain/sharpen. localStorage-persisted so it
+  // doesn't reappear across sessions.
+  const [showSharpenNudge, setShowSharpenNudge] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const dismissed = localStorage.getItem("raisefn_sharpen_nudge_dismissed");
+    if (!dismissed) setShowSharpenNudge(true);
+  }, []);
+  const dismissSharpenNudge = () => {
+    try { localStorage.setItem("raisefn_sharpen_nudge_dismissed", "1"); } catch {}
+    setShowSharpenNudge(false);
+  };
   const { panel, openPanel, closePanel, popPanel } = usePanelState();
   // Attached file may be a text-extracted document (gets injected into the
   // user message), an image (sent as a multimodal content block via `images`),
@@ -2292,6 +2347,23 @@ function BrainDeployInner() {
             <h2>Tell me about your raise <span className="t">(or paste anything).</span></h2>
             <p>{impersonating ? `Acting as ${impersonating}` : "Deck, investor list, company URL, or just describe it."}</p>
           </div>
+          {showSharpenNudge && (
+            <div className="sharpen-nudge">
+              <span className="sharpen-nudge-text">
+                Want sharper outputs?{" "}
+                <a href="/brain/sharpen" className="sharpen-nudge-link">
+                  Fine tune your agent →
+                </a>
+              </span>
+              <button
+                onClick={dismissSharpenNudge}
+                className="sharpen-nudge-close"
+                aria-label="Dismiss"
+              >
+                ✕
+              </button>
+            </div>
+          )}
           <div className="starters">
             {STARTERS.map((s) => (
               <button key={s} className="starter" onClick={() => send(s)}>{s}</button>

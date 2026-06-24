@@ -204,6 +204,18 @@ export function FounderSidebar({
           </div>
         </div>
       </SidebarSection>
+
+      <div className="sb-sharpen-link-wrap">
+        <a
+          href="/brain/sharpen"
+          className="sb-sharpen-link"
+          title="Fine tune your agent — stronger inputs, sharper outputs"
+        >
+          <span className="sb-sharpen-icon">⚙</span>
+          <span className="sb-sharpen-label">Sharpen</span>
+          <span className="sb-sharpen-arrow">→</span>
+        </a>
+      </div>
     </aside>
   );
 }

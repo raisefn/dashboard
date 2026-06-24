@@ -388,4 +388,45 @@ export const SIDEBAR_CSS = `
   font-size: 11px;
   color: #71717a;
 }
+
+/* Sharpen link — bottom of sidebar, separated from sections */
+.sb-sharpen-link-wrap {
+  margin: 24px 8px 16px;
+  padding-top: 16px;
+  border-top: 1px solid #27272a;
+}
+.sb-sharpen-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(45, 212, 191, 0.04);
+  border: 1px solid rgba(45, 212, 191, 0.18);
+  color: #d4d4d8;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 150ms ease;
+}
+.sb-sharpen-link:hover {
+  background: rgba(45, 212, 191, 0.1);
+  border-color: rgba(45, 212, 191, 0.4);
+  color: #f4f4f5;
+}
+.sb-sharpen-link:hover .sb-sharpen-arrow {
+  transform: translateX(3px);
+  color: #5eead4;
+}
+.sb-sharpen-icon {
+  font-size: 14px;
+  color: #2dd4bf;
+}
+.sb-sharpen-label { flex: 1; }
+.sb-sharpen-arrow {
+  font-size: 13px;
+  color: #2dd4bf;
+  transition: transform 150ms ease, color 150ms ease;
+}
 `;
