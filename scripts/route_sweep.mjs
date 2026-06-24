@@ -17,14 +17,15 @@
 //   - JavaScript runtime errors after the page loads
 //
 // Run:
-//   BASE_URL=https://dashboard.raisefn.com node scripts/route_sweep.mjs
+//   node scripts/route_sweep.mjs                              # default www.raisefn.com
 //   BASE_URL=http://localhost:3000 node scripts/route_sweep.mjs   # local dev
 //
-// NOTE: raisefn.com is the marketing site (different Vercel project) and
-// will intercept /brain/* with its waitlist middleware. Point BASE_URL at
-// the actual dashboard host where these routes live.
+// IMPORTANT: use www.raisefn.com (not the apex). The apex 307s to www
+// for all paths — a sweep against apex marks every redirect destination
+// as "wrong" because it sees the apex→www hop instead of the real Next.js
+// redirect rule.
 
-const BASE_URL = (process.env.BASE_URL || "http://localhost:3000").replace(/\/$/, "");
+const BASE_URL = (process.env.BASE_URL || "https://www.raisefn.com").replace(/\/$/, "");
 
 const PASS = "\x1b[32m✓\x1b[0m";
 const FAIL = "\x1b[31m✗\x1b[0m";
@@ -113,7 +114,7 @@ async function main() {
   section("2. SEO / discovery files");
   await expect200("/robots.txt", "GET /robots.txt");
   await expect200("/sitemap.xml", "GET /sitemap.xml");
-  await expect200("/feed.xml", "GET /feed.xml");
+  await expect200("/raise-intel/feed.xml", "GET /raise-intel/feed.xml");
   await expect200("/llms.txt", "GET /llms.txt");
 
   section("3. Investor signup (V2)");
@@ -166,7 +167,7 @@ async function main() {
   section("8. Content sanity checks");
   await expectContains("/llms.txt", "raise(fn)", "/llms.txt mentions raise(fn)");
   await expectContains("/robots.txt", "Sitemap", "/robots.txt declares Sitemap");
-  await expectContains("/feed.xml", "<rss", "/feed.xml is RSS");
+  await expectContains("/raise-intel/feed.xml", "<rss", "/raise-intel/feed.xml is RSS");
 
   // Summary
   const pass = results.filter(r => r.ok).length;
