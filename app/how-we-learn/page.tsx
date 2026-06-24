@@ -417,7 +417,7 @@ export default function HowWeLearnPage() {
             href="/signup"
             className="inline-flex items-center justify-center rounded-full bg-orange-600 px-10 py-4 text-sm font-bold tracking-wide text-white transition-all hover:bg-orange-500 hover:scale-105 shadow-2xl shadow-orange-900/40"
           >
-            Set up your raise
+            Start your raise →
           </Link>
           <div className="mt-10">
             <Link

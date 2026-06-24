@@ -316,7 +316,7 @@ export default function AgentsPage() {
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-sm text-zinc-500 mb-4">While you wait</p>
             <p className="text-zinc-300 mb-6">
-              raise(fn)&apos;s own brain is already live for founders and
+              The raise(fn) agent is already live for founders and
               investors. Start there — your assistant will plug in when it&apos;s
               ready.
             </p>

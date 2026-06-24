@@ -58,8 +58,8 @@ function HeroRings() {
   );
 }
 
-/* ── Brain Demo ── */
-function BrainDemo() {
+/* ── Execution Demo ── */
+function ExecutionDemo() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState(0);
@@ -78,11 +78,13 @@ function BrainDemo() {
   useEffect(() => {
     if (!visible) return;
     const timers = [
-      setTimeout(() => setStep(1), 400),   // question appears
-      setTimeout(() => setStep(2), 1800),  // thinking
-      setTimeout(() => setStep(3), 2800),  // readiness
-      setTimeout(() => setStep(4), 3600),  // investors
-      setTimeout(() => setStep(5), 4400),  // strategy
+      setTimeout(() => setStep(1), 400),   // founder question
+      setTimeout(() => setStep(2), 1800),  // working indicator
+      setTimeout(() => setStep(3), 2800),  // overdue list
+      setTimeout(() => setStep(4), 4200),  // founder picks Sarah
+      setTimeout(() => setStep(5), 5400),  // draft card appears
+      setTimeout(() => setStep(6), 7200),  // founder says send
+      setTimeout(() => setStep(7), 8200),  // sent confirmation
     ];
     return () => timers.forEach(clearTimeout);
   }, [visible]);
@@ -100,124 +102,134 @@ function BrainDemo() {
             <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
             <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
           </div>
-          <span className="ml-2 text-[11px] text-zinc-600 font-medium tracking-wide">raise(fn) brain</span>
-          <span className="ml-auto text-[10px] text-orange-500/60 font-semibold tracking-widest uppercase">live</span>
+          <span className="ml-2 text-[11px] text-zinc-600 font-medium tracking-wide">raise(fn) · live</span>
+          <span className="ml-auto text-[10px] text-orange-500/60 font-semibold tracking-widest uppercase">agent</span>
         </div>
 
-        <div className="p-5 sm:p-7 space-y-5">
-          {/* Question */}
+        <div className="p-5 sm:p-7 space-y-4">
+          {/* Founder Q1 */}
           <div
-            className="transition-all duration-700"
+            className="flex justify-end transition-all duration-500"
             style={{ opacity: step >= 1 ? 1 : 0, transform: step >= 1 ? "translateY(0)" : "translateY(8px)" }}
           >
-            <div className="flex items-start gap-3">
-              <span className="shrink-0 mt-0.5 h-5 w-5 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[10px] text-zinc-500">Q</span>
-              <p className="text-sm text-zinc-300 leading-relaxed">
-                We&apos;re building an AI code review platform. $1.8M ARR, 45% MoM growth, 2,400 GitHub stars,
-                npm package at 52K weekly downloads. We want to raise a $12M Series A.
-                <span className="text-white font-medium"> Are we actually ready? What&apos;s the strongest way to position this, and what are we not seeing?</span>
-              </p>
+            <div className="rounded-2xl bg-orange-950/40 border border-orange-900/40 px-4 py-2.5 max-w-[80%]">
+              <p className="text-sm text-zinc-200">who do I owe a reply to?</p>
             </div>
           </div>
 
-          {/* Thinking indicator */}
+          {/* Working indicator */}
           {step === 2 && (
-            <div className="flex items-center gap-2 pl-8">
+            <div className="flex items-center gap-2 pl-1">
               <span className="flex gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-orange-500/60 animate-pulse" />
-                <span className="h-1.5 w-1.5 rounded-full bg-orange-500/40 animate-pulse" style={{ animationDelay: "0.2s" }} />
-                <span className="h-1.5 w-1.5 rounded-full bg-orange-500/20 animate-pulse" style={{ animationDelay: "0.4s" }} />
+                <span className="h-1.5 w-1.5 rounded-full bg-teal-400/70 animate-pulse" />
+                <span className="h-1.5 w-1.5 rounded-full bg-teal-400/50 animate-pulse" style={{ animationDelay: "0.2s" }} />
+                <span className="h-1.5 w-1.5 rounded-full bg-teal-400/30 animate-pulse" style={{ animationDelay: "0.4s" }} />
               </span>
-              <span className="text-[11px] text-zinc-500">benchmarking against 1,847 dev-tools Series As from the last 24 months...</span>
+              <span className="text-[11px] text-zinc-500">scanning your pipeline…</span>
             </div>
           )}
 
-          {/* Response */}
+          {/* Agent reply 1: overdue list */}
           {step >= 3 && (
-            <div className="space-y-5 pl-8">
-              {/* Readiness Evaluation */}
-              <div
-                className="transition-all duration-700"
-                style={{ opacity: step >= 3 ? 1 : 0, transform: step >= 3 ? "translateY(0)" : "translateY(8px)" }}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-teal-400">Readiness evaluation</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950/50 text-emerald-400 border border-emerald-800/30 font-semibold">READY — WITH FLAGS</span>
-                </div>
-                {/* Metric benchmarks */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+            <div
+              className="flex justify-start transition-all duration-500"
+              style={{ opacity: step >= 3 ? 1 : 0, transform: step >= 3 ? "translateY(0)" : "translateY(8px)" }}
+            >
+              <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 px-4 py-3 max-w-[88%]">
+                <p className="text-sm text-zinc-300 leading-relaxed mb-3">Three replies overdue:</p>
+                <div className="space-y-2 mb-3">
                   {[
-                    { metric: "ARR", value: "$1.8M", percentile: "top 18%", status: "strong" },
-                    { metric: "Growth", value: "45% MoM", percentile: "top 4%", status: "flag" },
-                    { metric: "Dev adoption", value: "52K/wk npm", percentile: "top 11%", status: "strong" },
-                    { metric: "Community", value: "2,400 stars", percentile: "top 22%", status: "moderate" },
-                  ].map((m) => (
-                    <div key={m.metric} className="rounded border border-zinc-800/50 bg-zinc-900/20 px-3 py-2">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">{m.metric}</span>
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${
-                          m.status === "strong" ? "bg-emerald-950/50 text-emerald-400 border border-emerald-800/30" :
-                          m.status === "flag" ? "bg-amber-950/50 text-amber-400 border border-amber-800/30" :
-                          "bg-zinc-800/50 text-zinc-400 border border-zinc-700/30"
-                        }`}>{m.percentile}</span>
+                    { name: "Sarah Chen", firm: "Greenoak Capital", days: 9, ask: "asked for cohort retention" },
+                    { name: "Marcus Hill", firm: "Vault Ventures", days: 6, ask: "wants the deeper financial model" },
+                    { name: "Priya Sharma", firm: "Hummingbird Partners", days: 4, ask: "wanted three founder references" },
+                  ].map((p) => (
+                    <div key={p.name} className="rounded border border-zinc-800/60 bg-zinc-900/30 px-3 py-2 flex items-start gap-3">
+                      <span className="shrink-0 mt-1 inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs">
+                          <span className="text-zinc-200 font-semibold">{p.name}</span>
+                          <span className="text-zinc-500"> · {p.firm}</span>
+                        </p>
+                        <p className="text-[11px] text-zinc-500 mt-0.5">{p.days} days · {p.ask}</p>
                       </div>
-                      <span className="text-sm font-semibold text-zinc-200">{m.value}</span>
                     </div>
                   ))}
                 </div>
-                <p className="text-sm text-zinc-400 leading-relaxed">
-                  <span className="text-amber-400 font-medium">Growth flag:</span> 45% MoM is exceptional
-                  but only 2 months sustained. Of dev-tools companies that showed 40%+ growth
-                  for &lt;3 months, <span className="text-zinc-200">61% saw it moderate to 15–25% by month 4.</span>{" "}
-                  Investors will probe this hard. Prepare the cohort curve and leading indicators
-                  that suggest this holds — daily active users, expansion revenue, or usage frequency.
-                </p>
+                <p className="text-sm text-zinc-300 leading-relaxed">I drafted all three. Want to look at Sarah&apos;s first?</p>
               </div>
+            </div>
+          )}
 
-              {/* Narrative Analysis */}
-              <div
-                className="transition-all duration-700"
-                style={{ opacity: step >= 4 ? 1 : 0, transform: step >= 4 ? "translateY(0)" : "translateY(8px)" }}
-              >
-                <p className="text-[10px] font-bold uppercase tracking-widest text-orange-400 mb-3">Narrative analysis</p>
-                <div className="rounded-lg border border-zinc-800/60 bg-zinc-900/30 px-4 py-3 mb-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-950/50 text-red-400 border border-red-800/30 font-semibold">WEAK FRAME</span>
-                    <span className="text-xs text-zinc-400">&quot;AI code review platform&quot;</span>
+          {/* Founder Q2 */}
+          {step >= 4 && (
+            <div
+              className="flex justify-end transition-all duration-500"
+              style={{ opacity: step >= 4 ? 1 : 0, transform: step >= 4 ? "translateY(0)" : "translateY(8px)" }}
+            >
+              <div className="rounded-2xl bg-orange-950/40 border border-orange-900/40 px-4 py-2.5 max-w-[80%]">
+                <p className="text-sm text-zinc-200">yes show me Sarah&apos;s</p>
+              </div>
+            </div>
+          )}
+
+          {/* Agent reply 2: draft card */}
+          {step >= 5 && (
+            <div
+              className="flex justify-start transition-all duration-500"
+              style={{ opacity: step >= 5 ? 1 : 0, transform: step >= 5 ? "translateY(0)" : "translateY(8px)" }}
+            >
+              <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 px-4 py-3 max-w-[88%]">
+                <div className="rounded-lg border border-teal-800/40 bg-zinc-950/60 overflow-hidden">
+                  <div className="px-3 py-2 border-b border-teal-800/30 flex items-center justify-between">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-teal-400">Draft</span>
+                    <span className="text-[10px] text-zinc-500">to sarah@greenoak.vc</span>
                   </div>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    14 companies pitched &quot;AI code review&quot; in the last 6 months. 3 raised. Category is crowded
-                    and the framing triggers pattern matching against CodeRabbit, Codium, and Qodo.
-                  </p>
+                  <div className="px-3 py-3 space-y-1.5">
+                    <p className="text-[11px] text-zinc-500"><span className="text-zinc-600">Subject —</span> Cohort retention follow-up</p>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      Sarah,<br/>
+                      Thanks for the conversation Tuesday. You asked about 3/6/12-month cohort retention from the early-adopter cohort.
+                      Here&apos;s the breakdown: <span className="text-zinc-200">87% / 73% / 68% retained.</span> The drop between 3 and 6 months
+                      is concentrated in two specific use cases — happy to walk through the segmentation when you have 15 minutes…
+                    </p>
+                  </div>
                 </div>
-                <div className="rounded-lg border border-zinc-800/60 bg-zinc-900/30 px-4 py-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-950/50 text-emerald-400 border border-emerald-800/30 font-semibold">STRONGER FRAME</span>
-                    <span className="text-xs text-zinc-400">&quot;Developer workflow intelligence&quot;</span>
-                  </div>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Your npm adoption data tells a different story — developers are using this <span className="text-zinc-200">inside CI/CD pipelines,
-                    not just for reviews.</span> That&apos;s infrastructure, not tooling. Infrastructure companies
-                    raised at <span className="text-zinc-200">1.8x higher valuations</span> than point solutions in this sector last quarter. Reframe around
-                    where the usage actually lives.
-                  </p>
+                <div className="mt-3 flex gap-2">
+                  <button className="text-[11px] font-semibold px-3 py-1.5 rounded border border-teal-700/50 bg-teal-950/40 text-teal-300">
+                    Approve and send
+                  </button>
+                  <button className="text-[11px] font-semibold px-3 py-1.5 rounded border border-zinc-800 bg-zinc-900/40 text-zinc-400">
+                    Edit
+                  </button>
                 </div>
               </div>
+            </div>
+          )}
 
-              {/* Signal reading */}
-              <div
-                className="transition-all duration-700"
-                style={{ opacity: step >= 5 ? 1 : 0, transform: step >= 5 ? "translateY(0)" : "translateY(8px)" }}
-              >
-                <p className="text-[10px] font-bold uppercase tracking-widest text-violet-400 mb-2">What you&apos;re not seeing</p>
-                <p className="text-sm text-zinc-400 leading-relaxed">
-                  <span className="text-zinc-200">Two competitors in your space filed Form Ds in the last 45 days</span> —
-                  one for $8M (Seed extension), one for $18M (Series A). The $18M raise hasn&apos;t been
-                  announced yet. This creates urgency: investors who passed on those deals are actively
-                  looking for an alternative bet in this category right now. But it also means you&apos;ll be
-                  compared on metrics. Your npm traction is <span className="text-zinc-200">3x stronger</span> than
-                  both — lead with that.
+          {/* Founder Q3 */}
+          {step >= 6 && (
+            <div
+              className="flex justify-end transition-all duration-500"
+              style={{ opacity: step >= 6 ? 1 : 0, transform: step >= 6 ? "translateY(0)" : "translateY(8px)" }}
+            >
+              <div className="rounded-2xl bg-orange-950/40 border border-orange-900/40 px-4 py-2.5 max-w-[80%]">
+                <p className="text-sm text-zinc-200">send it</p>
+              </div>
+            </div>
+          )}
+
+          {/* Agent reply 3: sent confirmation */}
+          {step >= 7 && (
+            <div
+              className="flex justify-start transition-all duration-500"
+              style={{ opacity: step >= 7 ? 1 : 0, transform: step >= 7 ? "translateY(0)" : "translateY(8px)" }}
+            >
+              <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 px-4 py-3 max-w-[88%]">
+                <p className="text-sm text-zinc-300 leading-relaxed mb-2">
+                  <span className="inline-block mr-1.5 text-teal-400">✓</span>
+                  Sent to Sarah at 11:42 AM.
                 </p>
+                <p className="text-[11px] text-zinc-500">Logged in pipeline · set follow-up check for 7 days · queued the same review for Marcus and Priya.</p>
               </div>
             </div>
           )}
@@ -233,7 +245,7 @@ function StackDiagram() {
     {
       layer: 1,
       label: "Eyes & Ears",
-      headline: "How the Brain knows what it knows.",
+      headline: "How the agent knows what it knows.",
       interaction: "The data layer.",
       desc: "SEC filings, accelerator directories, investor registries, traction signals — standardized, cross-referenced, and updated continuously. Free and open source.",
       color: "#2dd4bf",
@@ -244,27 +256,27 @@ function StackDiagram() {
     },
     {
       layer: 2,
-      label: "The Brain",
-      headline: "Fundraising intelligence for your raise.",
-      interaction: "Every conversation builds the dataset.",
-      desc: "Every raise that runs through it — the meetings, the passes, the ghosting, the terms, the close — becomes data. Not announcements. Not press releases. What actually happened, from the founder's side. That dataset doesn't exist anywhere else. And every raise makes the next one sharper: which investors actually write checks at your stage, how long they take, what makes them pass, and what makes them move — then calibrates on what actually worked, not what sounded right in training data.",
+      label: "The Agent",
+      headline: "Runs your raise alongside you.",
+      interaction: "Match. Brief. Send. Track. Close.",
+      desc: "The founder-facing AI fundraising agent. Analyzes your deck, ranks the right investors, drafts briefs and outreach, tracks every reply, debriefs meetings, and closes the round with you. Every raise that runs through it makes the next one sharper — observed-truth data on who actually writes checks, how long they take, and what makes them move.",
       color: "#f97316",
       borderColor: "rgba(249,115,22,0.25)",
       badge: "THE PRODUCT",
       badgeColor: "text-orange-400 border-orange-700/50",
-      href: "/brain",
+      href: "/founders",
     },
     {
       layer: 3,
-      label: "Developer SDK",
-      headline: "For tools that embed fundraising intelligence.",
-      interaction: "Build on it.",
-      desc: "REST API and native integrations for LangChain, CrewAI, and Claude. Build fundraising intelligence into your product with a single call. x402 native — agents discover and pay autonomously, no key required.",
+      label: "Bring your AI",
+      headline: "Connect ChatGPT, Claude, or your own agent.",
+      interaction: "Query raise(fn) from anywhere.",
+      desc: "Your assistant gets read-access to your raise(fn) data — pipeline, briefs, matches, meeting notes. Ask in natural language; data flows from raise(fn). MCP-compatible. Founders and investors both supported.",
       color: "#a78bfa",
       borderColor: "rgba(167,139,250,0.25)",
-      badge: "OPEN SOURCE",
+      badge: "COMING SOON",
       badgeColor: "text-violet-400 border-violet-700/50",
-      href: "/sdk",
+      href: "/agents",
     },
   ];
 
@@ -365,10 +377,24 @@ export default function LandingPage() {
             <span className="text-orange-500">raise</span>
             <span className="text-teal-400">(fn)</span>
           </h1>
-          <p className="mx-auto mt-6 max-w-lg text-lg text-zinc-400">
-            Fundraising intelligence that gets smarter with every raise.
+          <p className="mx-auto mt-8 max-w-2xl text-2xl sm:text-3xl font-medium text-white leading-tight">
+            The AI Fundraising Agent
           </p>
-          <div className="mt-16 flex justify-center animate-fade-in" style={{ animationDelay: "1s" }}>
+          <p className="mx-auto mt-4 max-w-lg text-lg text-zinc-400">
+            You stay in control. The agent does the work.
+          </p>
+          <div className="mt-10 flex flex-col items-center gap-3 animate-fade-in" style={{ animationDelay: "0.6s" }}>
+            <Link
+              href="/signup"
+              className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
+            >
+              Drop your deck →
+            </Link>
+            <p className="text-xs text-zinc-600">
+              Free to start. Your deck stays private.
+            </p>
+          </div>
+          <div className="mt-12 flex justify-center animate-fade-in" style={{ animationDelay: "1.2s" }}>
             <svg
               className="text-zinc-600 animate-bounce"
               style={{ animationDuration: "2s" }}
@@ -387,7 +413,45 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Brain Demo ── */}
+      {/* ── What we do ── */}
+      <section className="relative py-32 px-4">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl text-center mb-16">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-500 mb-4">
+              What we do
+            </p>
+            <h2 className="text-3xl font-bold sm:text-4xl">
+              <span className="text-white">Match. Brief. Send. Track. Close.</span>
+              <br />
+              <span className="text-teal-400">One agent for the whole raise.</span>
+            </h2>
+          </div>
+          <div className="mx-auto max-w-3xl grid gap-y-7 gap-x-10 sm:grid-cols-2">
+            {[
+              { verb: "Analyzes", title: "your deck", desc: "Slide-by-slide critique. Narrative gaps. Comp rounds at your stage." },
+              { verb: "Matches", title: "you to 17K investors", desc: "Ranked by actual fit. Stage, sector, check size, who's deploying right now." },
+              { verb: "Drafts", title: "investor briefs", desc: "One-page founder briefs with your traction, narrative, and ask. Shareable link." },
+              { verb: "Drafts", title: "your outreach", desc: "Per-investor angle. Warm-intro path if one exists. Approve and send." },
+              { verb: "Preps", title: "every meeting", desc: "Brief on the investor, prior conversation notes, what they'll probe." },
+              { verb: "Debriefs", title: "after each call", desc: "Captures what they asked, what they liked, what they passed on. Updates your pipeline." },
+              { verb: "Tracks", title: "your pipeline", desc: "Every status, every commitment, every follow-up. Auto-updated from your conversations." },
+              { verb: "Closes", title: "the round with you", desc: "Term sheet review. Term comparison. Comms with the room. The whole close." },
+            ].map((cap) => (
+              <div key={cap.title} className="flex items-start gap-3">
+                <span className="shrink-0 mt-0.5 inline-flex items-center justify-center w-1.5 h-1.5 rounded-full bg-teal-400" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-base font-semibold text-white leading-snug">
+                    <span className="text-teal-400">{cap.verb}</span> {cap.title}
+                  </p>
+                  <p className="text-sm text-zinc-500 leading-relaxed mt-0.5">{cap.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </FadeInSection>
+      </section>
+
+      {/* ── Demo ── */}
       <section className="relative py-32 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center mb-12">
@@ -395,11 +459,54 @@ export default function LandingPage() {
               See it work
             </p>
             <h2 className="text-3xl font-bold sm:text-4xl">
-              <span className="text-white">Ask a real question.</span>{" "}
-              <span className="text-teal-400">Get a real answer.</span>
+              <span className="text-white">The agent doesn&apos;t advise.</span>{" "}
+              <span className="text-teal-400">It executes.</span>
             </h2>
           </div>
-          <BrainDemo />
+          <ExecutionDemo />
+        </FadeInSection>
+      </section>
+
+      {/* ── Why the agent exists: the truth + competitor knockouts ── */}
+      <section className="relative py-32 px-4">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl text-center mb-12">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
+              Why the agent exists
+            </p>
+            <h2 className="text-3xl font-bold sm:text-4xl mb-6">
+              <span className="text-white">Most rounds die in the follow-up.</span>
+            </h2>
+            <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+              The pitch is 10% of the raise. The pipeline is 90%. The boring 90% is where rounds get killed — slow follow-ups, missed signals, dropped threads, sloppy debriefs.
+              <span className="text-zinc-200"> The agent runs the 90%.</span> You handle the 10%.
+            </p>
+          </div>
+
+          <div className="mx-auto max-w-3xl mt-20">
+            <div className="text-center mb-10">
+              <h3 className="text-2xl font-bold sm:text-3xl">
+                <span className="text-white">No other tool runs the 90%.</span>
+              </h3>
+            </div>
+            <div className="space-y-3">
+              {[
+                { tool: "A CRM (Streak, HubSpot, Affinity)", knockout: "Tracks what you've already done. Doesn't decide what to do next." },
+                { tool: "A database (PitchBook, Crunchbase)", knockout: "Hands you a list. You write the messages and run the pipeline." },
+                { tool: "ChatGPT", knockout: "Will draft you anything. Doesn't know your investors or your pipeline." },
+                { tool: "DocSend", knockout: "Tells you who opened the deck. Doesn't tell you what to send next." },
+                { tool: "A spreadsheet + Gmail", knockout: "The default. Falls apart by investor 30." },
+              ].map((row) => (
+                <div
+                  key={row.tool}
+                  className="rounded-xl border border-zinc-800 bg-zinc-900/30 px-5 py-4 sm:px-6 sm:py-5 flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-6"
+                >
+                  <p className="text-sm font-semibold text-white sm:w-64 shrink-0">{row.tool}</p>
+                  <p className="text-sm text-zinc-500 leading-relaxed flex-1">{row.knockout}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </FadeInSection>
       </section>
 
@@ -408,75 +515,13 @@ export default function LandingPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl mb-12">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
-              How it works
+              How it's built
             </p>
             <h2 className="text-3xl font-bold sm:text-4xl">
-              <span className="text-white">The tool founders never had. Now they do.</span>
+              <span className="text-white">The data underneath. The agent on top. Open to other AIs.</span>
             </h2>
           </div>
           <StackDiagram />
-        </FadeInSection>
-      </section>
-
-      {/* ── Competitive Positioning ── */}
-      <section className="relative py-32 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl text-center mb-16">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
-              The difference
-            </p>
-            <h2 className="text-3xl font-bold sm:text-4xl">
-              <span className="text-white">Data platforms are rearview mirrors.</span>
-              <br />
-              <span className="text-teal-400">This is GPS.</span>
-            </h2>
-          </div>
-          <div className="mx-auto max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12">
-            <div>
-              <p className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-6">
-                Rearview mirror
-              </p>
-              <div className="space-y-4">
-                {[
-                  "Pay $20K–$50K/yr to search a database",
-                  "Build your own target list in a spreadsheet",
-                  "Stale data — no idea who's deploying right now",
-                  "Same list your competitor is building",
-                  "You are the analyst",
-                ].map((text) => (
-                  <p
-                    key={text}
-                    className="text-sm text-zinc-500 flex items-start gap-2"
-                  >
-                    <span className="text-zinc-600 mt-0.5">—</span>
-                    {text}
-                  </p>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-teal-400 uppercase tracking-wider mb-6">
-                raise(fn)
-              </p>
-              <div className="space-y-4">
-                {[
-                  "\"Who should lead my Series A?\" — 15 ranked matches",
-                  "Live data — who's deploying this quarter, not last year",
-                  "Flags your metrics are weak before you pitch",
-                  "Sequences outreach so the right investor moves first",
-                  "The analyst is built in",
-                ].map((text) => (
-                  <p
-                    key={text}
-                    className="text-sm text-zinc-300 flex items-start gap-2"
-                  >
-                    <span className="text-teal-400 mt-0.5">—</span>
-                    {text}
-                  </p>
-                ))}
-              </div>
-            </div>
-          </div>
         </FadeInSection>
       </section>
 
@@ -496,7 +541,7 @@ export default function LandingPage() {
             {[
               {
                 title: "More founders raise → real outcome data",
-                desc: "Every raise generates data no model can train on — who responded, who passed, who led, what terms closed. The Brain calibrates on results. That dataset doesn't exist anywhere else, and every raise that runs through raise(fn) makes it smarter for the next one.",
+                desc: "Every raise generates data no model can train on — who responded, who passed, who led, what terms closed. The agent calibrates on results. That dataset doesn't exist anywhere else, and every raise that runs through raise(fn) makes the next one sharper.",
                 color: "#2dd4bf",
               },
               {
@@ -506,12 +551,12 @@ export default function LandingPage() {
               },
               {
                 title: "Persistent context → switching costs",
-                desc: "The Brain remembers your raise — metrics, investor conversations, pitch iterations. Walk away and you start from zero somewhere else.",
+                desc: "The agent remembers your raise — metrics, investor conversations, pitch iterations, every conversation in your pipeline. Walk away and you start from zero somewhere else.",
                 color: "#a78bfa",
               },
               {
-                title: "Tool integrations → infrastructure lock-in",
-                desc: "Once a product embeds raise(fn) for fundraising intelligence, it becomes infrastructure. Ripping out a working API is a cost nobody pays voluntarily.",
+                title: "Other agents connect → infrastructure lock-in",
+                desc: "When ChatGPT, Claude, or a custom agent connects to raise(fn) for fundraising data, raise(fn) becomes infrastructure. Ripping out a working integration is a cost nobody pays voluntarily.",
                 color: "#fbbf24",
               },
             ].map((item) => (
@@ -521,49 +566,12 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-        </FadeInSection>
-      </section>
-
-      {/* ── What the Brain Does ── */}
-      <section className="relative py-32 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl text-center mb-16">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-500 mb-4">
-              The brain
-            </p>
-            <h2 className="text-3xl font-bold text-white sm:text-4xl mb-6">
-              Fundraising intelligence, not guesswork
-            </h2>
-          </div>
-          <div className="mx-auto max-w-3xl grid gap-y-8 gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { title: "Investor Targeting", desc: "Ranked by actual fit — sector, stage, activity, check size. Not a directory.", color: "#2dd4bf" },
-              { title: "Signal Reading", desc: "Decode investor behavior into actionable signals from real pattern data.", color: "#fb923c" },
-              { title: "Term Sheet Intel", desc: "Market-rate terms for your stage and sector. Know where you have leverage.", color: "#a78bfa" },
-              { title: "Readiness Evaluation", desc: "Your metrics vs. projects that raised at your stage. Know where you stand.", color: "#34d399" },
-              { title: "Competitive Raise Intel", desc: "Who else in your sector is raising, at what valuation, with what traction.", color: "#86efac" },
-              { title: "Outreach Guidance", desc: "Who to contact, what angle, who can intro. Per-investor strategy.", color: "#f87171" },
-            ].map((cap) => (
-              <div key={cap.title} className="text-center">
-                <p
-                  className="text-sm font-semibold mb-1"
-                  style={{ color: cap.color }}
-                >
-                  {cap.title}
-                </p>
-                <p className="text-sm text-zinc-500">{cap.desc}</p>
-              </div>
-            ))}
-          </div>
-          <p className="mx-auto max-w-3xl mt-10 text-center text-sm text-zinc-600">
-            Plus narrative analysis, valuation calibration, co-investor sequencing, pitch deck analysis, LP intelligence, and more.
-          </p>
-          <div className="mx-auto max-w-3xl mt-8 text-center">
+          <div className="mx-auto max-w-2xl mt-12 text-center">
             <Link
-              href="/brain"
-              className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30"
+              href="/how-we-learn"
+              className="text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors"
             >
-              See all 15 capabilities
+              How the agent learns →
             </Link>
           </div>
         </FadeInSection>
@@ -611,25 +619,25 @@ export default function LandingPage() {
               Built for
             </p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              Founders raising. Tools building. Investors deploying.
+              Founders raising. Investors connecting. Tools building.
             </h2>
           </div>
           <div className="mx-auto max-w-3xl grid gap-6 sm:grid-cols-3 text-center">
             {[
               {
                 who: "Founders raising",
-                what: "Know who to pitch, when you're ready, and what terms to expect. Use it for your raise, not forever.",
+                what: "The agent runs your raise — matches, briefs, outreach, follow-ups, close. You stay in the room. Use it for your raise, not forever.",
                 color: "#2dd4bf",
               },
               {
-                who: "Tools building",
-                what: "Embed fundraising intelligence in your product. One API, full raise coverage.",
-                color: "#a78bfa",
+                who: "Investors connecting",
+                what: "Be in the network the agent recommends from. Plug your own ChatGPT or Claude in to query deal flow, draft notes, follow up — your tools, your data.",
+                color: "#f97316",
               },
               {
-                who: "Investors deploying",
-                what: "Source deals, benchmark terms, track competitive dynamics, and monitor portfolio signals — all from live data.",
-                color: "#f97316",
+                who: "Tools building",
+                what: "MCP-compatible. Embed raise(fn) data + agent capabilities in your product. One connection, full raise coverage.",
+                color: "#a78bfa",
               },
             ].map((item) => (
               <div key={item.who}>
@@ -661,17 +669,17 @@ export default function LandingPage() {
             {[
               {
                 who: "Today",
-                what: "Founders use raise(fn) directly. The Brain knows your market, your investors, and your raise.",
+                what: "The agent runs your raise. Every raise that runs through it makes the next one sharper — observed-truth data on who actually writes checks, how long they take, and what makes them move.",
                 color: "#2dd4bf",
               },
               {
-                who: "Tomorrow",
-                what: "Your AI assistant calls raise(fn) on your behalf. Same intelligence, agent-mediated.",
+                who: "Next",
+                what: "Deeper integration with your stack. Gmail and Calendar so the agent sends from your inbox, schedules from your calendar, debriefs from your meetings — your tools, the agent's reach.",
                 color: "#a78bfa",
               },
               {
-                who: "The future",
-                what: "Agents raise capital autonomously. raise(fn) is the context layer the whole ecosystem runs on.",
+                who: "Then",
+                what: "raise(fn) becomes the platform that powers fundraising AI. Any agent, any assistant, queries raise(fn) for the data and intelligence underneath.",
                 color: "#f97316",
               },
             ].map((item) => (
@@ -694,23 +702,26 @@ export default function LandingPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
-              Ready to raise?
+              Drop your deck. The agent takes it from there.
             </h2>
-            <p className="text-zinc-500 mb-10">
-              Sign up free. Set up your raise.
+            <p className="text-zinc-500 mb-2">
+              Free to start. No credit card. The agent gets to work the second you upload.
+            </p>
+            <p className="text-zinc-600 text-sm mb-10">
+              Your deck stays private. Never shared. Never used to train.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="/signup"
                 className="rounded-full border border-orange-700/50 bg-orange-950/30 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/40 hover:text-orange-200"
               >
-                Set Up Your Raise
+                Drop your deck →
               </Link>
               <Link
-                href="/tracker"
+                href="/agents"
                 className="rounded-full border border-zinc-700/50 bg-zinc-900/30 px-8 py-3 text-sm font-medium text-zinc-400 transition-all hover:border-zinc-500 hover:bg-zinc-800/40 hover:text-zinc-300"
               >
-                Explore the data
+                Connect your AI
               </Link>
             </div>
           </div>
