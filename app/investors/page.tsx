@@ -221,11 +221,11 @@ export default function InvestorsPage() {
                 01 — Capture
               </p>
               <h2 className="text-3xl font-bold text-white mb-5 leading-tight">
-                Founder profiles built by the brain, not by a form.
+                Founder profiles built by the agent, not by a form.
               </h2>
               <p className="text-zinc-400 leading-relaxed mb-4">
                 We don&apos;t ask founders to fill in 47 fields they&apos;ll
-                abandon halfway through. The brain captures everything —
+                abandon halfway through. The agent captures everything —
                 sector intent, MRR, growth rate, team shape, burn, ICP,
                 current investors, stage edge cases — by working alongside
                 them on the raise.
@@ -331,7 +331,7 @@ export default function InvestorsPage() {
               </h2>
               <p className="text-zinc-400 leading-relaxed mb-4">
                 Every founder raising in your sectors gets profiled by the
-                brain. Most don&apos;t pass the thesis-matching engine.
+                agent. Most don&apos;t pass the thesis-matching engine.
                 The ones who do go through a quality review by raise(fn)
                 Team — traction quality, founder coachability, deal
                 sanity.
@@ -386,7 +386,7 @@ export default function InvestorsPage() {
               </p>
               <div className="space-y-3.5">
                 {[
-                  "Founder profiles built by the brain — deep, structured, honest",
+                  "Founder profiles built by the agent — deep, structured, honest",
                   "Thesis-matched alerts only when fit is tight",
                   "Stage edge cases handled (sector-agnostic, participation, regional)",
                   "Warm intros brokered by the raise(fn) Team — no cold inbound",
@@ -463,7 +463,7 @@ export default function InvestorsPage() {
               Get tighter founder matches.
             </h2>
             <p className="text-zinc-400 mb-8 max-w-xl mx-auto">
-              Set up your investor profile in 2 minutes. Tell the brain
+              Set up your investor profile in 2 minutes. Tell the agent
               your thesis. We&apos;ll surface the founders who fit.
             </p>
             <div className="flex items-center justify-center gap-4">
