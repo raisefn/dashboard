@@ -499,7 +499,6 @@ export default function LandingPage() {
                 { tool: "A database (PitchBook, Crunchbase)", knockout: "Hands you a list. You write the messages and run the pipeline." },
                 { tool: "ChatGPT", knockout: "Will draft you anything. Doesn't know your investors or your pipeline." },
                 { tool: "DocSend", knockout: "Tells you who opened the deck. Doesn't tell you what to send next." },
-                { tool: "A fundraising coach", knockout: "Sells advice by the hour. The agent does the work at a flat rate." },
                 { tool: "A spreadsheet + Gmail", knockout: "The default. Falls apart by investor 30." },
               ].map((row) => (
                 <div
