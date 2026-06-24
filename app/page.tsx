@@ -244,27 +244,27 @@ function StackDiagram() {
     },
     {
       layer: 2,
-      label: "The Brain",
-      headline: "Fundraising intelligence for your raise.",
-      interaction: "Every conversation builds the dataset.",
-      desc: "Every raise that runs through it — the meetings, the passes, the ghosting, the terms, the close — becomes data. Not announcements. Not press releases. What actually happened, from the founder's side. That dataset doesn't exist anywhere else. And every raise makes the next one sharper: which investors actually write checks at your stage, how long they take, what makes them pass, and what makes them move — then calibrates on what actually worked, not what sounded right in training data.",
+      label: "The Agent",
+      headline: "Runs your raise alongside you.",
+      interaction: "Match. Brief. Send. Track. Close.",
+      desc: "The founder-facing AI fundraising agent. Analyzes your deck, ranks the right investors, drafts briefs and outreach, tracks every reply, debriefs meetings, and closes the round with you. Every raise that runs through it makes the next one sharper — observed-truth data on who actually writes checks, how long they take, and what makes them move.",
       color: "#f97316",
       borderColor: "rgba(249,115,22,0.25)",
       badge: "THE PRODUCT",
       badgeColor: "text-orange-400 border-orange-700/50",
-      href: "/brain",
+      href: "/founders",
     },
     {
       layer: 3,
-      label: "Developer SDK",
-      headline: "For tools that embed fundraising intelligence.",
-      interaction: "Build on it.",
-      desc: "REST API and native integrations for LangChain, CrewAI, and Claude. Build fundraising intelligence into your product with a single call. x402 native — agents discover and pay autonomously, no key required.",
+      label: "Bring your AI",
+      headline: "Connect ChatGPT, Claude, or your own agent.",
+      interaction: "Query raise(fn) from anywhere.",
+      desc: "Your assistant gets read-access to your raise(fn) data — pipeline, briefs, matches, meeting notes. Ask in natural language; data flows from raise(fn). MCP-compatible. Founders and investors both supported.",
       color: "#a78bfa",
       borderColor: "rgba(167,139,250,0.25)",
-      badge: "OPEN SOURCE",
+      badge: "COMING SOON",
       badgeColor: "text-violet-400 border-violet-700/50",
-      href: "/sdk",
+      href: "/agents",
     },
   ];
 
@@ -365,8 +365,11 @@ export default function LandingPage() {
             <span className="text-orange-500">raise</span>
             <span className="text-teal-400">(fn)</span>
           </h1>
-          <p className="mx-auto mt-6 max-w-lg text-lg text-zinc-400">
-            Fundraising intelligence that gets smarter with every raise.
+          <p className="mx-auto mt-8 max-w-2xl text-2xl sm:text-3xl font-medium text-white leading-tight">
+            The AI Fundraising Agent.
+          </p>
+          <p className="mx-auto mt-4 max-w-lg text-lg text-zinc-400">
+            You stay in control. The agent does the work.
           </p>
           <div className="mt-16 flex justify-center animate-fade-in" style={{ animationDelay: "1s" }}>
             <svg
@@ -387,7 +390,48 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Brain Demo ── */}
+      {/* ── What we do ── */}
+      <section className="relative py-32 px-4">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl text-center mb-16">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-500 mb-4">
+              What we do
+            </p>
+            <h2 className="text-3xl font-bold sm:text-4xl">
+              <span className="text-white">Match. Brief. Send. Track. Close.</span>
+              <br />
+              <span className="text-teal-400">One agent for the whole raise.</span>
+            </h2>
+          </div>
+          <div className="mx-auto max-w-3xl grid gap-y-7 gap-x-10 sm:grid-cols-2">
+            {[
+              { verb: "Analyzes", title: "your deck", desc: "Slide-by-slide critique. Narrative gaps. Comp rounds at your stage." },
+              { verb: "Matches", title: "you to 17K investors", desc: "Ranked by actual fit. Stage, sector, check size, who's deploying right now." },
+              { verb: "Drafts", title: "investor briefs", desc: "One-page founder briefs with your traction, narrative, and ask. Shareable link." },
+              { verb: "Drafts + sends", title: "outreach", desc: "Per-investor angle. Warm-intro path if one exists. You approve, agent sends.", soon: true },
+              { verb: "Preps", title: "your meetings", desc: "Brief on the investor, prior notes, what they'll probe. 24h before each call.", soon: true },
+              { verb: "Debriefs", title: "after each meeting", desc: "Captures what they asked, what they liked, what they passed on. Updates pipeline.", soon: true },
+              { verb: "Tracks", title: "your pipeline", desc: "Every status, every commitment, every follow-up due. Auto-updated from chat + email." },
+              { verb: "Closes", title: "the round with you", desc: "Term sheet review. Term comparison. Comms with the room. Cap table updates.", soon: true },
+            ].map((cap) => (
+              <div key={cap.title} className="flex items-start gap-3">
+                <span className="shrink-0 mt-0.5 inline-flex items-center justify-center w-1.5 h-1.5 rounded-full bg-teal-400" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-base font-semibold text-white leading-snug">
+                    <span className="text-teal-400">{cap.verb}</span> {cap.title}
+                    {cap.soon && (
+                      <span className="ml-2 text-[9px] font-bold uppercase tracking-widest text-orange-400/70 align-middle">Soon</span>
+                    )}
+                  </p>
+                  <p className="text-sm text-zinc-500 leading-relaxed mt-0.5">{cap.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </FadeInSection>
+      </section>
+
+      {/* ── Demo ── */}
       <section className="relative py-32 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center mb-12">
@@ -408,10 +452,10 @@ export default function LandingPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl mb-12">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
-              How it works
+              How it's built
             </p>
             <h2 className="text-3xl font-bold sm:text-4xl">
-              <span className="text-white">The tool founders never had. Now they do.</span>
+              <span className="text-white">The data underneath. The agent on top. Open to other AIs.</span>
             </h2>
           </div>
           <StackDiagram />
@@ -524,51 +568,6 @@ export default function LandingPage() {
         </FadeInSection>
       </section>
 
-      {/* ── What the Brain Does ── */}
-      <section className="relative py-32 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl text-center mb-16">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-500 mb-4">
-              The brain
-            </p>
-            <h2 className="text-3xl font-bold text-white sm:text-4xl mb-6">
-              Fundraising intelligence, not guesswork
-            </h2>
-          </div>
-          <div className="mx-auto max-w-3xl grid gap-y-8 gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { title: "Investor Targeting", desc: "Ranked by actual fit — sector, stage, activity, check size. Not a directory.", color: "#2dd4bf" },
-              { title: "Signal Reading", desc: "Decode investor behavior into actionable signals from real pattern data.", color: "#fb923c" },
-              { title: "Term Sheet Intel", desc: "Market-rate terms for your stage and sector. Know where you have leverage.", color: "#a78bfa" },
-              { title: "Readiness Evaluation", desc: "Your metrics vs. projects that raised at your stage. Know where you stand.", color: "#34d399" },
-              { title: "Competitive Raise Intel", desc: "Who else in your sector is raising, at what valuation, with what traction.", color: "#86efac" },
-              { title: "Outreach Guidance", desc: "Who to contact, what angle, who can intro. Per-investor strategy.", color: "#f87171" },
-            ].map((cap) => (
-              <div key={cap.title} className="text-center">
-                <p
-                  className="text-sm font-semibold mb-1"
-                  style={{ color: cap.color }}
-                >
-                  {cap.title}
-                </p>
-                <p className="text-sm text-zinc-500">{cap.desc}</p>
-              </div>
-            ))}
-          </div>
-          <p className="mx-auto max-w-3xl mt-10 text-center text-sm text-zinc-600">
-            Plus narrative analysis, valuation calibration, co-investor sequencing, pitch deck analysis, LP intelligence, and more.
-          </p>
-          <div className="mx-auto max-w-3xl mt-8 text-center">
-            <Link
-              href="/brain"
-              className="rounded-full border border-orange-700/50 bg-orange-950/20 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/30"
-            >
-              See all 15 capabilities
-            </Link>
-          </div>
-        </FadeInSection>
-      </section>
-
       {/* ── Data backing ── */}
       <section className="relative py-32 px-4">
         <FadeInSection>
@@ -611,25 +610,25 @@ export default function LandingPage() {
               Built for
             </p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              Founders raising. Tools building. Investors deploying.
+              Founders raising. Investors connecting. Tools building.
             </h2>
           </div>
           <div className="mx-auto max-w-3xl grid gap-6 sm:grid-cols-3 text-center">
             {[
               {
                 who: "Founders raising",
-                what: "Know who to pitch, when you're ready, and what terms to expect. Use it for your raise, not forever.",
+                what: "The agent runs your raise — matches, briefs, outreach, follow-ups, close. You stay in the room. Use it for your raise, not forever.",
                 color: "#2dd4bf",
               },
               {
-                who: "Tools building",
-                what: "Embed fundraising intelligence in your product. One API, full raise coverage.",
-                color: "#a78bfa",
+                who: "Investors connecting",
+                what: "Be in the network the agent recommends from. Plug your own ChatGPT or Claude in to query deal flow, draft notes, follow up — your tools, your data.",
+                color: "#f97316",
               },
               {
-                who: "Investors deploying",
-                what: "Source deals, benchmark terms, track competitive dynamics, and monitor portfolio signals — all from live data.",
-                color: "#f97316",
+                who: "Tools building",
+                what: "MCP-compatible. Embed raise(fn) data + agent capabilities in your product. One connection, full raise coverage.",
+                color: "#a78bfa",
               },
             ].map((item) => (
               <div key={item.who}>
@@ -661,17 +660,17 @@ export default function LandingPage() {
             {[
               {
                 who: "Today",
-                what: "Founders use raise(fn) directly. The Brain knows your market, your investors, and your raise.",
+                what: "The agent matches, briefs, and tracks. You upload your deck, it gets to work — and gets sharper with every raise that runs through it.",
                 color: "#2dd4bf",
               },
               {
                 who: "Tomorrow",
-                what: "Your AI assistant calls raise(fn) on your behalf. Same intelligence, agent-mediated.",
+                what: "The agent sends outreach, preps and debriefs meetings, and closes the round with you. Gmail + Calendar integration ships next.",
                 color: "#a78bfa",
               },
               {
                 who: "The future",
-                what: "Agents raise capital autonomously. raise(fn) is the context layer the whole ecosystem runs on.",
+                what: "raise(fn) is the platform that powers fundraising AI. Any agent, any assistant, queries raise(fn) for the data and intelligence underneath.",
                 color: "#f97316",
               },
             ].map((item) => (
@@ -694,23 +693,23 @@ export default function LandingPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
-              Ready to raise?
+              Start your raise.
             </h2>
             <p className="text-zinc-500 mb-10">
-              Sign up free. Set up your raise.
+              Free to start. The agent gets to work as soon as you upload your deck.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="/signup"
                 className="rounded-full border border-orange-700/50 bg-orange-950/30 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/40 hover:text-orange-200"
               >
-                Set Up Your Raise
+                Start your raise
               </Link>
               <Link
-                href="/tracker"
+                href="/agents"
                 className="rounded-full border border-zinc-700/50 bg-zinc-900/30 px-8 py-3 text-sm font-medium text-zinc-400 transition-all hover:border-zinc-500 hover:bg-zinc-800/40 hover:text-zinc-300"
               >
-                Explore the data
+                Connect your AI
               </Link>
             </div>
           </div>
