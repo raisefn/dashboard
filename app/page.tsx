@@ -383,7 +383,18 @@ export default function LandingPage() {
           <p className="mx-auto mt-4 max-w-lg text-lg text-zinc-400">
             You stay in control. The agent does the work.
           </p>
-          <div className="mt-16 flex justify-center animate-fade-in" style={{ animationDelay: "1s" }}>
+          <div className="mt-10 flex flex-col items-center gap-3 animate-fade-in" style={{ animationDelay: "0.6s" }}>
+            <Link
+              href="/signup"
+              className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
+            >
+              Drop your deck →
+            </Link>
+            <p className="text-xs text-zinc-600">
+              Free to start. Your deck stays private.
+            </p>
+          </div>
+          <div className="mt-12 flex justify-center animate-fade-in" style={{ animationDelay: "1.2s" }}>
             <svg
               className="text-zinc-600 animate-bounce"
               style={{ animationDuration: "2s" }}
@@ -456,21 +467,6 @@ export default function LandingPage() {
         </FadeInSection>
       </section>
 
-      {/* ── The Stack ── */}
-      <section className="relative py-32 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl mb-12">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
-              How it's built
-            </p>
-            <h2 className="text-3xl font-bold sm:text-4xl">
-              <span className="text-white">The data underneath. The agent on top. Open to other AIs.</span>
-            </h2>
-          </div>
-          <StackDiagram />
-        </FadeInSection>
-      </section>
-
       {/* ── Why the agent exists: the truth + competitor knockouts ── */}
       <section className="relative py-32 px-4">
         <FadeInSection>
@@ -511,6 +507,21 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
+        </FadeInSection>
+      </section>
+
+      {/* ── The Stack ── */}
+      <section className="relative py-32 px-4">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl mb-12">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
+              How it's built
+            </p>
+            <h2 className="text-3xl font-bold sm:text-4xl">
+              <span className="text-white">The data underneath. The agent on top. Open to other AIs.</span>
+            </h2>
+          </div>
+          <StackDiagram />
         </FadeInSection>
       </section>
 
