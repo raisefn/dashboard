@@ -245,7 +245,7 @@ function StackDiagram() {
     {
       layer: 1,
       label: "Eyes & Ears",
-      headline: "How the Brain knows what it knows.",
+      headline: "How the agent knows what it knows.",
       interaction: "The data layer.",
       desc: "SEC filings, accelerator directories, investor registries, traction signals — standardized, cross-referenced, and updated continuously. Free and open source.",
       color: "#2dd4bf",
@@ -530,7 +530,7 @@ export default function LandingPage() {
             {[
               {
                 title: "More founders raise → real outcome data",
-                desc: "Every raise generates data no model can train on — who responded, who passed, who led, what terms closed. The Brain calibrates on results. That dataset doesn't exist anywhere else, and every raise that runs through raise(fn) makes it smarter for the next one.",
+                desc: "Every raise generates data no model can train on — who responded, who passed, who led, what terms closed. The agent calibrates on results. That dataset doesn't exist anywhere else, and every raise that runs through raise(fn) makes the next one sharper.",
                 color: "#2dd4bf",
               },
               {
@@ -540,12 +540,12 @@ export default function LandingPage() {
               },
               {
                 title: "Persistent context → switching costs",
-                desc: "The Brain remembers your raise — metrics, investor conversations, pitch iterations. Walk away and you start from zero somewhere else.",
+                desc: "The agent remembers your raise — metrics, investor conversations, pitch iterations, every conversation in your pipeline. Walk away and you start from zero somewhere else.",
                 color: "#a78bfa",
               },
               {
-                title: "Tool integrations → infrastructure lock-in",
-                desc: "Once a product embeds raise(fn) for fundraising intelligence, it becomes infrastructure. Ripping out a working API is a cost nobody pays voluntarily.",
+                title: "Other agents connect → infrastructure lock-in",
+                desc: "When ChatGPT, Claude, or a custom agent connects to raise(fn) for fundraising data, raise(fn) becomes infrastructure. Ripping out a working integration is a cost nobody pays voluntarily.",
                 color: "#fbbf24",
               },
             ].map((item) => (
