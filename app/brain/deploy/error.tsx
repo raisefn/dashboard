@@ -10,10 +10,10 @@ export default function BrainError({
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center px-4">
       <h2 className="text-xl font-semibold text-zinc-200 mb-2">
-        Brain went down
+        Something broke
       </h2>
       <p className="text-zinc-400 mb-6 text-sm">
-        {error.message || "Something broke in the brain. Give it another shot."}
+        {error.message || "Agent ran into an error. Give it another shot."}
       </p>
       <button
         onClick={reset}

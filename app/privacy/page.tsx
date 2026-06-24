@@ -26,7 +26,7 @@ export default function PrivacyPage() {
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>Account info (name, email, company, role)</li>
-            <li>Conversations with the brain</li>
+            <li>Conversations with the agent</li>
             <li>Fundraising data you share (pipeline status, investor interactions, meeting notes, terms)</li>
             <li>Basic usage data</li>
           </ul>
@@ -38,8 +38,8 @@ export default function PrivacyPage() {
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              To power your raisefn experience &mdash; investor matching, pipeline
-              recall, readiness benchmarking, and everything the brain does for you
+              To power your raise(fn) experience &mdash; investor matching, pipeline
+              recall, readiness benchmarking, and everything the agent does for you
             </li>
             <li>To improve the product through aggregate insights (never individual data)</li>
             <li>We do not sell your data</li>
