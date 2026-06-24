@@ -506,8 +506,11 @@ export default function FoundersPage() {
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
               Drop your deck. The agent takes it from there.
             </h2>
-            <p className="text-zinc-400 mb-8 max-w-xl mx-auto">
+            <p className="text-zinc-400 mb-2 max-w-xl mx-auto">
               Free to start. No credit card. The agent gets to work the second you upload.
+            </p>
+            <p className="text-zinc-500 text-sm mb-8 max-w-xl mx-auto">
+              Your deck stays private. Never shared. Never used to train.
             </p>
             <div className="flex items-center justify-center gap-4">
               <Link

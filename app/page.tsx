@@ -693,8 +693,11 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
               Drop your deck. The agent takes it from there.
             </h2>
-            <p className="text-zinc-500 mb-10">
+            <p className="text-zinc-500 mb-2">
               Free to start. No credit card. The agent gets to work the second you upload.
+            </p>
+            <p className="text-zinc-600 text-sm mb-10">
+              Your deck stays private. Never shared. Never used to train.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
