@@ -471,63 +471,45 @@ export default function LandingPage() {
         </FadeInSection>
       </section>
 
-      {/* ── Competitive Positioning ── */}
+      {/* ── Why the agent exists: the truth + competitor knockouts ── */}
       <section className="relative py-32 px-4">
         <FadeInSection>
-          <div className="mx-auto max-w-3xl text-center mb-16">
+          <div className="mx-auto max-w-3xl text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
-              The difference
+              Why the agent exists
             </p>
-            <h2 className="text-3xl font-bold sm:text-4xl">
-              <span className="text-white">Data platforms are rearview mirrors.</span>
-              <br />
-              <span className="text-teal-400">This is GPS.</span>
+            <h2 className="text-3xl font-bold sm:text-4xl mb-6">
+              <span className="text-white">Most rounds die in the follow-up.</span>
             </h2>
+            <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+              The pitch is 10% of the raise. The pipeline is 90%. The boring 90% is where rounds get killed — slow follow-ups, missed signals, dropped threads, sloppy debriefs.
+              <span className="text-zinc-200"> The agent runs the 90%.</span> You handle the 10%.
+            </p>
           </div>
-          <div className="mx-auto max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12">
-            <div>
-              <p className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-6">
-                Rearview mirror
-              </p>
-              <div className="space-y-4">
-                {[
-                  "Pay $20K–$50K/yr to search a database",
-                  "Build your own target list in a spreadsheet",
-                  "Stale data — no idea who's deploying right now",
-                  "Same list your competitor is building",
-                  "You are the analyst",
-                ].map((text) => (
-                  <p
-                    key={text}
-                    className="text-sm text-zinc-500 flex items-start gap-2"
-                  >
-                    <span className="text-zinc-600 mt-0.5">—</span>
-                    {text}
-                  </p>
-                ))}
-              </div>
+
+          <div className="mx-auto max-w-3xl mt-20">
+            <div className="text-center mb-10">
+              <h3 className="text-2xl font-bold sm:text-3xl">
+                <span className="text-white">No other tool runs the 90%.</span>
+              </h3>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-teal-400 uppercase tracking-wider mb-6">
-                raise(fn)
-              </p>
-              <div className="space-y-4">
-                {[
-                  "\"Who should lead my Series A?\" — 15 ranked matches",
-                  "Live data — who's deploying this quarter, not last year",
-                  "Flags your metrics are weak before you pitch",
-                  "Sequences outreach so the right investor moves first",
-                  "The analyst is built in",
-                ].map((text) => (
-                  <p
-                    key={text}
-                    className="text-sm text-zinc-300 flex items-start gap-2"
-                  >
-                    <span className="text-teal-400 mt-0.5">—</span>
-                    {text}
-                  </p>
-                ))}
-              </div>
+            <div className="space-y-3">
+              {[
+                { tool: "A CRM (Streak, HubSpot, Affinity)", knockout: "Tracks what you've already done. Doesn't decide what to do next." },
+                { tool: "A database (PitchBook, Crunchbase)", knockout: "Hands you a list. You write the messages and run the pipeline." },
+                { tool: "ChatGPT", knockout: "Will draft you anything. Doesn't know your investors or your pipeline." },
+                { tool: "DocSend", knockout: "Tells you who opened the deck. Doesn't tell you what to send next." },
+                { tool: "A fundraising coach", knockout: "Sells advice by the hour. The agent does the work at a flat rate." },
+                { tool: "A spreadsheet + Gmail", knockout: "The default. Falls apart by investor 30." },
+              ].map((row) => (
+                <div
+                  key={row.tool}
+                  className="rounded-xl border border-zinc-800 bg-zinc-900/30 px-5 py-4 sm:px-6 sm:py-5 flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-6"
+                >
+                  <p className="text-sm font-semibold text-white sm:w-64 shrink-0">{row.tool}</p>
+                  <p className="text-sm text-zinc-500 leading-relaxed flex-1">{row.knockout}</p>
+                </div>
+              ))}
             </div>
           </div>
         </FadeInSection>
