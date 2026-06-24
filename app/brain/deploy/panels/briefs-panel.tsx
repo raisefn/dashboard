@@ -75,6 +75,55 @@ function groupBriefsByRecency(briefs: ExistingBrief[]): BriefGroup[] {
 export function BriefsPanel({ session, impersonating, onOpenPanel }: BriefsPanelProps) {
   const [briefs, setBriefs] = useState<ExistingBrief[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Custom brief creation — simple input. Format: 'Name, Firm' or just name.
+  const [customInvestor, setCustomInvestor] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  async function createCustomBrief() {
+    if (!session) return;
+    const raw = customInvestor.trim();
+    if (!raw) return;
+    setCreating(true);
+    setCreateError(null);
+    try {
+      const founderEmail = (session.user?.email || "").trim().toLowerCase();
+      if (!founderEmail) throw new Error("No founder email on session.");
+      // Parse 'Name, Firm' — if no comma, treat whole string as name.
+      const commaIdx = raw.indexOf(",");
+      const name = (commaIdx > 0 ? raw.slice(0, commaIdx) : raw).trim();
+      const firm = commaIdx > 0 ? raw.slice(commaIdx + 1).trim() : "";
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch("/v1/brain/generate-brief", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          founder_email: impersonating || founderEmail,
+          investor_inline: { name, firm: firm || null },
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Failed (${res.status})`);
+      }
+      const data = await res.json();
+      setCustomInvestor("");
+      // Refresh list, then open the new brief if we got a token back
+      await load();
+      if (data.token) {
+        onOpenPanel({ kind: "brief", token: data.token, from: { kind: "briefs" } });
+      }
+      try { window.dispatchEvent(new CustomEvent("raisefn:briefs_updated")); } catch { /* defensive */ }
+    } catch (e) {
+      setCreateError(e instanceof Error ? e.message : "Failed to create brief.");
+    } finally {
+      setCreating(false);
+    }
+  }
 
   const load = useCallback(async () => {
     if (!session) return;
@@ -128,6 +177,38 @@ export function BriefsPanel({ session, impersonating, onOpenPanel }: BriefsPanel
     <div className="briefs-panel">
       <style>{BRIEFS_PANEL_CSS}</style>
 
+      {/* Custom brief creation — always at top */}
+      <div className="bp-create">
+        <div className="bp-create-label">Brief an investor</div>
+        <div className="bp-create-row">
+          <input
+            type="text"
+            className="bp-create-input"
+            placeholder="Name, Firm — e.g. Sarah Chen, Greenoak Capital"
+            value={customInvestor}
+            onChange={(e) => setCustomInvestor(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !creating && customInvestor.trim()) {
+                void createCustomBrief();
+              }
+            }}
+            disabled={creating}
+          />
+          <button
+            type="button"
+            className="bp-create-btn"
+            onClick={() => void createCustomBrief()}
+            disabled={creating || !customInvestor.trim()}
+          >
+            {creating ? "Generating…" : "Generate"}
+          </button>
+        </div>
+        {createError && <p className="bp-create-error">{createError}</p>}
+        <p className="bp-create-hint">
+          Brief any investor — matched, known, or just heard about. Agent pulls public data and structures it.
+        </p>
+      </div>
+
       {list.length === 0 ? (
         <div className="bp-empty">
           <p className="bp-empty-title">No briefs yet.</p>
@@ -166,6 +247,53 @@ const BRIEFS_PANEL_CSS = `
   .bp-state { padding: 32px 8px; }
   .bp-state-text { font-size: 13px; color: #71717a; margin: 0; }
   .bp-state-error { font-size: 13px; color: #fca5a5; margin: 0; }
+
+  /* Custom brief creation row */
+  .bp-create {
+    margin-bottom: 24px;
+    padding: 14px;
+    border: 1px solid #27272a;
+    background: rgba(24, 24, 27, 0.4);
+    border-radius: 8px;
+  }
+  .bp-create-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #71717a;
+    margin-bottom: 8px;
+  }
+  .bp-create-row { display: flex; gap: 8px; }
+  .bp-create-input {
+    flex: 1;
+    background: rgba(9, 9, 11, 0.6);
+    border: 1px solid #3f3f46;
+    border-radius: 6px;
+    color: #e4e4e7;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 8px 12px;
+    transition: border-color 150ms ease;
+  }
+  .bp-create-input:focus { outline: none; border-color: #2dd4bf; }
+  .bp-create-input:disabled { opacity: 0.5; cursor: not-allowed; }
+  .bp-create-btn {
+    background: #14b8a6;
+    color: #f4f4f5;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 150ms ease;
+  }
+  .bp-create-btn:hover { background: #0d9488; }
+  .bp-create-btn:disabled { opacity: 0.4; cursor: not-allowed; background: #14b8a6; }
+  .bp-create-hint { margin: 8px 0 0; font-size: 11px; color: #71717a; }
+  .bp-create-error { margin: 8px 0 0; font-size: 12px; color: #fca5a5; }
 
   .bp-empty {
     margin-top: 24px;

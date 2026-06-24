@@ -205,8 +205,9 @@ export function FounderSidebar({
         </div>
       </SidebarSection>
 
-      {/* SHARPEN — fine tune the agent. 5 sections; each row opens a panel. */}
-      <SidebarSection title="Sharpen">
+      {/* SHARPEN (internal) / "Fine tune your agent" (user-facing).
+       * Engineering name kept as "sharpen" — product brand is the full phrase. */}
+      <SidebarSection title="Fine tune your agent">
         <div className="sb-connections">
           {(state?.sharpen || DEFAULT_SHARPEN_ROWS).map((row) => (
             <button
@@ -215,6 +216,7 @@ export function FounderSidebar({
               className="sb-conn-row sb-sharpen-row"
               onClick={() => openPanel({ kind: "sharpen", section: row.id })}
               title={`Fine tune your agent — ${row.title}`}
+              aria-label={`Fine tune your agent — ${row.title}`}
             >
               <span
                 className="sb-conn-dot"

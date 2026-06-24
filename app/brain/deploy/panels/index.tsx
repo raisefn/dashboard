@@ -148,8 +148,8 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
         break;
       }
       case "sharpen": {
-        title = SHARPEN_SECTION_TITLES[panel.section] || "Sharpen";
-        breadcrumbs = [{ label: "Sharpen" }, { label: title }];
+        title = SHARPEN_SECTION_TITLES[panel.section] || "Fine tune";
+        breadcrumbs = [{ label: "Fine tune your agent" }, { label: title }];
         body = (
           <SharpenPanel
             sectionId={panel.section}
@@ -183,7 +183,7 @@ function panelLabel(p: Panel): string {
     case "investor": return p.slug;
     case "brief": return "Brief";
     case "document": return "Document";
-    case "sharpen": return "Sharpen";
+    case "sharpen": return "Fine tune your agent";
   }
 }
 
