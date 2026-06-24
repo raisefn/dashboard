@@ -4,7 +4,6 @@ import { useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { SectionCard } from "./section-card";
 import { useSharpenSave, FORM_LABEL_CSS } from "./use-sharpen-save";
-import { SuggestPill } from "./suggest-pill";
 import type { SharpenSection } from "./sharpen-types";
 
 interface Props {
@@ -38,16 +37,6 @@ export function ProofSection({ section, session, impersonating, onSaved }: Props
       status={section.status}
     >
       <style>{FORM_LABEL_CSS}</style>
-
-      <SuggestPill
-        sectionId="proof"
-        session={session}
-        impersonating={impersonating}
-        fields={[
-          { name: "press_links", live: pressLinks, setter: setPressLinks },
-          { name: "data_room_url", live: dataRoom, setter: setDataRoom },
-        ]}
-      />
 
       {/* MRR — canonical from chat */}
       <div className="sf-current">

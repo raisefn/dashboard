@@ -4,7 +4,6 @@ import { useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { SectionCard } from "./section-card";
 import { useSharpenSave, FORM_LABEL_CSS } from "./use-sharpen-save";
-import { SuggestPill } from "./suggest-pill";
 import type { SharpenSection } from "./sharpen-types";
 
 interface Props {
@@ -41,16 +40,6 @@ export function PastSection({ section, session, impersonating, onSaved }: Props)
       status={section.status}
     >
       <style>{FORM_LABEL_CSS}</style>
-
-      <SuggestPill
-        sectionId="past"
-        session={session}
-        impersonating={impersonating}
-        fields={[
-          { name: "prior_raise_notes", live: priorRaiseNotes, setter: setPriorRaiseNotes },
-          { name: "advisor_feedback", live: advisorFeedback, setter: setAdvisorFeedback },
-        ]}
-      />
 
       <div className="sf-current">
         <p className="sf-current-label">Privacy</p>
