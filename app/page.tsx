@@ -562,6 +562,14 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <div className="mx-auto max-w-2xl mt-12 text-center">
+            <Link
+              href="/how-we-learn"
+              className="text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors"
+            >
+              How the agent learns →
+            </Link>
+          </div>
         </FadeInSection>
       </section>
 

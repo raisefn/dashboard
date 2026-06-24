@@ -202,12 +202,12 @@ export default function InvestorsPage() {
             >
               Set up your investor profile
             </Link>
-            <a
-              href="#how"
+            <Link
+              href="/how-we-match"
               className="text-sm font-medium text-zinc-300 hover:text-white transition-colors"
             >
-              How it works →
-            </a>
+              How we match →
+            </Link>
           </div>
         </div>
       </section>
