@@ -126,19 +126,19 @@ export default function PricingPage() {
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
                 Free
               </h2>
-              <span className="text-sm text-zinc-500">$0 — try the brain</span>
+              <span className="text-sm text-zinc-500">$0 — try the agent</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              Drop your deck, ask the brain anything, get real matches. Free
+              Drop your deck, put the agent to work, get real matches. Free
               to get started. Upgrade when you need more.
             </p>
 
             <ul className="space-y-4 mb-10 list-none">
               {[
-                ["Brain chat", "limited — explore your raise end-to-end"],
+                ["Chat with the agent", "limited — explore your raise end-to-end"],
                 ["Investor briefs", "limited — one-page summaries for any investor, matched or known"],
                 ["Investor matches", "limited — discover new investors that fit"],
-                ["Full product otherwise", "no feature gates — every brain tool available"],
+                ["Full agent otherwise", "no feature gates — every capability available"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
                   <span className="text-zinc-500 text-lg leading-snug shrink-0">•</span>
@@ -175,17 +175,17 @@ export default function PricingPage() {
               <span className="text-sm text-zinc-500">$199/mo · cancel anytime</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              For founders actively raising. Same brain, no walls. Pay monthly,
+              For founders actively raising. Full agent, no caps. Pay monthly,
               cancel anytime. No engagement letter, no success fee.
             </p>
 
             <ul className="space-y-4 mb-10 list-none">
               {[
-                ["Uncapped chat with the brain", "ask anything, as often as you need"],
+                ["Uncapped chat with the agent", "ask anything, as often as you need"],
                 ["Uncapped investor matches", "keep exploring until you find your fit"],
                 ["Uncapped briefs", "one-page summaries for every investor you target"],
-                ["Pipeline + memory across sessions", "the brain remembers every conversation"],
-                ["All brain tools", "targeting, deck review, outreach drafts, meeting prep"],
+                ["Pipeline + memory across sessions", "the agent remembers every conversation"],
+                ["All agent capabilities", "matching, deck review, outreach drafts, meeting prep, debriefs, term sheet walkthrough"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
                   <span className="text-teal-400 text-lg leading-snug shrink-0">•</span>
