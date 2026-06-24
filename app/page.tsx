@@ -378,7 +378,7 @@ export default function LandingPage() {
             <span className="text-teal-400">(fn)</span>
           </h1>
           <p className="mx-auto mt-8 max-w-2xl text-2xl sm:text-3xl font-medium text-white leading-tight">
-            The AI Fundraising Agent.
+            The AI Fundraising Agent
           </p>
           <p className="mx-auto mt-4 max-w-lg text-lg text-zinc-400">
             You stay in control. The agent does the work.

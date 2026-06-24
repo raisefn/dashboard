@@ -469,8 +469,8 @@ export default function FoundersPage() {
                   a: "Yes. It runs a readiness check — six signals across story, ask, motion, wedge, target list, post-close plan. Tells you which ones are weak. Helps you sharpen them. Premature outreach burns the best investors first. Getting to 'ready' before opening conversations is half the game.",
                 },
                 {
-                  q: "How is raise(fn) different from a fundraising coach?",
-                  a: "Coaches charge retainer or hourly to give advice — the advice is generic, the work is still yours. raise(fn) doesn't give advice. It does the work — builds the list, writes the briefs, preps the meetings, tracks the pipeline, brokers the intros, walks you through the term sheet. Fixed-fee, fixed-scope, no success fee, no equity.",
+                  q: "How is raise(fn) different from other fundraising SaaS tools?",
+                  a: "Most fundraising SaaS is a database (PitchBook, Crunchbase), a CRM (Affinity, DealCloud), or generic outreach automation (Apollo, Lemlist) — built for general sales, not for raising a round. They give you tools; you still do the work. raise(fn) is the agent. It does the matching, drafts the briefs, drafts the outreach, preps your meetings, debriefs them, and tracks your pipeline automatically. One product for the whole raise. And it's calibrated on real fundraising outcomes, not generic CRM patterns — every raise that runs through it makes the next one sharper.",
                 },
                 {
                   q: "If I'm on the free plan, why would I pay?",
