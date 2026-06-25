@@ -51,19 +51,38 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true });
     }
 
-    // Defense-in-depth: refuse to flip to Advisor unless Stripe captured
-    // the engagement-letter consent on its checkout page. The checkout
-    // route sets consent_collection.terms_of_service='required' for
-    // Advisor, so any legitimate Advisor session should have
-    // consent.terms_of_service='accepted'. Pro has no consent step.
+    // Consent audit (was: hard refuse — relaxed 2026-06-25).
+    //
+    // Original behavior refused to flip to Advisor unless
+    // session.consent.terms_of_service was literally "accepted." That works
+    // for Checkout API sessions where the checkout route explicitly sets
+    // consent_collection.terms_of_service='required', but it BREAKS for
+    // Payment Link sessions — Stripe Payment Links don't reliably populate
+    // session.consent in the same shape, even when the "Require ToS" toggle
+    // is enabled at the link level. Result: paying Advisor customers (Matt
+    // Battistel, 2026-06-25) were silently locked out of their tier despite
+    // having actually paid and accepted the engagement letter at checkout.
+    //
+    // The legal protection here is the engagement letter URL displayed on
+    // the checkout page — set globally at Stripe Settings → Public details
+    // → Terms of service URL = https://raisefn.com/legal/engagement. The
+    // customer cannot complete checkout without clicking through that link
+    // pattern. The session.consent boolean is just an audit trail of that
+    // click — not the legal mechanism.
+    //
+    // New behavior: log a warning when consent isn't explicit so we can
+    // audit anomalies later, but don't block the tier flip. Verify ToS is
+    // enabled on every Advisor Payment Link as a separate operational
+    // check.
     if (tier === "advisor" && session.consent?.terms_of_service !== "accepted") {
-      console.error(
-        "Refusing to flip to advisor — checkout session missing terms_of_service consent:",
+      console.warn(
+        "Advisor session missing terms_of_service consent value (proceeding — engagement letter URL is displayed at checkout regardless):",
         session.id,
         "consent:",
-        session.consent
+        session.consent,
+        "consent_collection:",
+        session.consent_collection
       );
-      return NextResponse.json({ received: true });
     }
 
     try {
