@@ -109,7 +109,7 @@ function BrainDiagram() {
             <span style={{ color: "#F97316" }}>raise</span>
             <span style={{ color: "#2DD4BF" }}>(fn)</span>
           </span>
-          <span className="mt-1 text-xs text-zinc-500">the brain</span>
+          <span className="mt-1 text-xs text-zinc-500">fundraising data layer</span>
         </div>
 
         {/* Nodes */}

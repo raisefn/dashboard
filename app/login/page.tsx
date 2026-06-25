@@ -70,7 +70,7 @@ function LoginInner() {
             <span className="text-orange-500">raise</span>
             <span className="text-teal-400">(fn)</span>
           </h1>
-          <p className="text-sm text-zinc-500 mt-2">Sign in to access the Brain</p>
+          <p className="text-sm text-zinc-500 mt-2">Sign in to access raise(fn)</p>
         </div>
 
         {authError && (
