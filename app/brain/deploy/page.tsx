@@ -1769,25 +1769,20 @@ function BrainDeployInner() {
       }
     }
 
-    function showWelcomeThenAutoPlan(firstName: string, message: string) {
-      // Greeting bubble lands first. The session_open auto-fire useEffect
-      // below handles the [session_open] silent trigger after chatStarted
-      // flips true — runs for both fresh-conversation and session-restore
-      // paths, then skips when restored thread already has assistant turns.
+    function showWelcomeThenAutoPlan(_firstName: string, _message: string) {
+      // 2026-06-25: the hardcoded "Hey [Name]. Welcome to raise(fn)." bubble
+      // is gone. The LLM's [session_open] response IS the opening message
+      // now (rule 20 in chat.py — the "plane / pilot / 5-step pathway").
+      // Stacking the hardcoded greeting on top of the LLM response produced
+      // a double-bubble: a hollow "Welcome" then a long delay then the real
+      // opening. The LLM owns the welcome end-to-end.
       setChatStarted(true);
       setSessionReady(true);
       centerUiRef.current?.classList.add("at-bottom");
       messagesRef.current?.classList.add("active");
-
-      const typingEl = addMessageToDOM("assistant", "");
-      const typingContent = typingEl.querySelector(".content") as HTMLElement;
-      if (typingContent) {
-        typingContent.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-        setTimeout(() => {
-          typingContent.innerHTML = formatMarkdown(message);
-          requestAnimationFrame(() => scrollToBottom());
-        }, 800);
-      }
+      // No bubble added here. The session_open useEffect below fires
+      // [session_open] which goes through send(), which adds its own
+      // assistant bubble with a typing indicator + streaming response.
     }
 
     function showWelcomeWithMessage(firstName: string, message: string) {
