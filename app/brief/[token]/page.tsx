@@ -127,7 +127,7 @@ export default async function BriefPage(
             >
               raisefn.com
             </Link>
-            {" — Fundraising intelligence for founders."}
+            {" — The fundraising agent for founders."}
           </p>
         </footer>
       </div>

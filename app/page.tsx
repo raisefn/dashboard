@@ -546,7 +546,7 @@ export default function LandingPage() {
               },
               {
                 title: "More data sources → harder to replicate",
-                desc: "SEC filings, accelerator directories, investor registries, traction platforms — each with custom ingestion, normalization, and cross-referencing logic. Copying one source is easy. Copying the intelligence that emerges from combining them is not.",
+                desc: "SEC filings, accelerator directories, investor registries, traction platforms — each with custom ingestion, normalization, and cross-referencing logic. Copying one source is easy. Copying the signal that emerges from combining them is not.",
                 color: "#fb923c",
               },
               {
@@ -679,7 +679,7 @@ export default function LandingPage() {
               },
               {
                 who: "Then",
-                what: "raise(fn) becomes the platform that powers fundraising AI. Any agent, any assistant, queries raise(fn) for the data and intelligence underneath.",
+                what: "raise(fn) becomes the layer that powers fundraising AI. Any agent, any assistant, queries raise(fn) for what they need underneath.",
                 color: "#f97316",
               },
             ].map((item) => (

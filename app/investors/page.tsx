@@ -193,7 +193,7 @@ export default function InvestorsPage() {
             raise(fn) does the deep thesis-matching work for you. The
             founders we surface fit the criteria you actually invest in —
             sector, stage, check size, geography, and the edge cases
-            most platforms miss.
+            other tools miss.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
             <Link
@@ -254,7 +254,7 @@ export default function InvestorsPage() {
                 Thesis matching, not keyword soup.
               </h2>
               <p className="text-zinc-400 leading-relaxed mb-4">
-                The matching engine handles the cases other platforms break
+                The matching engine handles the cases other tools break
                 on: sector-agnostic firms, participation checks below the
                 round size, regional fit beyond &quot;US/EU/Asia&quot;,
                 stage edge cases like sector-agnostic angels for vertical
@@ -356,7 +356,7 @@ export default function InvestorsPage() {
               The difference
             </h2>
             <p className="text-zinc-400 max-w-2xl mx-auto">
-              Other platforms make founders push at investors. We make
+              Other tools make founders push at investors. We make
               founders fit before anyone reaches out.
             </p>
           </div>
@@ -369,7 +369,7 @@ export default function InvestorsPage() {
                 {[
                   "1,200 cold emails a quarter, most missing thesis",
                   "Founder profiles padded with marketing fluff",
-                  "Generic platforms surfacing every deal to every fund",
+                  "Generic tools surfacing every deal to every fund",
                   "No way to filter by stage edge cases",
                   "You spend hours qualifying out, minutes qualifying in",
                 ].map((text) => (
@@ -430,7 +430,7 @@ export default function InvestorsPage() {
                 },
                 {
                   q: "What does raise(fn) cost an investor?",
-                  a: "Free, for now. Won't always be — pricing will come once the platform matures. Founders fund the platform today.",
+                  a: "Free, for now. Won't always be — pricing will come once raise(fn) matures. Founders fund raise(fn) today.",
                 },
               ].map((qa) => (
                 <div key={qa.q}>

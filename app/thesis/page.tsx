@@ -57,7 +57,7 @@ const slides = [
   },
   {
     type: "text" as const,
-    text: "Founders come for the intelligence. Investors come for the deal flow. The more founders raise through raisefn, the more investors need to be there. The more investors on the platform, the more valuable it is for founders. Both sides compound.",
+    text: "Founders come for the agent. Investors come for the deal flow. The more founders raise through raisefn, the more investors need to be there. The more investors on raise(fn), the more valuable it is for founders. Both sides compound.",
   },
   {
     type: "text" as const,

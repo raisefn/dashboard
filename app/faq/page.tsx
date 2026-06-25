@@ -152,7 +152,7 @@ const FAQ_SECTIONS: FAQSection[] = [
       },
       {
         q: "What does raise(fn) cost an investor?",
-        a: "Free, for now. Won't always be — pricing will come once the platform matures. Founders fund the platform today.",
+        a: "Free, for now. Won't always be — pricing will come once raise(fn) matures. Founders fund raise(fn) today.",
       },
       {
         q: "Will founders see me before I want to engage?",

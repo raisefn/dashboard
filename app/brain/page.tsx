@@ -158,7 +158,7 @@ export default function BrainPage() {
       <section className="relative pt-16 pb-4 px-4">
         <div className="mx-auto max-w-3xl text-center animate-fade-in">
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            Fundraising intelligence that actually knows what&apos;s happening right now.
+            The fundraising agent that actually knows what&apos;s happening right now.
             Not trained on old data. Connected to live sources, updated continuously,
             and getting smarter with every raise that runs through it.
           </p>
@@ -297,9 +297,9 @@ export default function BrainPage() {
           </div>
           <div className="mx-auto max-w-3xl grid gap-6 sm:grid-cols-3 text-center">
             {[
-              { who: "Founders", what: "Navigate your raise with intelligence — from readiness to close.", color: "#2dd4bf", href: "/brain/entrepreneurs" },
+              { who: "Founders", what: "Run your raise with an agent that knows the market — from readiness to close.", color: "#2dd4bf", href: "/brain/entrepreneurs" },
               { who: "Investors", what: "Better deal flow, faster diligence, and a pipeline that remembers everything.", color: "#f97316", href: "/brain/investors" },
-              { who: "Developers", what: "Embed fundraising intelligence in your product.", color: "#a78bfa", href: "/sdk" },
+              { who: "Developers", what: "Embed raise(fn) in your product.", color: "#a78bfa", href: "/sdk" },
             ].map((item) => (
               <Link key={item.who} href={item.href} className="group transition-all hover:bg-zinc-900/30 rounded-xl p-4">
                 <p className="text-sm font-semibold mb-2 group-hover:brightness-125" style={{ color: item.color }}>{item.who}</p>

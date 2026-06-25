@@ -13,13 +13,13 @@ export default function AgentsPage() {
             Brain for Developers
           </p>
           <h1 className="text-4xl font-bold text-white sm:text-5xl mb-6">
-            Embed fundraising intelligence{" "}
+            Embed raise(fn){" "}
             <span className="text-violet-400">in your product</span>
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
             Your product can match investors, score readiness, analyze narratives,
             decode signals, and benchmark terms — in a single call. No scraping.
-            No training. Just intelligence.
+            No training. Just raise(fn).
           </p>
         </div>
       </section>
@@ -239,7 +239,7 @@ export default function AgentsPage() {
               Build with raise(fn)
             </h2>
             <p className="text-zinc-500 mb-8">
-              Ship fundraising intelligence in your product.
+              Ship raise(fn) in your product.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
