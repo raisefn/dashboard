@@ -108,7 +108,7 @@ export default function PricingPage() {
             Pricing
           </p>
           <h1 className="text-4xl font-bold text-white sm:text-5xl mb-6">
-            Fundraising intelligence built for founders
+            The agent that runs your raise alongside you
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
             Targeting, deck analysis, outreach drafts — grounded in 24,000+
