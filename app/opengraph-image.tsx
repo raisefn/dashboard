@@ -12,7 +12,7 @@ import { ImageResponse } from "next/og";
 
 export const runtime = "nodejs";
 export const alt =
-  "raise(fn) — Fundraising intelligence that gets smarter with every raise";
+  "raise(fn) — Your fundraising agent. Gets smarter with every raise.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -111,7 +111,7 @@ export default function Image() {
               whiteSpace: "nowrap",
             }}
           >
-            Fundraising intelligence that gets smarter with every raise.
+            Your fundraising agent. Gets smarter with every raise.
           </div>
         </div>
       </div>
