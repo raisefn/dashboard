@@ -40,7 +40,15 @@ type Investor = {
 type Batch = {
   id: string;
   generated_at: string | null;
-  request?: { sector?: string; stage?: string; raising_usd?: number | null } | null;
+  request?: {
+    sector?: string;
+    stage?: string;
+    raising_usd?: number | null;
+    region?: string | null;
+    country?: string | null;
+    state?: string | null;
+    investor_type?: string | null;
+  } | null;
   individuals_to_target?: Investor[];
   firms_to_consider?: Investor[];
   count?: number;
@@ -70,9 +78,15 @@ function batchLabel(b: Batch, idx: number, total: number): string {
   const pos = total - idx;
   const when = b.generated_at ? new Date(b.generated_at) : null;
   const dateStr = when ? when.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "";
-  const sector = b.request?.sector || "";
-  const stage = b.request?.stage || "";
-  const meta = [sector, stage].filter(Boolean).join(" · ");
+  const r = b.request || {};
+  const sector = r.sector || "";
+  const stage = r.stage || "";
+  // Surface the user-intent filters from the request, not just the
+  // founder profile sector+stage. If the founder asked for "LATAM matches"
+  // or "VC-only", the dropdown should say so — the batch IS the search.
+  const geo = r.region || [r.country, r.state].filter(Boolean).join("/") || "";
+  const itype = r.investor_type ? `${r.investor_type} only` : "";
+  const meta = [sector, stage, geo, itype].filter(Boolean).join(" · ");
   const count = b.count != null ? `${b.count} match${b.count === 1 ? "" : "es"}` : "";
   const parts = [dateStr, count, meta].filter(Boolean);
   return `Batch ${pos} — ${parts.join(" · ")}`;
