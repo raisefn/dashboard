@@ -1358,6 +1358,16 @@ function BrainDeployInner() {
             const event = JSON.parse(raw);
             if (event.type === "text") {
               fullText += event.content;
+              // Render incrementally as text arrives — feels native, like
+              // Claude.ai. The post-stream typewriter at the bottom of this
+              // function used to do this after the fact, which made short
+              // responses (like the session-open opening) feel canned and
+              // pre-programmed because the streaming finished before any
+              // visible typing happened. 2026-06-25.
+              try {
+                contentEl.innerHTML = formatMarkdown(fullText);
+                scrollToBottom();
+              } catch { /* tolerate transient markdown parse errors */ }
             } else if (event.type === "status") {
               activateNode(event.content);
               // Show tool status live — replaces typing dots
@@ -1439,69 +1449,21 @@ function BrainDeployInner() {
         }
       }
 
-      // Show response with typewriter effect.
+      // Streaming-time rendering above (in the `text` event handler) already
+      // wrote the response into the bubble incrementally — like Claude.ai.
+      // Here we just persist the final text to history + ensure the final
+      // markdown render is clean. The old post-stream typewriter is gone —
+      // it made short responses feel canned because streaming finished before
+      // any visible typing happened (raise(fn)'s session-open opening was
+      // the trigger 2026-06-25).
       if (fullText) {
         historyRef.current.push({ role: "assistant", content: fullText });
-
-        // Render markdown once into a temp container
-        const temp = document.createElement("div");
-        temp.innerHTML = formatMarkdown(fullText);
-
-        // Collect all text nodes and their parent elements
-        contentEl.innerHTML = "";
-        const nodes = Array.from(temp.childNodes);
-
-        // Clone the structure but empty all text
-        for (const node of nodes) {
-          contentEl.appendChild(node.cloneNode(true));
-        }
-
-        // Get all text nodes in the rendered content
-        const walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT);
-        const textNodes: Text[] = [];
-        let tn: Text | null;
-        while ((tn = walker.nextNode() as Text | null)) textNodes.push(tn);
-
-        // Store original text and blank them
-        const originals = textNodes.map(t => t.textContent || "");
-        textNodes.forEach(t => { t.textContent = ""; });
-
-        // Scroll to TOP of the response
+        // Defensive final render — streaming-time may have skipped some
+        // chunks if markdown parsing transiently choked.
+        try {
+          contentEl.innerHTML = formatMarkdown(fullText);
+        } catch { /* tolerate */ }
         scrollToElement(assistantEl);
-
-        // Reveal text character by character across all text nodes
-        const TICK_MS = 15;
-        const charsPerTick = 1;
-        let nodeIdx = 0;
-        let charIdx = 0;
-
-        await new Promise<void>((resolve) => {
-          const timer = setInterval(() => {
-            for (let c = 0; c < charsPerTick; c++) {
-              if (nodeIdx >= textNodes.length) {
-                clearInterval(timer);
-                // Ensure final state is perfect
-                contentEl.innerHTML = formatMarkdown(fullText);
-                resolve();
-                return;
-              }
-              const orig = originals[nodeIdx];
-              charIdx++;
-              textNodes[nodeIdx].textContent = orig.slice(0, charIdx);
-              if (charIdx >= orig.length) {
-                nodeIdx++;
-                charIdx = 0;
-              }
-            }
-
-            // Scroll to keep latest text visible — scroll container, not to bottom
-            const m = messagesRef.current;
-            if (m) {
-              const nearBottom = m.scrollHeight - m.scrollTop - m.clientHeight < 200;
-              if (nearBottom) m.scrollTop = m.scrollHeight;
-            }
-          }, TICK_MS);
-        });
 
         // ── Limit signals ─────────────────────────────────────────
         // Render the soft warning chip above the response (one-shot at 80%).
