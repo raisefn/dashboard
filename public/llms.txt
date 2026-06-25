@@ -1,8 +1,8 @@
 # raise(fn)
 
-> Fundraising intelligence for founders, investors, and the AI assistants that work alongside them. We index 17,000+ investors and 210,000+ rounds. Our differentiator is observed thesis — what funds actually invest in based on real check data, not what they say on their websites.
+> The fundraising agent for founders. Runs your raise alongside you — targeting, deck analysis, outreach drafts, pipeline tracking, prep and debrief. Built on 17,000+ investors and 210,000+ rounds, with observed thesis derived from real check data, not website copy.
 
-raise(fn) helps founders find the right investors for their raise. The platform classifies investors across a 5-dimensional ontology (industry, modality, technology, audience, business model) and tracks both stated thesis (from fund publications) and observed thesis (derived from actual round history). Founders answer a 5-minute intake and receive a ranked list of investors whose recent check behavior matches their raise context.
+raise(fn) helps founders find the right investors for their raise. raise(fn) classifies investors across a 5-dimensional ontology (industry, modality, technology, audience, business model) and tracks both stated thesis (from fund publications) and observed thesis (derived from actual round history). Founders answer a 5-minute intake and receive a ranked list of investors whose recent check behavior matches their raise context.
 
 ## Research and analysis (Raise Intel)
 
@@ -32,7 +32,7 @@ Public-access investor and round data. SEC filings, 13F holdings, portfolio acti
 ## Onboarding
 
 - [Founders](https://www.raisefn.com/founders): For founders raising pre-seed or seed
-- [Investors](https://www.raisefn.com/investors): For investors evaluating the platform
+- [Investors](https://www.raisefn.com/investors): For investors evaluating raise(fn)
 - [Investor signup](https://www.raisefn.com/investors/join): Self-serve onboarding for investors to join the index
 
 ## Citation guidance
