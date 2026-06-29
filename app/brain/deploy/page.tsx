@@ -247,7 +247,11 @@ function renderOutreachDraftCard(
     // edited and how long the card was open.
     original_subject: string;
     original_body: string;
+    // Auto-detected brief for this (founder, investor). When present, the
+    // card renders an "Include brief link" checkbox defaulted to ON.
+    // brief_url is the full public URL (already constructed server-side).
     brief_token: string | null;
+    brief_url: string | null;
     connected_email: string | null;
   },
   insertAfterEl: HTMLElement,
@@ -294,7 +298,12 @@ function renderOutreachDraftCard(
       <div style="font-size:11px;color:#71717a;padding-top:8px;">Body</div>
       <textarea data-field="body" rows="9" style="background:rgba(9,9,11,0.6);border:1px solid #3f3f46;color:#e4e4e7;padding:10px 12px;border-radius:5px;font-size:13px;font-family:inherit;line-height:1.55;outline:none;resize:vertical;min-height:140px;">${escapeText(draft.body)}</textarea>
     </div>
-    ${draft.brief_token ? `<div style="margin-top:10px;font-size:11px;color:#71717a;">Brief link will be appended on send · <code style="color:#a1a1aa;">/brief/${escapeText(draft.brief_token)}</code></div>` : ""}
+    ${draft.brief_token ? `
+    <label data-region="brief-toggle" style="margin-top:14px;display:flex;align-items:center;gap:8px;font-size:12px;color:#d4d4d8;cursor:pointer;user-select:none;">
+      <input data-field="include-brief" type="checkbox" checked style="appearance:auto;width:14px;height:14px;cursor:pointer;accent-color:#14b8a6;" />
+      <span>Include brief link</span>
+      <a href="${escapeAttr(draft.brief_url || `/brief/${draft.brief_token}`)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:#71717a;text-decoration:underline;">preview</a>
+    </label>` : ""}
     <div data-region="status" style="margin-top:12px;font-size:12px;color:#fca5a5;display:none;"></div>
     <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px;">
       <button type="button" data-action="send" style="background:#0d9488;border:none;color:#ffffff;font-size:13px;font-weight:500;padding:8px 18px;border-radius:5px;cursor:pointer;font-family:inherit;transition:background 150ms ease;">Send via Gmail</button>
@@ -309,6 +318,8 @@ function renderOutreachDraftCard(
   const sendBtn = card.querySelector<HTMLButtonElement>('[data-action="send"]')!;
   const cancelBtn = card.querySelector<HTMLButtonElement>('[data-action="cancel"]')!;
   const statusEl = card.querySelector<HTMLDivElement>('[data-region="status"]')!;
+  // Optional — only present when a brief was auto-detected for this investor.
+  const includeBriefInput = card.querySelector<HTMLInputElement>('[data-field="include-brief"]');
 
   function showStatus(msg: string, kind: "error" | "info") {
     statusEl.textContent = msg;
@@ -352,6 +363,10 @@ function renderOutreachDraftCard(
       // next draft has the right email cached.
       // For v1 we skip that round-trip; the founder can fix the row via
       // chat if they want. The send itself uses the to_email here.
+      // Brief inclusion: only send the token if the checkbox is checked.
+      // Checkbox is rendered only when a brief exists; default state is on.
+      const includeBrief = includeBriefInput ? includeBriefInput.checked : false;
+      const effectiveBriefToken = includeBrief ? draft.brief_token : null;
       const res = await fetch("/v1/brain/outreach/send", {
         method: "POST",
         headers,
@@ -359,7 +374,7 @@ function renderOutreachDraftCard(
           investor_slug: draft.investor_slug,
           subject,
           body,
-          brief_token: draft.brief_token,
+          brief_token: effectiveBriefToken,
           // Pass the typed email — backend uses this as override AND
           // persists it back to the pipeline row so next time it's
           // cached. Critical when draft_outreach returned missing_email=true.
@@ -1665,6 +1680,7 @@ function BrainDeployInner() {
                   original_subject: event.original_subject ? String(event.original_subject) : subjectInitial,
                   original_body: event.original_body ? String(event.original_body) : bodyInitial,
                   brief_token: event.brief_token ? String(event.brief_token) : null,
+                  brief_url: event.brief_url ? String(event.brief_url) : null,
                   connected_email: event.connected_email ? String(event.connected_email) : null,
                 };
                 renderOutreachDraftCard(
