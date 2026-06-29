@@ -24,6 +24,12 @@ interface BriefData {
   last_edited_at: string | null;
   status: string;
   view_count: number;
+  // Brand-gating (migration 031). show_raisefn_brand drives the toggle
+  // value; founder_tier drives whether the toggle is interactive
+  // (free=locked, pro/advisor=interactive). Optional for back-compat
+  // with any cached responses from before this lands.
+  show_raisefn_brand?: boolean;
+  founder_tier?: string;
 }
 
 interface BriefDetailPanelProps {
@@ -48,6 +54,39 @@ export function BriefDetailPanel({ token, session, impersonating }: BriefDetailP
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [brandUpdating, setBrandUpdating] = useState(false);
+  const [brandError, setBrandError] = useState<string | null>(null);
+
+  async function toggleBrand(next: boolean) {
+    if (!session || !token || !data) return;
+    setBrandUpdating(true);
+    setBrandError(null);
+    // Optimistic UI — flip immediately, rollback on error.
+    const prev = data.show_raisefn_brand;
+    setData({ ...data, show_raisefn_brand: next });
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch(`/v1/brain/briefs/${encodeURIComponent(token)}`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({ show_raisefn_brand: next }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Update failed (${res.status})`);
+      }
+    } catch (e) {
+      // Roll back optimistic update
+      setData(d => d ? { ...d, show_raisefn_brand: prev } : d);
+      setBrandError(e instanceof Error ? e.message : "Update failed");
+    } finally {
+      setBrandUpdating(false);
+    }
+  }
 
   const load = useCallback(async () => {
     if (!session || !token) return;
@@ -107,6 +146,11 @@ export function BriefDetailPanel({ token, session, impersonating }: BriefDetailP
   }
 
   const investorName = data.investor_full_name || data.investor_first_name || "Investor";
+  // Brand-gating: tier gates whether the toggle is interactive.
+  // Default-true on the flag for back-compat with older briefs.
+  const tier = (data.founder_tier || "free").toLowerCase();
+  const canEditBrand = tier === "pro" || tier === "advisor";
+  const brandOn = data.show_raisefn_brand !== false;
 
   return (
     <div className="brief-detail-panel">
@@ -151,6 +195,32 @@ export function BriefDetailPanel({ token, session, impersonating }: BriefDetailP
           </a>
         </div>
       </header>
+
+      {/* Brand-gating toggle. Free tier: locked + upgrade hint.
+          Pro/Advisor: interactive with optimistic flip. */}
+      <div className="bdp-brand-row">
+        <div className="bdp-brand-label">
+          <span className="bdp-brand-title">Show raise(fn) brand</span>
+          {!canEditBrand && (
+            <span className="bdp-brand-hint">Upgrade to remove</span>
+          )}
+          {brandError && (
+            <span className="bdp-brand-error">{brandError}</span>
+          )}
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={brandOn}
+          disabled={!canEditBrand || brandUpdating}
+          onClick={() => canEditBrand && toggleBrand(!brandOn)}
+          className={`bdp-brand-switch${brandOn ? " is-on" : ""}${!canEditBrand ? " is-locked" : ""}`}
+          title={canEditBrand ? (brandOn ? "Click to hide brand" : "Click to show brand") : "Upgrade to Pro or Advisor to remove"}
+        >
+          <span className="bdp-brand-knob" />
+        </button>
+      </div>
+
 
       <article
         className="bdp-content"
@@ -230,6 +300,68 @@ const BRIEF_DETAIL_CSS = `
   .bdp-action-secondary:hover {
     background: rgba(63, 63, 70, 0.4);
     border-color: #52525b;
+  }
+
+  .bdp-brand-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 20px;
+    padding: 10px 14px;
+    background: rgba(24, 24, 27, 0.4);
+    border: 1px solid #27272a;
+    border-radius: 8px;
+  }
+  .bdp-brand-label {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  .bdp-brand-title {
+    font-size: 13px;
+    color: #d4d4d8;
+  }
+  .bdp-brand-hint {
+    font-size: 11px;
+    color: #a1a1aa;
+  }
+  .bdp-brand-error { font-size: 11px; color: #fca5a5; }
+  .bdp-brand-switch {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    border-radius: 999px;
+    background: #3f3f46;
+    border: 1px solid #52525b;
+    cursor: pointer;
+    transition: background 150ms ease, border-color 150ms ease;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .bdp-brand-switch.is-on {
+    background: #14b8a6;
+    border-color: #0d9488;
+  }
+  .bdp-brand-switch:disabled,
+  .bdp-brand-switch.is-locked {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  .bdp-brand-knob {
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 16px;
+    height: 16px;
+    background: #f4f4f5;
+    border-radius: 50%;
+    transition: transform 150ms ease;
+  }
+  .bdp-brand-switch.is-on .bdp-brand-knob {
+    transform: translateX(16px);
   }
 
   .bdp-content {
