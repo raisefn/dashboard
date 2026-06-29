@@ -37,6 +37,20 @@ type Investor = {
   linkedin?: string | null;
 };
 
+// LLM-augmented recommendation — investor pulled from broad market
+// knowledge (not from our catalog). See brain/match_augmentation.py.
+type Recommendation = {
+  name: string;
+  firm?: string | null;
+  thesis_summary: string;
+  why_fit: string;
+  recent_activity?: string | null;
+  confidence: "recent_verified" | "pattern_inferred" | "historical";
+  contact_hint?: string | null;
+  requires_warm_intro: boolean;
+  source?: string;
+};
+
 type Batch = {
   id: string;
   generated_at: string | null;
@@ -51,6 +65,7 @@ type Batch = {
   } | null;
   individuals_to_target?: Investor[];
   firms_to_consider?: Investor[];
+  recommended_investors?: Recommendation[];
   count?: number;
 };
 
@@ -217,6 +232,21 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
   const individuals = activeBatch?.individuals_to_target || [];
   const firms = activeBatch?.firms_to_consider || [];
   const ordered: Investor[] = [...individuals, ...firms];
+  // LLM-augmented recommendations (Phase A — 2026-06-29). Surfaced when
+  // the catalog was thin for the founder's sector. See
+  // brain/match_augmentation.py + .claude/plans/llm_augmented_matching.md.
+  const recommended: Recommendation[] = activeBatch?.recommended_investors || [];
+  // Sort recommendations by confidence: recent_verified → pattern_inferred → historical.
+  // Higher-confidence rows surface first; historical buries at the bottom.
+  const CONFIDENCE_RANK: Record<string, number> = {
+    recent_verified: 0,
+    pattern_inferred: 1,
+    historical: 2,
+  };
+  const sortedRecommendations = [...recommended].sort(
+    (a, b) => (CONFIDENCE_RANK[a.confidence] ?? 3) - (CONFIDENCE_RANK[b.confidence] ?? 3),
+  );
+  const hasAnyContent = ordered.length > 0 || sortedRecommendations.length > 0;
 
   return (
     <div className="matches-panel">
@@ -245,13 +275,13 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
 
       {error && <div className="mp-error">{error}</div>}
 
-      {!activeBatch || ordered.length === 0 ? (
+      {!activeBatch || !hasAnyContent ? (
         <div className="mp-empty">
           <p className="mp-empty-title">No matches yet.</p>
           <p className="mp-empty-sub">Head back to chat and ask raise(fn) to pull matches.</p>
         </div>
       ) : (
-        <div className="mp-list">
+        <>{ordered.length > 0 && (<div className="mp-list">
           {ordered.map((inv, idx) => {
             const existing = findExistingBrief(inv.name);
             // Defensive cap at 100 — backend now caps `normalized` at 1.0
@@ -343,8 +373,69 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
               </div>
             );
           })}
-        </div>
+        </div>)}
+        {sortedRecommendations.length > 0 && (
+          <div className="mp-aug-section">
+            <div className="mp-aug-header">
+              <h3 className="mp-aug-title">
+                Recommended — not yet in our catalog
+              </h3>
+              <p className="mp-aug-sub">
+                Pulled from broad market knowledge for your sector. Treat as a
+                starting list — verify recency before warm intro.
+              </p>
+            </div>
+            <div className="mp-aug-list">
+              {sortedRecommendations.map((rec, idx) => (
+                <RecommendationCard key={`rec-${idx}`} rec={rec} />
+              ))}
+            </div>
+          </div>
+        )}
+        </>
       )}
+    </div>
+  );
+}
+
+function RecommendationCard({ rec }: { rec: Recommendation }) {
+  const confidenceLabel: Record<Recommendation["confidence"], string> = {
+    recent_verified: "Recent verified",
+    pattern_inferred: "Pattern inferred",
+    historical: "Historical",
+  };
+  return (
+    <div className={`mp-aug-card mp-aug-${rec.confidence}`}>
+      <div className="mp-aug-row">
+        <div className="mp-aug-main">
+          <div className="mp-aug-name-row">
+            <span className="mp-aug-name">{rec.name}</span>
+            {rec.firm && <span className="mp-aug-firm">· {rec.firm}</span>}
+            <span className={`mp-aug-conf mp-aug-conf-${rec.confidence}`}>
+              {confidenceLabel[rec.confidence]}
+            </span>
+            {rec.requires_warm_intro && (
+              <span className="mp-aug-warm">warm intro needed</span>
+            )}
+          </div>
+          <p className="mp-aug-thesis">{rec.thesis_summary}</p>
+          <p className="mp-aug-fit">
+            <span className="mp-aug-fit-label">Why fit:</span> {rec.why_fit}
+          </p>
+          {rec.recent_activity && (
+            <p className="mp-aug-recent">
+              <span className="mp-aug-recent-label">Recent:</span>{" "}
+              {rec.recent_activity}
+            </p>
+          )}
+          {rec.contact_hint && (
+            <p className="mp-aug-contact">
+              <span className="mp-aug-contact-label">Contact:</span>{" "}
+              {rec.contact_hint}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -514,4 +605,105 @@ const MATCHES_PANEL_CSS = `
     transition: color 150ms ease;
   }
   .mp-card-linkedin:hover { color: #a1a1aa; }
+
+  /* ── LLM-augmented recommendations ────────────────────────────────── */
+  .mp-aug-section {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px dashed #27272a;
+  }
+  .mp-aug-header { margin-bottom: 12px; }
+  .mp-aug-title {
+    margin: 0 0 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #e4e4e7;
+    letter-spacing: 0.02em;
+  }
+  .mp-aug-sub {
+    margin: 0;
+    font-size: 11px;
+    color: #71717a;
+    line-height: 1.5;
+  }
+  .mp-aug-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mp-aug-card {
+    border: 1px solid #27272a;
+    background: rgba(24, 24, 27, 0.3);
+    border-radius: 8px;
+    padding: 12px 14px;
+    transition: border-color 150ms ease;
+  }
+  .mp-aug-historical {
+    opacity: 0.65;
+  }
+  .mp-aug-row { display: flex; gap: 12px; }
+  .mp-aug-main { flex: 1; min-width: 0; }
+  .mp-aug-name-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .mp-aug-name {
+    color: #f4f4f5;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .mp-aug-firm {
+    color: #a1a1aa;
+    font-size: 12px;
+  }
+  .mp-aug-conf {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+  .mp-aug-conf-recent_verified {
+    color: #2dd4bf;
+    border-color: rgba(45, 212, 191, 0.4);
+    background: rgba(45, 212, 191, 0.08);
+  }
+  .mp-aug-conf-pattern_inferred {
+    color: #a1a1aa;
+    border-color: rgba(161, 161, 170, 0.3);
+  }
+  .mp-aug-conf-historical {
+    color: #71717a;
+    border-color: rgba(113, 113, 122, 0.25);
+  }
+  .mp-aug-warm {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #f97316;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid rgba(249, 115, 22, 0.4);
+    background: rgba(249, 115, 22, 0.06);
+  }
+  .mp-aug-thesis {
+    margin: 0 0 6px;
+    font-size: 12px;
+    color: #d4d4d8;
+    line-height: 1.5;
+  }
+  .mp-aug-fit, .mp-aug-recent, .mp-aug-contact {
+    margin: 0 0 4px;
+    font-size: 11px;
+    color: #a1a1aa;
+    line-height: 1.5;
+  }
+  .mp-aug-fit-label, .mp-aug-recent-label, .mp-aug-contact-label {
+    color: #71717a;
+    margin-right: 3px;
+  }
 `;
