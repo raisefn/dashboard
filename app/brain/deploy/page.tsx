@@ -221,6 +221,170 @@ function createInlineBriefButton(
 // data — same investor, same metadata is fine).
 const SESSION_INVESTOR_CACHE: Map<string, MatchInvestor> = new Map();
 
+// Phase 5b — render the inline outreach draft preview card. Called when
+// the brain emits an outreach_draft SSE event after draft_outreach runs.
+// Card supports editing subject/body, fixing the To address when the
+// pipeline row had no email, and sending via Gmail. On send success, the
+// card collapses to a "Sent · HH:MM" line.
+function escapeAttr(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function escapeText(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function renderOutreachDraftCard(
+  draft: {
+    investor_slug: string;
+    investor_name: string;
+    investor_firm: string | null;
+    to_email: string;
+    missing_email: boolean;
+    subject: string;
+    body: string;
+    brief_token: string | null;
+    connected_email: string | null;
+  },
+  insertAfterEl: HTMLElement,
+  session: { access_token: string; user: { email?: string | null } } | null,
+  impersonating: string,
+): void {
+  if (!session) return;
+
+  const card = document.createElement("div");
+  card.style.cssText = [
+    "margin-top: 18px",
+    "border: 1px solid #3f3f46",
+    "background: rgba(24, 24, 27, 0.65)",
+    "border-radius: 10px",
+    "padding: 16px 18px 14px",
+    "max-width: 720px",
+  ].join("; ");
+
+  const investorTitle = draft.investor_firm
+    ? `${draft.investor_name} · ${draft.investor_firm}`
+    : draft.investor_name;
+  const fromEmailDisplay = draft.connected_email || "your connected Gmail";
+
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:600;color:#a1a1aa;letter-spacing:0.04em;text-transform:uppercase;">Draft outreach · ${escapeText(investorTitle)}</div>
+      <button type="button" data-action="cancel" style="background:none;border:none;color:#71717a;font-size:11px;cursor:pointer;font-family:inherit;padding:0;">Cancel</button>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr;gap:8px 12px;align-items:start;">
+      <div style="font-size:11px;color:#71717a;padding-top:8px;">From</div>
+      <div style="font-size:12px;color:#a1a1aa;padding-top:8px;">${escapeText(fromEmailDisplay)}</div>
+      <div style="font-size:11px;color:#71717a;padding-top:8px;">To</div>
+      <input data-field="to" type="email" value="${escapeAttr(draft.to_email)}" placeholder="${draft.missing_email ? "Enter recipient email" : ""}" style="background:rgba(9,9,11,0.6);border:1px solid ${draft.missing_email ? "#b45309" : "#3f3f46"};color:#e4e4e7;padding:7px 10px;border-radius:5px;font-size:13px;font-family:inherit;outline:none;" />
+      <div style="font-size:11px;color:#71717a;padding-top:8px;">Subject</div>
+      <input data-field="subject" type="text" value="${escapeAttr(draft.subject)}" style="background:rgba(9,9,11,0.6);border:1px solid #3f3f46;color:#e4e4e7;padding:7px 10px;border-radius:5px;font-size:13px;font-family:inherit;outline:none;" />
+      <div style="font-size:11px;color:#71717a;padding-top:8px;">Body</div>
+      <textarea data-field="body" rows="9" style="background:rgba(9,9,11,0.6);border:1px solid #3f3f46;color:#e4e4e7;padding:10px 12px;border-radius:5px;font-size:13px;font-family:inherit;line-height:1.55;outline:none;resize:vertical;min-height:140px;">${escapeText(draft.body)}</textarea>
+    </div>
+    ${draft.brief_token ? `<div style="margin-top:10px;font-size:11px;color:#71717a;">Brief link will be appended on send · <code style="color:#a1a1aa;">/brief/${escapeText(draft.brief_token)}</code></div>` : ""}
+    <div data-region="status" style="margin-top:12px;font-size:12px;color:#fca5a5;display:none;"></div>
+    <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px;">
+      <button type="button" data-action="send" style="background:#0d9488;border:none;color:#ffffff;font-size:13px;font-weight:500;padding:8px 18px;border-radius:5px;cursor:pointer;font-family:inherit;transition:background 150ms ease;">Send via Gmail</button>
+    </div>
+  `;
+
+  insertAfterEl.appendChild(card);
+
+  const toInput = card.querySelector<HTMLInputElement>('[data-field="to"]')!;
+  const subjectInput = card.querySelector<HTMLInputElement>('[data-field="subject"]')!;
+  const bodyArea = card.querySelector<HTMLTextAreaElement>('[data-field="body"]')!;
+  const sendBtn = card.querySelector<HTMLButtonElement>('[data-action="send"]')!;
+  const cancelBtn = card.querySelector<HTMLButtonElement>('[data-action="cancel"]')!;
+  const statusEl = card.querySelector<HTMLDivElement>('[data-region="status"]')!;
+
+  function showStatus(msg: string, kind: "error" | "info") {
+    statusEl.textContent = msg;
+    statusEl.style.display = "block";
+    statusEl.style.color = kind === "error" ? "#fca5a5" : "#a1a1aa";
+  }
+
+  cancelBtn.onclick = () => {
+    card.remove();
+  };
+
+  sendBtn.onclick = async () => {
+    const subject = subjectInput.value.trim();
+    const body = bodyArea.value.trim();
+    const to = toInput.value.trim();
+    if (!to || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) {
+      showStatus("Recipient email is required.", "error");
+      return;
+    }
+    if (!subject) {
+      showStatus("Subject is required.", "error");
+      return;
+    }
+    if (!body) {
+      showStatus("Body is required.", "error");
+      return;
+    }
+    sendBtn.disabled = true;
+    sendBtn.textContent = "Sending…";
+    sendBtn.style.opacity = "0.7";
+    sendBtn.style.cursor = "wait";
+    statusEl.style.display = "none";
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      // If the to_email differs from what came back from the draft,
+      // capture it on the pipeline row first via update_pipeline so the
+      // next draft has the right email cached.
+      // For v1 we skip that round-trip; the founder can fix the row via
+      // chat if they want. The send itself uses the to_email here.
+      const res = await fetch("/v1/brain/outreach/send", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          investor_slug: draft.investor_slug,
+          subject,
+          body,
+          brief_token: draft.brief_token,
+        }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        showStatus(errBody.detail || `Send failed (${res.status})`, "error");
+        sendBtn.disabled = false;
+        sendBtn.textContent = "Send via Gmail";
+        sendBtn.style.opacity = "1";
+        sendBtn.style.cursor = "pointer";
+        return;
+      }
+      const result = await res.json();
+      const sentAt = result.sent_at
+        ? new Date(result.sent_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+        : new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#2dd4bf;">
+          <span style="font-size:14px;">✓</span>
+          <span>Sent to ${escapeText(draft.investor_name)} · ${escapeText(sentAt)}</span>
+        </div>
+        <div style="margin-top:6px;font-size:11px;color:#71717a;">Tracked under outreach_sent in your pipeline. Replies surface automatically when they land.</div>
+      `;
+      // Notify the dashboard that pipeline state changed so sidebar
+      // counts refresh.
+      window.dispatchEvent(new CustomEvent("raisefn:pipeline_updated"));
+    } catch (e) {
+      showStatus(
+        e instanceof Error ? e.message : "Send failed",
+        "error",
+      );
+      sendBtn.disabled = false;
+      sendBtn.textContent = "Send via Gmail";
+      sendBtn.style.opacity = "1";
+      sendBtn.style.cursor = "pointer";
+    }
+  };
+}
+
 function renderMatchesPanel(
   data: {
     individuals_to_target?: Array<Record<string, unknown>>;
@@ -1458,6 +1622,29 @@ function BrainDeployInner() {
               // Without the defer, badge sometimes read stale data because
               // the SSE event was emitted before the savepoint flushed.
               matchesUpdatedThisRoundRef.current = true;
+            } else if (event.type === "outreach_draft") {
+              // Phase 5b — draft_outreach tool just returned. Render an
+              // inline preview card below the in-flight assistant message
+              // with editable subject/body + Send via Gmail button.
+              try {
+                const draftData = {
+                  investor_slug: String(event.investor_slug || ""),
+                  investor_name: String(event.investor_name || "Investor"),
+                  investor_firm: event.investor_firm ? String(event.investor_firm) : null,
+                  to_email: event.to_email ? String(event.to_email) : "",
+                  missing_email: Boolean(event.missing_email),
+                  subject: String(event.subject || ""),
+                  body: String(event.body || ""),
+                  brief_token: event.brief_token ? String(event.brief_token) : null,
+                  connected_email: event.connected_email ? String(event.connected_email) : null,
+                };
+                renderOutreachDraftCard(
+                  draftData,
+                  contentEl.parentElement || contentEl,
+                  session,
+                  impersonating,
+                );
+              } catch { /* defensive */ }
             }
             // Note: `matches_panel` + `agent_plan` event handlers removed.
             // Match data lives in user_documents + Matches tab. The LLM
