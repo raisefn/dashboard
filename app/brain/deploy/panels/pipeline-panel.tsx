@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import type { Panel } from "./use-panel-state";
 
@@ -31,6 +31,7 @@ interface PipelinePanelProps {
 }
 
 const STATUS_LABEL: Record<string, string> = {
+  identified: "Identified",
   outreached: "Outreached",
   meeting_scheduled: "Meeting scheduled",
   met: "Met",
@@ -45,6 +46,26 @@ const STATUS_LABEL: Record<string, string> = {
   rejected: "Rejected",
 };
 
+// Funnel-order options for the inline status dropdown. Grouped into
+// active vs. closed so the founder can scan visually.
+const STATUS_OPTIONS_ACTIVE = [
+  "identified",
+  "outreached",
+  "meeting_scheduled",
+  "met",
+  "follow_up",
+  "diligence",
+  "term_sheet",
+  "committed",
+] as const;
+const STATUS_OPTIONS_CLOSED = [
+  "soft_pass",
+  "hard_pass",
+  "passed",
+  "ghosted",
+  "rejected",
+] as const;
+
 const STATUS_TONE: Record<string, "warm" | "active" | "cool"> = {
   committed: "warm",
   term_sheet: "warm",
@@ -53,6 +74,7 @@ const STATUS_TONE: Record<string, "warm" | "active" | "cool"> = {
   meeting_scheduled: "active",
   follow_up: "active",
   outreached: "active",
+  identified: "cool",
   ghosted: "cool",
   soft_pass: "cool",
   hard_pass: "cool",
@@ -61,6 +83,7 @@ const STATUS_TONE: Record<string, "warm" | "active" | "cool"> = {
 };
 
 const ACTIVE_STATUSES = new Set([
+  "identified",
   "outreached", "meeting_scheduled", "met", "follow_up",
   "diligence", "term_sheet", "committed",
 ]);
@@ -88,6 +111,98 @@ const STATUS_ORDER: Record<string, number> = {
   follow_up: 6, outreached: 7,
   ghosted: 8, soft_pass: 9, hard_pass: 10, passed: 11, rejected: 12,
 };
+
+// Inline status edit. Native <select> styled to look like the pill
+// it replaces. Stops propagation on the wrapper so opening the dropdown
+// doesn't trigger the row's onClick (which would open the detail panel).
+interface StatusSelectProps {
+  slug: string | null;
+  currentStatus: string;
+  tone: "warm" | "active" | "cool" | "cold";
+  session: Session | null;
+  impersonating: string;
+  onUpdated: (newStatus: string) => void;
+}
+
+function StatusSelect({ slug, currentStatus, tone, session, impersonating, onUpdated }: StatusSelectProps) {
+  const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleChange(e: ChangeEvent<HTMLSelectElement>) {
+    const newStatus = e.target.value;
+    if (!slug || !session) return;
+    if (newStatus === currentStatus) return;
+    setUpdating(true);
+    setError(null);
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch(
+        `/v1/brain/pipeline/${encodeURIComponent(slug)}/status`,
+        {
+          method: "PATCH",
+          headers,
+          body: JSON.stringify({ new_status: newStatus }),
+        },
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Update failed (${res.status})`);
+      }
+      const data = await res.json();
+      onUpdated(data.new_status || newStatus);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Update failed");
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  const label = STATUS_LABEL[currentStatus] || currentStatus || "—";
+  // Render current label in the unselected option so it shows correctly
+  // when the value is empty/null (e.g. a row with no status yet).
+  const showCurrentAsPlaceholder = !currentStatus || !STATUS_LABEL[currentStatus];
+
+  return (
+    <span
+      className="pp-status-edit-wrap"
+      onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => e.stopPropagation()}
+      title={error || (updating ? "Updating…" : "Click to change status")}
+    >
+      <select
+        className={`pp-status-select pp-status-${tone}${updating ? " is-updating" : ""}${error ? " is-error" : ""}`}
+        value={currentStatus || ""}
+        onChange={handleChange}
+        disabled={!slug || updating}
+        aria-label="Status"
+      >
+        {showCurrentAsPlaceholder && (
+          <option value="" disabled>
+            {label}
+          </option>
+        )}
+        <optgroup label="Active">
+          {STATUS_OPTIONS_ACTIVE.map(s => (
+            <option key={s} value={s}>
+              {STATUS_LABEL[s]}
+            </option>
+          ))}
+        </optgroup>
+        <optgroup label="Closed">
+          {STATUS_OPTIONS_CLOSED.map(s => (
+            <option key={s} value={s}>
+              {STATUS_LABEL[s]}
+            </option>
+          ))}
+        </optgroup>
+      </select>
+    </span>
+  );
+}
 
 function formatAge(days: number | null): string {
   if (days === null || days === undefined) return "—";
@@ -229,15 +344,22 @@ export function PipelinePanel({ session, impersonating, onInjectPrompt, onOpenPa
           <div className="pp-tbody">
             {filtered.map(r => {
               const tone = STATUS_TONE[r.status || ""] || "cold";
-              const statusLabel = STATUS_LABEL[r.status || ""] || r.status || "—";
               return (
-                <button
+                <div
                   key={r.id}
-                  type="button"
                   className="pp-row"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => {
                     if (r.slug) onOpenPanel({ kind: "investor", slug: r.slug, from: { kind: "pipeline" } });
                     else onInjectPrompt(`Looking at ${r.name}. What do you want to do?`);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      if (r.slug) onOpenPanel({ kind: "investor", slug: r.slug, from: { kind: "pipeline" } });
+                      else onInjectPrompt(`Looking at ${r.name}. What do you want to do?`);
+                    }
                   }}
                 >
                   <div className="pp-cell pp-cell-name">
@@ -245,12 +367,22 @@ export function PipelinePanel({ session, impersonating, onInjectPrompt, onOpenPa
                     {r.firm && <div className="pp-firm">{r.firm}</div>}
                   </div>
                   <div className="pp-cell pp-cell-status">
-                    <span className={`pp-status-pill pp-status-${tone}`}>{statusLabel}</span>
+                    <StatusSelect
+                      slug={r.slug}
+                      currentStatus={r.status || ""}
+                      tone={tone}
+                      session={session}
+                      impersonating={impersonating}
+                      onUpdated={(newStatus) => {
+                        setRows(prev => prev?.map(row => row.id === r.id ? { ...row, status: newStatus } : row) || null);
+                        window.dispatchEvent(new CustomEvent("raisefn:pipeline_updated"));
+                      }}
+                    />
                   </div>
                   <div className="pp-cell pp-cell-age">
                     {formatAge(r.days_since_update)}
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -400,33 +532,69 @@ const PIPELINE_PANEL_CSS = `
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .pp-status-pill {
+  .pp-status-edit-wrap {
+    display: inline-flex;
+    align-items: center;
+  }
+  .pp-status-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
     display: inline-block;
+    font-family: inherit;
     font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    padding: 2px 8px;
+    padding: 2px 22px 2px 8px;
     border-radius: 999px;
+    cursor: pointer;
+    outline: none;
+    background-repeat: no-repeat;
+    background-position: right 7px center;
+    background-size: 8px;
+    transition: filter 150ms ease, opacity 150ms ease;
+  }
+  .pp-status-select:hover { filter: brightness(1.15); }
+  .pp-status-select:focus { outline: 1px solid rgba(45, 212, 191, 0.55); outline-offset: 1px; }
+  .pp-status-select.is-updating { opacity: 0.55; cursor: wait; }
+  .pp-status-select.is-error { outline: 1px solid #fca5a5; outline-offset: 1px; }
+  .pp-status-select:disabled { cursor: not-allowed; }
+  .pp-status-select option {
+    background: #18181b;
+    color: #e4e4e7;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+    font-size: 12px;
+  }
+  .pp-status-select optgroup {
+    background: #09090b;
+    color: #71717a;
+    font-style: normal;
   }
   .pp-status-warm {
-    background: rgba(45, 212, 191, 0.12);
+    background-color: rgba(45, 212, 191, 0.12);
     color: #2dd4bf;
     border: 1px solid rgba(45, 212, 191, 0.25);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'><path d='M0 0l4 5 4-5z' fill='%232dd4bf'/></svg>");
   }
   .pp-status-active {
-    background: rgba(253, 186, 116, 0.12);
+    background-color: rgba(253, 186, 116, 0.12);
     color: #fdba74;
     border: 1px solid rgba(253, 186, 116, 0.25);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'><path d='M0 0l4 5 4-5z' fill='%23fdba74'/></svg>");
   }
   .pp-status-cool {
-    background: rgba(113, 113, 122, 0.15);
+    background-color: rgba(113, 113, 122, 0.15);
     color: #a1a1aa;
     border: 1px solid rgba(82, 82, 91, 0.4);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'><path d='M0 0l4 5 4-5z' fill='%23a1a1aa'/></svg>");
   }
   .pp-status-cold {
-    background: rgba(63, 63, 70, 0.4);
+    background-color: rgba(63, 63, 70, 0.4);
     color: #71717a;
     border: 1px solid #3f3f46;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'><path d='M0 0l4 5 4-5z' fill='%2371717a'/></svg>");
   }
 `;
