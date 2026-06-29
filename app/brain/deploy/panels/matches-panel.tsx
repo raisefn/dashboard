@@ -425,6 +425,12 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
                               // the why_fit signal without a schema change.
                               thesis: [rec.thesis_summary, `Why fit for this founder: ${rec.why_fit}`].join(" — "),
                               website: null,
+                              // Phase C v1 — tag this stub as auto-promoted from
+                              // augmentation so admin can review the brief-acted
+                              // set at /admin/users. See
+                              // .claude/plans/llm_augmented_matching.md.
+                              is_aug_recommendation: true,
+                              aug_confidence: rec.confidence,
                             },
                           }),
                         });
