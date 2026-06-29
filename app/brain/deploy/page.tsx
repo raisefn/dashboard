@@ -258,7 +258,12 @@ function renderOutreachDraftCard(
     "background: rgba(24, 24, 27, 0.65)",
     "border-radius: 10px",
     "padding: 16px 18px 14px",
-    "max-width: 720px",
+    // Fill the available chat column. The card was capped at 720px
+    // which produced a cramped textarea on wider screens. The chat
+    // column already has its own width constraint; let the card
+    // breathe within that.
+    "width: 100%",
+    "box-sizing: border-box",
   ].join("; ");
 
   const investorTitle = draft.investor_firm
