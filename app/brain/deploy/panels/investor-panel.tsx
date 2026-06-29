@@ -146,6 +146,39 @@ export function InvestorPanel({ slug, session, impersonating, injectChatPrompt, 
   const [data, setData] = useState<InvestorDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [markingPassed, setMarkingPassed] = useState(false);
+  const [markError, setMarkError] = useState<string | null>(null);
+
+  async function markPassed() {
+    if (!session || !slug) return;
+    setMarkingPassed(true);
+    setMarkError(null);
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch(
+        `/v1/brain/pipeline/${encodeURIComponent(slug)}/status`,
+        {
+          method: "PATCH",
+          headers,
+          body: JSON.stringify({ new_status: "passed" }),
+        },
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Mark failed (${res.status})`);
+      }
+      // Panel re-fetches on this event (see useEffect below).
+      window.dispatchEvent(new CustomEvent("raisefn:pipeline_updated"));
+    } catch (e) {
+      setMarkError(e instanceof Error ? e.message : "Mark failed");
+    } finally {
+      setMarkingPassed(false);
+    }
+  }
 
   const load = useCallback(async () => {
     if (!session || !slug) return;
@@ -283,9 +316,11 @@ export function InvestorPanel({ slug, session, impersonating, injectChatPrompt, 
           <button
             type="button"
             className="ip-action ip-action-secondary"
-            onClick={() => injectChatPrompt(`Mark ${displayName} as passed`)}
+            onClick={markPassed}
+            disabled={markingPassed}
+            title={markError || undefined}
           >
-            Mark passed
+            {markingPassed ? "Marking…" : "Mark passed"}
           </button>
         )}
         <button
