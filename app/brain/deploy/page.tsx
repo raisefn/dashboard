@@ -347,6 +347,10 @@ function renderOutreachDraftCard(
           subject,
           body,
           brief_token: draft.brief_token,
+          // Pass the typed email — backend uses this as override AND
+          // persists it back to the pipeline row so next time it's
+          // cached. Critical when draft_outreach returned missing_email=true.
+          to_email: to,
         }),
       });
       if (!res.ok) {
