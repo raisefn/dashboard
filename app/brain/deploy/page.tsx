@@ -242,6 +242,11 @@ function renderOutreachDraftCard(
     missing_email: boolean;
     subject: string;
     body: string;
+    // Phase 5c Mechanism 1 — LLM's original draft for edit-delta tracking.
+    // Echoed back on send so the backend can record how much the founder
+    // edited and how long the card was open.
+    original_subject: string;
+    original_body: string;
     brief_token: string | null;
     connected_email: string | null;
   },
@@ -250,6 +255,9 @@ function renderOutreachDraftCard(
   impersonating: string,
 ): void {
   if (!session) return;
+
+  // Phase 5c Mechanism 1 — clock starts the moment the card is mounted.
+  const renderedAt = Date.now();
 
   const card = document.createElement("div");
   card.style.cssText = [
@@ -356,6 +364,10 @@ function renderOutreachDraftCard(
           // persists it back to the pipeline row so next time it's
           // cached. Critical when draft_outreach returned missing_email=true.
           to_email: to,
+          // Phase 5c Mechanism 1 — edit tracking.
+          original_subject: draft.original_subject,
+          original_body: draft.original_body,
+          seconds_in_card: (Date.now() - renderedAt) / 1000,
         }),
       });
       if (!res.ok) {
@@ -1636,14 +1648,22 @@ function BrainDeployInner() {
               // inline preview card below the in-flight assistant message
               // with editable subject/body + Send via Gmail button.
               try {
+                const subjectInitial = String(event.subject || "");
+                const bodyInitial = String(event.body || "");
                 const draftData = {
                   investor_slug: String(event.investor_slug || ""),
                   investor_name: String(event.investor_name || "Investor"),
                   investor_firm: event.investor_firm ? String(event.investor_firm) : null,
                   to_email: event.to_email ? String(event.to_email) : "",
                   missing_email: Boolean(event.missing_email),
-                  subject: String(event.subject || ""),
-                  body: String(event.body || ""),
+                  subject: subjectInitial,
+                  body: bodyInitial,
+                  // Phase 5c Mechanism 1 — capture the LLM's original draft
+                  // at card-mount time. Old brains that don't echo the
+                  // originals fall back to the current subject/body, which
+                  // is correct (no edit registered).
+                  original_subject: event.original_subject ? String(event.original_subject) : subjectInitial,
+                  original_body: event.original_body ? String(event.original_body) : bodyInitial,
                   brief_token: event.brief_token ? String(event.brief_token) : null,
                   connected_email: event.connected_email ? String(event.connected_email) : null,
                 };
