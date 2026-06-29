@@ -381,14 +381,76 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
                 Recommended — not yet in our catalog
               </h3>
               <p className="mp-aug-sub">
-                Pulled from broad market knowledge for your sector. Treat as a
-                starting list — verify recency before warm intro.
+                Pulled from broad market knowledge. Generate a brief to bring
+                them into raise(fn).
               </p>
             </div>
             <div className="mp-aug-list">
-              {sortedRecommendations.map((rec, idx) => (
-                <RecommendationCard key={`rec-${idx}`} rec={rec} />
-              ))}
+              {sortedRecommendations.map((rec, idx) => {
+                const key = `rec-${idx}`;
+                const isGen = generatingKey === key;
+                const errMsg = rowError?.key === key ? rowError.msg : null;
+                const existing = findExistingBrief(rec.name);
+                return (
+                  <RecommendationCard
+                    key={key}
+                    rec={rec}
+                    isGenerating={isGen}
+                    errMsg={errMsg}
+                    existingBrief={existing}
+                    onGenerateBrief={async () => {
+                      if (!session || isGen) return;
+                      setGeneratingKey(key);
+                      setRowError(null);
+                      try {
+                        const founderEmail = (impersonating || session.user.email || "").toLowerCase();
+                        const headers: Record<string, string> = {
+                          "Content-Type": "application/json",
+                          Authorization: `Bearer ${session.access_token}`,
+                        };
+                        if (impersonating) headers["X-Impersonate"] = impersonating;
+                        const res = await fetch("/v1/brain/generate-brief", {
+                          method: "POST",
+                          headers,
+                          body: JSON.stringify({
+                            founder_email: founderEmail,
+                            investor_inline: {
+                              name: rec.name,
+                              firm: rec.firm || null,
+                              title: null,
+                              // Combine thesis + founder-specific fit so the
+                              // brief generator has both lenses. Existing
+                              // endpoint takes a single thesis string today;
+                              // joining is the lowest-risk way to surface
+                              // the why_fit signal without a schema change.
+                              thesis: [rec.thesis_summary, `Why fit for this founder: ${rec.why_fit}`].join(" — "),
+                              website: null,
+                            },
+                          }),
+                        });
+                        if (!res.ok) {
+                          const body = await res.json().catch(() => ({}));
+                          throw new Error(body.detail || `Brief generation failed (${res.status})`);
+                        }
+                        const data = await res.json();
+                        const token = data.url ? String(data.url).split("/").pop() : null;
+                        if (token) {
+                          onOpenPanel({ kind: "brief", token, from: { kind: "matches" } });
+                        } else if (data.url) {
+                          window.open(data.url, "_blank", "noopener");
+                        }
+                        try { window.dispatchEvent(new CustomEvent("raisefn:briefs_updated")); } catch { /* defensive */ }
+                        await fetchMatches();
+                      } catch (e) {
+                        setRowError({ key, msg: e instanceof Error ? e.message : "Brief generation failed." });
+                      } finally {
+                        setGeneratingKey(null);
+                      }
+                    }}
+                    onViewBrief={(token) => onOpenPanel({ kind: "brief", token, from: { kind: "matches" } })}
+                  />
+                );
+              })}
             </div>
           </div>
         )}
@@ -398,19 +460,40 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
   );
 }
 
-function RecommendationCard({ rec }: { rec: Recommendation }) {
+function RecommendationCard({
+  rec,
+  isGenerating,
+  errMsg,
+  existingBrief,
+  onGenerateBrief,
+  onViewBrief,
+}: {
+  rec: Recommendation;
+  isGenerating: boolean;
+  errMsg: string | null;
+  existingBrief: ExistingBrief | null;
+  onGenerateBrief: () => void;
+  onViewBrief: (token: string) => void;
+}) {
   const confidenceLabel: Record<Recommendation["confidence"], string> = {
     recent_verified: "Recent verified",
     pattern_inferred: "Pattern inferred",
     historical: "Historical",
   };
+  // Compact subtitle line — combine firm + recent + contact into one
+  // muted line below the primary name. Reduces vertical density without
+  // hiding information.
+  const subtitleParts: string[] = [];
+  if (rec.firm) subtitleParts.push(rec.firm);
+  if (rec.recent_activity) subtitleParts.push(rec.recent_activity);
+  if (rec.contact_hint) subtitleParts.push(rec.contact_hint);
+
   return (
     <div className={`mp-aug-card mp-aug-${rec.confidence}`}>
       <div className="mp-aug-row">
         <div className="mp-aug-main">
           <div className="mp-aug-name-row">
             <span className="mp-aug-name">{rec.name}</span>
-            {rec.firm && <span className="mp-aug-firm">· {rec.firm}</span>}
             <span className={`mp-aug-conf mp-aug-conf-${rec.confidence}`}>
               {confidenceLabel[rec.confidence]}
             </span>
@@ -418,21 +501,31 @@ function RecommendationCard({ rec }: { rec: Recommendation }) {
               <span className="mp-aug-warm">warm intro needed</span>
             )}
           </div>
-          <p className="mp-aug-thesis">{rec.thesis_summary}</p>
-          <p className="mp-aug-fit">
-            <span className="mp-aug-fit-label">Why fit:</span> {rec.why_fit}
-          </p>
-          {rec.recent_activity && (
-            <p className="mp-aug-recent">
-              <span className="mp-aug-recent-label">Recent:</span>{" "}
-              {rec.recent_activity}
-            </p>
+          {subtitleParts.length > 0 && (
+            <p className="mp-aug-subtitle">{subtitleParts.join(" · ")}</p>
           )}
-          {rec.contact_hint && (
-            <p className="mp-aug-contact">
-              <span className="mp-aug-contact-label">Contact:</span>{" "}
-              {rec.contact_hint}
-            </p>
+          <p className="mp-aug-thesis">{rec.thesis_summary}</p>
+          <p className="mp-aug-fit">{rec.why_fit}</p>
+          {errMsg && <p className="mp-aug-error">{errMsg}</p>}
+        </div>
+        <div className="mp-aug-actions">
+          {existingBrief ? (
+            <button
+              type="button"
+              className="mp-btn mp-btn-secondary"
+              onClick={() => onViewBrief(existingBrief.token)}
+            >
+              View brief
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="mp-btn mp-btn-primary"
+              disabled={isGenerating}
+              onClick={onGenerateBrief}
+            >
+              {isGenerating ? "Generating…" : "Generate brief"}
+            </button>
           )}
         </div>
       </div>
@@ -641,8 +734,32 @@ const MATCHES_PANEL_CSS = `
   .mp-aug-historical {
     opacity: 0.65;
   }
-  .mp-aug-row { display: flex; gap: 12px; }
+  .mp-aug-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
   .mp-aug-main { flex: 1; min-width: 0; }
+  .mp-aug-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .mp-aug-subtitle {
+    margin: 0 0 6px;
+    font-size: 11px;
+    color: #71717a;
+    line-height: 1.5;
+  }
+  .mp-aug-error {
+    margin: 6px 0 0;
+    font-size: 11px;
+    color: #fca5a5;
+    line-height: 1.5;
+  }
   .mp-aug-name-row {
     display: flex;
     align-items: center;
@@ -696,14 +813,11 @@ const MATCHES_PANEL_CSS = `
     color: #d4d4d8;
     line-height: 1.5;
   }
-  .mp-aug-fit, .mp-aug-recent, .mp-aug-contact {
-    margin: 0 0 4px;
+  .mp-aug-fit {
+    margin: 0;
     font-size: 11px;
     color: #a1a1aa;
     line-height: 1.5;
-  }
-  .mp-aug-fit-label, .mp-aug-recent-label, .mp-aug-contact-label {
-    color: #71717a;
-    margin-right: 3px;
+    font-style: italic;
   }
 `;
