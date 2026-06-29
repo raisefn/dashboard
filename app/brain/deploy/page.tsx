@@ -880,6 +880,23 @@ function BrainDeployInner() {
   const [impersonateInput, setImpersonateInput] = useState("");
   const [impersonating, setImpersonating] = useState("");
 
+  // Rehydrate impersonation state on mount. Without this, navigation
+  // (clicking Matches, refreshing, opening any panel that triggers a
+  // remount of this page) drops the admin's "Acting as" context and
+  // they appear to be signed back into their own account. Caught
+  // 2026-06-29: Justin acting as Matt → clicked Matches → showed his
+  // own account's matches because the state had reset.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("raisefn_impersonating");
+      if (saved) {
+        setImpersonating(saved);
+      }
+    } catch {
+      /* private browsing — skip */
+    }
+  }, []);
+
   // Persist impersonation across the dashboard so other components
   // (BrainTabs especially — Briefs/Matches counts) can scope their
   // API calls to the founder being acted-as. Without this, the tabs
