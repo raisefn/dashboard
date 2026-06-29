@@ -148,6 +148,45 @@ export function InvestorPanel({ slug, session, impersonating, injectChatPrompt, 
   const [error, setError] = useState<string | null>(null);
   const [markingPassed, setMarkingPassed] = useState(false);
   const [markError, setMarkError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  async function removeFromPipeline(displayName: string) {
+    if (!session || !slug) return;
+    const ok = window.confirm(
+      `Remove ${displayName} from your pipeline?\n\nThis deletes the row and all its activity (status updates, outreach, replies). Briefs are kept. This can't be undone.`,
+    );
+    if (!ok) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch(
+        `/v1/brain/pipeline/${encodeURIComponent(slug)}`,
+        {
+          method: "DELETE",
+          headers,
+        },
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Delete failed (${res.status})`);
+      }
+      // Refresh sidebar + pipeline panel counts, close this panel.
+      window.dispatchEvent(new CustomEvent("raisefn:pipeline_updated"));
+      // Crude close: navigate back to the matches panel. Better would be
+      // an onClose prop, but this panel doesn't have one yet — the page
+      // listens for pipeline_updated and the parent will re-render.
+      window.dispatchEvent(new CustomEvent("raisefn:close_panel"));
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : "Delete failed");
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   async function markPassed() {
     if (!session || !slug) return;
@@ -329,6 +368,15 @@ export function InvestorPanel({ slug, session, impersonating, injectChatPrompt, 
           onClick={() => injectChatPrompt(`Walk me through where I stand with ${displayName}`)}
         >
           Discuss in chat
+        </button>
+        <button
+          type="button"
+          className="ip-action ip-action-danger"
+          onClick={() => removeFromPipeline(displayName)}
+          disabled={deleting}
+          title={deleteError || "Remove this investor and their activity from your pipeline"}
+        >
+          {deleting ? "Removing…" : "Remove from pipeline"}
         </button>
       </div>
 
@@ -542,6 +590,20 @@ const INVESTOR_PANEL_CSS = `
     background: rgba(63, 63, 70, 0.5);
     border-color: #52525b;
     color: #f4f4f5;
+  }
+  .ip-action-danger {
+    background: transparent;
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+  .ip-action-danger:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #fecaca;
+  }
+  .ip-action-danger:disabled {
+    opacity: 0.6;
+    cursor: wait;
   }
 
   .ip-section { margin-bottom: 24px; }
