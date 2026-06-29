@@ -32,6 +32,10 @@ interface BriefData {
   investor_full_name: string | null;
   generated_at: string | null;
   view_count: number;
+  // Brand-gating (migration 031). When false, the page renders
+  // without the raise(fn) wordmark + footer block. Older briefs that
+  // predate the column fall back to true.
+  show_raisefn_brand?: boolean;
 }
 
 async function fetchBrief(token: string): Promise<BriefData | null> {
@@ -61,9 +65,14 @@ export async function generateMetadata(
   }
   const company = brief.founder_company || "a portfolio opportunity";
   const investor = brief.investor_first_name || "you";
+  const showBrand = brief.show_raisefn_brand !== false;
   return {
-    title: `${brief.founder_company || "Investor brief"} — raise(fn) Team`,
-    description: `Prepared by raise(fn) Team for ${investor}. Confidential brief on ${company}.`,
+    title: showBrand
+      ? `${brief.founder_company || "Investor brief"} — raise(fn) Team`
+      : `${brief.founder_company || "Investor brief"}`,
+    description: showBrand
+      ? `Prepared by raise(fn) Team for ${investor}. Confidential brief on ${company}.`
+      : `Confidential brief on ${company} for ${investor}.`,
     robots: { index: false, follow: false },
   };
 }
@@ -83,20 +92,29 @@ export default async function BriefPage(
     notFound();
   }
 
+  // Brand-gating (migration 031). When false, render without the
+  // raise(fn) wordmark + footer. Default true for safety + back-compat.
+  const showBrand = brief.show_raisefn_brand !== false;
+
   return (
     <main className="brief-root fixed inset-0 overflow-y-auto bg-white text-zinc-900 z-30">
       <style>{BRIEF_CSS}</style>
 
       <div className="mx-auto max-w-[720px] px-6 py-12 sm:py-16">
-        {/* Brand header */}
+        {/* Header — branded version keeps the wordmark; unbranded keeps
+            only the Confidential tag so the page still has a top rule. */}
         <header className="mb-10 flex items-center justify-between border-b border-zinc-200 pb-6">
-          <Link
-            href="https://www.raisefn.com"
-            className="text-lg font-bold tracking-tight"
-          >
-            <span className="text-orange-500">raise</span>
-            <span className="text-teal-500">(fn)</span>
-          </Link>
+          {showBrand ? (
+            <Link
+              href="https://www.raisefn.com"
+              className="text-lg font-bold tracking-tight"
+            >
+              <span className="text-orange-500">raise</span>
+              <span className="text-teal-500">(fn)</span>
+            </Link>
+          ) : (
+            <span aria-hidden="true" />
+          )}
           <span className="text-xs uppercase tracking-wider text-zinc-500">
             Confidential
           </span>
@@ -109,27 +127,30 @@ export default async function BriefPage(
           </ReactMarkdown>
         </article>
 
-        {/* Footer */}
-        <footer className="mt-16 border-t border-zinc-200 pt-6 text-xs text-zinc-500">
-          <p>
-            Prepared by{" "}
-            <span className="font-medium text-zinc-700">raise(fn) Team</span>.
-            Forwarded in confidence to{" "}
-            <span className="font-medium text-zinc-700">
-              {brief.investor_full_name || "the named recipient"}
-            </span>
-            .
-          </p>
-          <p className="mt-2">
-            <Link
-              href="https://www.raisefn.com"
-              className="text-zinc-600 hover:text-zinc-900"
-            >
-              raisefn.com
-            </Link>
-            {" — The fundraising agent for founders."}
-          </p>
-        </footer>
+        {/* Footer — only rendered when branding is on. Unbranded briefs end
+            cleanly at the markdown content. */}
+        {showBrand && (
+          <footer className="mt-16 border-t border-zinc-200 pt-6 text-xs text-zinc-500">
+            <p>
+              Prepared by{" "}
+              <span className="font-medium text-zinc-700">raise(fn) Team</span>.
+              Forwarded in confidence to{" "}
+              <span className="font-medium text-zinc-700">
+                {brief.investor_full_name || "the named recipient"}
+              </span>
+              .
+            </p>
+            <p className="mt-2">
+              <Link
+                href="https://www.raisefn.com"
+                className="text-zinc-600 hover:text-zinc-900"
+              >
+                raisefn.com
+              </Link>
+              {" — The fundraising agent for founders."}
+            </p>
+          </footer>
+        )}
       </div>
 
       {/* Owner-only edit surface. Renders nothing for public viewers. */}
