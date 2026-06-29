@@ -116,16 +116,29 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
   const [generatingKey, setGeneratingKey] = useState<string | null>(null);
   const [rowError, setRowError] = useState<{ key: string; msg: string } | null>(null);
 
-  const fetchMatches = useCallback(async () => {
+  const fetchMatches = useCallback(async (signal?: AbortSignal) => {
     if (!session) return;
     setLoading(true);
     setError(null);
+    // Hard client-side timeout — 30s. Backgrounded tabs sometimes leave
+    // the in-flight fetch pending indefinitely; the timeout guarantees
+    // we exit the loading state and the user can retry. Caught
+    // 2026-06-29: matches panel got permanently stuck on "Loading
+    // matches..." after a tab switch.
+    const localCtl = signal ? null : new AbortController();
+    const effective = signal || localCtl?.signal;
+    const timeoutId = localCtl
+      ? window.setTimeout(() => localCtl.abort(), 30_000)
+      : null;
     try {
       const headers: Record<string, string> = {
         Authorization: `Bearer ${session.access_token}`,
       };
       if (impersonating) headers["X-Impersonate"] = impersonating;
-      const res = await fetch("/v1/brain/matches/mine", { headers });
+      const res = await fetch("/v1/brain/matches/mine", {
+        headers,
+        signal: effective,
+      });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.detail || `Failed to load matches (${res.status})`);
@@ -139,14 +152,31 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
       });
       setBriefs(data.briefs || []);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load matches.");
+      // AbortError fires on unmount + on our 30s timeout — both are
+      // expected lifecycle events, not real errors. Surfacing them as
+      // an error message would confuse the user when they navigate
+      // away mid-fetch.
+      if (e instanceof Error && e.name === "AbortError") {
+        // Keep prior batches on screen; loading state still resets below.
+      } else {
+        setError(e instanceof Error ? e.message : "Failed to load matches.");
+      }
     } finally {
+      // GUARANTEED reset — even if fetch never resolved cleanly,
+      // setLoading(false) runs so the user always escapes the loading state.
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
       setLoading(false);
     }
   }, [session, impersonating]);
 
   useEffect(() => {
-    void fetchMatches();
+    const ctl = new AbortController();
+    void fetchMatches(ctl.signal);
+    // Cancel the in-flight fetch on unmount or when deps change. Without
+    // this, a backgrounded tab can leave a stale fetch lingering that
+    // updates state on a now-unmounted component (React warning) or
+    // gets stuck pending indefinitely.
+    return () => ctl.abort();
   }, [fetchMatches]);
 
   // Refresh when a new batch lands (chat fires match_investors).
@@ -158,6 +188,20 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
       window.removeEventListener("raisefn:matches_updated", onUpdate);
       window.removeEventListener("raisefn:briefs_updated", onUpdate);
     };
+  }, [fetchMatches]);
+
+  // Recover on tab return — when document becomes visible after being
+  // hidden, refetch. Browsers (Safari especially) sometimes suspend
+  // background fetches; this gives a clean way back. Refetches on EVERY
+  // visibility change; cheap GET, no rate-limit concern.
+  useEffect(() => {
+    function onVisibility() {
+      if (document.visibilityState === "visible") {
+        void fetchMatches();
+      }
+    }
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [fetchMatches]);
 
   function findExistingBrief(name?: string | null): ExistingBrief | null {
