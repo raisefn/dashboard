@@ -9,8 +9,8 @@ voice, ship.
 
 ## Status
 
-- ✅ done: 8
-- ⏳ pending: 12
+- ✅ done: 9
+- ⏳ pending: 11
 - 🎯 cadence target: daily (~1/day)
 
 ## Workflow
@@ -38,6 +38,8 @@ voice, ship.
   → [/raise-intel/how-do-i-know-if-a-vc-passed-or-is-just-slow](/raise-intel/how-do-i-know-if-a-vc-passed-or-is-just-slow)
 - [x] **How do I create urgency without lying about having other offers?**
   → [/raise-intel/how-do-i-create-urgency-without-lying](/raise-intel/how-do-i-create-urgency-without-lying)
+- [x] **How do I close the round faster?**
+  → [/raise-intel/how-do-i-close-the-round-faster](/raise-intel/how-do-i-close-the-round-faster)
 
 ## Pending — priority order
 
@@ -49,10 +51,6 @@ list. Priorities are loose — pick anything in the top tier.
   → [/raise-intel/what-questions-will-vcs-ask-me-in-a-pre-seed-meeting](/raise-intel/what-questions-will-vcs-ask-me-in-a-pre-seed-meeting)
 - [x] **How do I get a warm intro to a VC?** ✅ published 2026-06-18
   → [/raise-intel/how-do-i-get-a-warm-intro-to-a-vc](/raise-intel/how-do-i-get-a-warm-intro-to-a-vc)
-- [ ] **How do I close the round faster?**
-  Category: process. Angle: speed is mostly about pipeline density
-  + commitment language, not "creating urgency" theater.
-
 ### Tier 2 — informational / high search volume
 
 - [ ] **How much should I raise?**
