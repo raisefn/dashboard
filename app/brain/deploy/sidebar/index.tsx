@@ -31,6 +31,19 @@ interface FounderSidebarProps {
  * For Phase 2 v1, refetch is the simplest robust path; we'll move to
  * granular optimistic mutations once we see real founder usage.
  */
+// Phase 5a (2026-06-29): per-provider connection state surfaced in
+// the Connections section. Fetched from /v1/brain/connections; refetched
+// on raisefn:connections_updated.
+type ConnectionRow = {
+  provider: string;
+  google_email: string | null;
+  scopes: string[];
+  connected_at: string | null;
+  last_used_at: string | null;
+  broken: boolean;
+  last_error: string | null;
+};
+
 export function FounderSidebar({
   session,
   impersonating,
@@ -39,6 +52,13 @@ export function FounderSidebar({
   adminHeader,
 }: FounderSidebarProps) {
   const [state, setState] = useState<SidebarState | null>(null);
+  const [connections, setConnections] = useState<ConnectionRow[]>([]);
+  const [connectionStatus, setConnectionStatus] = useState<
+    { kind: "success" | "error"; message: string } | null
+  >(null);
+  const [gmailBusy, setGmailBusy] = useState<"connecting" | "disconnecting" | null>(
+    null,
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -75,6 +95,141 @@ export function FounderSidebar({
       window.removeEventListener("raisefn:documents_updated", onUpdate);
     };
   }, [session, impersonating]);
+
+  // Phase 5a — connections list (Gmail/Calendar/LinkedIn). Separate
+  // fetch from sidebar-state so connection actions (connect/disconnect)
+  // can refresh just this slice via raisefn:connections_updated.
+  useEffect(() => {
+    let cancelled = false;
+    async function loadConnections() {
+      if (!session) return;
+      try {
+        const headers: Record<string, string> = {
+          Authorization: `Bearer ${session.access_token}`,
+        };
+        if (impersonating) headers["X-Impersonate"] = impersonating;
+        const res = await fetch("/v1/brain/connections", { headers });
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (!cancelled) setConnections(data.connections || []);
+      } catch {
+        // Best-effort — empty connections list just means UI shows
+        // every provider as not-yet-connected, which is the safe default.
+      }
+    }
+    loadConnections();
+
+    function onUpdate() { void loadConnections(); }
+    window.addEventListener("raisefn:connections_updated", onUpdate);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("raisefn:connections_updated", onUpdate);
+    };
+  }, [session, impersonating]);
+
+  // Parse ?connection_status= on mount (returned by the OAuth callback
+  // redirect), surface a toast, and strip the params from the URL so a
+  // refresh doesn't re-fire the toast.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("connection_status");
+    if (!status) return;
+    const provider = params.get("provider") || "provider";
+    const email = params.get("email") || "";
+    const reason = params.get("error_reason") || "";
+    if (status === "connected") {
+      setConnectionStatus({
+        kind: "success",
+        message: email ? `Connected ${provider} (${email})` : `Connected ${provider}`,
+      });
+      window.dispatchEvent(new CustomEvent("raisefn:connections_updated"));
+    } else if (status === "error") {
+      setConnectionStatus({
+        kind: "error",
+        message: `Could not connect ${provider}${reason ? ` — ${reason}` : ""}`,
+      });
+    }
+    // Clean the URL — keep just /brain/deploy with no query string.
+    const cleanUrl = window.location.pathname + window.location.hash;
+    window.history.replaceState({}, "", cleanUrl);
+    // Auto-dismiss after 6s so it doesn't linger forever.
+    const timer = window.setTimeout(() => setConnectionStatus(null), 6_000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  async function handleConnectGmail() {
+    if (!session || gmailBusy) return;
+    setGmailBusy("connecting");
+    try {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch("/v1/brain/connections/gmail/authorize", { headers });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setConnectionStatus({
+          kind: "error",
+          message: body.detail || `Connect failed (${res.status})`,
+        });
+        return;
+      }
+      const data = await res.json();
+      const authorizeUrl: string | undefined = data.authorize_url;
+      if (!authorizeUrl) {
+        setConnectionStatus({ kind: "error", message: "No authorize URL returned" });
+        return;
+      }
+      // Full-page navigation — simplest, no popup blockers, matches
+      // Google's OAuth UX expectations. Callback redirects back to
+      // /brain/deploy with status params; the URL-parser useEffect
+      // above surfaces the result.
+      window.location.href = authorizeUrl;
+    } catch (e) {
+      setConnectionStatus({
+        kind: "error",
+        message: e instanceof Error ? e.message : "Connect failed",
+      });
+    } finally {
+      setGmailBusy(null);
+    }
+  }
+
+  async function handleDisconnectGmail() {
+    if (!session || gmailBusy) return;
+    if (!window.confirm("Disconnect Gmail? raise(fn) will no longer send or read your email.")) return;
+    setGmailBusy("disconnecting");
+    try {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch("/v1/brain/connections/gmail", {
+        method: "DELETE",
+        headers,
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setConnectionStatus({
+          kind: "error",
+          message: body.detail || `Disconnect failed (${res.status})`,
+        });
+        return;
+      }
+      setConnections((prev) => prev.filter((c) => c.provider !== "gmail"));
+      setConnectionStatus({ kind: "success", message: "Gmail disconnected" });
+      window.dispatchEvent(new CustomEvent("raisefn:connections_updated"));
+    } catch (e) {
+      setConnectionStatus({
+        kind: "error",
+        message: e instanceof Error ? e.message : "Disconnect failed",
+      });
+    } finally {
+      setGmailBusy(null);
+    }
+  }
+
+  const gmailConnection = connections.find((c) => c.provider === "gmail") || null;
 
   return (
     <aside className="founder-sidebar">
@@ -114,11 +269,52 @@ export function FounderSidebar({
 
       <SidebarSection title="Connections">
         <div className="sb-connections">
-          <div className="sb-conn-row sb-conn-disabled" title="Phase 5 — send outreach + auto-detect replies">
-            <span className="sb-conn-dot" />
-            <span className="sb-conn-label">Gmail</span>
-            <span className="sb-conn-status">Coming soon</span>
-          </div>
+          {connectionStatus && (
+            <div className={`sb-conn-toast sb-conn-toast-${connectionStatus.kind}`}>
+              {connectionStatus.message}
+            </div>
+          )}
+          {gmailConnection ? (
+            <div
+              className={`sb-conn-row sb-conn-on${gmailConnection.broken ? " sb-conn-broken" : ""}`}
+              title={
+                gmailConnection.broken
+                  ? `Reconnect needed — ${gmailConnection.last_error || "unknown error"}`
+                  : "Sending outreach + reading replies on your behalf"
+              }
+            >
+              <span className={`sb-conn-dot${gmailConnection.broken ? "" : " on"}`} />
+              <span className="sb-conn-label">Gmail</span>
+              <span className="sb-conn-status">
+                {gmailConnection.google_email || "Connected"}
+              </span>
+              <button
+                type="button"
+                className="sb-conn-action"
+                onClick={handleDisconnectGmail}
+                disabled={gmailBusy !== null}
+              >
+                {gmailBusy === "disconnecting" ? "…" : "Disconnect"}
+              </button>
+            </div>
+          ) : (
+            <div
+              className="sb-conn-row"
+              title="Send outreach + auto-detect replies"
+            >
+              <span className="sb-conn-dot" />
+              <span className="sb-conn-label">Gmail</span>
+              <span className="sb-conn-status">Not connected</span>
+              <button
+                type="button"
+                className="sb-conn-action sb-conn-action-primary"
+                onClick={handleConnectGmail}
+                disabled={gmailBusy !== null}
+              >
+                {gmailBusy === "connecting" ? "Connecting…" : "Connect →"}
+              </button>
+            </div>
+          )}
           <div className="sb-conn-row sb-conn-disabled" title="Phase 6 — auto-prep + auto-debrief on each meeting">
             <span className="sb-conn-dot" />
             <span className="sb-conn-label">Calendar</span>

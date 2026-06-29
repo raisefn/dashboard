@@ -389,6 +389,64 @@ export const SIDEBAR_CSS = `
   color: #71717a;
 }
 
+/* Phase 5a Gmail OAuth — interactive connection state. */
+.sb-conn-action {
+  font-size: 11px;
+  font-family: inherit;
+  color: #71717a;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+.sb-conn-action:hover {
+  color: #d4d4d8;
+  border-color: #3f3f46;
+}
+.sb-conn-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.sb-conn-action-primary {
+  color: #2dd4bf;
+  border-color: rgba(45, 212, 191, 0.3);
+}
+.sb-conn-action-primary:hover {
+  color: #2dd4bf;
+  border-color: rgba(45, 212, 191, 0.6);
+  background: rgba(45, 212, 191, 0.05);
+}
+
+.sb-conn-broken .sb-conn-status {
+  color: #f87171;
+}
+
+.sb-conn-toast {
+  margin: 0 8px 8px;
+  padding: 7px 10px;
+  font-size: 11px;
+  line-height: 1.4;
+  border-radius: 5px;
+  border: 1px solid;
+  animation: sb-conn-toast-in 200ms ease;
+}
+.sb-conn-toast-success {
+  color: #2dd4bf;
+  background: rgba(45, 212, 191, 0.06);
+  border-color: rgba(45, 212, 191, 0.3);
+}
+.sb-conn-toast-error {
+  color: #fca5a5;
+  background: rgba(127, 29, 29, 0.15);
+  border-color: rgba(127, 29, 29, 0.5);
+}
+@keyframes sb-conn-toast-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* Sharpen sidebar rows — same shape as connections rows but clickable */
 .sb-sharpen-row {
   background: none;
