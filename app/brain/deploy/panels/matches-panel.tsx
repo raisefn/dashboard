@@ -254,7 +254,11 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
         <div className="mp-list">
           {ordered.map((inv, idx) => {
             const existing = findExistingBrief(inv.name);
-            const score = inv.score && inv.score_max ? Math.round((inv.score / inv.score_max) * 100) : null;
+            // Defensive cap at 100 — backend now caps `normalized` at 1.0
+            // (brain 2e3bf6a) but some matcher paths still pass raw
+            // final_score / composite_max which can overflow on strong matches.
+            // Belt-and-suspenders so a future regression doesn't show >100% again.
+            const score = inv.score && inv.score_max ? Math.min(100, Math.round((inv.score / inv.score_max) * 100)) : null;
             const key = rowKey(inv, idx);
             const isGenerating = generatingKey === key;
             const errMsg = rowError?.key === key ? rowError.msg : null;
