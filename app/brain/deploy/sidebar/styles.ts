@@ -389,37 +389,63 @@ export const SIDEBAR_CSS = `
   color: #71717a;
 }
 
-/* Phase 5a Gmail OAuth — interactive connection state. */
-.sb-conn-action {
+/* Phase 5a Gmail OAuth — stacked layout for connection rows.
+ *
+ * Two-line: top is dot + label + action (Connect/Disconnect). Bottom
+ * is the meta line — email address when connected, short descriptor
+ * when not. Breathing room around both lines so the row reads as a
+ * proper integration card, not a cramped single line.
+ */
+.sb-conn-stacked {
+  padding: 9px 12px 10px;
+  border-radius: 6px;
+  transition: background 150ms ease;
+}
+.sb-conn-stacked:hover {
+  background: rgba(45, 212, 191, 0.03);
+}
+.sb-conn-stacked-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sb-conn-stacked-top .sb-conn-label {
+  flex: 1;
+}
+.sb-conn-stacked-meta {
+  margin-top: 4px;
+  /* Indent past the dot so it visually nests under the label. */
+  margin-left: 16px;
+  font-size: 11px;
+  color: #71717a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sb-conn-link-action {
   font-size: 11px;
   font-family: inherit;
   color: #71717a;
   background: none;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  padding: 2px 8px;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  transition: color 150ms ease, border-color 150ms ease;
+  transition: color 150ms ease;
 }
-.sb-conn-action:hover {
+.sb-conn-link-action:hover {
   color: #d4d4d8;
-  border-color: #3f3f46;
 }
-.sb-conn-action:disabled {
+.sb-conn-link-action:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
-.sb-conn-action-primary {
+.sb-conn-link-primary {
   color: #2dd4bf;
-  border-color: rgba(45, 212, 191, 0.3);
 }
-.sb-conn-action-primary:hover {
-  color: #2dd4bf;
-  border-color: rgba(45, 212, 191, 0.6);
-  background: rgba(45, 212, 191, 0.05);
+.sb-conn-link-primary:hover {
+  color: #5eead4;
 }
-
-.sb-conn-broken .sb-conn-status {
+.sb-conn-broken .sb-conn-stacked-meta {
   color: #f87171;
 }
 

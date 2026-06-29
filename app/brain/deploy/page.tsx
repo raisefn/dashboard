@@ -2416,14 +2416,14 @@ const SURFACE_GRID_CSS = `
   .surface-grid {
     flex: 1;
     display: grid;
-    grid-template-columns: 260px 1fr 0fr;
+    grid-template-columns: 300px 1fr 0fr;
     min-height: 0;
     position: relative;
     z-index: 1;
     transition: grid-template-columns 250ms cubic-bezier(0.4, 0, 0.2, 1);
   }
   .surface-grid.panel-open {
-    grid-template-columns: 260px minmax(360px, 40fr) minmax(480px, 60fr);
+    grid-template-columns: 300px minmax(360px, 40fr) minmax(480px, 60fr);
   }
   .panel-col {
     min-height: 0;

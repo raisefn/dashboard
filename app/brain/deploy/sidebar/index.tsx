@@ -276,43 +276,46 @@ export function FounderSidebar({
           )}
           {gmailConnection ? (
             <div
-              className={`sb-conn-row sb-conn-on${gmailConnection.broken ? " sb-conn-broken" : ""}`}
+              className={`sb-conn-stacked${gmailConnection.broken ? " sb-conn-broken" : ""}`}
               title={
                 gmailConnection.broken
                   ? `Reconnect needed — ${gmailConnection.last_error || "unknown error"}`
-                  : "Sending outreach + reading replies on your behalf"
+                  : "Connected via OAuth"
               }
             >
-              <span className={`sb-conn-dot${gmailConnection.broken ? "" : " on"}`} />
-              <span className="sb-conn-label">Gmail</span>
-              <span className="sb-conn-status">
+              <div className="sb-conn-stacked-top">
+                <span className={`sb-conn-dot${gmailConnection.broken ? "" : " on"}`} />
+                <span className="sb-conn-label">Gmail</span>
+                <button
+                  type="button"
+                  className="sb-conn-link-action"
+                  onClick={handleDisconnectGmail}
+                  disabled={gmailBusy !== null}
+                >
+                  {gmailBusy === "disconnecting" ? "Disconnecting…" : "Disconnect"}
+                </button>
+              </div>
+              <div className="sb-conn-stacked-meta">
                 {gmailConnection.google_email || "Connected"}
-              </span>
-              <button
-                type="button"
-                className="sb-conn-action"
-                onClick={handleDisconnectGmail}
-                disabled={gmailBusy !== null}
-              >
-                {gmailBusy === "disconnecting" ? "…" : "Disconnect"}
-              </button>
+              </div>
             </div>
           ) : (
-            <div
-              className="sb-conn-row"
-              title="Send outreach + auto-detect replies"
-            >
-              <span className="sb-conn-dot" />
-              <span className="sb-conn-label">Gmail</span>
-              <span className="sb-conn-status">Not connected</span>
-              <button
-                type="button"
-                className="sb-conn-action sb-conn-action-primary"
-                onClick={handleConnectGmail}
-                disabled={gmailBusy !== null}
-              >
-                {gmailBusy === "connecting" ? "Connecting…" : "Connect →"}
-              </button>
+            <div className="sb-conn-stacked">
+              <div className="sb-conn-stacked-top">
+                <span className="sb-conn-dot" />
+                <span className="sb-conn-label">Gmail</span>
+                <button
+                  type="button"
+                  className="sb-conn-link-action sb-conn-link-primary"
+                  onClick={handleConnectGmail}
+                  disabled={gmailBusy !== null}
+                >
+                  {gmailBusy === "connecting" ? "Connecting…" : "Connect →"}
+                </button>
+              </div>
+              <div className="sb-conn-stacked-meta">
+                Send outreach · auto-detect replies
+              </div>
             </div>
           )}
           <div className="sb-conn-row sb-conn-disabled" title="Phase 6 — auto-prep + auto-debrief on each meeting">
