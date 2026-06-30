@@ -13,6 +13,7 @@
  */
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Metadata } from "next";
@@ -40,8 +41,44 @@ interface BriefData {
 
 async function fetchBrief(token: string): Promise<BriefData | null> {
   try {
+    // Founder-self-view suppression: if the request has a Supabase
+    // session cookie, forward the access_token to brain so it can
+    // detect "this is the founder viewing their own brief" and skip
+    // the view_count bump + crossing event emit.
+    //
+    // Cookie name follows Supabase SSR convention:
+    //   sb-<project-ref>-auth-token
+    // The cookie value is a base64-encoded JSON array [access_token, ...].
+    //
+    // Anyone without the cookie (real investor visitors) gets the
+    // normal view-counting path. Founder cookie alone never affects
+    // brief content — only the counter.
+    const cookieStore = await cookies();
+    const headers: Record<string, string> = {};
+    for (const c of cookieStore.getAll()) {
+      if (c.name.startsWith("sb-") && c.name.endsWith("-auth-token")) {
+        try {
+          let raw = c.value;
+          // Newer supabase-js wraps the JSON in base64 with a prefix
+          if (raw.startsWith("base64-")) {
+            raw = Buffer.from(raw.slice(7), "base64").toString("utf-8");
+          }
+          const parsed = JSON.parse(raw);
+          // Supabase stores as either { access_token, ... } or
+          // [access_token, refresh_token, ...] depending on version.
+          const accessToken =
+            Array.isArray(parsed) ? parsed[0] : parsed?.access_token;
+          if (typeof accessToken === "string" && accessToken.length > 20) {
+            headers["Authorization"] = `Bearer ${accessToken}`;
+          }
+        } catch { /* malformed cookie → just treat as anonymous */ }
+        break;
+      }
+    }
+
     const res = await fetch(`${BRAIN_URL}/v1/brain/briefs/${token}`, {
       cache: "no-store",
+      headers,
     });
     if (res.status === 404) return null;
     if (!res.ok) {

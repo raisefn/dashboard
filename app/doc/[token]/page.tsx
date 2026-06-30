@@ -17,6 +17,7 @@
  * Nav is suppressed for this route (see components/nav.tsx).
  */
 import { redirect, notFound } from "next/navigation";
+import { cookies } from "next/headers";
 
 const BRAIN_URL = "https://brain-production-61da.up.railway.app";
 
@@ -32,6 +33,30 @@ export default async function DocSharePage({
     notFound();
   }
 
+  // Founder-self-view suppression — same pattern as /brief/[token]:
+  // forward the Supabase session JWT so brain can skip the view count
+  // bump when the founder views their own share URL.
+  const cookieStore = await cookies();
+  const headers: Record<string, string> = {};
+  for (const c of cookieStore.getAll()) {
+    if (c.name.startsWith("sb-") && c.name.endsWith("-auth-token")) {
+      try {
+        let raw = c.value;
+        if (raw.startsWith("base64-")) {
+          raw = Buffer.from(raw.slice(7), "base64").toString("utf-8");
+        }
+        const parsed = JSON.parse(raw);
+        const accessToken = Array.isArray(parsed)
+          ? parsed[0]
+          : parsed?.access_token;
+        if (typeof accessToken === "string" && accessToken.length > 20) {
+          headers["Authorization"] = `Bearer ${accessToken}`;
+        }
+      } catch { /* malformed cookie → anonymous */ }
+      break;
+    }
+  }
+
   // Brain's endpoint is a redirect — we follow it server-side so the view
   // count bumps even if the client doesn't follow redirects automatically.
   let targetUrl: string | null = null;
@@ -39,6 +64,7 @@ export default async function DocSharePage({
     const res = await fetch(`${BRAIN_URL}/v1/brain/docs/${token}`, {
       redirect: "manual",
       cache: "no-store",
+      headers,
     });
     if (res.status === 302 || res.status === 301) {
       targetUrl = res.headers.get("location");
