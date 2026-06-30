@@ -109,8 +109,8 @@ export default function SignalsStrip({ accessToken, onAction, refreshKey = 0 }: 
   if (!loaded || signals.length === 0) return null;
 
   return (
-    <div className="signals-strip" role="region" aria-label="Signals since you last opened raise(fn)">
-      <div className="signals-strip-header">Since you last opened raise(fn)</div>
+    <div className="signals-strip" role="region" aria-label="What's new since you opened raise(fn)">
+      <div className="signals-strip-header">What's new</div>
       <div className="signals-strip-list">
         {signals.map((sig) => (
           <div key={sig.id} className="signal-card">
