@@ -40,9 +40,24 @@ interface Metrics {
     hard_pass: number[];
   };
   revenue_usd: number[] | null;
+  revenue_stripe_usd?: number[] | null;
+  revenue_adjustments_usd?: number[];
   free_to_paid_conversions: number[] | null;
   stripe_status: string;
   generated_at: string;
+}
+
+interface RevenueAdjustment {
+  id: string;
+  source_label: string;
+  amount_usd: number;
+  currency: string;
+  occurred_at: string | null;
+  recorded_by: string;
+  customer_email: string | null;
+  notes: string | null;
+  voided_at: string | null;
+  created_at: string | null;
 }
 
 export default function AdminMetricsPage() {
@@ -241,6 +256,274 @@ export default function AdminMetricsPage() {
       <p className="text-xs text-zinc-600 mt-6">
         Generated: {new Date(metrics.generated_at).toLocaleString()}
       </p>
+
+      <RevenueAdjustmentsSection />
+    </div>
+  );
+}
+
+
+function RevenueAdjustmentsSection() {
+  const [rows, setRows] = useState<RevenueAdjustment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Form state
+  const [sourceLabel, setSourceLabel] = useState("");
+  const [amountUsd, setAmountUsd] = useState("");
+  const [occurredAt, setOccurredAt] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData.session;
+      if (!session) return;
+      const res = await fetch(
+        "/v1/brain/admin/revenue-adjustments?months=24",
+        { headers: { Authorization: `Bearer ${session.access_token}` } },
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setRows(data.adjustments || []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Fetch failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void load();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData.session;
+      if (!session) throw new Error("Not signed in");
+
+      // Convert date input to ISO with UTC midnight — we don't have
+      // per-payment timezone resolution in the form. Operator can edit
+      // notes if a specific time matters.
+      const occurredIso = new Date(occurredAt + "T12:00:00Z").toISOString();
+
+      const res = await fetch("/v1/brain/admin/revenue-adjustment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          source_label: sourceLabel.trim(),
+          amount_usd: Number(amountUsd),
+          currency: "USD",
+          occurred_at: occurredIso,
+          customer_email: customerEmail.trim() || null,
+          notes: notes.trim() || null,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `HTTP ${res.status}`);
+      }
+      // Reset form + reload list
+      setSourceLabel("");
+      setAmountUsd("");
+      setCustomerEmail("");
+      setNotes("");
+      await load();
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "Submit failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleVoid = async (id: string) => {
+    if (!window.confirm("Void this revenue entry? It will be excluded from charts.")) {
+      return;
+    }
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData.session;
+      if (!session) return;
+      await fetch(`/v1/brain/admin/revenue-adjustment/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      await load();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const activeTotal = rows
+    .filter((r) => !r.voided_at)
+    .reduce((sum, r) => sum + r.amount_usd, 0);
+
+  return (
+    <div className="mt-10 rounded-lg border border-zinc-800 bg-zinc-900/40 p-5">
+      <div className="flex items-baseline justify-between mb-4">
+        <h2 className="text-lg font-semibold text-white">
+          Off-Stripe revenue
+        </h2>
+        <div className="text-xs text-zinc-500">
+          ACH / wire / check payments — NOT processed through Stripe.
+          Counted alongside Stripe charges in the Revenue chart above.
+        </div>
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end mb-5"
+      >
+        <div className="md:col-span-2">
+          <label className="block text-xs text-zinc-400 mb-1">Source</label>
+          <input
+            type="text"
+            value={sourceLabel}
+            onChange={(e) => setSourceLabel(e.target.value)}
+            placeholder="Bunny Studio - ACH"
+            required
+            className="w-full bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-sm text-zinc-100 focus:border-teal-500 outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-zinc-400 mb-1">Amount (USD)</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0.01"
+            value={amountUsd}
+            onChange={(e) => setAmountUsd(e.target.value)}
+            placeholder="2333.33"
+            required
+            className="w-full bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-sm text-zinc-100 focus:border-teal-500 outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-zinc-400 mb-1">Date</label>
+          <input
+            type="date"
+            value={occurredAt}
+            onChange={(e) => setOccurredAt(e.target.value)}
+            required
+            className="w-full bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-sm text-zinc-100 focus:border-teal-500 outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-zinc-400 mb-1">Customer email (opt)</label>
+          <input
+            type="email"
+            value={customerEmail}
+            onChange={(e) => setCustomerEmail(e.target.value)}
+            placeholder="ops@bunnystudio.com"
+            className="w-full bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-sm text-zinc-100 focus:border-teal-500 outline-none"
+          />
+        </div>
+        <div>
+          <button
+            type="submit"
+            disabled={submitting || !sourceLabel || !amountUsd}
+            className="w-full bg-teal-500 hover:bg-teal-400 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-medium rounded px-4 py-2 text-sm"
+          >
+            {submitting ? "Adding…" : "Add entry"}
+          </button>
+        </div>
+        <div className="md:col-span-6">
+          <input
+            type="text"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Notes (optional)"
+            className="w-full bg-zinc-950 border border-zinc-700 rounded px-3 py-2 text-sm text-zinc-100 focus:border-teal-500 outline-none"
+          />
+        </div>
+      </form>
+
+      {submitError && (
+        <div className="mb-3 text-xs text-red-400">{submitError}</div>
+      )}
+
+      {loading ? (
+        <div className="text-xs text-zinc-500">Loading entries…</div>
+      ) : error ? (
+        <div className="text-xs text-red-400">{error}</div>
+      ) : rows.length === 0 ? (
+        <div className="text-xs text-zinc-500">
+          No off-Stripe entries yet. Use the form above to add the first one.
+        </div>
+      ) : (
+        <>
+          <div className="text-xs text-zinc-500 mb-2">
+            {rows.length} {rows.length === 1 ? "entry" : "entries"} · Active total: ${activeTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-xs text-zinc-500 border-b border-zinc-800">
+                  <th className="text-left py-2 font-normal">Date</th>
+                  <th className="text-left py-2 font-normal">Source</th>
+                  <th className="text-right py-2 font-normal">Amount</th>
+                  <th className="text-left py-2 font-normal">Customer</th>
+                  <th className="text-left py-2 font-normal">Notes</th>
+                  <th className="text-right py-2 font-normal">By</th>
+                  <th className="text-right py-2 font-normal"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr
+                    key={r.id}
+                    className={`border-b border-zinc-900 ${
+                      r.voided_at ? "opacity-40 line-through" : ""
+                    }`}
+                  >
+                    <td className="py-2 text-zinc-400">
+                      {r.occurred_at?.split("T")[0]}
+                    </td>
+                    <td className="py-2 text-zinc-200">{r.source_label}</td>
+                    <td className="py-2 text-right text-zinc-100 font-medium">
+                      ${r.amount_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                    <td className="py-2 text-zinc-500 text-xs">
+                      {r.customer_email || "—"}
+                    </td>
+                    <td className="py-2 text-zinc-500 text-xs">
+                      {r.notes || "—"}
+                    </td>
+                    <td className="py-2 text-right text-zinc-600 text-xs">
+                      {r.recorded_by.split("@")[0]}
+                    </td>
+                    <td className="py-2 text-right">
+                      {!r.voided_at && (
+                        <button
+                          onClick={() => void handleVoid(r.id)}
+                          className="text-xs text-zinc-500 hover:text-red-400"
+                          title="Void this entry (soft-delete; preserved for audit)"
+                        >
+                          Void
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </div>
   );
 }
