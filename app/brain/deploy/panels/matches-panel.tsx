@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import type { Panel } from "./use-panel-state";
 
@@ -35,6 +35,9 @@ type Investor = {
   type?: string | null;
   description?: string | null;
   linkedin?: string | null;
+  // M3 (2026-06-30) — bucket A = observed-truth-backed, B = stated-only,
+  // C is reserved for the recommended_investors (LLM-augmented) list.
+  bucket?: "A" | "B" | "C";
 };
 
 // LLM-augmented recommendation — investor pulled from broad market
@@ -306,9 +309,15 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
   // Filter dismissed slugs out of the rendered list. Session-local; refresh
   // restores them since dismissals are a TRAINING signal for the matcher,
   // not a permanent founder preference.
-  const ordered: Investor[] = [...individuals, ...firms].filter(
-    (inv) => !inv.slug || !dismissedSlugs.has(inv.slug)
-  );
+  // M3 (2026-06-30): sort by bucket so A (observed-truth) renders before B
+  // (stated-only). Within each bucket, preserve the matcher's score order.
+  const ordered: Investor[] = [...individuals, ...firms]
+    .filter((inv) => !inv.slug || !dismissedSlugs.has(inv.slug))
+    .sort((a, b) => {
+      const aIsA = a.bucket === "A" ? 0 : 1;
+      const bIsA = b.bucket === "A" ? 0 : 1;
+      return aIsA - bIsA;
+    });
   // LLM-augmented recommendations (Phase A — 2026-06-29). Surfaced when
   // the catalog was thin for the founder's sector. See
   // brain/match_augmentation.py + .claude/plans/llm_augmented_matching.md.
@@ -359,7 +368,33 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
         </div>
       ) : (
         <>{ordered.length > 0 && (<div className="mp-list">
+          {/* M3 (2026-06-30): bucket section markers. A = observed-truth-
+              backed (real portfolio data confirms thesis). B = stated-only
+              (matched on the investor's declared focus, no portfolio
+              backing yet). C is the augmentation block below (recommended_
+              investors). Headers only render when both A and B are
+              present so the surface stays clean for single-bucket lists. */}
+          {(() => {
+            const buckA = ordered.filter((i) => i.bucket === "A").length;
+            const buckB = ordered.filter((i) => i.bucket === "B" || !i.bucket).length;
+            const showHeaders = buckA > 0 && buckB > 0;
+            if (!showHeaders) return null;
+            return (
+              <div className="mp-bucket-intro">
+                <span className="mp-bucket-label">High confidence</span>
+                <span className="mp-bucket-hint">
+                  Backed by real portfolio data — these investors actually deploy here.
+                </span>
+              </div>
+            );
+          })()}
           {ordered.map((inv, idx) => {
+            // M3 bucket divider — emit a small label row between A and B
+            // sections within the single-loop render.
+            const prev = idx > 0 ? ordered[idx - 1] : null;
+            const prevIsA = prev?.bucket === "A";
+            const currIsB = inv.bucket === "B" || !inv.bucket;
+            const showBucketBreak = prevIsA && currIsB;
             const existing = findExistingBrief(inv.name);
             // Defensive cap at 100 — backend now caps `normalized` at 1.0
             // (brain 2e3bf6a) but some matcher paths still pass raw
@@ -383,7 +418,16 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
               facts.push(inv.focus_sectors.slice(0, 2).join(" / "));
             }
             return (
-              <div key={key} className="mp-card">
+              <Fragment key={key}>
+              {showBucketBreak && (
+                <div className="mp-bucket-intro mp-bucket-intro-b">
+                  <span className="mp-bucket-label mp-bucket-label-b">Stated focus</span>
+                  <span className="mp-bucket-hint">
+                    Matched on declared thesis — verify the investor is actively deploying before reaching out.
+                  </span>
+                </div>
+              )}
+              <div className="mp-card">
                 <div className="mp-card-row">
                   <div className="mp-card-main">
                     <div className="mp-card-title-line">
@@ -458,6 +502,7 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
                   </div>
                 </div>
               </div>
+              </Fragment>
             );
           })}
         </div>)}
@@ -803,6 +848,36 @@ const MATCHES_PANEL_CSS = `
     text-decoration: none;
   }
   .mp-card-dismiss:hover { color: #fca5a5; text-decoration: underline; }
+  /* M3 bucket markers — split list visually so founders see "high
+     confidence" matches ahead of "stated only" matches. Quiet styling
+     by design; the goal is honest labeling, not a loud taxonomy lesson. */
+  .mp-bucket-intro {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 6px 2px 10px;
+    border-bottom: 1px solid rgba(82, 82, 91, 0.3);
+    margin-bottom: 6px;
+  }
+  .mp-bucket-intro-b {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(82, 82, 91, 0.3);
+  }
+  .mp-bucket-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #2dd4bf;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .mp-bucket-label-b { color: #a1a1aa; }
+  .mp-bucket-hint {
+    font-size: 11px;
+    color: #71717a;
+    line-height: 1.45;
+  }
 
   /* ── LLM-augmented recommendations ────────────────────────────────── */
   .mp-aug-section {
