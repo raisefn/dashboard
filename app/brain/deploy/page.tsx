@@ -190,7 +190,13 @@ function createInlineBriefButton(
       }
       const briefData = await res.json();
       briefUrl = briefData.url;
-      window.open(briefData.url, "_blank", "noopener");
+      // Founder is generating + opening their own brief — use the preview
+      // route so this initial QA view doesn't count as a signal. The
+      // shareable URL (briefData.url) stays available for the share button.
+      const previewUrl = briefData.token
+        ? `/preview/brief/${briefData.token}`
+        : briefData.url;
+      window.open(previewUrl, "_blank", "noopener");
       try { window.dispatchEvent(new CustomEvent("raisefn:briefs_updated")); } catch { /* defensive */ }
       btn.style.cssText = BRIEF_BTN_DONE_STYLE;
       btn.innerHTML = `<span>✓ Open brief${escapeHtml(nameLabel)}</span>`;
@@ -306,7 +312,7 @@ function renderOutreachDraftCard(
     <label data-region="brief-toggle" style="margin-top:14px;display:flex;align-items:center;gap:8px;font-size:12px;color:#d4d4d8;cursor:pointer;user-select:none;">
       <input data-field="include-brief" type="checkbox" checked style="appearance:auto;width:14px;height:14px;cursor:pointer;accent-color:#14b8a6;" />
       <span>Include brief link</span>
-      <a href="${escapeAttr(draft.brief_url || `/brief/${draft.brief_token}`)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:#71717a;text-decoration:underline;">preview</a>
+      <a href="/preview/brief/${escapeAttr(draft.brief_token)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:#71717a;text-decoration:underline;">preview</a>
     </label>` : ""}
     ${draft.deck_url ? `
     <label data-region="deck-toggle" style="margin-top:8px;display:flex;align-items:center;gap:8px;font-size:12px;color:#d4d4d8;cursor:pointer;user-select:none;">
@@ -458,6 +464,7 @@ function renderCalendarInviteCard(
     summary: string;
     include_brief: boolean;
     brief_url: string | null;
+    brief_token: string | null;
   },
   insertAfterEl: HTMLElement,
   session: { access_token: string; user: { email?: string | null } } | null,
@@ -535,7 +542,7 @@ function renderCalendarInviteCard(
     <label data-region="brief-toggle" style="margin-top:14px;display:flex;align-items:center;gap:8px;font-size:12px;color:#d4d4d8;cursor:pointer;user-select:none;">
       <input data-field="include-brief" type="checkbox" ${draft.include_brief ? "checked" : ""} style="appearance:auto;width:14px;height:14px;cursor:pointer;accent-color:#14b8a6;" />
       <span>Include brief link in invite description</span>
-      <a href="${escapeAttr(draft.brief_url)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:#71717a;text-decoration:underline;">preview</a>
+      <a href="${draft.brief_token ? `/preview/brief/${escapeAttr(draft.brief_token)}` : escapeAttr(draft.brief_url)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:#71717a;text-decoration:underline;">preview</a>
     </label>` : ""}
     <div data-region="status" style="margin-top:12px;font-size:12px;color:#fca5a5;display:none;"></div>
     <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px;">
@@ -1916,6 +1923,7 @@ function BrainDeployInner() {
                   summary: String(d.summary || ""),
                   include_brief: Boolean(d.include_brief ?? true),
                   brief_url: d.brief_url ? String(d.brief_url) : null,
+                  brief_token: d.brief_token ? String(d.brief_token) : null,
                 };
                 renderCalendarInviteCard(
                   draftData,

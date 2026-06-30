@@ -113,9 +113,17 @@ export function BriefDetailPanel({ token, session, impersonating }: BriefDetailP
 
   useEffect(() => { void load(); }, [load]);
 
+  // publicUrl = the investor-facing shareable URL — counts views, fires
+  // signals. NEVER swap this for the preview route, even for in-app display.
   const publicUrl = typeof window !== "undefined"
     ? `${window.location.origin}/brief/${token}`
     : `/brief/${token}`;
+  // previewUrl = founder-internal route. Reads the founder's Supabase JWT
+  // client-side and sends it as Bearer to the brain so view_count + signal
+  // firing both skip. Used by "Open in new tab" below. Fixes the prior
+  // self-view bridge that tried to read JWT from cookies (broken because
+  // dashboard auth uses localStorage, not cookies).
+  const previewUrl = `/preview/brief/${token}`;
 
   async function copyLink() {
     try {
@@ -186,7 +194,7 @@ export function BriefDetailPanel({ token, session, impersonating }: BriefDetailP
             {copied ? "Copied!" : "Copy share link"}
           </button>
           <a
-            href={publicUrl}
+            href={previewUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="bdp-action bdp-action-secondary"
