@@ -61,6 +61,11 @@ export default function Nav() {
   if (pathname.startsWith("/brief")) {
     return null;
   }
+  // /doc/<token> is a server-side redirect to the underlying document
+  // URL. We don't want a flash of dashboard nav during the redirect.
+  if (pathname.startsWith("/doc")) {
+    return null;
+  }
 
   // Brain product surfaces — chat, matches, briefs — are the founder's
   // working environment. They render their own product-style top bar
