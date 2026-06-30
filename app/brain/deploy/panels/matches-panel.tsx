@@ -458,8 +458,14 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
                     {errMsg && <p className="mp-card-error">{errMsg}</p>}
                   </div>
                   <div className="mp-card-actions">
-                    {score !== null && (
-                      <span className="mp-card-fit">fit {score}%</span>
+                    {inv.bucket === "A" && (
+                      <span className="mp-card-bucket mp-card-bucket-a" title="Backed by real portfolio data">High confidence</span>
+                    )}
+                    {(inv.bucket === "B" || (!inv.bucket && score !== null)) && (
+                      <span className="mp-card-bucket mp-card-bucket-b" title="Matched on stated thesis — verify before reaching out">Stated focus</span>
+                    )}
+                    {inv.bucket === "C" && (
+                      <span className="mp-card-bucket mp-card-bucket-c" title="Pulled from broad market knowledge — not in our catalog yet">Broader knowledge</span>
                     )}
                     {existing ? (
                       <button
@@ -799,6 +805,34 @@ const MATCHES_PANEL_CSS = `
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: #71717a;
+  }
+  /* M3 per-card bucket badge — distinct color per bucket so founders
+     instantly recognize confidence tier on each row. Replaces the
+     uniform "FIT N%" pill (all matches at same fit% looked broken). */
+  .mp-card-bucket {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .mp-card-bucket-a {
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.35);
+  }
+  .mp-card-bucket-b {
+    color: #a3a3a3;
+    background: rgba(161, 161, 170, 0.08);
+    border-color: rgba(161, 161, 170, 0.25);
+  }
+  .mp-card-bucket-c {
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.10);
+    border-color: rgba(245, 158, 11, 0.35);
   }
 
   .mp-btn {
