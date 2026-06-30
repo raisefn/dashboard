@@ -72,5 +72,6 @@ export interface SidebarState {
   documents: SidebarDocument[];
   activity: SidebarActivity[];
   sharpen?: SharpenSidebarRow[];
+  signals_unack_count?: number;
   acting_as_email: string | null;
 }

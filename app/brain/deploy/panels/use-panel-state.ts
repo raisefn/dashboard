@@ -17,6 +17,7 @@ export type Panel =
   | { kind: "documents" }
   | { kind: "document"; id: string; from?: Panel }
   | { kind: "pipeline" }
+  | { kind: "signals" }
   | { kind: "sharpen"; section: SharpenSectionId };
 
 /**
@@ -102,6 +103,8 @@ function panelFromSearchParams(sp: URLSearchParams | ReturnType<typeof useSearch
       return { kind: "documents" };
     case "pipeline":
       return { kind: "pipeline" };
+    case "signals":
+      return { kind: "signals" };
     case "investor": {
       const slug = get("slug");
       if (!slug) return null;

@@ -10,6 +10,7 @@ import { PipelinePanel } from "./pipeline-panel";
 import { DocumentPanel } from "./document-panel";
 import { DocumentsPanel } from "./documents-panel";
 import { SharpenPanel } from "./sharpen-panel";
+import { SignalsPanel } from "./signals-panel";
 import type { Panel } from "./use-panel-state";
 
 const SHARPEN_SECTION_TITLES: Record<string, string> = {
@@ -147,6 +148,23 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
         );
         break;
       }
+      case "signals":
+        title = "Signals";
+        body = (
+          <SignalsPanel
+            session={session}
+            impersonating={impersonating}
+            injectChatPrompt={injectChatPrompt}
+            onSignalActed={() => {
+              // Close the panel so the chat response is visible while it
+              // streams. Sidebar badge refreshes via the
+              // raisefn:signals_updated event the caller wires below.
+              onClose();
+              window.dispatchEvent(new CustomEvent("raisefn:signals_updated"));
+            }}
+          />
+        );
+        break;
       case "sharpen": {
         title = SHARPEN_SECTION_TITLES[panel.section] || "Fine tune";
         breadcrumbs = [{ label: "Fine tune your agent" }, { label: title }];
@@ -184,6 +202,7 @@ function panelLabel(p: Panel): string {
     case "brief": return "Brief";
     case "document": return "Document";
     case "sharpen": return "Fine tune your agent";
+    case "signals": return "Signals";
   }
 }
 

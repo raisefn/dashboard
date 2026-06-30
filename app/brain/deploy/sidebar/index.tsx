@@ -85,6 +85,7 @@ export function FounderSidebar({
     window.addEventListener("raisefn:profile_updated", onUpdate);
     window.addEventListener("raisefn:briefs_updated", onUpdate);
     window.addEventListener("raisefn:documents_updated", onUpdate);
+    window.addEventListener("raisefn:signals_updated", onUpdate);
 
     return () => {
       cancelled = true;
@@ -93,6 +94,7 @@ export function FounderSidebar({
       window.removeEventListener("raisefn:profile_updated", onUpdate);
       window.removeEventListener("raisefn:briefs_updated", onUpdate);
       window.removeEventListener("raisefn:documents_updated", onUpdate);
+      window.removeEventListener("raisefn:signals_updated", onUpdate);
     };
   }, [session, impersonating]);
 
@@ -243,6 +245,17 @@ export function FounderSidebar({
 
       {/* Strict rule: every section with an aggregating panel collapses to
        * header + count + arrow. The panel IS the list — sidebar is the door. */}
+      {/* Signals: surfaces brief views + inbound replies as actionable
+       * cards in a slide-over panel. Badge shows unack count; clicking
+       * each card's primary action sends a chat message + acks. Lives
+       * above Pipeline so a hot signal is the first thing the founder
+       * notices. See [[feedback-agent-not-email-for-founder-signals]]. */}
+      <SidebarSection
+        title="Signals"
+        count={state?.signals_unack_count ?? 0}
+        onTitleClick={() => openPanel({ kind: "signals" })}
+      />
+
       <SidebarSection
         title="Pipeline"
         count={state?.pipeline?.length ?? 0}
