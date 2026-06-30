@@ -1675,6 +1675,18 @@ function BrainDeployInner() {
               // Without the defer, badge sometimes read stale data because
               // the SSE event was emitted before the savepoint flushed.
               matchesUpdatedThisRoundRef.current = true;
+            } else if (event.type === "pipeline_updated") {
+              // Brain emits this after update_pipeline / ingest_meeting /
+              // log_meeting_debrief succeed. Dispatch the dashboard event so
+              // FounderSidebar re-fetches /sidebar-state and the PIPELINE
+              // count badge reflects the new state immediately. Pre-fix
+              // (2026-06-30), the count stayed stale until manual refresh
+              // even though the row was in the DB — caused "did it actually
+              // add?" confusion (caught when Justin added 1982.vc and the
+              // count stayed at 0).
+              try {
+                window.dispatchEvent(new CustomEvent("raisefn:pipeline_updated"));
+              } catch { /* defensive */ }
             } else if (event.type === "outreach_draft") {
               // Phase 5b — draft_outreach tool just returned. Render an
               // inline preview card below the in-flight assistant message
