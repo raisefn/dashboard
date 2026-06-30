@@ -438,6 +438,204 @@ function renderOutreachDraftCard(
   };
 }
 
+// Calendar V2 (2026-06-30) — preview-and-confirm card. The send_calendar_invite
+// chat tool no longer fires the Google API; it returns a draft and the brain
+// emits a calendar_invite_draft SSE event with the payload. We render an
+// inline card here; the Send button POSTs to /v1/brain/calendar/send-invite
+// which re-validates server-side and fires Google. Cancel removes the card.
+//
+// Why a dedicated UI vs reusing outreach: the editable fields are different
+// (datetime vs subject+body), and the founder's mental model of "schedule a
+// meeting" deserves an obviously distinct surface from email outreach.
+function renderCalendarInviteCard(
+  draft: {
+    investor_slug: string;
+    investor_name: string;
+    investor_firm: string | null;
+    investor_email: string;
+    start_iso: string;
+    duration_minutes: number;
+    summary: string;
+    include_brief: boolean;
+    brief_url: string | null;
+  },
+  insertAfterEl: HTMLElement,
+  session: { access_token: string; user: { email?: string | null } } | null,
+  impersonating: string,
+): void {
+  if (!session) return;
+
+  // Brain passes ISO 8601 with timezone offset. <input type="datetime-local">
+  // wants 'YYYY-MM-DDTHH:MM' in LOCAL time. Convert through Date so the input
+  // shows the wall-clock time in the founder's browser timezone, then on send
+  // we rebuild ISO with the browser's current tz offset. This means the time
+  // shown matches the time that lands on the calendar — no surprises.
+  function toLocalInputValue(iso: string): string {
+    try {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return "";
+      const pad = (n: number) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    } catch {
+      return "";
+    }
+  }
+  function fromLocalInputValue(local: string): string {
+    // Reconstruct an ISO 8601 string with the browser's current tz offset.
+    // `new Date('YYYY-MM-DDTHH:MM')` interprets as local time → .toISOString()
+    // converts to UTC. Build the offset suffix ourselves to keep the original
+    // tz intact (matters for Google Calendar event semantics).
+    const d = new Date(local);
+    if (isNaN(d.getTime())) return "";
+    const tzMin = -d.getTimezoneOffset();
+    const sign = tzMin >= 0 ? "+" : "-";
+    const abs = Math.abs(tzMin);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const offset = `${sign}${pad(Math.floor(abs / 60))}:${pad(abs % 60)}`;
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00${offset}`;
+  }
+
+  const card = document.createElement("div");
+  card.style.cssText = [
+    "margin-top: 18px",
+    "border: 1px solid #3f3f46",
+    "background: rgba(24, 24, 27, 0.65)",
+    "border-radius: 10px",
+    "padding: 16px 18px 14px",
+    "width: 100%",
+    "box-sizing: border-box",
+  ].join("; ");
+
+  const investorTitle = draft.investor_firm
+    ? `${draft.investor_name} · ${draft.investor_firm}`
+    : draft.investor_name;
+  const localStart = toLocalInputValue(draft.start_iso);
+
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:600;color:#a1a1aa;letter-spacing:0.04em;text-transform:uppercase;">Calendar invite · ${escapeText(investorTitle)}</div>
+      <button type="button" data-action="cancel" style="background:none;border:none;color:#71717a;font-size:11px;cursor:pointer;font-family:inherit;padding:0;">Cancel</button>
+    </div>
+    <div style="display:grid;grid-template-columns:80px 1fr;gap:8px 12px;align-items:start;">
+      <div style="font-size:11px;color:#71717a;padding-top:8px;">To</div>
+      <div style="font-size:12px;color:#a1a1aa;padding-top:8px;">${escapeText(draft.investor_email)}</div>
+      <div style="font-size:11px;color:#71717a;padding-top:8px;">When</div>
+      <input data-field="start" type="datetime-local" value="${escapeAttr(localStart)}" style="background:rgba(9,9,11,0.6);border:1px solid #3f3f46;color:#e4e4e7;padding:7px 10px;border-radius:5px;font-size:13px;font-family:inherit;outline:none;" />
+      <div style="font-size:11px;color:#71717a;padding-top:8px;">Length</div>
+      <select data-field="duration" style="background:rgba(9,9,11,0.6);border:1px solid #3f3f46;color:#e4e4e7;padding:7px 10px;border-radius:5px;font-size:13px;font-family:inherit;outline:none;">
+        <option value="15"${draft.duration_minutes === 15 ? " selected" : ""}>15 min</option>
+        <option value="30"${draft.duration_minutes === 30 ? " selected" : ""}>30 min</option>
+        <option value="45"${draft.duration_minutes === 45 ? " selected" : ""}>45 min</option>
+        <option value="60"${draft.duration_minutes === 60 ? " selected" : ""}>60 min</option>
+      </select>
+      <div style="font-size:11px;color:#71717a;padding-top:8px;">Title</div>
+      <input data-field="summary" type="text" value="${escapeAttr(draft.summary)}" style="background:rgba(9,9,11,0.6);border:1px solid #3f3f46;color:#e4e4e7;padding:7px 10px;border-radius:5px;font-size:13px;font-family:inherit;outline:none;" />
+    </div>
+    ${draft.brief_url ? `
+    <label data-region="brief-toggle" style="margin-top:14px;display:flex;align-items:center;gap:8px;font-size:12px;color:#d4d4d8;cursor:pointer;user-select:none;">
+      <input data-field="include-brief" type="checkbox" ${draft.include_brief ? "checked" : ""} style="appearance:auto;width:14px;height:14px;cursor:pointer;accent-color:#14b8a6;" />
+      <span>Include brief link in invite description</span>
+      <a href="${escapeAttr(draft.brief_url)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:#71717a;text-decoration:underline;">preview</a>
+    </label>` : ""}
+    <div data-region="status" style="margin-top:12px;font-size:12px;color:#fca5a5;display:none;"></div>
+    <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px;">
+      <button type="button" data-action="send" style="background:#0d9488;border:none;color:#ffffff;font-size:13px;font-weight:500;padding:8px 18px;border-radius:5px;cursor:pointer;font-family:inherit;transition:background 150ms ease;">Send invite</button>
+    </div>
+  `;
+
+  insertAfterEl.appendChild(card);
+
+  const startInput = card.querySelector<HTMLInputElement>('[data-field="start"]')!;
+  const durationSelect = card.querySelector<HTMLSelectElement>('[data-field="duration"]')!;
+  const summaryInput = card.querySelector<HTMLInputElement>('[data-field="summary"]')!;
+  const sendBtn = card.querySelector<HTMLButtonElement>('[data-action="send"]')!;
+  const cancelBtn = card.querySelector<HTMLButtonElement>('[data-action="cancel"]')!;
+  const statusEl = card.querySelector<HTMLDivElement>('[data-region="status"]')!;
+  const includeBriefInput = card.querySelector<HTMLInputElement>('[data-field="include-brief"]');
+
+  function showStatus(msg: string, kind: "error" | "info") {
+    statusEl.textContent = msg;
+    statusEl.style.display = "block";
+    statusEl.style.color = kind === "error" ? "#fca5a5" : "#a1a1aa";
+  }
+
+  cancelBtn.onclick = () => {
+    card.remove();
+  };
+
+  sendBtn.onclick = async () => {
+    const startLocal = startInput.value;
+    if (!startLocal) {
+      showStatus("Pick a date and time.", "error");
+      return;
+    }
+    const startIso = fromLocalInputValue(startLocal);
+    if (!startIso) {
+      showStatus("That date isn't valid.", "error");
+      return;
+    }
+    const durationMin = parseInt(durationSelect.value, 10) || 30;
+    const summary = summaryInput.value.trim();
+    const includeBrief = includeBriefInput ? includeBriefInput.checked : draft.include_brief;
+
+    sendBtn.disabled = true;
+    sendBtn.textContent = "Sending…";
+    sendBtn.style.opacity = "0.7";
+    sendBtn.style.cursor = "wait";
+    statusEl.style.display = "none";
+
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch("/v1/brain/calendar/send-invite", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          investor_slug: draft.investor_slug,
+          start_iso: startIso,
+          duration_minutes: durationMin,
+          summary: summary || null,
+          include_brief: includeBrief,
+        }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        showStatus(errBody.detail || `Send failed (${res.status})`, "error");
+        sendBtn.disabled = false;
+        sendBtn.textContent = "Send invite";
+        sendBtn.style.opacity = "1";
+        sendBtn.style.cursor = "pointer";
+        return;
+      }
+      const result = await res.json();
+      const meetLink = result.meet_link ? String(result.meet_link) : null;
+      const eventLink = result.html_link ? String(result.html_link) : null;
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#2dd4bf;">
+          <span style="font-size:14px;">✓</span>
+          <span>Invite sent to ${escapeText(draft.investor_name)}</span>
+        </div>
+        ${meetLink ? `<div style="margin-top:8px;font-size:12px;color:#a1a1aa;">Google Meet: <a href="${escapeAttr(meetLink)}" target="_blank" rel="noopener noreferrer" style="color:#5eead4;text-decoration:underline;">${escapeText(meetLink)}</a></div>` : ""}
+        ${eventLink ? `<div style="margin-top:4px;font-size:11px;color:#71717a;"><a href="${escapeAttr(eventLink)}" target="_blank" rel="noopener noreferrer" style="color:#71717a;text-decoration:underline;">Open in Google Calendar</a></div>` : ""}
+      `;
+      // Pipeline status auto-bumped to meeting_scheduled server-side.
+      window.dispatchEvent(new CustomEvent("raisefn:pipeline_updated"));
+    } catch (e) {
+      showStatus(
+        e instanceof Error ? e.message : "Send failed",
+        "error",
+      );
+      sendBtn.disabled = false;
+      sendBtn.textContent = "Send invite";
+      sendBtn.style.opacity = "1";
+      sendBtn.style.cursor = "pointer";
+    }
+  };
+}
+
 function renderMatchesPanel(
   data: {
     individuals_to_target?: Array<Record<string, unknown>>;
@@ -1701,6 +1899,30 @@ function BrainDeployInner() {
               // count + Briefs panel refresh without manual reload.
               try {
                 window.dispatchEvent(new CustomEvent("raisefn:briefs_updated"));
+              } catch { /* defensive */ }
+            } else if (event.type === "calendar_invite_draft") {
+              // Calendar V2 — send_calendar_invite tool returned a draft.
+              // Render the inline confirm card. Send button POSTs to
+              // /v1/brain/calendar/send-invite which fires the Google API.
+              try {
+                const d = (event.draft ?? {}) as Record<string, unknown>;
+                const draftData = {
+                  investor_slug: String(d.investor_slug || ""),
+                  investor_name: String(d.investor_name || "Investor"),
+                  investor_firm: d.investor_firm ? String(d.investor_firm) : null,
+                  investor_email: String(d.investor_email || ""),
+                  start_iso: String(d.start_iso || ""),
+                  duration_minutes: Number(d.duration_minutes) || 30,
+                  summary: String(d.summary || ""),
+                  include_brief: Boolean(d.include_brief ?? true),
+                  brief_url: d.brief_url ? String(d.brief_url) : null,
+                };
+                renderCalendarInviteCard(
+                  draftData,
+                  contentEl.parentElement || contentEl,
+                  session,
+                  impersonating,
+                );
               } catch { /* defensive */ }
             } else if (event.type === "outreach_draft") {
               // Phase 5b — draft_outreach tool just returned. Render an
