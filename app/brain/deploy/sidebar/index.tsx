@@ -343,8 +343,11 @@ export function FounderSidebar({
             let status = "Bundled with Gmail";
             let title = "Connect Gmail to enable Calendar — one OAuth grant covers both.";
             if (hasGoogle && hasCalScope) {
-              status = "Connected";
-              title = "Calendar access granted via your Google connection.";
+              // "via Gmail" instead of "Connected" — signals the bundling
+              // so users don't expect a separate Disconnect button.
+              // The whole grant disconnects together via the Gmail row.
+              status = "via Gmail";
+              title = "Calendar access is bundled with your Gmail connection. Disconnect Gmail to revoke both.";
             } else if (hasGoogle && !hasCalScope) {
               status = "Reconnect Gmail to enable";
               title = "Your existing Gmail connection predates Calendar support. Disconnect + reconnect Gmail to grant Calendar access in one step.";
