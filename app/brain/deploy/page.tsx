@@ -10,6 +10,7 @@ import type { Session } from "@supabase/supabase-js";
 import { formatMarkdown } from "@/lib/format-markdown";
 import { FounderSidebar } from "./sidebar";
 import { PanelHost, usePanelState } from "./panels";
+import SignalsStrip from "./signals-strip";
 
 const ADMIN_EMAILS = ["justin@raisefn.com", "justinpetsche@gmail.com"];
 
@@ -744,6 +745,99 @@ const BRAIN_CSS = `
   .starter:hover {
     border-color: #3f3f46; color: #d4d4d8;
     background: rgba(39,39,42,0.6);
+  }
+
+  /* Signals strip — code-rendered cards above the chat input. Visible
+     only when there are unacknowledged founder-facing events. */
+  .signals-strip {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto 12px;
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .signals-strip-header {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #71717a;
+    padding-left: 4px;
+  }
+  .signals-strip-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .signal-card {
+    display: flex;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(24, 24, 27, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid #27272a;
+    border-radius: 10px;
+    transition: border-color 150ms ease;
+  }
+  .signal-card:hover {
+    border-color: #3f3f46;
+  }
+  .signal-card-icon {
+    font-size: 18px;
+    line-height: 1.2;
+    flex-shrink: 0;
+  }
+  .signal-card-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .signal-card-title {
+    color: #e4e4e7;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .signal-card-subtitle {
+    color: #71717a;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .signal-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+  .signal-action {
+    background: rgba(45, 212, 191, 0.08);
+    color: #2dd4bf;
+    border: 1px solid rgba(45, 212, 191, 0.3);
+    padding: 5px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+  .signal-action:hover {
+    background: rgba(45, 212, 191, 0.15);
+    border-color: rgba(45, 212, 191, 0.5);
+  }
+  .signal-action-dismiss {
+    background: transparent;
+    color: #71717a;
+    border-color: #3f3f46;
+  }
+  .signal-action-dismiss:hover {
+    background: rgba(63, 63, 70, 0.3);
+    color: #a1a1aa;
+    border-color: #52525b;
   }
 
   /* Input bar */
@@ -2600,6 +2694,12 @@ function BrainDeployInner() {
               <button key={s} className="starter" onClick={() => send(s)}>{s}</button>
             ))}
           </div>
+          {sessionReady && (
+            <SignalsStrip
+              accessToken={session?.access_token ?? null}
+              onAction={(message) => { void send(message); }}
+            />
+          )}
           <div className="input-bar">
             {attachedFile && (
               <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 12px", fontSize: "12px", color: "#2dd4bf", background: "#18181b", borderRadius: "8px", marginBottom: "6px" }}>
