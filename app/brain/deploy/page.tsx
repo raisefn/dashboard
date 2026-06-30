@@ -1687,6 +1687,21 @@ function BrainDeployInner() {
               try {
                 window.dispatchEvent(new CustomEvent("raisefn:pipeline_updated"));
               } catch { /* defensive */ }
+            } else if (event.type === "profile_updated") {
+              // Brain emits after update_profile / update_raise / close_raise
+              // succeed. Fine Tune sidebar rows + My Raise card refresh.
+              // Same family of bugs as pipeline_updated — caught 2026-06-30
+              // EOD on the new-user test when 6 captured profile fields
+              // didn't show in the sidebar until reload.
+              try {
+                window.dispatchEvent(new CustomEvent("raisefn:profile_updated"));
+              } catch { /* defensive */ }
+            } else if (event.type === "briefs_updated") {
+              // Brain emits after generate_brief succeeds. BRIEFS sidebar
+              // count + Briefs panel refresh without manual reload.
+              try {
+                window.dispatchEvent(new CustomEvent("raisefn:briefs_updated"));
+              } catch { /* defensive */ }
             } else if (event.type === "outreach_draft") {
               // Phase 5b — draft_outreach tool just returned. Render an
               // inline preview card below the in-flight assistant message
