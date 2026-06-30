@@ -331,11 +331,32 @@ export function FounderSidebar({
               </div>
             </div>
           )}
-          <div className="sb-conn-row sb-conn-disabled" title="Phase 6 — auto-prep + auto-debrief on each meeting">
-            <span className="sb-conn-dot" />
-            <span className="sb-conn-label">Calendar</span>
-            <span className="sb-conn-status">Coming soon</span>
-          </div>
+          {(() => {
+            // Calendar piggybacks on the Gmail OAuth grant (one Google
+            // connection covers both). The Calendar row reflects whether
+            // the existing Gmail connection includes the calendar.events
+            // scope — Gmail connections established before 2026-06-30
+            // didn't request it and need a reconnect to enable.
+            const CAL_SCOPE = "https://www.googleapis.com/auth/calendar.events";
+            const hasGoogle = !!gmailConnection;
+            const hasCalScope = !!(gmailConnection?.scopes || []).includes(CAL_SCOPE);
+            let status = "Bundled with Gmail";
+            let title = "Connect Gmail to enable Calendar — one OAuth grant covers both.";
+            if (hasGoogle && hasCalScope) {
+              status = "Connected";
+              title = "Calendar access granted via your Google connection.";
+            } else if (hasGoogle && !hasCalScope) {
+              status = "Reconnect Gmail to enable";
+              title = "Your existing Gmail connection predates Calendar support. Disconnect + reconnect Gmail to grant Calendar access in one step.";
+            }
+            return (
+              <div className="sb-conn-row sb-conn-disabled" title={title}>
+                <span className={`sb-conn-dot${hasGoogle && hasCalScope ? " on" : ""}`} />
+                <span className="sb-conn-label">Calendar</span>
+                <span className="sb-conn-status">{status}</span>
+              </div>
+            );
+          })()}
           <div className="sb-conn-row sb-conn-disabled" title="Warm intro mapping + 2nd-degree network introspection">
             <span className="sb-conn-dot" />
             <span className="sb-conn-label">LinkedIn</span>
