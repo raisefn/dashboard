@@ -115,6 +115,34 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
   const [error, setError] = useState<string | null>(null);
   const [generatingKey, setGeneratingKey] = useState<string | null>(null);
   const [rowError, setRowError] = useState<{ key: string; msg: string } | null>(null);
+  // Session-local dismissals. Optimistic: the card disappears immediately,
+  // brain logs the action asynchronously. Refresh restores the card (V1
+  // doesn't persist hide state — the dismiss is a TRAINING signal, not a
+  // permanent founder preference). Future could add an undo toast.
+  const [dismissedSlugs, setDismissedSlugs] = useState<Set<string>>(new Set());
+
+  const dismissInvestor = useCallback(async (slug: string) => {
+    if (!slug || !session) return;
+    setDismissedSlugs((prev) => {
+      const next = new Set(prev);
+      next.add(slug);
+      return next;
+    });
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      await fetch("/v1/brain/outcomes/dismiss-match", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ investor_slug: slug }),
+      });
+    } catch {
+      // Best-effort; founder UX shouldn't depend on logging success.
+    }
+  }, [session, impersonating]);
 
   const fetchMatches = useCallback(async (signal?: AbortSignal) => {
     if (!session) return;
@@ -275,7 +303,12 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
   const activeBatch = batches.find((b) => b.id === activeBatchId) || batches[0] || null;
   const individuals = activeBatch?.individuals_to_target || [];
   const firms = activeBatch?.firms_to_consider || [];
-  const ordered: Investor[] = [...individuals, ...firms];
+  // Filter dismissed slugs out of the rendered list. Session-local; refresh
+  // restores them since dismissals are a TRAINING signal for the matcher,
+  // not a permanent founder preference.
+  const ordered: Investor[] = [...individuals, ...firms].filter(
+    (inv) => !inv.slug || !dismissedSlugs.has(inv.slug)
+  );
   // LLM-augmented recommendations (Phase A — 2026-06-29). Surfaced when
   // the catalog was thin for the founder's sector. See
   // brain/match_augmentation.py + .claude/plans/llm_augmented_matching.md.
@@ -411,6 +444,16 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
                       >
                         LinkedIn ↗
                       </a>
+                    )}
+                    {inv.slug && (
+                      <button
+                        type="button"
+                        className="mp-card-dismiss"
+                        onClick={() => dismissInvestor(inv.slug!)}
+                        title="Hide this match and tell raise(fn) it wasn't a fit"
+                      >
+                        ✕ Not a fit
+                      </button>
                     )}
                   </div>
                 </div>
@@ -748,6 +791,18 @@ const MATCHES_PANEL_CSS = `
     transition: color 150ms ease;
   }
   .mp-card-linkedin:hover { color: #a1a1aa; }
+  .mp-card-dismiss {
+    background: transparent;
+    border: none;
+    color: #71717a;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+    margin-left: 4px;
+    text-decoration: none;
+  }
+  .mp-card-dismiss:hover { color: #fca5a5; text-decoration: underline; }
 
   /* ── LLM-augmented recommendations ────────────────────────────────── */
   .mp-aug-section {
