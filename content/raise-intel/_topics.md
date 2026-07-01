@@ -9,7 +9,7 @@ voice, ship.
 
 ## Status
 
-- ✅ done: 9
+- ✅ done: 10
 - ⏳ pending: 11
 - 🎯 cadence target: daily (~1/day)
 
@@ -40,6 +40,8 @@ voice, ship.
   → [/raise-intel/how-do-i-create-urgency-without-lying](/raise-intel/how-do-i-create-urgency-without-lying)
 - [x] **How do I close the round faster?**
   → [/raise-intel/how-do-i-close-the-round-faster](/raise-intel/how-do-i-close-the-round-faster)
+- [x] **Can AI raise money for me?** ✅ published 2026-06-30
+  → [/raise-intel/can-ai-raise-money-for-me](/raise-intel/can-ai-raise-money-for-me)
 
 ## Pending — priority order
 
