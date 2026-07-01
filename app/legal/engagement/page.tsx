@@ -3,7 +3,7 @@ import Link from "next/link";
 export const metadata = {
   title: "Advisor Engagement | raise(fn)",
   description:
-    "raise(fn) Advisor engagement terms — three months of hands-on support while you raise. $999/month for 3 months or $1,999 upfront.",
+    "raise(fn) Advisor engagement terms — one month of hands-on setup and guidance, then Pro ongoing. $1,997 today ($199 first month Pro + $1,798 setup), then $199/mo.",
 };
 
 export default function EngagementPage() {
@@ -31,23 +31,19 @@ export default function EngagementPage() {
             What we do
           </h2>
           <p className="text-sm text-zinc-400 mb-4">
-            Three months of hands-on support while you raise.
+            One month of hands-on setup and guidance, then Pro ongoing.
           </p>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              <span className="text-white font-medium">Month 1</span> &mdash; We build your
-              investor shortlist, write tailored briefs for the top matches, sequence the
-              outreach, and have a kickoff call.
+              <span className="text-white font-medium">Month 1 hands-on</span>{" "}
+              &mdash; We set your agent up for you, dial in your investor sourcing,
+              guide you through the first month of your raise, and make warm intros
+              to our proprietary network when there&rsquo;s a real match.
             </li>
             <li>
-              <span className="text-white font-medium">Month 2</span> &mdash; We prep you
-              before every investor meeting, debrief after, and track the pipeline live with
-              you. Weekly check-ins.
-            </li>
-            <li>
-              <span className="text-white font-medium">Month 3</span> &mdash; We help with
-              close support, write the materials you need to land the round, and set you up
-              to keep using raise(fn) Pro on your own afterward.
+              <span className="text-white font-medium">Month 2 onward</span>{" "}
+              &mdash; You continue on raise(fn) Pro at $199/mo. Uncapped agent,
+              matches, briefs, meeting prep, pipeline. Cancel anytime.
             </li>
           </ul>
           <p className="text-sm text-zinc-400 mt-4">
@@ -59,28 +55,34 @@ export default function EngagementPage() {
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
             What you pay
           </h2>
-          <p className="text-sm text-zinc-400 mb-4">Two ways to pay:</p>
+          <p className="text-sm text-zinc-400 mb-4">
+            <span className="text-white font-medium">$1,997 today.</span>{" "}
+            This covers:
+          </p>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              <span className="text-white font-medium">Monthly &mdash; $999/month for 3 months.</span>{" "}
-              Auto-debited each month, $2,997 total. You can stop future charges anytime by
-              emailing team@raisefn.com.
+              <span className="text-white font-medium">$199</span>{" "}
+              &mdash; your first month of raise(fn) Pro (agent access, uncapped).
             </li>
             <li>
-              <span className="text-white font-medium">Upfront &mdash; $1,999 once.</span>{" "}
-              That&rsquo;s ~33% off the monthly total. Same scope, same engagement, no
-              recurring charges.
+              <span className="text-white font-medium">$1,798</span>{" "}
+              &mdash; setup + month 1 hands-on guidance + warm intros from raise(fn) Team.
             </li>
           </ul>
-          <p className="text-sm text-zinc-400 mt-4 mb-2">Either way:</p>
+          <p className="text-sm text-zinc-400 mt-4">
+            Starting day 31, Pro auto-renews at{" "}
+            <span className="text-white font-medium">$199/mo</span>. Cancel
+            anytime from your account or by emailing team@raisefn.com.
+          </p>
+          <p className="text-sm text-zinc-400 mt-4 mb-2">Also:</p>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              No success fee. We don&rsquo;t get paid based on whether your round closes or
-              how much you raise.
+              No success fee. We don&rsquo;t get paid based on whether your round closes
+              or how much you raise.
             </li>
             <li>
-              raise(fn) is not a registered broker-dealer. No cut of capital raised, no
-              equity, no securities brokering.
+              raise(fn) is not a registered broker-dealer. No cut of capital raised,
+              no equity, no securities brokering.
             </li>
             <li>
               <span className="text-white font-medium">All purchases final.</span> Funds
@@ -93,15 +95,9 @@ export default function EngagementPage() {
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
             How long it runs
           </h2>
-          <p className="text-sm text-zinc-400 mb-4">3 months. After that, you choose:</p>
-          <ul className="space-y-2 text-sm leading-relaxed">
-            <li>Keep Advisor going at $999/month (cancel anytime, no commitment)</li>
-            <li>Drop to raise(fn) Pro at $199/month (software only)</li>
-            <li>End the engagement &mdash; you go back to the free tier</li>
-          </ul>
-          <p className="text-sm text-zinc-400 mt-4">
-            If you don&rsquo;t tell us within 7 days of the engagement ending, we default to
-            ending it. No surprise charges.
+          <p className="text-sm text-zinc-400 mb-4">
+            Month 1 is the hands-on engagement. After that, you&rsquo;re on Pro
+            ongoing at $199/mo, no fixed end date. You choose when to cancel.
           </p>
         </section>
 
@@ -111,7 +107,8 @@ export default function EngagementPage() {
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              You can stop future charges anytime &mdash; just email us at{" "}
+              You can stop future Pro charges anytime &mdash; from your account or
+              by emailing us at{" "}
               <a
                 href="mailto:team@raisefn.com"
                 className="text-teal-400 hover:text-teal-300 transition-colors"
@@ -120,7 +117,7 @@ export default function EngagementPage() {
               </a>
               . We cancel the next month&rsquo;s payment immediately.
             </li>
-            <li>Funds paid stay paid.</li>
+            <li>The $1,997 you paid at checkout stays paid.</li>
           </ul>
         </section>
 
@@ -130,8 +127,8 @@ export default function EngagementPage() {
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              Everything we make for you &mdash; briefs, prep docs, debriefs, close
-              materials, positioning &mdash; is yours. Use it however you want, forever.
+              Everything we make for you &mdash; agent setup, sourcing, briefs, warm
+              intro paths &mdash; is yours. Use it however you want, forever.
             </li>
             <li>
               We learn from the engagement in aggregate (what kinds of pitches land, what
@@ -211,8 +208,7 @@ export default function EngagementPage() {
               engagement.
             </li>
             <li>
-              By paying the first $999 monthly or the $1,999 upfront on raisefn.com, you
-              accept these terms.
+              By paying the $1,997 checkout on raisefn.com, you accept these terms.
             </li>
           </ul>
         </section>

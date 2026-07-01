@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 import FadeInSection from "@/components/fade-in-section";
 
-type Tier = "pro";
+type Tier = "pro" | "advisor";
 
 export default function PricingPage() {
   const router = useRouter();
@@ -224,21 +224,23 @@ export default function PricingPage() {
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
                 Advisor
               </h2>
-              <span className="text-sm text-zinc-500">By request</span>
+              <span className="text-sm text-zinc-500">$1,997 today · $199/mo after month 1</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              Three months of hands-on support while you raise &mdash; briefs,
-              meeting prep, debriefs, and close support, with raise(fn) Team in
-              the loop the whole way. No success fees. No equity.
+              Month 1 with raise(fn) Team hands-on. We set your agent up for
+              you, guide you through the first month of your raise, and make
+              warm intros to our proprietary investor network when we can. Pro
+              continues at $199/mo after that, cancel anytime. No success fees.
+              No equity.
             </p>
 
             <ul className="space-y-4 mb-10 list-none">
               {[
-                ["Everything in Pro, uncapped", "for the duration of your engagement"],
-                ["Tailored investor briefs", "written for each match, not templated"],
-                ["Pre-meeting prep + post-meeting debriefs", "for every investor conversation"],
-                ["Pipeline tracking + weekly check-ins", "we stay close while you raise"],
-                ["Close support", "round-close docs, transition prep, next-round positioning"],
+                ["Agent setup, done for you", "profile, taxonomy, sourcing dialed in on day one"],
+                ["Month 1 hands-on guidance", "raise(fn) Team in the loop on your outreach, briefs, and meetings"],
+                ["Warm intros to our proprietary network", "when there's a real match, Justin makes the intro personally"],
+                ["Everything in Pro, uncapped", "matches, briefs, deck critique, meeting prep, pipeline"],
+                ["Pro from month 2 onward", "$199/mo recurring, cancel anytime"],
               ].map(([name, desc]) => (
                 <li key={name} className="flex items-start gap-3">
                   <span className="text-orange-400 text-lg leading-snug shrink-0">•</span>
@@ -250,14 +252,17 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <a
-              href="mailto:team@raisefn.com?subject=raise(fn)%20Advisor%20inquiry"
-              className="rounded-full border border-orange-600/60 bg-orange-900/30 px-8 py-3 text-sm font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50 inline-block"
+            <button
+              onClick={() => startCheckout("advisor")}
+              disabled={checkoutLoading === "advisor"}
+              className="rounded-full border border-orange-600/60 bg-orange-900/30 px-8 py-3 text-sm font-medium text-orange-200 transition-all hover:border-orange-500 hover:bg-orange-900/50 disabled:opacity-50"
             >
-              Talk to us — team@raisefn.com
-            </a>
+              {checkoutLoading === "advisor" ? "Opening checkout…" : "Get Advisor — $1,997"}
+            </button>
             <p className="mt-3 text-xs text-zinc-500 max-w-xl">
-              We&rsquo;ll walk you through the engagement, scope, and pricing.
+              $1,997 today covers your first month of Pro ($199) plus setup and
+              guidance ($1,798). Pro auto-renews at $199/mo starting day 31 —
+              cancel anytime from your account.
             </p>
             {checkoutError && (
               <div className="mt-3 text-xs text-red-400 max-w-xl">{checkoutError}</div>

@@ -2051,12 +2051,12 @@ function BrainDeployInner() {
                   <div class="upgrade-card-tier-name">Pro</div>
                   <div class="upgrade-card-tier-price">$199/mo · cancel anytime</div>
                   <div class="upgrade-card-tier-pitch">
-                    Uncapped product, same brain you already know. The SaaS path.
+                    Uncapped agent, same one you already know. The SaaS path.
                   </div>
                   <ul class="upgrade-card-tier-list">
-                    <li>Uncapped chat with the brain</li>
                     <li>Uncapped investor matches</li>
                     <li>Uncapped briefs</li>
+                    <li>Uncapped outreach drafts + meeting prep + debriefs</li>
                     <li>Pipeline + memory across sessions</li>
                   </ul>
                   <button class="upgrade-card-tier-cta" data-cta="pro">
@@ -2067,22 +2067,23 @@ function BrainDeployInner() {
 
                 <div class="upgrade-card-tier upgrade-card-tier--advisor">
                   <div class="upgrade-card-tier-name">Advisor</div>
-                  <div class="upgrade-card-tier-price">$999/mo × 3 · or $1,999 upfront</div>
+                  <div class="upgrade-card-tier-price">$1,997 today · $199/mo after month 1</div>
                   <div class="upgrade-card-tier-pitch">
-                    Three months with raise(fn) Team in the loop on your raise — guidance from someone who's been there, plus warm intros to our proprietary investor network.
+                    Month 1 with raise(fn) Team hands-on. We set your agent up, guide you through the first month, and make warm intros to our proprietary network when we can. Pro from month 2.
                   </div>
                   <ul class="upgrade-card-tier-list">
+                    <li>Agent setup, done for you</li>
+                    <li>Month 1 hands-on guidance from raise(fn) Team</li>
                     <li>Warm intros to our proprietary network when there's a match</li>
-                    <li>Tailored briefs for every investor you target</li>
-                    <li>Pre-meeting prep + post-meeting debriefs</li>
-                    <li>Pipeline tracking + weekly check-ins</li>
+                    <li>Pro uncapped from month 2, $199/mo, cancel anytime</li>
                   </ul>
                   <button class="upgrade-card-tier-cta" data-cta="advisor">
-                    Get Advisor — $999/mo
+                    Get Advisor — $1,997
                   </button>
                   <div class="upgrade-card-error" data-err="advisor" style="display:none"></div>
                   <div class="upgrade-card-tier-foot">
-                    No success fees. No equity. Save ~33% with $1,999 upfront.
+                    $1,997 today = first month Pro ($199) + setup ($1,798).
+                    No success fees. No equity.
                     <a href="/legal/engagement">Full engagement letter</a>.
                   </div>
                 </div>
