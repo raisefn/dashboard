@@ -88,18 +88,26 @@ export default function TermsPage() {
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              Advisor is a 3-month hands-on engagement &mdash; $999/month for 3 months
-              ($2,997 total) or $1,999 upfront. No success fees.
+              Advisor is one month of hands-on setup and guidance from raise(fn) Team,
+              then Pro ongoing. $1,997 today ($199 first month Pro + $1,798 setup).
+              Pro auto-renews at $199/month starting day 31. No success fees.
             </li>
             <li>
-              Available by request. Email{" "}
+              Self-serve at{" "}
+              <a
+                href="/pricing"
+                className="text-teal-400 hover:text-teal-300 transition-colors"
+              >
+                /pricing
+              </a>{" "}
+              or email{" "}
               <a
                 href="mailto:team@raisefn.com"
                 className="text-teal-400 hover:text-teal-300 transition-colors"
               >
                 team@raisefn.com
               </a>{" "}
-              to start. Full engagement terms reviewed and accepted at checkout.
+              with questions. Full engagement terms reviewed and accepted at checkout.
             </li>
           </ul>
         </section>
@@ -110,9 +118,9 @@ export default function TermsPage() {
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>Pro is $199/month via Stripe &mdash; cancel anytime, access continues through end of billing period</li>
-            <li>Advisor is $999/month for 3 months (auto-debited) or $1,999 upfront, via Stripe</li>
+            <li>Advisor is $1,997 today via Stripe (mixed line items: $199 first-month Pro + $1,798 setup), then Pro auto-renews at $199/month starting day 31</li>
             <li><strong className="text-zinc-100">All purchases final.</strong> Funds paid are funds paid.</li>
-            <li>Advisor: you can stop future charges anytime by emailing team@raisefn.com. Past charges are non-refundable.</li>
+            <li>You can stop future Pro charges anytime from your account or by emailing team@raisefn.com. Past charges are non-refundable.</li>
             <li>Disputes or chargebacks: email team@raisefn.com before opening a dispute</li>
           </ul>
         </section>
