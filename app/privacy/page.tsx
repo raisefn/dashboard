@@ -66,6 +66,67 @@ export default function PrivacyPage() {
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
+            Google API access (Gmail, Calendar)
+          </h2>
+          <p className="text-sm text-zinc-400 mb-4 leading-relaxed">
+            When you connect your Google account, raise(fn) requests only the scopes
+            required to run your raise. We never access, read, or store Google account
+            data outside these specific uses.
+          </p>
+          <ul className="space-y-3 text-sm leading-relaxed">
+            <li>
+              <span className="text-white font-medium">gmail.send</span> &mdash; used
+              to send outreach emails on your behalf. Every email is drafted in the
+              app and requires your explicit approval via the Send button before it&rsquo;s
+              transmitted. raise(fn) never sends automatically without your action.
+            </li>
+            <li>
+              <span className="text-white font-medium">calendar.events</span> &mdash;
+              used to create calendar invites for investor meetings. Every invite
+              requires your explicit approval via the Send Invite button before it&rsquo;s
+              transmitted to Google Calendar.
+            </li>
+          </ul>
+          <p className="text-sm text-zinc-400 mt-4 mb-2 leading-relaxed">
+            <span className="text-white font-medium">What we don&rsquo;t do:</span>
+          </p>
+          <ul className="space-y-2 text-sm leading-relaxed">
+            <li>We do not read your incoming mail.</li>
+            <li>We do not access your Gmail search history, contacts, or attachments outside outbound emails you approve.</li>
+            <li>We do not transfer Google user data to any third party.</li>
+            <li>We do not use Google user data for AI/ML training.</li>
+            <li>We do not permit humans to read your Google user data except: (a) with your explicit consent, (b) to comply with applicable law, (c) for security investigations of abuse, or (d) for aggregate anonymized product improvement.</li>
+          </ul>
+          <p className="text-sm text-zinc-400 mt-4 leading-relaxed">
+            raise(fn)&rsquo;s use and transfer of information received from Google APIs
+            adheres to the{" "}
+            <a
+              href="https://developers.google.com/terms/api-services-user-data-policy"
+              className="text-teal-400 hover:text-teal-300 transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Google API Services User Data Policy
+            </a>
+            , including the Limited Use requirements.
+          </p>
+          <p className="text-sm text-zinc-400 mt-4 leading-relaxed">
+            You can revoke raise(fn)&rsquo;s access to your Google account at any time
+            from your{" "}
+            <a
+              href="https://myaccount.google.com/permissions"
+              className="text-teal-400 hover:text-teal-300 transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Google account permissions page
+            </a>{" "}
+            or from the Connections panel inside raise(fn).
+          </p>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
             Where your data lives
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
