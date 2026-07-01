@@ -111,9 +111,9 @@ export default function PricingPage() {
             The agent that runs your raise alongside you
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            Targeting, deck analysis, outreach drafts — grounded in 24,000+
-            rounds of fundraising activity. Free to try. Pro when you&apos;re
-            in the work. Hands-on Advisor support available on request.
+            Sourcing, per-investor briefs, meeting prep, deck critique, pipeline
+            that updates itself. Free to try. Pro when you&apos;re in the work.
+            Hands-on Advisor support available on request.
           </p>
         </div>
       </section>
