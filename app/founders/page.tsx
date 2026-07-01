@@ -58,7 +58,7 @@ function PipelineMemoryCard() {
   return (
     <div className="rounded-2xl border border-zinc-800 overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(24,24,27,0.95), rgba(9,9,11,0.98))" }}>
       <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/80">
-        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">Pipeline — Auto-tracked from chat</span>
+        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">Pipeline — Captured as you work</span>
         <span className="text-[10px] text-teal-500/60 font-semibold tracking-widest uppercase">4 open</span>
       </div>
       <div className="p-4 space-y-2.5">
@@ -208,14 +208,14 @@ function BriefPreviewCard() {
 
 /* ── Capability grid — everything else the agent handles ── */
 const CAPABILITIES = [
-  { icon: "📑", name: "Deck extraction", desc: "Drop a PDF — sector, stage, MRR, team, raise size auto-populated." },
-  { icon: "🔎", name: "Investor research", desc: "GP-level detail — recent checks, sweet spots, what they pass on." },
-  { icon: "✉️", name: "Outreach drafting", desc: "Cold and warm intros, tailored per investor and round context." },
-  { icon: "🎤", name: "Meeting prep", desc: "Six-section briefing per meeting: angles, risks, hard questions, asks." },
-  { icon: "🗒️", name: "Meeting debrief", desc: "Capture next steps, commitments, status changes — no notes lost." },
-  { icon: "📜", name: "Term sheet analysis", desc: "Plain-English read of every clause, flagged for the founder-hostile ones." },
-  { icon: "🧭", name: "Narrative review", desc: "Where the pitch lands and where it leaks — before you go out wide." },
-  { icon: "📈", name: "Signal reading", desc: "Is the investor moving fast or slow-rolling? Pattern read across replies." },
+  { icon: "📑", name: "Extracts your deck", desc: "Drop a PDF — sector, stage, MRR, team, raise size populated for you." },
+  { icon: "🔎", name: "Researches every investor", desc: "GP-level detail — recent checks, sweet spots, what they pass on." },
+  { icon: "✉️", name: "Writes and sends outreach", desc: "Cold and warm intros, tailored per investor. Sends from your connected Gmail." },
+  { icon: "📅", name: "Books your meetings", desc: "Drafts the calendar invite, confirms with you, fires it into Google Calendar." },
+  { icon: "🎤", name: "Preps you for every meeting", desc: "Six-section briefing per meeting: angles, risks, hard questions, asks." },
+  { icon: "🗒️", name: "Captures the debrief", desc: "Next steps, commitments, status changes — nothing lost." },
+  { icon: "📜", name: "Walks you through the term sheet", desc: "Plain-English read of every clause. Flags the founder-hostile ones." },
+  { icon: "🧭", name: "Critiques your pitch", desc: "Where the narrative lands and where it leaks — before you go out wide." },
 ];
 
 function CapabilityGrid() {
@@ -250,10 +250,9 @@ export default function FoundersPage() {
             The agent that runs your raise alongside you.
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            raise(fn) matches you to the right investors, drafts the briefs,
-            drafts the outreach, preps every meeting, captures every debrief,
-            and tracks your pipeline. You stay on the calls and the product.
-            The agent does the rest.
+            raise(fn) sources the right investors, writes and sends your outreach,
+            books your meetings, preps you for each one, captures the debrief,
+            and tracks the pipeline. You take the calls. The agent runs the rest.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
             <Link
@@ -288,15 +287,15 @@ export default function FoundersPage() {
               </h2>
               <p className="text-zinc-400 leading-relaxed mb-4">
                 Not an alphabetical list of every VC on the internet. The
-                agent reads your sector, stage, check size, geography, and
-                cap table, then ranks investors whose thesis, deployment
-                cadence, and history actually fit.
+                agent takes your sector, stage, check size, geography, and
+                cap table, then sources and ranks investors whose thesis,
+                deployment cadence, and history actually fit.
               </p>
               <p className="text-zinc-400 leading-relaxed">
-                Including the angels and family offices nobody else
-                surfaces, the firms that haven&apos;t posted in a year but
-                are quietly writing checks, and the warm-intro candidates
-                in our proprietary network.
+                Includes the angels and family offices nobody else surfaces,
+                the firms that haven&apos;t posted in a year but are quietly
+                writing checks, and the warm-intro candidates in our
+                proprietary network.
               </p>
               <p className="text-sm text-zinc-500 mt-5">
                 See{" "}
@@ -326,17 +325,16 @@ export default function FoundersPage() {
                 02 — Memory
               </p>
               <h2 className="text-3xl font-bold text-white mb-5 leading-tight">
-                Tracks every conversation. Forgets nothing.
+                Captures every conversation. Forgets nothing.
               </h2>
               <p className="text-zinc-400 leading-relaxed mb-4">
-                Every conversation, meeting note, commitment, and decision
-                — captured automatically as you work. No CRM to fill in. No
-                investor questions to re-read at midnight before the second
-                meeting.
+                The agent captures every meeting, commitment, and decision
+                as you work. No CRM to fill in. No investor questions to
+                re-read at midnight before the second meeting.
               </p>
               <p className="text-zinc-400 leading-relaxed">
-                When you come back tomorrow, the agent knows where you
-                left off. When you come back next month, it still knows.
+                Come back tomorrow, the agent knows where you left off.
+                Come back next month, it still knows.
               </p>
             </div>
             <div className="md:order-1">
@@ -355,17 +353,17 @@ export default function FoundersPage() {
                 03 — Briefs
               </p>
               <h2 className="text-3xl font-bold text-white mb-5 leading-tight">
-                Investor briefs in seconds, not Saturdays.
+                Writes investor briefs in seconds, not Saturdays.
               </h2>
               <p className="text-zinc-400 leading-relaxed mb-4">
-                One-page tailored summaries for any investor — what they
-                fund, what they pass on, why this could fit, and what to
-                surface up front. Use them to prep meetings, draft cold
-                outreach, or send to your advisors.
+                The agent writes a one-page brief tailored to any investor —
+                what they fund, what they pass on, why this could fit, and
+                what to surface up front. Use them to prep meetings, ground
+                cold outreach, or send to your advisors.
               </p>
               <p className="text-zinc-400 leading-relaxed">
-                Works for investors the agent matched you with — and for
-                anyone you already know. Drop in a name, get a brief.
+                Works for investors the agent sourced — and for anyone you
+                already know. Drop in a name, get a brief.
               </p>
             </div>
             <div>
@@ -473,7 +471,7 @@ export default function FoundersPage() {
                 },
                 {
                   q: "How is raise(fn) different from other fundraising SaaS tools?",
-                  a: "Most fundraising SaaS is a database (PitchBook, Crunchbase), a CRM (Affinity, DealCloud), or generic outreach automation (Apollo, Lemlist) — built for general sales, not for raising a round. They give you tools; you still do the work. raise(fn) is the agent. It does the matching, drafts the briefs, drafts the outreach, preps your meetings, debriefs them, and tracks your pipeline automatically. One product for the whole raise. And it's calibrated on real fundraising outcomes, not generic CRM patterns — every raise that runs through it makes the next one sharper.",
+                  a: "Most fundraising SaaS is a database (PitchBook, Crunchbase), a CRM (Affinity, DealCloud), or generic outreach automation (Apollo, Lemlist) — built for general sales, not for raising a round. They give you tools; you still do the work. raise(fn) is the agent. It sources the matches, writes the briefs, sends the outreach through your Gmail, books your meetings on Google Calendar, preps you for each one, captures the debrief, and tracks your pipeline as you go. One product for the whole raise. And it's calibrated on real fundraising outcomes, not generic CRM patterns — every raise that runs through it makes the next one sharper.",
                 },
                 {
                   q: "If I'm on the free plan, why would I pay?",
