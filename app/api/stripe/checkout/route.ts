@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStripe, getPriceIdFor, type AdvisorBilling } from "@/lib/stripe";
+import { getStripe, getCheckoutLineItems } from "@/lib/stripe";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
@@ -7,14 +7,9 @@ export async function POST(req: Request) {
     const stripe = getStripe();
     const body = await req.json();
     const tier: string = body.tier;
-    const billing: AdvisorBilling | undefined = body.billing;
 
-    // Default Advisor billing to monthly. Upfront option requires explicit
-    // billing='upfront' in the request body.
-    const advisorBilling: AdvisorBilling = billing === "upfront" ? "upfront" : "monthly";
-
-    const priceId = getPriceIdFor(tier, advisorBilling);
-    if (!priceId) {
+    const lineItems = getCheckoutLineItems(tier);
+    if (!lineItems) {
       return NextResponse.json(
         { error: "Invalid tier." },
         { status: 400 }
@@ -48,56 +43,24 @@ export async function POST(req: Request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://raisefn.com";
 
-    // Pricing v4 (2026-06-11) checkout flows:
-    // - pro: $199/mo subscription, no engagement letter, pure SaaS
-    // - advisor (monthly): $999/mo recurring subscription. Engagement
-    //   letter consent required. Founder can stop future charges by
-    //   emailing team@raisefn.com. No auto-cancel; if they want to
-    //   continue past 3 months, they can.
-    // - advisor (upfront): $1,999 one-time payment. Engagement letter
-    //   consent required. Same scope as monthly, ~33% off the total.
+    // Pricing v5 (2026-07-01):
+    // - pro: single-line $199/mo subscription
+    // - advisor: mixed-mode subscription ($199/mo Pro) + one-time ($1,798
+    //   setup fee) = $1,997 due at checkout, then $199/mo Pro from day 31.
+    //   Engagement letter accepted natively via consent_collection.
     //
-    // Consent collection wording reflects v4 letter — no 3%, no success
-    // fee, no equity. Founder accepts the engagement letter natively on
-    // Stripe's hosted page (terms_of_service URL configured in Stripe
-    // Dashboard → Business settings → Terms of service URL = /legal/engagement).
+    // Grandfathered v4 advisor customers (Matt/Taylor/Ralph/Alfredo) keep
+    // their existing subscriptions — no code path forces migration.
     const isAdvisor = tier === "advisor";
-    const isAdvisorUpfront = isAdvisor && advisorBilling === "upfront";
 
     const session = await stripe.checkout.sessions.create(
-      isAdvisorUpfront
+      isAdvisor
         ? {
-            mode: "payment",
-            line_items: [{ price: priceId, quantity: 1 }],
-            customer_email: user.email,
-            consent_collection: {
-              terms_of_service: "required",
-            },
-            custom_text: {
-              terms_of_service_acceptance: {
-                message:
-                  "I agree to the **raise(fn) Advisor Engagement Letter**. Three months of hands-on support. No success fees. All purchases final — funds paid are funds paid.",
-              },
-            },
-            metadata: {
-              supabase_user_id: user.id,
-              tier,
-              advisor_billing: "upfront",
-            },
-            payment_intent_data: {
-              metadata: {
-                email: user.email,
-                tier,
-                advisor_billing: "upfront",
-              },
-            },
-            success_url: `${baseUrl}/brain/deploy?checkout=success`,
-            cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
-          }
-        : isAdvisor
-        ? {
+            // Mixed-mode: subscription (Pro) + one-time (Setup Fee).
+            // Stripe supports both line item types in a single session
+            // when mode='subscription'.
             mode: "subscription",
-            line_items: [{ price: priceId, quantity: 1 }],
+            line_items: lineItems,
             customer_email: user.email,
             consent_collection: {
               terms_of_service: "required",
@@ -105,19 +68,19 @@ export async function POST(req: Request) {
             custom_text: {
               terms_of_service_acceptance: {
                 message:
-                  "I agree to the **raise(fn) Advisor Engagement Letter**. $999/month for 3 months of hands-on support. No success fees. Stop future charges anytime by emailing team@raisefn.com. Funds paid are funds paid.",
+                  "I agree to the **raise(fn) Advisor Engagement Letter**. $1,997 today = first month of Pro ($199) + setup and guidance ($1,798). Pro continues at $199/mo, cancel anytime. No success fees. Funds paid are funds paid.",
               },
             },
             metadata: {
               supabase_user_id: user.id,
               tier,
-              advisor_billing: "monthly",
+              pricing_version: "v5",
             },
             subscription_data: {
               metadata: {
                 email: user.email,
                 tier,
-                advisor_billing: "monthly",
+                pricing_version: "v5",
               },
             },
             success_url: `${baseUrl}/brain/deploy?checkout=success`,
@@ -125,7 +88,7 @@ export async function POST(req: Request) {
           }
         : {
             mode: "subscription",
-            line_items: [{ price: priceId, quantity: 1 }],
+            line_items: lineItems,
             customer_email: user.email,
             metadata: {
               supabase_user_id: user.id,
