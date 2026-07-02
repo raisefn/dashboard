@@ -136,7 +136,7 @@ export default function Nav() {
             </Link>
             <Link
               href="/signup"
-              className="rounded-full bg-orange-600 px-5 py-1.5 text-xs font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
+              className="rounded-full border border-orange-700/60 bg-transparent px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all hover:border-orange-600 hover:text-orange-200 hover:bg-orange-950/30"
             >
               Start your raise →
             </Link>
