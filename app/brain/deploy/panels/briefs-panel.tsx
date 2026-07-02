@@ -211,8 +211,8 @@ export function BriefsPanel({ session, impersonating, onOpenPanel }: BriefsPanel
 
       {list.length === 0 ? (
         <div className="bp-empty">
-          <p className="bp-empty-title">No briefs yet.</p>
-          <p className="bp-empty-sub">Ask raise(fn) to brief any investor — &quot;generate a brief on [name]&quot;.</p>
+          <p className="bp-empty-title">Your investor briefs will show up here.</p>
+          <p className="bp-empty-sub">One-page research on any investor — thesis, check size, warm-intro paths — tailored to your raise. Ask raise(fn) to &quot;generate a brief on [name]&quot; to get started.</p>
         </div>
       ) : (
         groups.map(group => (

@@ -363,8 +363,8 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
 
       {!activeBatch || !hasAnyContent ? (
         <div className="mp-empty">
-          <p className="mp-empty-title">No matches yet.</p>
-          <p className="mp-empty-sub">Head back to chat and ask raise(fn) to pull matches.</p>
+          <p className="mp-empty-title">Your investor matches will show up here.</p>
+          <p className="mp-empty-sub">Ranked by fit against your sector, stage, and geography. Head back to chat and ask raise(fn) to &quot;pull matches&quot; to get started.</p>
         </div>
       ) : (
         <>{ordered.length > 0 && (<div className="mp-list">

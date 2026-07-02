@@ -107,7 +107,8 @@ export function DocumentsPanel({ session, impersonating, onOpenPanel }: Document
     return (
       <div className="docs-state">
         <style>{DOCS_PANEL_CSS}</style>
-        <p className="docs-state-text">No documents yet. Drop your deck in chat to see it here.</p>
+        <p className="docs-state-title">Your documents will show up here.</p>
+        <p className="docs-state-sub">Your deck, term sheets, and anything else you upload lives in this section. Drop a file in chat to add one.</p>
       </div>
     );
   }
@@ -156,6 +157,8 @@ const DOCS_PANEL_CSS = `
 
   .docs-state { padding: 32px 8px; }
   .docs-state-text { font-size: 13px; color: #71717a; margin: 0; }
+  .docs-state-title { font-size: 14px; color: #d4d4d8; margin: 0 0 6px; }
+  .docs-state-sub { font-size: 12px; color: #71717a; margin: 0; line-height: 1.5; }
   .docs-state-error { font-size: 13px; color: #fca5a5; margin: 0; }
 
   .docs-group { margin-bottom: 28px; }
