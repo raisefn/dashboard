@@ -844,6 +844,14 @@ const BRAIN_CSS = `
     flex: 1; position: relative; z-index: 1;
     display: flex; flex-direction: column;
     overflow: hidden;
+    transition: box-shadow 150ms ease, background-color 150ms ease;
+  }
+  /* Drag-hover state — subtle teal outline + slight background wash so the
+     founder can see the drop target is live. Applied via className toggle
+     on the outer div, so the whole chat surface (messages + input) glows. */
+  .brain-main-dragging {
+    box-shadow: inset 0 0 0 2px rgba(45, 212, 191, 0.55);
+    background-color: rgba(45, 212, 191, 0.04);
   }
 
   .brain-canvas {
@@ -1377,6 +1385,13 @@ function BrainDeployInner() {
     | { kind: "document"; name: string; mediaType: string; data: string };
   const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
   const [uploading, setUploading] = useState(false);
+  // Drag-and-drop over the chat surface (2026-07-02). User feedback:
+  // "Says drop your deck, so I tried to drag and drop my deck and it did
+  // nothing." Handlers below route the drop into the same uploadFile
+  // helper that the paperclip button uses. isDragging drives the visual
+  // border-highlight cue so the drop target is discoverable.
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounterRef = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const raiseIdRef = useRef<string | null>(
     typeof window !== "undefined"
@@ -2568,6 +2583,36 @@ function BrainDeployInner() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
+  // Drag-and-drop handlers — user drags a file over the chat surface,
+  // it uploads via the same path as the paperclip button. Uses a counter
+  // to survive dragEnter/dragLeave firing on child elements (React's
+  // drag events bubble through nested DOM).
+  function handleDragEnter(e: React.DragEvent<HTMLDivElement>) {
+    if (!e.dataTransfer.types.includes("Files")) return;
+    e.preventDefault();
+    dragCounterRef.current += 1;
+    if (dragCounterRef.current === 1) setIsDragging(true);
+  }
+  function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
+    if (!e.dataTransfer.types.includes("Files")) return;
+    e.preventDefault();  // required to allow drop
+  }
+  function handleDragLeave(e: React.DragEvent<HTMLDivElement>) {
+    if (!e.dataTransfer.types.includes("Files")) return;
+    e.preventDefault();
+    dragCounterRef.current = Math.max(0, dragCounterRef.current - 1);
+    if (dragCounterRef.current === 0) setIsDragging(false);
+  }
+  async function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+    if (!e.dataTransfer.types.includes("Files")) return;
+    e.preventDefault();
+    dragCounterRef.current = 0;
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    await uploadFile(file);
+  }
+
   // Paste handler — clipboard image (Cmd+V on a screenshot) becomes an
   // attached image, same path as the file picker.
   async function handlePaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
@@ -2805,7 +2850,14 @@ function BrainDeployInner() {
         </div>
 
         {/* Main */}
-        <div className="brain-main" ref={mainRef}>
+        <div
+          className={`brain-main${isDragging ? " brain-main-dragging" : ""}`}
+          ref={mainRef}
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           {/* Mobile sidebar toggle */}
           <button
             type="button"
@@ -2894,7 +2946,7 @@ function BrainDeployInner() {
               ref={sendBtnRef}
               className="send-btn"
               onClick={sendFromInput}
-              disabled={isStreaming || !input.trim()}
+              disabled={isStreaming || (!input.trim() && !attachedFile)}
             >
               Send
             </button>
