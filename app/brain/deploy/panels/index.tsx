@@ -62,13 +62,9 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
         // own H1 with the canonical display name. Keeping the shell
         // title minimal here to avoid double-rendering the name.
         title = panel.slug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-        const from = panel.from;
-        breadcrumbs = from
-          ? [
-              { label: panelLabel(from), onClick: () => onPopPanel(panel) },
-              { label: title },
-            ]
-          : undefined;
+        // Breadcrumbs removed 2026-07-02 — duplicated the H2 title just
+        // below ("Matches ▸ Investor" over "Investor") and users can
+        // navigate back via the X button + sidebar.
         body = (
           <InvestorPanel
             slug={panel.slug}
@@ -92,13 +88,7 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
         break;
       case "brief": {
         title = "Brief";
-        const from = panel.from;
-        breadcrumbs = from
-          ? [
-              { label: panelLabel(from), onClick: () => onPopPanel(panel) },
-              { label: "Brief" },
-            ]
-          : undefined;
+        // Breadcrumbs removed 2026-07-02 — see comment on "investor" case.
         body = (
           <BriefDetailPanel
             token={panel.token}
@@ -131,13 +121,7 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
         break;
       case "document": {
         title = "Document";
-        const from = panel.from;
-        breadcrumbs = from
-          ? [
-              { label: panelLabel(from), onClick: () => onPopPanel(panel) },
-              { label: "Document" },
-            ]
-          : undefined;
+        // Breadcrumbs removed 2026-07-02 — see comment on "investor" case.
         body = (
           <DocumentPanel
             id={panel.id}
