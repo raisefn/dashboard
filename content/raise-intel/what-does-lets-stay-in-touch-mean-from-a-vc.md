@@ -18,7 +18,7 @@ cta_href: "/signup"
 
 A VC saying "let's stay in touch" is telling you it's a pass. Not "not yet." Not "come back in Q3." A pass. They're being polite. They're preserving optionality in case you become the next Notion. It's a costless gesture that sounds like a door left open, and it isn't.
 
-Founders who believe otherwise burn six months of energy on quarterly "just checking in" emails VCs never open. The VC has moved on to whichever founder they actually want to fund this quarter. You're marking a stock they don't own.
+Founders who believe otherwise burn six months of energy on quarterly "just checking in" emails VCs never open. The VC has moved on to whichever founder they actually want to fund this quarter. You're marking a stock they don't own. Same pattern as any [slow no](/raise-intel/how-do-i-know-if-a-vc-passed-or-is-just-slow) — the signal is in what they don't say.
 
 ## Why they say it
 
@@ -38,7 +38,7 @@ Don't schedule quarterly check-ins. Don't send monthly updates. Don't email six 
 
 Real news is a closed lead, a signed customer they'd recognize, a product launch, or hitting the milestone they specifically named. Nothing else qualifies. Not new hires. Not press. Not "we're crushing it."
 
-When you have news, send two sentences.
+When you have news, send two sentences. Same rules as any [cold outreach](/raise-intel/how-do-i-write-a-cold-email-to-a-vc) — specific, no fluff, no "hoping this finds you well."
 
 > Sarah — closed our lead this week (Foundry, $2.5M seed). If you're still curious happy to make room in the round. If not, no worries.
 
@@ -56,7 +56,7 @@ Send silence. Send silence. Send silence. Then send two sentences with hard news
 
 The soft-pass VC is a next-round conversation, not a this-round conversation. Add them to a list called "keep informed on close." Not a pipeline. A press release list. They'll get the announcement when you're wired. They'll email back. That's when you re-engage on your terms.
 
-Stop chasing soft passes. Run fresh conversations with investors who are already leaning in.
+Stop chasing soft passes. Run fresh conversations with investors who are already leaning in. Real urgency in a raise comes from momentum with the right investors, not [manufactured pressure](/raise-intel/how-do-i-create-urgency-without-lying) on the wrong ones.
 
 ## What raise(fn) does with this
 
