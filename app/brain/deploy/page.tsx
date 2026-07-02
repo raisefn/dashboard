@@ -1692,6 +1692,184 @@ function BrainDeployInner() {
     };
   }, [loading]);
 
+  /* ── Render the upgrade card in the chat surface ──
+   *
+   * Extracted 2026-07-02 so it can be triggered from TWO paths:
+   *   1. SSE stream done handler when brain emits `limit_reached`
+   *      (chat message → cap check fires → SSE fires → this renders)
+   *   2. Window event `raisefn:show_upgrade_card` dispatched from any
+   *      sidebar panel when a panel-initiated action returns 429
+   *      (Generate brief on match card, "Brief an investor" input, etc)
+   *
+   * Both paths render the SAME rich two-tier card in the chat area.
+   * Single source of truth for the upgrade UX; when we improve the
+   * card, every entry point gets the improvement for free.
+   */
+  const renderUpgradeCardInChat = useCallback((lr: {
+    tier: string;
+    reason: string | null;
+    cap: number | null;
+  }) => {
+    if (!messagesInnerRef.current) return;
+    const isFreeVerified = lr.tier === "free";
+
+    const card = document.createElement("div");
+    card.className = "upgrade-card";
+
+    if (isFreeVerified) {
+      const leadin = wallCardLeadin(lr.reason);
+      card.innerHTML = `
+        <div class="upgrade-card-leadin">${leadin}</div>
+        <div class="upgrade-card-tiers">
+          <div class="upgrade-card-tier upgrade-card-tier--pro">
+            <div class="upgrade-card-tier-name">Pro</div>
+            <div class="upgrade-card-tier-price">$199/mo · cancel anytime</div>
+            <div class="upgrade-card-tier-pitch">
+              Uncapped agent, same one you already know. The SaaS path.
+            </div>
+            <ul class="upgrade-card-tier-list">
+              <li>Uncapped investor matches</li>
+              <li>Uncapped briefs</li>
+              <li>Uncapped outreach drafts + meeting prep + debriefs</li>
+              <li>Pipeline + memory across sessions</li>
+            </ul>
+            <button class="upgrade-card-tier-cta" data-cta="pro">
+              Get Pro — $199/mo
+            </button>
+            <div class="upgrade-card-error" data-err="pro" style="display:none"></div>
+          </div>
+          <div class="upgrade-card-tier upgrade-card-tier--advisor">
+            <div class="upgrade-card-tier-name">Advisor</div>
+            <div class="upgrade-card-tier-price">$1,997 today · $199/mo after month 1</div>
+            <div class="upgrade-card-tier-pitch">
+              Month 1 with raise(fn) Team hands-on. We set your agent up, guide you through the first month, and make warm intros to our proprietary network when we can. Pro from month 2.
+            </div>
+            <ul class="upgrade-card-tier-list">
+              <li>Agent setup, done for you</li>
+              <li>Month 1 hands-on guidance from raise(fn) Team</li>
+              <li>Warm intros to our proprietary network when there's a match</li>
+              <li>Pro uncapped from month 2, $199/mo, cancel anytime</li>
+            </ul>
+            <button class="upgrade-card-tier-cta" data-cta="advisor">
+              Get Advisor — $1,997
+            </button>
+            <div class="upgrade-card-error" data-err="advisor" style="display:none"></div>
+            <div class="upgrade-card-tier-foot">
+              $1,997 today = first month Pro ($199) + setup ($1,798).
+              No success fees. No equity.
+              <a href="/legal/engagement">Full engagement letter</a>.
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      card.innerHTML = `
+        <div class="upgrade-card-leadin">
+          Heavy month — you've hit a monthly soft cap on Advisor usage.
+          This is a temporary cost protection during your engagement.
+        </div>
+        <div class="upgrade-card-header">Need more this month?</div>
+        <div class="upgrade-card-subhead">
+          If you're actively closing a raise and need the cap bumped, just
+          email and we'll handle it.
+        </div>
+        <div class="upgrade-card-cta-row">
+          <a href="mailto:team@raisefn.com?subject=Advisor%20cap%20bump"
+             class="upgrade-card-btn"
+             style="text-decoration:none">
+            Email team@raisefn.com
+          </a>
+        </div>
+      `;
+    }
+
+    messagesInnerRef.current.appendChild(card);
+    requestAnimationFrame(() => {
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+
+    if (isFreeVerified) {
+      const wireTierCta = (tier: "pro" | "advisor") => {
+        const btn = card.querySelector(
+          `.upgrade-card-tier-cta[data-cta="${tier}"]`
+        ) as HTMLButtonElement | null;
+        const errDiv = card.querySelector(
+          `.upgrade-card-error[data-err="${tier}"]`
+        ) as HTMLDivElement | null;
+        if (!btn) return;
+        const originalLabel = btn.textContent || "";
+        btn.addEventListener("click", async () => {
+          const { data: { session: freshSession } } = await supabase.auth.getSession();
+          const token = freshSession?.access_token;
+          if (!token) {
+            try {
+              localStorage.setItem("pendingPostAuthIntent", `upgrade-${tier}`);
+            } catch { /* ignore */ }
+            router.push(`/signup?after=upgrade-${tier}`);
+            return;
+          }
+          btn.disabled = true;
+          btn.textContent = "Opening checkout…";
+          try {
+            const res = await fetch("/api/stripe/checkout", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ tier }),
+            });
+            if (res.status === 401) {
+              try {
+                localStorage.setItem("pendingPostAuthIntent", `upgrade-${tier}`);
+              } catch { /* ignore */ }
+              router.push(`/signup?after=upgrade-${tier}`);
+              return;
+            }
+            const data = await res.json();
+            if (!res.ok || !data.url) {
+              throw new Error(data.error || "Checkout failed");
+            }
+            window.location.href = data.url;
+          } catch (e) {
+            btn.disabled = false;
+            btn.textContent = originalLabel;
+            if (errDiv) {
+              errDiv.style.display = "block";
+              errDiv.textContent =
+                "Couldn't start checkout — try again or email team@raisefn.com.";
+            }
+            console.error("Stripe checkout error:", e);
+          }
+        });
+      };
+      wireTierCta("pro");
+      wireTierCta("advisor");
+    }
+  }, [router]);
+
+  /* ── Panel-triggered upgrade prompts ──
+   * Sidebar panels (matches, briefs) can trigger the same upgrade card
+   * by dispatching this window event. See matches-panel.tsx and
+   * briefs-panel.tsx which dispatch on 429 from generate-brief.
+   * Debounced against duplicate cards by checking for an existing one
+   * in the chat scroll before appending. */
+  useEffect(() => {
+    function onShowUpgrade(e: Event) {
+      const detail = (e as CustomEvent).detail || {};
+      // Debounce: if there's already a card in the chat area, don't
+      // stack a second one on top of it. User already sees the pitch.
+      if (messagesInnerRef.current?.querySelector(".upgrade-card")) return;
+      renderUpgradeCardInChat({
+        tier: detail.tier || "free",
+        reason: detail.reason || null,
+        cap: detail.cap ?? null,
+      });
+    }
+    window.addEventListener("raisefn:show_upgrade_card", onShowUpgrade);
+    return () => window.removeEventListener("raisefn:show_upgrade_card", onShowUpgrade);
+  }, [renderUpgradeCardInChat]);
+
   /* ── Send message (exact SSE logic from chat.html) ── */
   const send = useCallback(async (message: string, opts?: { silent?: boolean; displayMessage?: string; images?: { media_type: string; data: string }[]; documents?: { media_type: string; data: string; filename: string }[] }) => {
     if (isStreaming || !session) return;
@@ -2036,170 +2214,19 @@ function BrainDeployInner() {
       // is skipped, but we still need to show the card.
       if (limitReachedRef.current) {
         const lr = limitReachedRef.current;
-        // Free tier (Phase 3 model — no more free_verified split) hits cap
-        // → show the rich upgrade card. Paid tier hits day/month cap →
-        // show the Concierge mailto.
-        const isFreeVerified = lr.tier === "free";
 
         // The card IS the response — no empty assistant bubble above it.
         // Brain stops streaming text on limit_reached; the placeholder
         // bubble would just sit empty, so remove it.
         assistantEl.remove();
 
-        const card = document.createElement("div");
-        card.className = "upgrade-card";
-
-        if (isFreeVerified) {
-            // Pricing v3 (2026-06-10) — equal-twin tiles. Pro (SaaS) and
-            // Advisor (concierge) presented side-by-side; user picks
-            // based on what they need. Leadin reflects which lifetime cap
-            // fired (messages / briefs / matches). Copy lives in
-            // lib/upgrade-card-copy.ts so this card + the design preview
-            // route can't drift.
-            const leadin = wallCardLeadin(lr.reason);
-
-            card.innerHTML = `
-              <div class="upgrade-card-leadin">${leadin}</div>
-
-              <div class="upgrade-card-tiers">
-                <div class="upgrade-card-tier upgrade-card-tier--pro">
-                  <div class="upgrade-card-tier-name">Pro</div>
-                  <div class="upgrade-card-tier-price">$199/mo · cancel anytime</div>
-                  <div class="upgrade-card-tier-pitch">
-                    Uncapped agent, same one you already know. The SaaS path.
-                  </div>
-                  <ul class="upgrade-card-tier-list">
-                    <li>Uncapped investor matches</li>
-                    <li>Uncapped briefs</li>
-                    <li>Uncapped outreach drafts + meeting prep + debriefs</li>
-                    <li>Pipeline + memory across sessions</li>
-                  </ul>
-                  <button class="upgrade-card-tier-cta" data-cta="pro">
-                    Get Pro — $199/mo
-                  </button>
-                  <div class="upgrade-card-error" data-err="pro" style="display:none"></div>
-                </div>
-
-                <div class="upgrade-card-tier upgrade-card-tier--advisor">
-                  <div class="upgrade-card-tier-name">Advisor</div>
-                  <div class="upgrade-card-tier-price">$1,997 today · $199/mo after month 1</div>
-                  <div class="upgrade-card-tier-pitch">
-                    Month 1 with raise(fn) Team hands-on. We set your agent up, guide you through the first month, and make warm intros to our proprietary network when we can. Pro from month 2.
-                  </div>
-                  <ul class="upgrade-card-tier-list">
-                    <li>Agent setup, done for you</li>
-                    <li>Month 1 hands-on guidance from raise(fn) Team</li>
-                    <li>Warm intros to our proprietary network when there's a match</li>
-                    <li>Pro uncapped from month 2, $199/mo, cancel anytime</li>
-                  </ul>
-                  <button class="upgrade-card-tier-cta" data-cta="advisor">
-                    Get Advisor — $1,997
-                  </button>
-                  <div class="upgrade-card-error" data-err="advisor" style="display:none"></div>
-                  <div class="upgrade-card-tier-foot">
-                    $1,997 today = first month Pro ($199) + setup ($1,798).
-                    No success fees. No equity.
-                    <a href="/legal/engagement">Full engagement letter</a>.
-                  </div>
-                </div>
-              </div>
-            `;
-          } else {
-            // Paid tier hit a soft cap — no upsell. Advisor customers are mid
-            // engagement; just acknowledge and offer direct contact for more.
-            card.innerHTML = `
-              <div class="upgrade-card-leadin">
-                Heavy month — you've hit a monthly soft cap on Advisor usage.
-                This is a temporary cost protection during your engagement.
-              </div>
-              <div class="upgrade-card-header">Need more this month?</div>
-              <div class="upgrade-card-subhead">
-                If you're actively closing a raise and need the cap bumped, just
-                email and we'll handle it.
-              </div>
-              <div class="upgrade-card-cta-row">
-                <a href="mailto:team@raisefn.com?subject=Advisor%20cap%20bump"
-                   class="upgrade-card-btn"
-                   style="text-decoration:none">
-                  Email team@raisefn.com
-                </a>
-              </div>
-            `;
-          }
-
-          // Append to the chat container (a sibling of the message bubbles)
-          // instead of inside contentEl — that lets the card span the full
-          // chat width instead of being capped at 65% by .message.assistant.
-          const cardParent = messagesInnerRef.current ?? contentEl;
-          cardParent.appendChild(card);
-          // Make sure the user actually SEES the card — scroll it into view.
-          requestAnimationFrame(() => {
-            card.scrollIntoView({ behavior: "smooth", block: "center" });
-          });
-
-          // Wire each tier CTA → Stripe checkout. Pricing v3 (2026-06-10):
-          // Pro and Advisor both route through /api/stripe/checkout with
-          // the right tier body. Defensive token re-fetch + 401 → /signup
-          // is preserved per tier.
-          if (isFreeVerified) {
-            const wireTierCta = (tier: "pro" | "advisor") => {
-              const btn = card.querySelector(
-                `.upgrade-card-tier-cta[data-cta="${tier}"]`
-              ) as HTMLButtonElement | null;
-              const errDiv = card.querySelector(
-                `.upgrade-card-error[data-err="${tier}"]`
-              ) as HTMLDivElement | null;
-              if (!btn) return;
-              const originalLabel = btn.textContent || "";
-              btn.addEventListener("click", async () => {
-                const { data: { session: freshSession } } = await supabase.auth.getSession();
-                const token = freshSession?.access_token;
-                if (!token) {
-                  try {
-                    localStorage.setItem("pendingPostAuthIntent", `upgrade-${tier}`);
-                  } catch { /* ignore */ }
-                  router.push(`/signup?after=upgrade-${tier}`);
-                  return;
-                }
-                btn.disabled = true;
-                btn.textContent = "Opening checkout…";
-                try {
-                  const res = await fetch("/api/stripe/checkout", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ tier }),
-                  });
-                  if (res.status === 401) {
-                    try {
-                      localStorage.setItem("pendingPostAuthIntent", `upgrade-${tier}`);
-                    } catch { /* ignore */ }
-                    router.push(`/signup?after=upgrade-${tier}`);
-                    return;
-                  }
-                  const data = await res.json();
-                  if (!res.ok || !data.url) {
-                    throw new Error(data.error || "Checkout failed");
-                  }
-                  window.location.href = data.url;
-                } catch (e) {
-                  btn.disabled = false;
-                  btn.textContent = originalLabel;
-                  if (errDiv) {
-                    errDiv.style.display = "block";
-                    errDiv.textContent =
-                      "Couldn't start checkout — try again or email team@raisefn.com.";
-                  }
-                  console.error("Stripe checkout error:", e);
-                }
-              });
-            };
-            wireTierCta("pro");
-            wireTierCta("advisor");
-          }
-
+        // Delegate to the shared render helper (used by both SSE and
+        // sidebar-triggered 429s — see renderUpgradeCardInChat above).
+        renderUpgradeCardInChat({
+          tier: lr.tier,
+          reason: lr.reason,
+          cap: lr.cap,
+        });
         limitReachedRef.current = null;
       }
     } catch (e) {
