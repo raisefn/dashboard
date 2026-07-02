@@ -390,8 +390,8 @@ export default function LandingPage() {
             >
               Drop your deck →
             </Link>
-            <p className="text-xs text-zinc-600">
-              Free to start. Your deck stays private.
+            <p className="text-xs text-zinc-500">
+              Free to start — sign up in 30 seconds. Your deck stays private.
             </p>
           </div>
           <div className="mt-12 flex justify-center animate-fade-in" style={{ animationDelay: "1.2s" }}>

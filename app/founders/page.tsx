@@ -268,7 +268,10 @@ export default function FoundersPage() {
               See pricing →
             </Link>
           </div>
-          <p className="text-xs text-zinc-600 mt-4">
+          <p className="text-xs text-zinc-500 mt-3">
+            Free to start — sign up in 30 seconds.
+          </p>
+          <p className="text-xs text-zinc-600 mt-1">
             Your deck stays private. Never shared. Never used to train.
           </p>
         </div>
