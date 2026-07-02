@@ -109,21 +109,34 @@ export function SignalsPanel({
   );
 
   if (loading) {
-    return <div className="sig-panel-state">Loading signals…</div>;
+    return (
+      <>
+        <style>{SIG_PANEL_CSS}</style>
+        <div className="sig-panel-state">Loading signals…</div>
+      </>
+    );
   }
   if (error) {
-    return <div className="sig-panel-state sig-panel-error">{error}</div>;
+    return (
+      <>
+        <style>{SIG_PANEL_CSS}</style>
+        <div className="sig-panel-state sig-panel-error">{error}</div>
+      </>
+    );
   }
   if (signals.length === 0) {
     return (
-      <div className="sig-panel-empty">
-        <div className="sig-panel-empty-icon" aria-hidden>📡</div>
-        <div className="sig-panel-empty-title">All caught up</div>
-        <div className="sig-panel-empty-body">
-          No new signals since you last checked. When investors view your
-          briefs or send replies, the activity shows up here.
+      <>
+        <style>{SIG_PANEL_CSS}</style>
+        <div className="sig-panel-empty">
+          <div className="sig-panel-empty-icon" aria-hidden>📡</div>
+          <div className="sig-panel-empty-title">All caught up</div>
+          <div className="sig-panel-empty-body">
+            No new signals since you last checked. When investors view your
+            briefs or send replies, the activity shows up here.
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
