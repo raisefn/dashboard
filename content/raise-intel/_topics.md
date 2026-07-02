@@ -65,7 +65,7 @@ list. Priorities are loose — pick anything in the top tier.
 - [ ] **How long will fundraising take?**
   Category: timing. Angle: 4-8 weeks if you're ready. 4-6 months if
   you're not. Almost always determined by prep, not market.
-- [x] **What do investors actually want to see in my deck?**
+- [ ] **What do investors actually want to see in my deck?**
   Category: deck. Angle: 80% of decks are wrong. Here's the 5 slides
   that matter and why the other 7 don't.
 
