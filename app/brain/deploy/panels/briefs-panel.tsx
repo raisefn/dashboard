@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import type { Panel } from "./use-panel-state";
+import { UpgradePrompt } from "@/components/upgrade-prompt";
 
 /**
  * Briefs list panel — every investor brief the founder has generated.
@@ -79,6 +80,10 @@ export function BriefsPanel({ session, impersonating, onOpenPanel }: BriefsPanel
   const [customInvestor, setCustomInvestor] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  // Cap-hit state — same pattern as matches-panel. When generate-brief
+  // returns 429, render UpgradePrompt above the create input instead of
+  // a red error line.
+  const [paywall, setPaywall] = useState<{ reason: "briefs"; current: number; cap: number } | null>(null);
 
   async function createCustomBrief() {
     if (!session) return;
@@ -106,6 +111,17 @@ export function BriefsPanel({ session, impersonating, onOpenPanel }: BriefsPanel
           investor_inline: { name, firm: firm || null },
         }),
       });
+      if (res.status === 429) {
+        const body = await res.json().catch(() => ({}));
+        const detail: string = typeof body.detail === "string" ? body.detail : "";
+        const match = detail.match(/\((\d+)\/(\d+)\)/);
+        setPaywall({
+          reason: "briefs",
+          current: match ? Number(match[1]) : 0,
+          cap: match ? Number(match[2]) : 0,
+        });
+        return;
+      }
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.detail || `Failed (${res.status})`);
@@ -177,6 +193,19 @@ export function BriefsPanel({ session, impersonating, onOpenPanel }: BriefsPanel
     <div className="briefs-panel">
       <style>{BRIEFS_PANEL_CSS}</style>
 
+      {/* Upgrade prompt — fires when generate-brief returns 429. */}
+      {paywall && (
+        <div className="bp-upgrade-wrap">
+          <UpgradePrompt
+            session={session}
+            reason={paywall.reason}
+            currentCount={paywall.current}
+            cap={paywall.cap}
+            onDismiss={() => setPaywall(null)}
+          />
+        </div>
+      )}
+
       {/* Custom brief creation — always at top */}
       <div className="bp-create">
         <div className="bp-create-label">Brief an investor</div>
@@ -247,6 +276,8 @@ const BRIEFS_PANEL_CSS = `
   .bp-state { padding: 32px 8px; }
   .bp-state-text { font-size: 13px; color: #71717a; margin: 0; }
   .bp-state-error { font-size: 13px; color: #fca5a5; margin: 0; }
+
+  .bp-upgrade-wrap { margin-bottom: 20px; }
 
   /* Custom brief creation row */
   .bp-create {

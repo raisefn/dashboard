@@ -3,6 +3,7 @@
 import { Fragment, useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import type { Panel } from "./use-panel-state";
+import { UpgradePrompt } from "@/components/upgrade-prompt";
 
 /**
  * Matches list panel — the in-place replacement for /brain/matches.
@@ -118,6 +119,11 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
   const [error, setError] = useState<string | null>(null);
   const [generatingKey, setGeneratingKey] = useState<string | null>(null);
   const [rowError, setRowError] = useState<{ key: string; msg: string } | null>(null);
+  // Cap-hit state — when generate-brief returns 429, we render an
+  // inline UpgradePrompt at the top of the panel instead of a red
+  // error line on the failing match card. Persists until dismissed
+  // or the user upgrades (any successful action clears it).
+  const [paywall, setPaywall] = useState<{ reason: "briefs"; current: number; cap: number } | null>(null);
   // Session-local dismissals. Optimistic: the card disappears immediately,
   // brain logs the action asynchronously. Refresh restores the card (V1
   // doesn't persist hide state — the dismiss is a TRAINING signal, not a
@@ -272,6 +278,21 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
           },
         }),
       });
+      if (res.status === 429) {
+        // Cap hit — fire the inline UpgradePrompt at the top of the panel
+        // instead of surfacing a red error on the row. Parse the counts
+        // from brain's message when we can, fall back to a generic message.
+        const body = await res.json().catch(() => ({}));
+        const detail: string = typeof body.detail === "string" ? body.detail : "";
+        // Backend detail format: "You've hit the free lifetime limit on briefs (X/Y). Upgrade to keep going."
+        const match = detail.match(/\((\d+)\/(\d+)\)/);
+        setPaywall({
+          reason: "briefs",
+          current: match ? Number(match[1]) : 0,
+          cap: match ? Number(match[2]) : 0,
+        });
+        return;
+      }
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.detail || `Brief generation failed (${res.status})`);
@@ -337,6 +358,22 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
   return (
     <div className="matches-panel">
       <style>{MATCHES_PANEL_CSS}</style>
+
+      {/* Upgrade prompt — fires when generate-brief returns 429. Renders
+          above the batch selector so it's the first thing the founder
+          sees after clicking Generate. Dismissible; clears if they
+          generate again (which will just re-fire the 429). */}
+      {paywall && (
+        <div className="mp-upgrade-wrap">
+          <UpgradePrompt
+            session={session}
+            reason={paywall.reason}
+            currentCount={paywall.current}
+            cap={paywall.cap}
+            onDismiss={() => setPaywall(null)}
+          />
+        </div>
+      )}
 
       {/* Batch selector + context */}
       {batches.length > 1 ? (
@@ -682,6 +719,8 @@ const MATCHES_PANEL_CSS = `
 
   .mp-state { padding: 32px 8px; }
   .mp-state-text { font-size: 13px; color: #71717a; margin: 0; }
+
+  .mp-upgrade-wrap { margin-bottom: 20px; }
 
   .mp-batch-row { margin-bottom: 16px; }
   .mp-batch-select {
