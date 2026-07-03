@@ -194,6 +194,7 @@ export function NextUpPill({ session, impersonating, onAction }: NextUpPillProps
     <div className={`nextup${next.done ? " nextup-done" : ""}`}>
       <style>{NEXTUP_CSS}</style>
       <div className="nextup-left">
+        <span className="nextup-dot" aria-hidden="true" />
         <span className="nextup-label">{next.label}</span>
         <div className="nextup-body">
           <div className="nextup-text">{next.text}</div>
@@ -225,10 +226,11 @@ export function NextUpPill({ session, impersonating, onAction }: NextUpPillProps
 
 const NEXTUP_CSS = `
   .nextup {
-    margin: 12px 20px 0;
-    padding: 12px 16px;
-    background: linear-gradient(90deg, rgba(249,115,22,0.09), rgba(249,115,22,0.02));
-    border: 1px solid rgba(249,115,22,0.28);
+    margin: 14px 20px 6px;
+    padding: 14px 18px;
+    background: #1a1104;
+    border: 1px solid rgba(249,115,22,0.55);
+    border-left: 3px solid #f97316;
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -236,27 +238,47 @@ const NEXTUP_CSS = `
     gap: 12px;
     z-index: 5;
     position: relative;
+    box-shadow: 0 1px 0 rgba(249,115,22,0.05) inset, 0 4px 12px rgba(0,0,0,0.3);
   }
   .nextup-done {
-    background: rgba(74,222,128,0.05);
-    border-color: rgba(74,222,128,0.22);
+    background: #0e1a10;
+    border-color: rgba(74,222,128,0.5);
+    border-left-color: #4ade80;
+    box-shadow: 0 1px 0 rgba(74,222,128,0.05) inset, 0 4px 12px rgba(0,0,0,0.3);
   }
   .nextup-left {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     min-width: 0;
     flex: 1;
   }
+  .nextup-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #f97316;
+    box-shadow: 0 0 0 3px rgba(249,115,22,0.2);
+    flex-shrink: 0;
+    animation: nextup-pulse 2.5s ease-in-out infinite;
+  }
+  .nextup-done .nextup-dot {
+    background: #4ade80;
+    box-shadow: 0 0 0 3px rgba(74,222,128,0.15);
+    animation: none;
+  }
+  @keyframes nextup-pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(249,115,22,0.2); }
+    50%      { box-shadow: 0 0 0 6px rgba(249,115,22,0.08); }
+  }
   .nextup-label {
-    font-size: 10px;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: #f97316;
-    font-weight: 600;
+    color: #fdba74;
+    font-weight: 700;
     flex-shrink: 0;
   }
-  .nextup-done .nextup-label { color: #4ade80; }
+  .nextup-done .nextup-label { color: #86efac; }
   .nextup-body { min-width: 0; }
   .nextup-text {
     font-size: 13.5px;
