@@ -9,6 +9,7 @@ import { wallCardLeadin } from "@/lib/upgrade-card-copy";
 import type { Session } from "@supabase/supabase-js";
 import { formatMarkdown } from "@/lib/format-markdown";
 import { FounderSidebar } from "./sidebar";
+import { NextUpPill } from "./next-up-pill";
 import { PanelHost, usePanelState } from "./panels";
 
 const ADMIN_EMAILS = ["justin@raisefn.com", "justinpetsche@gmail.com"];
@@ -2889,6 +2890,12 @@ function BrainDeployInner() {
           >
             ☰
           </button>
+
+          <NextUpPill
+            session={session}
+            impersonating={impersonating}
+            onAction={injectChatPrompt}
+          />
 
         <div className="messages-container" ref={messagesRef}>
           <div className="messages-inner" ref={messagesInnerRef} />
