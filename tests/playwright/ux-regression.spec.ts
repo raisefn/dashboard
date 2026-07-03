@@ -121,7 +121,7 @@ test.describe("TODAY queue in sidebar", () => {
     );
     await page.goto("/brain/deploy");
     await expect(page.locator(".sb-today")).toBeVisible({ timeout: 15_000 });
-    await expect(page.locator(".sb-today-empty")).toContainText(/Nothing to handle/i);
+    await expect(page.locator(".sb-today-empty")).toContainText(/No new signals from our actions/i);
   });
 
   test("Unacked signal renders as an urgent row", async ({ page }) => {
