@@ -94,6 +94,14 @@ test.describe("TODAY queue in sidebar", () => {
         },
       ],
       signals_unack_count: 0,
+      // All sharpen sections solid — no gaps to suggest.
+      sharpen: [
+        { id: "basics", title: "Basics", status: "solid" },
+        { id: "story", title: "Story", status: "solid" },
+        { id: "team", title: "Team & cap", status: "solid" },
+        { id: "proof", title: "Proof", status: "solid" },
+        { id: "past", title: "Past convos", status: "solid" },
+      ],
     });
     // Mock Gmail as connected with Calendar scope so those onboarding
     // rows don't fire.
@@ -245,6 +253,57 @@ test.describe("panel empty states", () => {
     await expect(page.locator(".docs-state-sub")).toContainText(/Drop your deck/i);
     await expect(page.locator(".docs-state-sub")).toContainText(/Google Slides/i);
     await expect(page.locator(".docs-state-cmd")).toHaveCount(0);
+  });
+});
+
+test.describe("SUGGESTED tier", () => {
+  test("Post-onboarding stasis surfaces contextual suggestions", async ({ page }) => {
+    // Founder is past onboarding: deck, matches, brief made, Gmail
+    // connected. Still has 4 sharpen gaps + 12 matches. Onboarding
+    // chain is exhausted → SUGGESTED tier fills in.
+    await mockSidebarState(page, {
+      documents: [{ id: "d1", filename: "deck.pdf", doc_type: "deck", created_at: new Date().toISOString() }],
+      matches: { total_unique: 12, batches_count: 1, latest_batch: null },
+      briefs: [{ token: "t1", investor_full_name: "S", investor_first_name: null, created_at: new Date().toISOString() }],
+      pipeline: [],
+      signals_unack_count: 0,
+      sharpen: [
+        { id: "basics", title: "Basics", status: "solid" },
+        { id: "story", title: "Story", status: "gap" },
+        { id: "team", title: "Team & cap", status: "gap" },
+        { id: "proof", title: "Proof", status: "empty" },
+        { id: "past", title: "Past convos", status: "empty" },
+      ],
+    });
+    // Gmail connected so Connect Gmail onboarding row doesn't fire.
+    await page.route("**/v1/brain/connections", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          connections: [
+            {
+              provider: "gmail",
+              google_email: "founder@raisefn.local",
+              scopes: [
+                "https://www.googleapis.com/auth/gmail.send",
+                "https://www.googleapis.com/auth/calendar.events",
+              ],
+              connected_at: new Date().toISOString(),
+              last_used_at: null,
+              broken: false,
+              last_error: null,
+            },
+          ],
+        }),
+      }),
+    );
+    await page.goto("/brain/deploy");
+    await expect(page.locator(".sb-today")).toBeVisible({ timeout: 15_000 });
+    // No urgent items — SUGGESTED sharpen row fills in with teal dot.
+    const gapsRow = page.locator(".sb-today-row").filter({ hasText: /Sharpen 4 gaps/i });
+    await expect(gapsRow).toBeVisible();
+    await expect(gapsRow.locator(".sb-today-dot-suggested")).toBeVisible();
   });
 });
 
