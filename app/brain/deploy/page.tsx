@@ -854,11 +854,6 @@ const BRAIN_CSS = `
     background-color: rgba(45, 212, 191, 0.04);
   }
 
-  .brain-canvas {
-    position: absolute; inset: 0;
-    z-index: 0;
-  }
-
   /* Center UI */
   .center-ui {
     position: absolute; inset: 0;
@@ -2894,7 +2889,6 @@ function BrainDeployInner() {
           >
             ☰
           </button>
-          <canvas className="brain-canvas" ref={canvasRef} />
 
         <div className="messages-container" ref={messagesRef}>
           <div className="messages-inner" ref={messagesInnerRef} />
