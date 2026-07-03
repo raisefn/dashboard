@@ -41,13 +41,14 @@ const STATUS_LABEL: Record<string, string> = {
   committed: "Committed",
   soft_pass: "Soft pass",
   hard_pass: "Hard pass",
-  passed: "Passed",
   ghosted: "Ghosted",
-  rejected: "Rejected",
 };
 
 // Funnel-order options for the inline status dropdown. Grouped into
 // active vs. closed so the founder can scan visually.
+// 2026-07-03: killed the redundant "passed" and "rejected" statuses —
+// both were indistinguishable from "hard_pass" in practice. Existing
+// rows with those values got migrated to "hard_pass" in the same push.
 const STATUS_OPTIONS_ACTIVE = [
   "identified",
   "outreached",
@@ -61,9 +62,7 @@ const STATUS_OPTIONS_ACTIVE = [
 const STATUS_OPTIONS_CLOSED = [
   "soft_pass",
   "hard_pass",
-  "passed",
   "ghosted",
-  "rejected",
 ] as const;
 
 const STATUS_TONE: Record<string, "warm" | "active" | "cool"> = {
@@ -78,8 +77,6 @@ const STATUS_TONE: Record<string, "warm" | "active" | "cool"> = {
   ghosted: "cool",
   soft_pass: "cool",
   hard_pass: "cool",
-  passed: "cool",
-  rejected: "cool",
 };
 
 const ACTIVE_STATUSES = new Set([
@@ -88,7 +85,7 @@ const ACTIVE_STATUSES = new Set([
   "diligence", "term_sheet", "committed",
 ]);
 const STALE_STATUSES = new Set([
-  "ghosted", "soft_pass", "hard_pass", "passed", "rejected",
+  "ghosted", "soft_pass", "hard_pass",
 ]);
 
 type Filter = "active" | "all" | "stale";
@@ -109,7 +106,7 @@ const SORTS: { key: SortKey; label: string }[] = [
 const STATUS_ORDER: Record<string, number> = {
   committed: 1, term_sheet: 2, diligence: 3, met: 4, meeting_scheduled: 5,
   follow_up: 6, outreached: 7,
-  ghosted: 8, soft_pass: 9, hard_pass: 10, passed: 11, rejected: 12,
+  ghosted: 8, soft_pass: 9, hard_pass: 10,
 };
 
 // Inline status edit. Native <select> styled to look like the pill
