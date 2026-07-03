@@ -17,16 +17,15 @@ import type { SharpenSectionId } from "./use-panel-state";
  *
  * New model: this panel shows what raise(fn) already knows about each
  * section (extracted from the deck + chat). If something's missing, the
- * founder taps "Fill this in →" which opens the chat pre-loaded with a
- * nudge — the agent then asks the specific questions in chat and
- * captures the answers via update_profile. Chat is the only edit surface.
+ * gap chips make it visible — the founder chats naturally about the
+ * topic and brain's silent capture (rule 5) fills it. No chat inject,
+ * no fake action buttons that just repopulate the chat.
  */
 
 interface SharpenPanelProps {
   sectionId: SharpenSectionId;
   session: Session | null;
   impersonating: string;
-  injectChatPrompt: (prompt: string) => void;
 }
 
 const FIELD_LABELS: Record<string, string> = {
@@ -66,14 +65,6 @@ const FIELD_LABELS: Record<string, string> = {
   advisor_feedback: "Advisor feedback",
 };
 
-const SECTION_NUDGE: Record<string, string> = {
-  basics: "Ask me about my raise basics — sector, stage, target amount, timeline, instrument, hard nos. Whatever's missing.",
-  story: "Ask me about my story — why now, wedge, post-raise vision, positioning. Whatever's missing.",
-  team: "Ask me about my team + cap table — team size, cofounders, cap breakdown, hiring plan. Whatever's missing.",
-  proof: "Ask me about my proof — MRR, press, data room, references. Whatever's missing.",
-  past: "Ask me about past investor conversations, prior raises, and advisor feedback. Whatever's missing.",
-};
-
 function formatValue(field: string, value: unknown): string {
   if (value === null || value === undefined || value === "") return "";
   if (typeof value === "boolean") return value ? "Yes" : "No";
@@ -90,7 +81,7 @@ function formatValue(field: string, value: unknown): string {
   return s.length > 140 ? s.slice(0, 140) + "…" : s;
 }
 
-export function SharpenPanel({ sectionId, session, impersonating, injectChatPrompt }: SharpenPanelProps) {
+export function SharpenPanel({ sectionId, session, impersonating }: SharpenPanelProps) {
   const [state, setState] = useState<SharpenState | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -136,20 +127,18 @@ export function SharpenPanel({ sectionId, session, impersonating, injectChatProm
   return (
     <div className="sharpen-panel">
       <style>{SHARPEN_CSS}</style>
-      <SectionReadout section={section} injectChatPrompt={injectChatPrompt} />
+      <SectionReadout section={section} />
     </div>
   );
 }
 
 interface ReadoutProps {
   section: SharpenSection;
-  injectChatPrompt: (prompt: string) => void;
 }
 
-function SectionReadout({ section, injectChatPrompt }: ReadoutProps) {
+function SectionReadout({ section }: ReadoutProps) {
   const data = section.data as Record<string, unknown>;
   const hasGaps = section.fields_missing.length > 0;
-  const nudge = SECTION_NUDGE[section.id] || `Ask me about the ${section.title} section — whatever's missing.`;
 
   return (
     <div className="sh-section">
@@ -187,15 +176,6 @@ function SectionReadout({ section, injectChatPrompt }: ReadoutProps) {
           </>
         )}
 
-        {hasGaps && (
-          <button
-            type="button"
-            className="sh-fillbtn"
-            onClick={() => injectChatPrompt(nudge)}
-          >
-            Fill this in →
-          </button>
-        )}
       </div>
     </div>
   );
@@ -289,22 +269,6 @@ const SHARPEN_CSS = `
     border: 1px solid rgba(251, 191, 36, 0.25);
     border-radius: 999px;
   }
-
-  .sh-fillbtn {
-    align-self: flex-start;
-    background: #f97316;
-    color: #0a0a0a;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 6px;
-    transition: background 150ms ease;
-  }
-  .sh-fillbtn:hover { background: #fb923c; }
 
   @media (max-width: 640px) {
     .sh-fact { grid-template-columns: 1fr; gap: 2px; }
