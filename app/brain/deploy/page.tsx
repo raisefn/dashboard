@@ -2512,6 +2512,48 @@ function BrainDeployInner() {
     try { localStorage.removeItem("raisefn_active_plan_id"); } catch { /* private browsing */ }
   }, []);
 
+  /* ── Window-level file-drop guard ─────────────────────────────
+   * The chat column has its own drop handlers, but if the user
+   * drops onto the sidebar or the Documents panel, the browser
+   * default fires and opens the file in a new tab. This effect
+   * catches ANY drop anywhere on the page, prevents the default,
+   * and routes it through uploadFile. Ref pattern keeps the
+   * listener stable while uploadFile identity changes per render.
+   */
+  const uploadFileRef = useRef(uploadFile);
+  useEffect(() => { uploadFileRef.current = uploadFile; });
+  useEffect(() => {
+    const isFileDrag = (e: DragEvent) =>
+      Array.from(e.dataTransfer?.types || []).includes("Files");
+    const onDragOver = (e: DragEvent) => {
+      if (!isFileDrag(e)) return;
+      e.preventDefault();
+      setIsDragging(true);
+    };
+    const onDrop = (e: DragEvent) => {
+      if (!isFileDrag(e)) return;
+      e.preventDefault();
+      setIsDragging(false);
+      dragCounterRef.current = 0;
+      const file = e.dataTransfer?.files?.[0];
+      if (file) void uploadFileRef.current(file);
+    };
+    const onDragLeave = (e: DragEvent) => {
+      if (e.relatedTarget === null || (e as unknown as { clientX: number }).clientX === 0) {
+        setIsDragging(false);
+        dragCounterRef.current = 0;
+      }
+    };
+    window.addEventListener("dragover", onDragOver);
+    window.addEventListener("drop", onDrop);
+    window.addEventListener("dragleave", onDragLeave);
+    return () => {
+      window.removeEventListener("dragover", onDragOver);
+      window.removeEventListener("drop", onDrop);
+      window.removeEventListener("dragleave", onDragLeave);
+    };
+  }, []);
+
   /* ── DOM helpers (imperative, like the original) ── */
   function addMessageToDOM(role: string, content: string): HTMLDivElement {
     const inner = messagesInnerRef.current!;
