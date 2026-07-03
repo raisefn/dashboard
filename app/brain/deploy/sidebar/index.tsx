@@ -16,6 +16,11 @@ interface FounderSidebarProps {
   injectChatPrompt: (prompt: string) => void;
   /** Open a slide-over panel by setting its state. Wired in v3. */
   openPanel: (p: Panel) => void;
+  /** TODAY queue direct actions — bypass main-chat LLM routing. Result
+   * renders in the chat log as a plain assistant message (prep) or an
+   * outreach preview card (draft_followup). */
+  queuePrepFor: (investorSlug: string) => Promise<void> | void;
+  queueDraftFollowupFor: (investorSlug: string) => Promise<void> | void;
   /** Admin slot: rendered at the top of the sidebar when present.
    * Used for the "Acting as" impersonation select. */
   adminHeader?: ReactNode;
@@ -50,6 +55,8 @@ export function FounderSidebar({
   impersonating,
   injectChatPrompt,
   openPanel,
+  queuePrepFor,
+  queueDraftFollowupFor,
   adminHeader,
 }: FounderSidebarProps) {
   const [state, setState] = useState<SidebarState | null>(null);
@@ -248,7 +255,8 @@ export function FounderSidebar({
         state={state}
         signalsUnackCount={state?.signals_unack_count ?? 0}
         openPanel={openPanel}
-        injectChatPrompt={injectChatPrompt}
+        queuePrepFor={queuePrepFor}
+        queueDraftFollowupFor={queueDraftFollowupFor}
       />
 
       <SidebarSection title="My Raise">
