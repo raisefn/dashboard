@@ -139,6 +139,8 @@ interface ReadoutProps {
 function SectionReadout({ section }: ReadoutProps) {
   const data = section.data as Record<string, unknown>;
   const hasGaps = section.fields_missing.length > 0;
+  const totalFields = section.fields_filled.length + section.fields_missing.length;
+  const filledCount = section.fields_filled.length;
 
   return (
     <div className="sh-section">
@@ -146,6 +148,11 @@ function SectionReadout({ section }: ReadoutProps) {
         <div className="sh-head-title">
           <h2 className="sh-title">{section.title}</h2>
           <StatusBadge status={section.status} />
+          {totalFields > 0 && (
+            <span className="sh-fraction">
+              {filledCount} of {totalFields} filled
+            </span>
+          )}
         </div>
         <p className="sh-why">{section.why_it_matters}</p>
       </div>
@@ -173,6 +180,10 @@ function SectionReadout({ section }: ReadoutProps) {
                 <li key={f} className="sh-gap">{FIELD_LABELS[f] || f}</li>
               ))}
             </ul>
+            <p className="sh-gap-hint">
+              Just tell me these in chat — no forms. I&apos;ll capture them
+              silently as we talk.
+            </p>
           </>
         )}
 
@@ -268,6 +279,23 @@ const SHARPEN_CSS = `
     background: rgba(251, 191, 36, 0.08);
     border: 1px solid rgba(251, 191, 36, 0.25);
     border-radius: 999px;
+  }
+
+  .sh-fraction {
+    font-size: 11px;
+    color: #a1a1aa;
+    font-weight: 500;
+  }
+
+  .sh-gap-hint {
+    margin: 12px 0 0;
+    font-size: 12px;
+    color: #a1a1aa;
+    line-height: 1.5;
+    padding: 8px 12px;
+    background: rgba(251, 191, 36, 0.06);
+    border-left: 2px solid #fbbf24;
+    border-radius: 0 4px 4px 0;
   }
 
   @media (max-width: 640px) {
