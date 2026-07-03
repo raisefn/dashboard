@@ -128,6 +128,34 @@ test.describe("TODAY queue in sidebar", () => {
     await expect(meetingRow.locator(".sb-today-dot-urgent")).toBeVisible();
   });
 
+  test("Brand-new founder (no deck) shows onboarding row: Upload your deck", async ({ page }) => {
+    // Explicitly zero everything so the empty state fallback for onboarding
+    // kicks in. Documents length 0 is the trigger.
+    await mockSidebarState(page, {
+      documents: [],
+      matches: { total_unique: 0, batches_count: 0, latest_batch: null },
+      briefs: [],
+      pipeline: [],
+      signals_unack_count: 0,
+    });
+    await page.goto("/brain/deploy");
+    const row = page.locator(".sb-today-row").filter({ hasText: /Upload your deck/i });
+    await expect(row).toBeVisible({ timeout: 15_000 });
+    await expect(row.locator(".sb-today-dot-urgent")).toBeVisible();
+  });
+
+  test("Has deck but no matches shows onboarding row: Pull your first matches", async ({ page }) => {
+    await mockSidebarState(page, {
+      documents: [{ id: "d1", filename: "deck.pdf", doc_type: "deck", created_at: new Date().toISOString() }],
+      matches: { total_unique: 0, batches_count: 0, latest_batch: null },
+      briefs: [],
+      pipeline: [],
+    });
+    await page.goto("/brain/deploy");
+    const row = page.locator(".sb-today-row").filter({ hasText: /Pull your first matches/i });
+    await expect(row).toBeVisible({ timeout: 15_000 });
+  });
+
   test("Stale outreach renders a warm follow-up row", async ({ page }) => {
     await mockSidebarState(page, {
       pipeline: [

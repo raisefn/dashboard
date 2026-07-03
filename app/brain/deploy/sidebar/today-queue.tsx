@@ -73,6 +73,53 @@ export function TodayQueue({
       });
     }
 
+    // 1b. Progressive onboarding — surface THE current next step for
+    // founders who haven't completed the deck → matches → briefs →
+    // outreach on-ramp. One row at a time (not a stack of 4). Drops
+    // off automatically once the founder crosses each threshold.
+    // Only shows when there are no signals and no imminent meetings
+    // ahead — active state takes precedence over onboarding.
+    const documentsCount = state.documents?.length || 0;
+    const matchesCount = state.matches?.total_unique || 0;
+    const briefsCount = state.briefs?.length || 0;
+    const pipelineOutreachedCount = (state.pipeline || []).filter((p) => {
+      const s = (p.status || "").toLowerCase();
+      return s !== "" && s !== "identified";
+    }).length;
+    if (documentsCount === 0) {
+      out.push({
+        key: "onboard-deck",
+        dot: "urgent",
+        primary: "Upload your deck",
+        secondary: "I'll build your profile from it",
+        onClick: () => openPanel({ kind: "documents" }),
+      });
+    } else if (matchesCount === 0) {
+      out.push({
+        key: "onboard-matches",
+        dot: "urgent",
+        primary: "Pull your first matches",
+        secondary: "Investors that fit your raise",
+        onClick: () => openPanel({ kind: "matches" }),
+      });
+    } else if (briefsCount === 0) {
+      out.push({
+        key: "onboard-briefs",
+        dot: "urgent",
+        primary: "Generate your first brief",
+        secondary: "One-page pitch tuned to a specific investor",
+        onClick: () => openPanel({ kind: "matches" }),
+      });
+    } else if (pipelineOutreachedCount === 0) {
+      out.push({
+        key: "onboard-outreach",
+        dot: "urgent",
+        primary: "Send your first outreach",
+        secondary: "Reach out to a matched investor",
+        onClick: () => openPanel({ kind: "briefs" }),
+      });
+    }
+
     const now = Date.now();
     const in3Days = now + 3 * 24 * 60 * 60 * 1000;
     const in14Days = now + 14 * 24 * 60 * 60 * 1000;
