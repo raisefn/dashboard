@@ -211,6 +211,10 @@ export function NextUpPill({ session, impersonating, onAction, onOpenPanel }: Ne
   useEffect(() => { setDismissed(false); }, [next.kind]);
 
   if (next.kind === "loading" || dismissed) return null;
+  // "Current" state = nothing urgent. Don't render an empty-status card
+  // just to say "no next action" — that's clutter. The pill exists to
+  // name a NEXT ACTION. When there isn't one, get out of the way.
+  if (next.kind === "current" || next.done) return null;
 
   return (
     <div className={`nextup${next.done ? " nextup-done" : ""}`}>
