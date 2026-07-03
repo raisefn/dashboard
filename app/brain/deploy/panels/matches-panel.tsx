@@ -383,8 +383,9 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
 
       {!activeBatch || !hasAnyContent ? (
         <div className="mp-empty">
-          <p className="mp-empty-title">Your investor matches will show up here.</p>
-          <p className="mp-empty-sub">Ranked by fit against your sector, stage, and geography. Head back to chat and ask raise(fn) to &quot;pull matches&quot; to get started.</p>
+          <p className="mp-empty-title">No matches yet.</p>
+          <p className="mp-empty-sub">Once I know your sector and stage, I&apos;ll surface investors who fit.</p>
+          <p className="mp-empty-cmd">try: &quot;pull matches&quot;</p>
         </div>
       ) : (
         <>{ordered.length > 0 && (<div className="mp-list">
@@ -743,7 +744,18 @@ const MATCHES_PANEL_CSS = `
     text-align: center;
   }
   .mp-empty-title { margin: 0 0 6px; font-size: 14px; color: #d4d4d8; }
-  .mp-empty-sub { margin: 0; font-size: 12px; color: #71717a; }
+  .mp-empty-sub { margin: 0 0 14px; font-size: 12px; color: #71717a; }
+  .mp-empty-cmd {
+    display: inline-block;
+    margin: 0;
+    padding: 6px 12px;
+    background: rgba(249, 115, 22, 0.1);
+    color: #f97316;
+    border: 1px solid rgba(249, 115, 22, 0.25);
+    border-radius: 6px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+  }
 
   .mp-list {
     display: flex;
