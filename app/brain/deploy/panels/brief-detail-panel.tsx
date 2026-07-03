@@ -56,6 +56,14 @@ export function BriefDetailPanel({ token, session, impersonating }: BriefDetailP
   const [copied, setCopied] = useState(false);
   const [brandUpdating, setBrandUpdating] = useState(false);
   const [brandError, setBrandError] = useState<string | null>(null);
+  // Inline edit mode — mirrors the BriefEditorOverlay behavior from the
+  // standalone /brief/[token] page so the founder can fix typos and
+  // rework copy without opening another tab. Scoped to markdown only;
+  // status + private notes stay on the standalone overlay.
+  const [editing, setEditing] = useState(false);
+  const [draftMd, setDraftMd] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   async function toggleBrand(next: boolean) {
     if (!session || !token || !data) return;
@@ -112,6 +120,51 @@ export function BriefDetailPanel({ token, session, impersonating }: BriefDetailP
   }, [session, token, impersonating]);
 
   useEffect(() => { void load(); }, [load]);
+
+  function startEdit() {
+    if (!data) return;
+    setDraftMd(data.markdown || "");
+    setSaveError(null);
+    setEditing(true);
+  }
+
+  function cancelEdit() {
+    setEditing(false);
+    setSaveError(null);
+  }
+
+  async function saveEdit() {
+    if (!session || !token || !data) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch(`/v1/brain/briefs/${encodeURIComponent(token)}`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({ content_md: draftMd }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Save failed (${res.status})`);
+      }
+      const payload = await res.json().catch(() => ({}));
+      setData(d => d ? {
+        ...d,
+        markdown: draftMd,
+        last_edited_at: payload.last_edited_at || d.last_edited_at,
+      } : d);
+      setEditing(false);
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "Save failed.");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   // publicUrl = the investor-facing shareable URL — counts views, fires
   // signals. NEVER swap this for the preview route, even for in-app display.
@@ -186,9 +239,18 @@ export function BriefDetailPanel({ token, session, impersonating }: BriefDetailP
           </div>
         </div>
         <div className="bdp-actions">
+          {!editing && (
+            <button
+              type="button"
+              className="bdp-action"
+              onClick={startEdit}
+            >
+              Edit
+            </button>
+          )}
           <button
             type="button"
-            className="bdp-action"
+            className="bdp-action bdp-action-secondary"
             onClick={copyLink}
           >
             {copied ? "Copied!" : "Copy share link"}
@@ -230,10 +292,46 @@ export function BriefDetailPanel({ token, session, impersonating }: BriefDetailP
       </div>
 
 
-      <article
-        className="bdp-content"
-        dangerouslySetInnerHTML={{ __html: formatMarkdown(data.markdown || "") }}
-      />
+      {editing ? (
+        <div className="bdp-edit">
+          <textarea
+            className="bdp-edit-textarea"
+            value={draftMd}
+            onChange={(e) => setDraftMd(e.target.value)}
+            rows={24}
+            spellCheck
+            placeholder="Brief markdown…"
+            aria-label="Brief content (markdown)"
+          />
+          {saveError && <div className="bdp-edit-error">{saveError}</div>}
+          <div className="bdp-edit-actions">
+            <button
+              type="button"
+              className="bdp-action"
+              onClick={saveEdit}
+              disabled={saving}
+            >
+              {saving ? "Saving…" : "Save"}
+            </button>
+            <button
+              type="button"
+              className="bdp-action bdp-action-secondary"
+              onClick={cancelEdit}
+              disabled={saving}
+            >
+              Cancel
+            </button>
+            <span className="bdp-edit-hint">
+              Investor sees the saved version. Section structure recommended.
+            </span>
+          </div>
+        </div>
+      ) : (
+        <article
+          className="bdp-content"
+          dangerouslySetInnerHTML={{ __html: formatMarkdown(data.markdown || "") }}
+        />
+      )}
     </div>
   );
 }
@@ -308,6 +406,44 @@ const BRIEF_DETAIL_CSS = `
   .bdp-action-secondary:hover {
     background: rgba(63, 63, 70, 0.4);
     border-color: #52525b;
+  }
+
+  .bdp-edit { display: flex; flex-direction: column; gap: 12px; }
+  .bdp-edit-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 480px;
+    padding: 14px 16px;
+    background: #09090b;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    color: #e4e4e7;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    resize: vertical;
+    outline: none;
+    transition: border-color 150ms ease;
+  }
+  .bdp-edit-textarea:focus { border-color: #3f3f46; }
+  .bdp-edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .bdp-edit-hint {
+    font-size: 11px;
+    color: #71717a;
+    margin-left: 4px;
+  }
+  .bdp-edit-error {
+    font-size: 12px;
+    color: #fca5a5;
+    padding: 8px 12px;
+    background: rgba(220, 38, 38, 0.06);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    border-radius: 6px;
   }
 
   .bdp-brand-row {
