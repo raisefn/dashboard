@@ -13,7 +13,22 @@ import { test as base, type Page } from "@playwright/test";
 
 // ─── Default mocked API state ─────────────────────────────────────
 
-export const DEFAULT_SIDEBAR_STATE = {
+// Loose typing on purpose — specs override slices via a plain spread
+// (`{ ...DEFAULT_SIDEBAR_STATE, documents: [...] }`). Narrow types on
+// empty arrays would infer never[] and reject valid overrides.
+type SidebarStateMock = {
+  campaign: Record<string, unknown> | null;
+  pipeline: Array<Record<string, unknown>>;
+  matches: Record<string, unknown>;
+  briefs: Array<Record<string, unknown>>;
+  documents: Array<Record<string, unknown>>;
+  activity: Array<Record<string, unknown>>;
+  sharpen: Array<Record<string, unknown>>;
+  signals_unack_count: number;
+  acting_as_email: string | null;
+};
+
+export const DEFAULT_SIDEBAR_STATE: SidebarStateMock = {
   campaign: {
     id: "test-campaign",
     status: "active",

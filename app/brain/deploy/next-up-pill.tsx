@@ -158,11 +158,36 @@ function computeNextUp(state: SidebarState | null): NextUp {
     };
   }
 
+  // "Current" — no urgent action. Show a scan of what's in flight so
+  // the founder gets useful state at a glance, not a "nothing urgent"
+  // placeholder. Counts drawn from real sidebar state.
+  const activeCount = activePipeline.length;
+  const briefCount = state.briefs?.length || 0;
+  // Next meeting within the visible pipeline (any date, not just 14 days)
+  const nextMeetingRow = (state.pipeline || [])
+    .filter((p) => !!p.meeting_scheduled_for)
+    .map((p) => ({ p, t: Date.parse(p.meeting_scheduled_for as string) }))
+    .filter((r) => !Number.isNaN(r.t) && r.t >= now)
+    .sort((a, b) => a.t - b.t)[0];
+  const parts: string[] = [];
+  if (activeCount > 0) {
+    parts.push(`${activeCount} active thread${activeCount === 1 ? "" : "s"}`);
+  }
+  if (briefCount > 0) {
+    parts.push(`${briefCount} brief${briefCount === 1 ? "" : "s"} live`);
+  }
+  if (nextMeetingRow) {
+    const dt = new Date(nextMeetingRow.p.meeting_scheduled_for as string);
+    const when = dt.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+    parts.push(`next meeting ${when}`);
+  }
   return {
     kind: "current",
-    label: "You're current",
-    text: "Nothing urgent. Meetings booked, follow-ups sent.",
-    hint: "I'll ping you when something moves.",
+    label: "In flight",
+    text: parts.length > 0 ? parts.join(" · ") : "No open threads. Add investors to your pipeline to get moving.",
+    hint: nextMeetingRow
+      ? `Prepping for ${nextMeetingRow.p.name}${nextMeetingRow.p.firm ? ` (${nextMeetingRow.p.firm})` : ""}`
+      : undefined,
     done: true,
   };
 }
@@ -211,10 +236,6 @@ export function NextUpPill({ session, impersonating, onAction, onOpenPanel }: Ne
   useEffect(() => { setDismissed(false); }, [next.kind]);
 
   if (next.kind === "loading" || dismissed) return null;
-  // "Current" state = nothing urgent. Don't render an empty-status card
-  // just to say "no next action" — that's clutter. The pill exists to
-  // name a NEXT ACTION. When there isn't one, get out of the way.
-  if (next.kind === "current" || next.done) return null;
 
   return (
     <div className={`nextup${next.done ? " nextup-done" : ""}`}>
@@ -273,11 +294,13 @@ const NEXTUP_CSS = `
     box-shadow: 0 1px 0 rgba(249,115,22,0.05) inset, 0 4px 12px rgba(0,0,0,0.3);
   }
   .nextup-done {
-    background: #0e1a10;
-    border-color: rgba(74,222,128,0.5);
+    background: #0e2415;
+    border-color: rgba(74,222,128,0.55);
     border-left-color: #4ade80;
     box-shadow: 0 1px 0 rgba(74,222,128,0.05) inset, 0 4px 12px rgba(0,0,0,0.3);
   }
+  .nextup-done .nextup-text { color: #dcfce7; }
+  .nextup-done .nextup-hint { color: #86efac; }
   .nextup-left {
     display: flex;
     align-items: center;
