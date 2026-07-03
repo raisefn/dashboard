@@ -47,12 +47,12 @@ interface TodayQueueProps {
   hasCalendarScope: boolean;
 }
 
-type RowKind = "onboarding" | "active";
+type RowKind = "onboarding" | "active" | "suggested";
 
 type QueueItem = {
   key: string;
   kind: RowKind;
-  dot: "urgent" | "warm" | "cool";
+  dot: "urgent" | "warm" | "cool" | "suggested";
   primary: string;
   secondary?: string;
   onClick: () => void;
@@ -250,6 +250,43 @@ export function TodayQueue({
         secondary: "Reconnect Gmail to grant calendar scope",
         onClick: () => void queueConnectGmail(),
       });
+    }
+
+    // ─── SUGGESTED tier ──────────────────────────────────────────
+    // Only fills in when the urgent/onboarding tiers had nothing to
+    // surface. Prevents crowding an already-active queue with ambient
+    // "you could do X" suggestions. Deterministic rules over state,
+    // snoozable 24h like other active-state rows.
+    if (out.length === 0) {
+      const gaps = (state.sharpen || []).filter(
+        (r) => r.status === "gap" || r.status === "empty",
+      ).length;
+      if (gaps > 0 && !isActiveSnoozed("suggest-gaps", now)) {
+        out.push({
+          key: "suggest-gaps",
+          kind: "suggested",
+          dot: "suggested",
+          primary: `Sharpen ${gaps} gap${gaps === 1 ? "" : "s"} in your profile`,
+          secondary: "Sharper input, sharper output",
+          onClick: () => openPanel({ kind: "sharpen", section: "basics" }),
+        });
+      }
+      const matchesCountForSuggest = state.matches?.total_unique || 0;
+      const briefsCountForSuggest = state.briefs?.length || 0;
+      if (
+        matchesCountForSuggest > 0 &&
+        briefsCountForSuggest === 0 &&
+        !isActiveSnoozed("suggest-brief", now)
+      ) {
+        out.push({
+          key: "suggest-brief",
+          kind: "suggested",
+          dot: "suggested",
+          primary: `Draft a brief for one of your ${matchesCountForSuggest} matches`,
+          secondary: "Pick a match, I'll draft a one-pager",
+          onClick: () => openPanel({ kind: "matches" }),
+        });
+      }
     }
 
     // ─── Stale follow-ups ────────────────────────────────────────
@@ -462,6 +499,7 @@ const TODAY_CSS = `
   .sb-today-dot-urgent { background: #f97316; box-shadow: 0 0 0 2px rgba(249,115,22,0.2); }
   .sb-today-dot-warm { background: #fbbf24; }
   .sb-today-dot-cool { background: #71717a; }
+  .sb-today-dot-suggested { background: #2dd4bf; box-shadow: 0 0 0 2px rgba(45,212,191,0.15); }
   .sb-today-body {
     display: flex;
     flex-direction: column;
