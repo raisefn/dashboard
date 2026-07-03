@@ -22,10 +22,15 @@ interface NextUpPillProps {
   session: Session | null;
   impersonating: string;
   onAction: (prompt: string) => void;
+  /** Route certain pill actions to panels instead of the chat input.
+   * Currently used for the new-signal state, where the right response
+   * is opening the signals panel, not typing something. */
+  onOpenPanel?: (kind: "signals") => void;
 }
 
 type NextUpKind =
   | "loading"
+  | "new-signal"
   | "no-deck"
   | "no-matches"
   | "no-briefs"
@@ -47,6 +52,23 @@ interface NextUp {
 function computeNextUp(state: SidebarState | null): NextUp {
   if (!state) {
     return { kind: "loading", label: "Next up", text: "" };
+  }
+
+  // Highest priority: unacknowledged inbound signals. A live investor
+  // reply beats everything — no other work matters if you haven't
+  // acknowledged fresh warm interest.
+  const unack = state.signals_unack_count ?? 0;
+  if (unack > 0) {
+    return {
+      kind: "new-signal",
+      label: "New signal",
+      text: unack === 1
+        ? "An investor moved on your radar."
+        : `${unack} new signals from investors on your radar.`,
+      hint: "Open Signals to reply, dismiss, or see the rest.",
+      actionLabel: "Open signals",
+      actionPrompt: "__OPEN_SIGNALS__",
+    };
   }
 
   if (!state.documents || state.documents.length === 0) {
@@ -145,7 +167,7 @@ function computeNextUp(state: SidebarState | null): NextUp {
   };
 }
 
-export function NextUpPill({ session, impersonating, onAction }: NextUpPillProps) {
+export function NextUpPill({ session, impersonating, onAction, onOpenPanel }: NextUpPillProps) {
   const [state, setState] = useState<SidebarState | null>(null);
   const [dismissed, setDismissed] = useState(false);
 
@@ -206,7 +228,13 @@ export function NextUpPill({ session, impersonating, onAction }: NextUpPillProps
           <button
             type="button"
             className="nextup-action"
-            onClick={() => onAction(next.actionPrompt!)}
+            onClick={() => {
+              if (next.actionPrompt === "__OPEN_SIGNALS__" && onOpenPanel) {
+                onOpenPanel("signals");
+              } else if (next.actionPrompt) {
+                onAction(next.actionPrompt);
+              }
+            }}
           >
             {next.actionLabel}
           </button>
