@@ -63,32 +63,82 @@ export const EMPTY_CONNECTIONS_RESPONSE = { connections: [] };
 // ─── Test helpers ─────────────────────────────────────────────────
 
 export async function stubSupabaseSession(page: Page) {
-  // Set a fake Supabase session in localStorage BEFORE the page loads
-  // so the deploy page's auth check doesn't redirect us to /login.
-  // The token content doesn't need to be a real JWT — the dashboard
-  // only checks .session.access_token existence for routing.
+  // supabase-js v2 stores the session flat (not wrapped in currentSession
+  // like v1). Key format is `sb-<project-ref>-auth-token`.
   await page.addInitScript(() => {
+    const nowSec = Math.floor(Date.now() / 1000);
     const fakeSession = {
       access_token: "test-access-token",
-      refresh_token: "test-refresh",
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
+      refresh_token: "test-refresh-token",
+      expires_at: nowSec + 3600,
+      expires_in: 3600,
+      token_type: "bearer",
       user: {
-        id: "test-user-id",
+        id: "00000000-0000-0000-0000-000000000000",
+        aud: "authenticated",
+        role: "authenticated",
         email: "test@raisefn.local",
+        email_confirmed_at: new Date().toISOString(),
+        phone: "",
+        confirmed_at: new Date().toISOString(),
+        last_sign_in_at: new Date().toISOString(),
+        app_metadata: { provider: "email", providers: ["email"] },
         user_metadata: { name: "Test Founder" },
+        identities: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       },
     };
-    // Supabase stores session under a project-specific key. The dashboard
-    // uses this exact key based on the Supabase project URL.
     const supaKey = "sb-kvjhdubbcwvebfmncqot-auth-token";
-    localStorage.setItem(
-      supaKey,
-      JSON.stringify({ currentSession: fakeSession, expiresAt: fakeSession.expires_at }),
-    );
+    // v2 stores the raw session JSON, not wrapped.
+    localStorage.setItem(supaKey, JSON.stringify(fakeSession));
   });
+
+  // Intercept Supabase auth API calls so the client thinks the session
+  // is valid. Without these, supabase-js tries to refresh on load, gets
+  // a 401 from real Supabase for our fake refresh_token, wipes the
+  // session, and redirects to /login.
+  await page.route("**/auth/v1/user**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        id: "00000000-0000-0000-0000-000000000000",
+        email: "test@raisefn.local",
+        aud: "authenticated",
+        role: "authenticated",
+        user_metadata: { name: "Test Founder" },
+        app_metadata: { provider: "email" },
+      }),
+    }),
+  );
+  await page.route("**/auth/v1/token**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        access_token: "test-access-token",
+        refresh_token: "test-refresh-token",
+        expires_at: Math.floor(Date.now() / 1000) + 3600,
+        expires_in: 3600,
+        token_type: "bearer",
+        user: {
+          id: "00000000-0000-0000-0000-000000000000",
+          email: "test@raisefn.local",
+        },
+      }),
+    }),
+  );
 }
 
 export async function installDefaultRoutes(page: Page) {
+  // Playwright route matching is REVERSE ORDER — last registered fires
+  // first. So the catch-all MUST be registered FIRST (so it fires LAST),
+  // then specific routes registered AFTER (so they fire FIRST). Specific
+  // routes shadow the catch-all for their patterns.
+  await page.route("**/v1/brain/**", (route) => {
+    route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
+  });
   await page.route("**/v1/brain/sidebar-state", (route) =>
     route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(DEFAULT_SIDEBAR_STATE) }),
   );
@@ -98,7 +148,6 @@ export async function installDefaultRoutes(page: Page) {
   await page.route("**/v1/brain/connections", (route) =>
     route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(EMPTY_CONNECTIONS_RESPONSE) }),
   );
-  // Match panel data
   await page.route("**/v1/brain/matches**", (route) =>
     route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ batches: [] }) }),
   );
@@ -140,14 +189,6 @@ export async function installDefaultRoutes(page: Page) {
       }),
     }),
   );
-  // Any other /v1/brain/* → fall through with 200 empty so we don't
-  // crash rendering on an unmatched fetch.
-  await page.route("**/v1/brain/**", (route) => {
-    // If a spec-specific handler was already registered above, this
-    // won't fire — Playwright's route order matches the FIRST match.
-    // This is the safety net.
-    route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
-  });
 }
 
 // ─── Extended test with auth + route stubs pre-installed ──────────
