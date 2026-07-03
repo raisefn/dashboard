@@ -108,8 +108,10 @@ export function DocumentsPanel({ session, impersonating, onOpenPanel }: Document
       <div className="docs-state">
         <style>{DOCS_PANEL_CSS}</style>
         <p className="docs-state-title">No deck loaded.</p>
-        <p className="docs-state-sub">Drop your deck anywhere in the chat. PDF, PPT, or Keynote — I&apos;ll parse it.</p>
-        <p className="docs-state-cmd">or paste a Google Slides link</p>
+        <p className="docs-state-sub">
+          Drop your deck anywhere in the chat area — PDF, PPT, Keynote,
+          or a Google Slides link. I&apos;ll parse it.
+        </p>
       </div>
     );
   }
@@ -159,19 +161,8 @@ const DOCS_PANEL_CSS = `
   .docs-state { padding: 32px 8px; }
   .docs-state-text { font-size: 13px; color: #71717a; margin: 0; }
   .docs-state-title { font-size: 14px; color: #d4d4d8; margin: 0 0 6px; }
-  .docs-state-sub { font-size: 12px; color: #71717a; margin: 0 0 14px; line-height: 1.5; }
+  .docs-state-sub { font-size: 12px; color: #71717a; margin: 0; line-height: 1.5; max-width: 420px; }
   .docs-state-error { font-size: 13px; color: #fca5a5; margin: 0; }
-  .docs-state-cmd {
-    display: inline-block;
-    margin: 0;
-    padding: 6px 12px;
-    background: rgba(249, 115, 22, 0.1);
-    color: #f97316;
-    border: 1px solid rgba(249, 115, 22, 0.25);
-    border-radius: 6px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 12px;
-  }
 
   .docs-group { margin-bottom: 28px; }
   .docs-group-label {
