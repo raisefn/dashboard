@@ -30,7 +30,9 @@ interface TodayQueueProps {
   state: SidebarState | null;
   signalsUnackCount: number;
   openPanel: (p: Panel) => void;
-  injectChatPrompt: (prompt: string) => void;
+  /** Direct actions — bypass chat routing. */
+  queuePrepFor: (investorSlug: string) => Promise<void> | void;
+  queueDraftFollowupFor: (investorSlug: string) => Promise<void> | void;
 }
 
 type QueueItem = {
@@ -47,7 +49,8 @@ export function TodayQueue({
   state,
   signalsUnackCount,
   openPanel,
-  injectChatPrompt,
+  queuePrepFor,
+  queueDraftFollowupFor,
 }: TodayQueueProps) {
   const items = useMemo<QueueItem[]>(() => {
     if (!state) return [];
@@ -95,7 +98,11 @@ export function TodayQueue({
         dot: "urgent",
         primary: `Prep for ${investorLabel}`,
         secondary: when,
-        onClick: () => injectChatPrompt(`Prep me for the meeting with ${investorLabel}.`),
+        // Direct action — hits /brain/queue/prep/{slug}, appends prep
+        // brief in chat log. No chat inject.
+        onClick: () => {
+          if (p.slug) void queuePrepFor(p.slug);
+        },
       });
       if (out.length >= MAX_ITEMS) return out;
     }
@@ -124,12 +131,13 @@ export function TodayQueue({
             ? `Follow up with ${first.name}`
             : `Follow up: ${first.name} +${rest} more`,
         secondary: `${first.days_since_update}d quiet`,
-        onClick: () =>
-          injectChatPrompt(
-            stale.length === 1
-              ? `Draft a follow-up to ${first.name}${first.firm ? ` at ${first.firm}` : ""}.`
-              : "Draft follow-ups for the investors that have gone quiet.",
-          ),
+        // Direct action — hits /brain/queue/draft_followup/{slug},
+        // appends outreach preview card in chat log. No chat inject.
+        // Drafts the FIRST stale investor; if there are more, founder
+        // handles them iteratively or via chat.
+        onClick: () => {
+          if (first.slug) void queueDraftFollowupFor(first.slug);
+        },
       });
     }
 
@@ -148,13 +156,15 @@ export function TodayQueue({
         dot: "cool",
         primary: `Meeting: ${investorLabel}`,
         secondary: when,
-        onClick: () => injectChatPrompt(`Prep me for the meeting with ${investorLabel}.`),
+        onClick: () => {
+          if (p.slug) void queuePrepFor(p.slug);
+        },
       });
       if (out.length >= MAX_ITEMS) return out;
     }
 
     return out.slice(0, MAX_ITEMS);
-  }, [state, signalsUnackCount, openPanel, injectChatPrompt]);
+  }, [state, signalsUnackCount, openPanel, queuePrepFor, queueDraftFollowupFor]);
 
   return (
     <div className="sb-today">
