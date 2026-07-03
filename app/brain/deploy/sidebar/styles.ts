@@ -107,6 +107,42 @@ export const SIDEBAR_CSS = `
   padding: 6px 4px 0;
 }
 
+/* Collapsible sections (Fine tune, Connections) — caret + summary in header. */
+.sb-section-header-collapsible {
+  color: #a1a1aa;
+  cursor: pointer;
+  justify-content: flex-start;
+}
+.sb-section-header-collapsible .sb-section-title {
+  flex: 0 1 auto;
+}
+.sb-section-caret {
+  display: inline-block;
+  font-size: 10px;
+  color: #52525b;
+  transition: transform 150ms ease;
+  transform-origin: center;
+  width: 12px;
+  text-align: center;
+}
+.sb-section-caret[data-open="false"] {
+  transform: rotate(-90deg);
+}
+.sb-section-summary {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 500;
+  color: #71717a;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 2px 8px;
+  background: #1c1c1f;
+  border-radius: 999px;
+}
+.sb-section-header-collapsible:hover .sb-section-caret {
+  color: #a1a1aa;
+}
+
 /* MY RAISE — single-line summary, hover-glow button */
 .sb-my-raise {
   width: 100%;

@@ -243,23 +243,15 @@ export function FounderSidebar({
         <MyRaise campaign={state?.campaign || null} onInjectPrompt={injectChatPrompt} />
       </SidebarSection>
 
-      {/* Strict rule: every section with an aggregating panel collapses to
-       * header + count + arrow. The panel IS the list — sidebar is the door. */}
-      {/* Signals: surfaces brief views + inbound replies as actionable
-       * cards in a slide-over panel. Badge shows unack count; clicking
-       * each card's primary action sends a chat message + acks. Lives
-       * above Pipeline so a hot signal is the first thing the founder
-       * notices. See [[feedback-agent-not-email-for-founder-signals]]. */}
+      {/* Section order maps to the causal flow of a raise:
+       *   Documents (deck in) → Matches (first output) → Briefs (derived) →
+       *   Pipeline (post-outreach state) → Signals (long-tail intel).
+       * Matches surfaced above the fold — first thing that "activates" after
+       * a deck upload, per external UX review 2026-07-03. */}
       <SidebarSection
-        title="Signals"
-        count={state?.signals_unack_count ?? 0}
-        onTitleClick={() => openPanel({ kind: "signals" })}
-      />
-
-      <SidebarSection
-        title="Pipeline"
-        count={state?.pipeline?.length ?? 0}
-        onTitleClick={() => openPanel({ kind: "pipeline" })}
+        title="Documents"
+        count={state?.documents?.length ?? 0}
+        onTitleClick={() => openPanel({ kind: "documents" })}
       />
 
       <SidebarSection
@@ -275,12 +267,68 @@ export function FounderSidebar({
       />
 
       <SidebarSection
-        title="Documents"
-        count={state?.documents?.length ?? 0}
-        onTitleClick={() => openPanel({ kind: "documents" })}
+        title="Pipeline"
+        count={state?.pipeline?.length ?? 0}
+        onTitleClick={() => openPanel({ kind: "pipeline" })}
       />
 
-      <SidebarSection title="Connections">
+      <SidebarSection
+        title="Signals"
+        count={state?.signals_unack_count ?? 0}
+        onTitleClick={() => openPanel({ kind: "signals" })}
+      />
+
+      {/* SHARPEN (internal) / "Fine tune your agent" (user-facing).
+       * Engineering name kept as "sharpen" — product brand is the full phrase.
+       * Collapsible with gap-count summary — reduces visual density without
+       * hiding the signal that tells the founder what to work on. */}
+      <SidebarSection
+        title="Fine tune your agent"
+        collapsible
+        defaultCollapsed
+        summary={(() => {
+          const rows = state?.sharpen || DEFAULT_SHARPEN_ROWS;
+          const gaps = rows.filter((r) => r.status === "gap" || r.status === "empty").length;
+          return gaps === 0 ? "All solid" : `${gaps} gap${gaps === 1 ? "" : "s"}`;
+        })()}
+      >
+        <div className="sb-connections">
+          {(state?.sharpen || DEFAULT_SHARPEN_ROWS).map((row) => (
+            <button
+              key={row.id}
+              type="button"
+              className="sb-conn-row sb-sharpen-row"
+              onClick={() => openPanel({ kind: "sharpen", section: row.id })}
+              title={`Fine tune your agent — ${row.title}`}
+              aria-label={`Fine tune your agent — ${row.title}`}
+            >
+              <span
+                className="sb-conn-dot"
+                style={{ background: STATUS_DOT_COLOR[row.status] }}
+              />
+              <span className="sb-conn-label">{row.title}</span>
+              <span className="sb-conn-status sb-sharpen-status" data-status={row.status}>
+                {row.status}
+              </span>
+            </button>
+          ))}
+        </div>
+      </SidebarSection>
+
+      <SidebarSection
+        title="Connections"
+        collapsible
+        defaultCollapsed
+        summary={(() => {
+          const CAL_SCOPE = "https://www.googleapis.com/auth/calendar.events";
+          const gmailOk = !!gmailConnection && !gmailConnection.broken;
+          const calOk = gmailOk && (gmailConnection?.scopes || []).includes(CAL_SCOPE);
+          const n = (gmailOk ? 1 : 0) + (calOk ? 1 : 0);
+          if (n === 0) return "Set up";
+          if (n === 2) return "Ready";
+          return "1 of 2";
+        })()}
+      >
         <div className="sb-connections">
           {connectionStatus && (
             <div className={`sb-conn-toast sb-conn-toast-${connectionStatus.kind}`}>
@@ -374,32 +422,6 @@ export function FounderSidebar({
                 : "On"}
             </span>
           </div>
-        </div>
-      </SidebarSection>
-
-      {/* SHARPEN (internal) / "Fine tune your agent" (user-facing).
-       * Engineering name kept as "sharpen" — product brand is the full phrase. */}
-      <SidebarSection title="Fine tune your agent">
-        <div className="sb-connections">
-          {(state?.sharpen || DEFAULT_SHARPEN_ROWS).map((row) => (
-            <button
-              key={row.id}
-              type="button"
-              className="sb-conn-row sb-sharpen-row"
-              onClick={() => openPanel({ kind: "sharpen", section: row.id })}
-              title={`Fine tune your agent — ${row.title}`}
-              aria-label={`Fine tune your agent — ${row.title}`}
-            >
-              <span
-                className="sb-conn-dot"
-                style={{ background: STATUS_DOT_COLOR[row.status] }}
-              />
-              <span className="sb-conn-label">{row.title}</span>
-              <span className="sb-conn-status sb-sharpen-status" data-status={row.status}>
-                {row.status}
-              </span>
-            </button>
-          ))}
         </div>
       </SidebarSection>
     </aside>
