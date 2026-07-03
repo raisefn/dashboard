@@ -368,55 +368,88 @@ export function TodayQueue({
     [dismissOnboarding, snoozeActive],
   );
 
+  const todayItems = items.filter((i) => i.kind !== "suggested");
+  const suggestedItems = items.filter((i) => i.kind === "suggested");
+  const allEmpty = todayItems.length === 0 && suggestedItems.length === 0;
+
   return (
     <div className="sb-today">
       <style>{TODAY_CSS}</style>
-      <div className="sb-today-header">
-        <span className="sb-today-title">Today</span>
-        {items.length > 0 && (
-          <span className="sb-today-count">{items.length}</span>
-        )}
-      </div>
-      {items.length === 0 ? (
-        <div className="sb-today-empty">No new signals from our actions yet.</div>
-      ) : (
-        <ul className="sb-today-list">
-          {items.map((item) => (
-            <li key={item.key} className="sb-today-item">
-              <button
-                type="button"
-                className="sb-today-row"
-                onClick={item.onClick}
-              >
-                <span className={`sb-today-dot sb-today-dot-${item.dot}`} aria-hidden />
-                <span className="sb-today-body">
-                  <span className="sb-today-primary">{item.primary}</span>
-                  {item.secondary && (
-                    <span className="sb-today-secondary">{item.secondary}</span>
-                  )}
-                </span>
-              </button>
-              <button
-                type="button"
-                className="sb-today-dismiss"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDismiss(item);
-                }}
-                aria-label={
-                  item.kind === "onboarding" ? "Skip this step" : "Snooze for 24 hours"
-                }
-                title={
-                  item.kind === "onboarding" ? "Skip this step" : "Snooze 24h"
-                }
-              >
-                ✕
-              </button>
-            </li>
-          ))}
-        </ul>
+
+      {/* TODAY — urgent + onboarding items */}
+      {(todayItems.length > 0 || allEmpty) && (
+        <div className="sb-today-section">
+          <div className="sb-today-header">
+            <span className="sb-today-title">Today</span>
+            {todayItems.length > 0 && (
+              <span className="sb-today-count">{todayItems.length}</span>
+            )}
+          </div>
+          {allEmpty ? (
+            <div className="sb-today-empty">No new signals from our actions yet.</div>
+          ) : (
+            <SectionList items={todayItems} onDismiss={handleDismiss} />
+          )}
+        </div>
+      )}
+
+      {/* SUGGESTED — contextual next-actions */}
+      {suggestedItems.length > 0 && (
+        <div className="sb-today-section sb-today-section-suggested">
+          <div className="sb-today-header">
+            <span className="sb-today-title">Suggested</span>
+            <span className="sb-today-count">{suggestedItems.length}</span>
+          </div>
+          <SectionList items={suggestedItems} onDismiss={handleDismiss} />
+        </div>
       )}
     </div>
+  );
+}
+
+function SectionList({
+  items,
+  onDismiss,
+}: {
+  items: QueueItem[];
+  onDismiss: (item: QueueItem) => void;
+}) {
+  return (
+    <ul className="sb-today-list">
+      {items.map((item) => (
+        <li key={item.key} className="sb-today-item">
+          <button
+            type="button"
+            className="sb-today-row"
+            onClick={item.onClick}
+          >
+            <span className={`sb-today-dot sb-today-dot-${item.dot}`} aria-hidden />
+            <span className="sb-today-body">
+              <span className="sb-today-primary">{item.primary}</span>
+              {item.secondary && (
+                <span className="sb-today-secondary">{item.secondary}</span>
+              )}
+            </span>
+          </button>
+          <button
+            type="button"
+            className="sb-today-dismiss"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDismiss(item);
+            }}
+            aria-label={
+              item.kind === "onboarding" ? "Skip this step" : "Snooze for 24 hours"
+            }
+            title={
+              item.kind === "onboarding" ? "Skip this step" : "Snooze 24h"
+            }
+          >
+            ✕
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -425,6 +458,11 @@ const TODAY_CSS = `
     padding: 8px 8px 4px;
     margin-bottom: 8px;
     border-bottom: 1px solid #1c1c1f;
+  }
+  .sb-today-section + .sb-today-section {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #1c1c1f;
   }
   .sb-today-header {
     display: flex;

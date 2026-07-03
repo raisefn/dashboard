@@ -157,7 +157,6 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
             sectionId={panel.section}
             session={session}
             impersonating={impersonating}
-            injectChatPrompt={injectChatPrompt}
           />
         );
         break;

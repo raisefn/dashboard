@@ -355,18 +355,17 @@ test.describe("sharpen panel — readout only, no forms", () => {
     await expect(selects).toHaveCount(0);
   });
 
-  test("Fine tune readout shows 'Fill this in →' button (not 'Ask brain to')", async ({ page }) => {
+  test("Fine tune readout has NO 'Fill this in' button (chat inject killed)", async ({ page }) => {
     await page.goto("/brain/deploy");
     const fineTuneHeader = page.locator(".sb-section-header-collapsible").filter({ hasText: "Fine tune" });
     await expect(fineTuneHeader).toBeVisible({ timeout: 15_000 });
     await fineTuneHeader.click();
     await page.locator(".sb-sharpen-row").filter({ hasText: "Basics" }).first().click();
 
-    const fillBtn = page.locator(".sh-fillbtn");
-    await expect(fillBtn).toBeVisible();
-    await expect(fillBtn).toHaveText(/Fill this in/i);
-    // Guardrail: never surface the engineering name to users
-    await expect(fillBtn).not.toContainText(/brain/i);
+    // Sharpen readout must NOT have any fill/action button — killed
+    // because it repopulated the chat (Justin's rule) AND showed even
+    // when fields were filled (misleading). Readout is READ-ONLY.
+    await expect(page.locator(".sh-fillbtn")).toHaveCount(0);
   });
 });
 
