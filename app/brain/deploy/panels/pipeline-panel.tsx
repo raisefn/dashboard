@@ -470,7 +470,7 @@ const PIPELINE_PANEL_CSS = `
     text-align: center;
   }
   .pp-empty-title { margin: 0 0 6px; font-size: 14px; color: #d4d4d8; }
-  .pp-empty-sub { margin: 0; font-size: 12px; color: #71717a; max-width: 400px; line-height: 1.5; }
+  .pp-empty-sub { margin: 0 auto; font-size: 12px; color: #71717a; max-width: 400px; line-height: 1.5; }
 
   .pp-table {
     border: 1px solid #27272a;

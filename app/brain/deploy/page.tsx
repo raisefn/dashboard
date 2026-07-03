@@ -1866,7 +1866,7 @@ function BrainDeployInner() {
   }, [renderUpgradeCardInChat]);
 
   /* ── Send message (exact SSE logic from chat.html) ── */
-  const send = useCallback(async (message: string, opts?: { silent?: boolean; displayMessage?: string; images?: { media_type: string; data: string }[]; documents?: { media_type: string; data: string; filename: string }[] }) => {
+  const send = useCallback(async (message: string, opts?: { silent?: boolean; displayMessage?: string; images?: { media_type: string; data: string }[]; documents?: { media_type: string; data: string; filename: string }[]; forceTool?: string }) => {
     if (isStreaming || !session) return;
     const silent = opts?.silent ?? false;
 
@@ -1911,6 +1911,7 @@ function BrainDeployInner() {
         ...(conversationIdRef.current && { conversation_id: conversationIdRef.current }),
         ...(opts?.images && opts.images.length > 0 && { images: opts.images }),
         ...(opts?.documents && opts.documents.length > 0 && { documents: opts.documents }),
+        ...(opts?.forceTool && { force_tool: opts.forceTool }),
       });
 
       const brainUrl = "https://brain-production-61da.up.railway.app/v1/brain/chat";
@@ -2759,130 +2760,56 @@ function BrainDeployInner() {
     setMobileSidebarOpen(false);
   };
 
-  // Direct-action helpers for the TODAY queue. Zero chat inject, zero
-  // main-chat LLM routing — endpoint returns a deterministic result,
-  // we append it directly to the chat log. Justin's rule (2026-07-03):
-  // click → agent goes to work.
+  // TODAY queue direct-action helpers.
+  //
+  // Route through the normal chat send() with a hidden user message +
+  // forceTool. Result:
+  //   - LLM's tool_choice is pinned to the specific tool (deterministic
+  //     — no routing risk)
+  //   - Response streams through the standard chat pipeline
+  //   - Message persists to conversation history (survives refresh —
+  //     this is what the DOM-append approach was missing)
+  //   - Rich LLM synthesis of the result, same as when the tool fires
+  //     from a normal chat turn
+  //
+  // Justin's rule stays intact: click → agent goes to work. No chat
+  // inject in the input, no populate-then-send. The user message is
+  // silent — founder sees only the assistant response.
   //
   // Plain functions (NOT useCallback) — they live AFTER conditional
   // early returns above (loading + !session), so calling a hook here
-  // would violate rules of hooks. Regenerating per-render is fine;
-  // FounderSidebar's re-render impact is negligible.
+  // would violate rules of hooks.
   const queuePrepFor = async (slug: string) => {
-    if (!messagesInnerRef.current || !session) return;
     setMobileSidebarOpen(false);
-    // Append a loading bubble first so the founder sees immediate feedback.
-    const loading = document.createElement("div");
-    loading.className = "message assistant";
-    loading.innerHTML = `<div class="content"><em style="color:#71717a;">Prepping…</em></div>`;
-    messagesInnerRef.current.appendChild(loading);
-    requestAnimationFrame(() => loading.scrollIntoView({ behavior: "smooth", block: "center" }));
-    try {
-      const headers: Record<string, string> = {
-        Authorization: `Bearer ${session.access_token}`,
-        "Content-Type": "application/json",
-      };
-      if (impersonating) headers["X-Impersonate"] = impersonating;
-      const res = await fetch(`/v1/brain/queue/prep/${encodeURIComponent(slug)}`, {
-        method: "POST",
-        headers,
-      });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        loading.innerHTML = `<div class="content"><span style="color:#fca5a5;">Prep failed: ${body.detail || res.status}</span></div>`;
-        return;
-      }
-      loading.innerHTML = `<div class="content">${formatMarkdown(body.text || "")}</div>`;
-      requestAnimationFrame(() => loading.scrollIntoView({ behavior: "smooth", block: "center" }));
-    } catch (e) {
-      loading.innerHTML = `<div class="content"><span style="color:#fca5a5;">Prep failed: ${e instanceof Error ? e.message : "unknown error"}</span></div>`;
-    }
+    // Silent user message + forceTool=prepare_for_meeting. Result persists
+    // to conversation history via the normal chat pipeline (survives
+    // refresh — the DOM-only approach was the bug Justin caught).
+    await send(`Prep me for the meeting with investor slug: ${slug}`, {
+      silent: true,
+      forceTool: "prepare_for_meeting",
+    });
   };
 
   const queueDraftFollowupFor = async (slug: string) => {
-    if (!messagesInnerRef.current || !session) return;
     setMobileSidebarOpen(false);
-    const loading = document.createElement("div");
-    loading.className = "message assistant";
-    loading.innerHTML = `<div class="content"><em style="color:#71717a;">Drafting follow-up…</em></div>`;
-    messagesInnerRef.current.appendChild(loading);
-    requestAnimationFrame(() => loading.scrollIntoView({ behavior: "smooth", block: "center" }));
-    try {
-      const headers: Record<string, string> = {
-        Authorization: `Bearer ${session.access_token}`,
-        "Content-Type": "application/json",
-      };
-      if (impersonating) headers["X-Impersonate"] = impersonating;
-      const res = await fetch(
-        `/v1/brain/queue/draft_followup/${encodeURIComponent(slug)}`,
-        { method: "POST", headers },
-      );
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        loading.innerHTML = `<div class="content"><span style="color:#fca5a5;">Draft failed: ${body.detail || res.status}</span></div>`;
-        return;
-      }
-      // Replace loading bubble with the outreach preview card.
-      loading.innerHTML = "";
-      renderOutreachDraftCard(
-        {
-          investor_slug: body.investor_slug,
-          investor_name: body.investor_name,
-          investor_firm: body.investor_firm,
-          to_email: body.to_email || "",
-          missing_email: !!body.missing_email,
-          subject: body.subject,
-          body: body.body,
-          original_subject: body.original_subject || body.subject,
-          original_body: body.original_body || body.body,
-          brief_token: body.brief_token || null,
-          brief_url: body.brief_url || null,
-          deck_url: body.deck_url || null,
-          connected_email: body.connected_email || null,
-        },
-        loading,
-        session,
-        impersonating,
-      );
-      requestAnimationFrame(() => loading.scrollIntoView({ behavior: "smooth", block: "center" }));
-    } catch (e) {
-      loading.innerHTML = `<div class="content"><span style="color:#fca5a5;">Draft failed: ${e instanceof Error ? e.message : "unknown error"}</span></div>`;
-    }
+    await send(`Draft a follow-up email to investor slug: ${slug}`, {
+      silent: true,
+      forceTool: "draft_outreach",
+    });
   };
 
-  // TODAY queue: Pull matches direct action. Hits /queue/match, refetches
-  // sidebar so the panel populates.
+  // TODAY queue: Pull matches — routed through chat send with forced
+  // tool_choice. Response streams through the standard chat pipeline,
+  // gets persisted, survives refresh. Same rich output as when
+  // match_investors fires from a normal chat turn.
   const queuePullMatches = async () => {
-    if (!messagesInnerRef.current || !session) return;
     setMobileSidebarOpen(false);
-    const loading = document.createElement("div");
-    loading.className = "message assistant";
-    loading.innerHTML = `<div class="content"><em style="color:#71717a;">Pulling matches…</em></div>`;
-    messagesInnerRef.current.appendChild(loading);
-    requestAnimationFrame(() => loading.scrollIntoView({ behavior: "smooth", block: "center" }));
-    try {
-      const headers: Record<string, string> = {
-        Authorization: `Bearer ${session.access_token}`,
-        "Content-Type": "application/json",
-      };
-      if (impersonating) headers["X-Impersonate"] = impersonating;
-      const res = await fetch(`/v1/brain/queue/match`, {
-        method: "POST",
-        headers,
-      });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        loading.innerHTML = `<div class="content"><span style="color:#fca5a5;">Match run failed: ${body.detail || res.status}</span></div>`;
-        return;
-      }
-      const count = body.matches_count ?? 0;
-      loading.innerHTML = `<div class="content"><strong>Matches ready.</strong> ${count} investor${count === 1 ? "" : "s"} surfaced. Open the Matches panel to review.</div>`;
-      // Refetch sidebar + matches so the panel populates immediately.
-      window.dispatchEvent(new CustomEvent("raisefn:matches_updated"));
-      requestAnimationFrame(() => loading.scrollIntoView({ behavior: "smooth", block: "center" }));
-    } catch (e) {
-      loading.innerHTML = `<div class="content"><span style="color:#fca5a5;">Match run failed: ${e instanceof Error ? e.message : "unknown error"}</span></div>`;
-    }
+    await send("Pull my investor matches now.", {
+      silent: true,
+      forceTool: "match_investors",
+    });
+    // Sidebar Matches count + panel refetch on tool result — the SSE
+    // handler dispatches raisefn:matches_updated on tool_result events.
   };
 
   // TODAY queue: Connect Gmail (or reconnect for Calendar scope).

@@ -341,7 +341,7 @@ export function TodayQueue({
         )}
       </div>
       {items.length === 0 ? (
-        <div className="sb-today-empty">Nothing to handle right now.</div>
+        <div className="sb-today-empty">No new signals from our actions yet.</div>
       ) : (
         <ul className="sb-today-list">
           {items.map((item) => (
