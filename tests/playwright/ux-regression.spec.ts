@@ -73,56 +73,9 @@ test.describe("sidebar reorder + collapsibles", () => {
   });
 });
 
-test.describe("Next up pill states", () => {
-  test("state: no-deck — pill prompts upload", async ({ page }) => {
-    await mockSidebarState(page, { documents: [], matches: { total_unique: 0, batches_count: 0, latest_batch: null } });
-    await page.goto("/brain/deploy");
-    const pill = page.locator(".nextup");
-    await expect(pill).toBeVisible({ timeout: 15_000 });
-    await expect(pill).toContainText(/Upload your deck/i);
-  });
-
-  test("state: no-matches — pill prompts pull matches", async ({ page }) => {
-    await mockSidebarState(page, {
-      documents: [{ id: "d1", filename: "deck.pdf", doc_type: "deck", created_at: new Date().toISOString() }],
-      matches: { total_unique: 0, batches_count: 0, latest_batch: null },
-    });
-    await page.goto("/brain/deploy");
-    const pill = page.locator(".nextup");
-    await expect(pill).toBeVisible({ timeout: 15_000 });
-    await expect(pill).toContainText(/[Pp]ull matches/i);
-  });
-
-  test("state: no-briefs — pill prompts brief generation", async ({ page }) => {
-    await mockSidebarState(page, {
-      documents: [{ id: "d1", filename: "deck.pdf", doc_type: "deck", created_at: new Date().toISOString() }],
-      matches: { total_unique: 5, batches_count: 1, latest_batch: null },
-      briefs: [],
-    });
-    await page.goto("/brain/deploy");
-    const pill = page.locator(".nextup");
-    await expect(pill).toBeVisible({ timeout: 15_000 });
-    await expect(pill).toContainText(/brief/i);
-  });
-
-  test("state: new-signal — pill has HIGHEST priority even with other work pending", async ({ page }) => {
-    // Simulate a founder with NO deck (would normally be no-deck state)
-    // + an unack signal. The pill must show new-signal, not no-deck.
-    await mockSidebarState(page, {
-      documents: [],
-      matches: { total_unique: 0, batches_count: 0, latest_batch: null },
-      signals_unack_count: 1,
-    });
-    await page.goto("/brain/deploy");
-    const pill = page.locator(".nextup");
-    await expect(pill).toBeVisible({ timeout: 15_000 });
-    await expect(pill.locator(".nextup-label")).toContainText(/New signal/i);
-    // Action button should read Open signals
-    await expect(pill.locator(".nextup-action")).toContainText(/Open signals/i);
-  });
-
-  test("state: current — pill enters done state with no action button", async ({ page }) => {
-    // Everything done: deck, matches, briefs, active pipeline, no stale, no meetings.
+test.describe("TODAY queue in sidebar", () => {
+  test("Empty state renders 'Nothing to handle' when no attention items", async ({ page }) => {
+    // Documents + matches + briefs + recent pipeline, no signals, no meetings, no stale.
     await mockSidebarState(page, {
       documents: [{ id: "d1", filename: "deck.pdf", doc_type: "deck", created_at: new Date().toISOString() }],
       matches: { total_unique: 3, batches_count: 1, latest_batch: null },
@@ -134,18 +87,65 @@ test.describe("Next up pill states", () => {
           name: "Test Investor",
           firm: "Fund",
           status: "outreached",
-          days_since_update: 2, // recent
+          days_since_update: 2,
           meeting_scheduled_for: null,
         },
       ],
       signals_unack_count: 0,
     });
     await page.goto("/brain/deploy");
-    const pill = page.locator(".nextup");
-    await expect(pill).toBeVisible({ timeout: 15_000 });
-    await expect(pill).toHaveClass(/nextup-done/);
-    // No action button in done state
-    await expect(pill.locator(".nextup-action")).toHaveCount(0);
+    await expect(page.locator(".sb-today")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator(".sb-today-empty")).toContainText(/Nothing to handle/i);
+  });
+
+  test("Unacked signal renders as an urgent row", async ({ page }) => {
+    await mockSidebarState(page, { signals_unack_count: 2 });
+    await page.goto("/brain/deploy");
+    const row = page.locator(".sb-today-row").first();
+    await expect(row).toBeVisible({ timeout: 15_000 });
+    await expect(row).toContainText(/signals/i);
+    await expect(row.locator(".sb-today-dot-urgent")).toBeVisible();
+  });
+
+  test("Meeting within 3 days renders an urgent prep row", async ({ page }) => {
+    const soon = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString();
+    await mockSidebarState(page, {
+      pipeline: [
+        {
+          id: "p1",
+          slug: "kaszek",
+          name: "Kaszek",
+          firm: "Kaszek Ventures",
+          status: "meeting_scheduled",
+          days_since_update: 1,
+          meeting_scheduled_for: soon,
+        },
+      ],
+    });
+    await page.goto("/brain/deploy");
+    const meetingRow = page.locator(".sb-today-row").filter({ hasText: /Prep for Kaszek/i });
+    await expect(meetingRow).toBeVisible({ timeout: 15_000 });
+    await expect(meetingRow.locator(".sb-today-dot-urgent")).toBeVisible();
+  });
+
+  test("Stale outreach renders a warm follow-up row", async ({ page }) => {
+    await mockSidebarState(page, {
+      pipeline: [
+        {
+          id: "p1",
+          slug: "sarah",
+          name: "Sarah Chen",
+          firm: "Foundry",
+          status: "outreached",
+          days_since_update: 12,
+          meeting_scheduled_for: null,
+        },
+      ],
+    });
+    await page.goto("/brain/deploy");
+    const staleRow = page.locator(".sb-today-row").filter({ hasText: /Follow up/i });
+    await expect(staleRow).toBeVisible({ timeout: 15_000 });
+    await expect(staleRow.locator(".sb-today-dot-warm")).toBeVisible();
   });
 });
 

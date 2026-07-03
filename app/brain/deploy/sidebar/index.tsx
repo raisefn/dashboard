@@ -5,6 +5,7 @@ import type { Session } from "@supabase/supabase-js";
 
 import { SidebarSection } from "./section";
 import { MyRaise } from "./my-raise";
+import { TodayQueue } from "./today-queue";
 import { SIDEBAR_CSS } from "./styles";
 import type { SidebarState } from "./types";
 import type { Panel } from "../panels";
@@ -238,6 +239,17 @@ export function FounderSidebar({
       <style>{SIDEBAR_CSS}</style>
 
       {adminHeader && <div className="sb-admin-header">{adminHeader}</div>}
+
+      {/* TODAY queue — the spine of the workspace. Every item is one
+       * concrete thing that needs the founder's attention right now.
+       * Replaces the "Next up" pill (killed 2026-07-03). Linear "My
+       * Issues" pattern applied to fundraising. */}
+      <TodayQueue
+        state={state}
+        signalsUnackCount={state?.signals_unack_count ?? 0}
+        openPanel={openPanel}
+        injectChatPrompt={injectChatPrompt}
+      />
 
       <SidebarSection title="My Raise">
         <MyRaise campaign={state?.campaign || null} onInjectPrompt={injectChatPrompt} />
