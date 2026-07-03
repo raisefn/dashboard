@@ -2895,6 +2895,7 @@ function BrainDeployInner() {
             session={session}
             impersonating={impersonating}
             onAction={injectChatPrompt}
+            onOpenPanel={(kind) => openPanel({ kind })}
           />
 
         <div className="messages-container" ref={messagesRef}>
