@@ -129,12 +129,12 @@ export function SignalsPanel({
       <>
         <style>{SIG_PANEL_CSS}</style>
         <div className="sig-panel-empty">
-          <div className="sig-panel-empty-icon" aria-hidden>📡</div>
-          <div className="sig-panel-empty-title">All caught up</div>
+          <div className="sig-panel-empty-title">Nothing surfaced yet.</div>
           <div className="sig-panel-empty-body">
-            No new signals since you last checked. When investors view your
-            briefs or send replies, the activity shows up here.
+            Signals show up when investors on your radar view a brief, reply,
+            or move on something in your space.
           </div>
+          <div className="sig-panel-empty-cmd">nothing to do — I&apos;ll ping you</div>
         </div>
       </>
     );
@@ -191,12 +191,22 @@ const SIG_PANEL_CSS = `
     padding: 48px 24px; text-align: center;
     display: flex; flex-direction: column; align-items: center; gap: 10px;
   }
-  .sig-panel-empty-icon { font-size: 32px; opacity: 0.6; }
   .sig-panel-empty-title {
     font-size: 14px; font-weight: 600; color: #d4d4d8;
   }
   .sig-panel-empty-body {
     font-size: 12px; color: #71717a; line-height: 1.5; max-width: 320px;
+  }
+  .sig-panel-empty-cmd {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 6px 12px;
+    background: rgba(249, 115, 22, 0.1);
+    color: #f97316;
+    border: 1px solid rgba(249, 115, 22, 0.25);
+    border-radius: 6px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
   }
   .sig-panel-list { display: flex; flex-direction: column; gap: 10px; }
   .sig-panel-card {

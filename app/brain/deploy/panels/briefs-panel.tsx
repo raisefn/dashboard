@@ -230,8 +230,9 @@ export function BriefsPanel({ session, impersonating, onOpenPanel }: BriefsPanel
 
       {list.length === 0 ? (
         <div className="bp-empty">
-          <p className="bp-empty-title">Your investor briefs will show up here.</p>
-          <p className="bp-empty-sub">One-page research on any investor — thesis, check size, warm-intro paths — tailored to your raise. Ask raise(fn) to &quot;generate a brief on [name]&quot; to get started.</p>
+          <p className="bp-empty-title">No briefs yet.</p>
+          <p className="bp-empty-sub">Pick a match you like and I&apos;ll draft a one-pager tuned to their thesis.</p>
+          <p className="bp-empty-cmd">try: &quot;brief [investor name]&quot;</p>
         </div>
       ) : (
         groups.map(group => (
@@ -323,7 +324,18 @@ const BRIEFS_PANEL_CSS = `
     text-align: center;
   }
   .bp-empty-title { margin: 0 0 6px; font-size: 14px; color: #d4d4d8; }
-  .bp-empty-sub { margin: 0; font-size: 12px; color: #71717a; }
+  .bp-empty-sub { margin: 0 0 14px; font-size: 12px; color: #71717a; }
+  .bp-empty-cmd {
+    display: inline-block;
+    margin: 0;
+    padding: 6px 12px;
+    background: rgba(249, 115, 22, 0.1);
+    color: #f97316;
+    border: 1px solid rgba(249, 115, 22, 0.25);
+    border-radius: 6px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+  }
 
   .bp-group { margin-bottom: 24px; }
   .bp-group-title {

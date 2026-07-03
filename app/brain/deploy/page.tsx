@@ -9,6 +9,7 @@ import { wallCardLeadin } from "@/lib/upgrade-card-copy";
 import type { Session } from "@supabase/supabase-js";
 import { formatMarkdown } from "@/lib/format-markdown";
 import { FounderSidebar } from "./sidebar";
+import { NextUpPill } from "./next-up-pill";
 import { PanelHost, usePanelState } from "./panels";
 
 const ADMIN_EMAILS = ["justin@raisefn.com", "justinpetsche@gmail.com"];
@@ -852,11 +853,6 @@ const BRAIN_CSS = `
   .brain-main-dragging {
     box-shadow: inset 0 0 0 2px rgba(45, 212, 191, 0.55);
     background-color: rgba(45, 212, 191, 0.04);
-  }
-
-  .brain-canvas {
-    position: absolute; inset: 0;
-    z-index: 0;
   }
 
   /* Center UI */
@@ -2894,7 +2890,12 @@ function BrainDeployInner() {
           >
             ☰
           </button>
-          <canvas className="brain-canvas" ref={canvasRef} />
+
+          <NextUpPill
+            session={session}
+            impersonating={impersonating}
+            onAction={injectChatPrompt}
+          />
 
         <div className="messages-container" ref={messagesRef}>
           <div className="messages-inner" ref={messagesInnerRef} />
