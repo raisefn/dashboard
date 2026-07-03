@@ -243,9 +243,9 @@ export function SignalsPanel({
           <div className="sig-panel-empty-title">Nothing surfaced yet.</div>
           <div className="sig-panel-empty-body">
             Signals show up when investors on your radar view a brief, reply,
-            or move on something in your space.
+            or move on something in your space. Nothing to do — I&apos;ll ping
+            you when something moves.
           </div>
-          <div className="sig-panel-empty-cmd">nothing to do — I&apos;ll ping you</div>
         </div>
       </>
     );
@@ -456,18 +456,7 @@ const SIG_PANEL_CSS = `
     font-size: 14px; font-weight: 600; color: #d4d4d8;
   }
   .sig-panel-empty-body {
-    font-size: 12px; color: #71717a; line-height: 1.5; max-width: 320px;
-  }
-  .sig-panel-empty-cmd {
-    display: inline-block;
-    margin-top: 6px;
-    padding: 6px 12px;
-    background: rgba(249, 115, 22, 0.1);
-    color: #f97316;
-    border: 1px solid rgba(249, 115, 22, 0.25);
-    border-radius: 6px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 12px;
+    font-size: 12px; color: #71717a; line-height: 1.5; max-width: 360px;
   }
   .sig-panel-list { display: flex; flex-direction: column; gap: 10px; }
   .sig-panel-card {

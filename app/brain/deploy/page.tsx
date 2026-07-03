@@ -2850,6 +2850,64 @@ function BrainDeployInner() {
     }
   };
 
+  // TODAY queue: Pull matches direct action. Hits /queue/match, refetches
+  // sidebar so the panel populates.
+  const queuePullMatches = async () => {
+    if (!messagesInnerRef.current || !session) return;
+    setMobileSidebarOpen(false);
+    const loading = document.createElement("div");
+    loading.className = "message assistant";
+    loading.innerHTML = `<div class="content"><em style="color:#71717a;">Pulling matches…</em></div>`;
+    messagesInnerRef.current.appendChild(loading);
+    requestAnimationFrame(() => loading.scrollIntoView({ behavior: "smooth", block: "center" }));
+    try {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch(`/v1/brain/queue/match`, {
+        method: "POST",
+        headers,
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        loading.innerHTML = `<div class="content"><span style="color:#fca5a5;">Match run failed: ${body.detail || res.status}</span></div>`;
+        return;
+      }
+      const count = body.matches_count ?? 0;
+      loading.innerHTML = `<div class="content"><strong>Matches ready.</strong> ${count} investor${count === 1 ? "" : "s"} surfaced. Open the Matches panel to review.</div>`;
+      // Refetch sidebar + matches so the panel populates immediately.
+      window.dispatchEvent(new CustomEvent("raisefn:matches_updated"));
+      requestAnimationFrame(() => loading.scrollIntoView({ behavior: "smooth", block: "center" }));
+    } catch (e) {
+      loading.innerHTML = `<div class="content"><span style="color:#fca5a5;">Match run failed: ${e instanceof Error ? e.message : "unknown error"}</span></div>`;
+    }
+  };
+
+  // TODAY queue: Connect Gmail (or reconnect for Calendar scope).
+  // Fires the existing OAuth authorize endpoint that returns a Google
+  // authorize_url; full-page redirect to Google, then Google redirects
+  // back to /brain/deploy?connection_status=connected&provider=gmail.
+  const queueConnectGmail = async () => {
+    if (!session) return;
+    try {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${session.access_token}`,
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch("/v1/brain/connections/gmail/authorize", { headers });
+      if (!res.ok) return;
+      const data = await res.json();
+      const authorizeUrl: string | undefined = data.authorize_url;
+      if (authorizeUrl) {
+        window.location.href = authorizeUrl;
+      }
+    } catch {
+      // Best-effort. Sidebar Connections section still works as a fallback.
+    }
+  };
+
   return (
     <div className="brain-root">
       <style>{BRAIN_CSS}</style>
@@ -2887,6 +2945,8 @@ function BrainDeployInner() {
             openPanel={openPanel}
             queuePrepFor={queuePrepFor}
             queueDraftFollowupFor={queueDraftFollowupFor}
+            queuePullMatches={queuePullMatches}
+            queueConnectGmail={queueConnectGmail}
             adminHeader={
               isAdmin ? (
                 <>

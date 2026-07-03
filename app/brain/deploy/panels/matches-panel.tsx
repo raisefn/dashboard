@@ -5,6 +5,67 @@ import type { Session } from "@supabase/supabase-js";
 import type { Panel } from "./use-panel-state";
 
 /**
+ * Empty-state pull button. Direct backend call to /queue/match — no
+ * chat routing. Dispatches raisefn:matches_updated on success so the
+ * panel refetches and the sidebar count updates.
+ */
+function MatchesEmptyState({
+  session,
+  impersonating,
+}: {
+  session: Session | null;
+  impersonating: string;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+
+  async function handlePull() {
+    if (!session || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      };
+      if (impersonating) headers["X-Impersonate"] = impersonating;
+      const res = await fetch("/v1/brain/queue/match", { method: "POST", headers });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(body.detail || `Match run failed (${res.status})`);
+        return;
+      }
+      setDone(true);
+      window.dispatchEvent(new CustomEvent("raisefn:matches_updated"));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Match run failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mp-empty">
+      <p className="mp-empty-title">No matches yet.</p>
+      <p className="mp-empty-sub">
+        Investors that fit your sector, stage, and check band. Pull whenever
+        your profile is fresh.
+      </p>
+      <button
+        type="button"
+        className="mp-empty-btn"
+        onClick={handlePull}
+        disabled={busy || done}
+      >
+        {busy ? "Pulling matches…" : done ? "Matches refreshing…" : "Pull matches"}
+      </button>
+      {error && <p className="mp-empty-error">{error}</p>}
+    </div>
+  );
+}
+
+/**
  * Matches list panel — the in-place replacement for /brain/matches.
  * Uses the same /v1/brain/matches/mine endpoint as the legacy page,
  * with the same batch selector + per-row Generate brief flow.
@@ -382,11 +443,7 @@ export function MatchesPanel({ session, impersonating, onOpenPanel }: MatchesPan
       {error && <div className="mp-error">{error}</div>}
 
       {!activeBatch || !hasAnyContent ? (
-        <div className="mp-empty">
-          <p className="mp-empty-title">No matches yet.</p>
-          <p className="mp-empty-sub">Once I know your sector and stage, I&apos;ll surface investors who fit.</p>
-          <p className="mp-empty-cmd">try: &quot;pull matches&quot;</p>
-        </div>
+        <MatchesEmptyState session={session} impersonating={impersonating} />
       ) : (
         <>{ordered.length > 0 && (<div className="mp-list">
           {/* M3 (2026-06-30): bucket section markers. A = observed-truth-
@@ -744,18 +801,24 @@ const MATCHES_PANEL_CSS = `
     text-align: center;
   }
   .mp-empty-title { margin: 0 0 6px; font-size: 14px; color: #d4d4d8; }
-  .mp-empty-sub { margin: 0 0 14px; font-size: 12px; color: #71717a; }
-  .mp-empty-cmd {
+  .mp-empty-sub { margin: 0 0 16px; font-size: 12px; color: #71717a; max-width: 380px; line-height: 1.5; }
+  .mp-empty-btn {
     display: inline-block;
     margin: 0;
-    padding: 6px 12px;
-    background: rgba(249, 115, 22, 0.1);
-    color: #f97316;
-    border: 1px solid rgba(249, 115, 22, 0.25);
+    padding: 8px 18px;
+    background: #f97316;
+    color: #0a0a0a;
+    border: none;
     border-radius: 6px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 12px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 150ms ease;
   }
+  .mp-empty-btn:hover:not(:disabled) { background: #fb923c; }
+  .mp-empty-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .mp-empty-error { margin: 10px 0 0; font-size: 12px; color: #fca5a5; }
 
   .mp-list {
     display: flex;

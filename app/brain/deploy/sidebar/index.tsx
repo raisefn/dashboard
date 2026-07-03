@@ -21,6 +21,10 @@ interface FounderSidebarProps {
    * outreach preview card (draft_followup). */
   queuePrepFor: (investorSlug: string) => Promise<void> | void;
   queueDraftFollowupFor: (investorSlug: string) => Promise<void> | void;
+  /** TODAY queue: Pull matches direct backend call. */
+  queuePullMatches: () => Promise<void> | void;
+  /** TODAY queue: Fire Gmail OAuth authorize (full-page redirect). */
+  queueConnectGmail: () => Promise<void> | void;
   /** Admin slot: rendered at the top of the sidebar when present.
    * Used for the "Acting as" impersonation select. */
   adminHeader?: ReactNode;
@@ -57,6 +61,8 @@ export function FounderSidebar({
   openPanel,
   queuePrepFor,
   queueDraftFollowupFor,
+  queuePullMatches,
+  queueConnectGmail,
   adminHeader,
 }: FounderSidebarProps) {
   const [state, setState] = useState<SidebarState | null>(null);
@@ -257,6 +263,18 @@ export function FounderSidebar({
         openPanel={openPanel}
         queuePrepFor={queuePrepFor}
         queueDraftFollowupFor={queueDraftFollowupFor}
+        queuePullMatches={queuePullMatches}
+        queueConnectGmail={queueConnectGmail}
+        hasGmailConnected={
+          !!gmailConnection && !gmailConnection.broken
+        }
+        hasCalendarScope={
+          !!gmailConnection &&
+          !gmailConnection.broken &&
+          (gmailConnection.scopes || []).includes(
+            "https://www.googleapis.com/auth/calendar.events",
+          )
+        }
       />
 
       <SidebarSection title="My Raise">
