@@ -151,7 +151,8 @@ export function PanelHost({ panel, onClose, onOpenPanel, onPopPanel, injectChatP
         break;
       case "sharpen": {
         title = SHARPEN_SECTION_TITLES[panel.section] || "Fine tune";
-        breadcrumbs = [{ label: "Fine tune your agent" }, { label: title }];
+        // No breadcrumbs — Justin removed these earlier and I reintroduced
+        // them by accident. Panel title + close X is enough.
         body = (
           <SharpenPanel
             sectionId={panel.section}
