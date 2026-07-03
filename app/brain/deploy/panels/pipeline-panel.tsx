@@ -324,8 +324,11 @@ export function PipelinePanel({ session, impersonating, onInjectPrompt, onOpenPa
       {total === 0 ? (
         <div className="pp-empty">
           <p className="pp-empty-title">Pipeline&apos;s empty.</p>
-          <p className="pp-empty-sub">Add investors as you have real conversations. I&apos;ll track stage and next moves.</p>
-          <p className="pp-empty-cmd">try: &quot;log a call with [investor]&quot;</p>
+          <p className="pp-empty-sub">
+            Investors you&apos;re actually in conversation with land here.
+            Tell me about a call, a warm intro, or someone you&apos;ve been
+            emailing — I&apos;ll track stage and next moves.
+          </p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="pp-empty">
@@ -467,18 +470,7 @@ const PIPELINE_PANEL_CSS = `
     text-align: center;
   }
   .pp-empty-title { margin: 0 0 6px; font-size: 14px; color: #d4d4d8; }
-  .pp-empty-sub { margin: 0 0 14px; font-size: 12px; color: #71717a; }
-  .pp-empty-cmd {
-    display: inline-block;
-    margin: 0;
-    padding: 6px 12px;
-    background: rgba(249, 115, 22, 0.1);
-    color: #f97316;
-    border: 1px solid rgba(249, 115, 22, 0.25);
-    border-radius: 6px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 12px;
-  }
+  .pp-empty-sub { margin: 0; font-size: 12px; color: #71717a; max-width: 400px; line-height: 1.5; }
 
   .pp-table {
     border: 1px solid #27272a;

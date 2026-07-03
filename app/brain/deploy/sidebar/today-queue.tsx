@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import type { SidebarState } from "./types";
 import type { Panel } from "../panels";
 
@@ -8,35 +8,50 @@ import type { Panel } from "../panels";
  * TODAY queue — Linear "My Issues" pattern for a raise.
  *
  * Every item is one thing that needs the founder's attention right now.
- * Each row is a concrete click that does the action (opens a panel or
- * teed-up chat prompt). When empty, states "nothing to handle."
+ * Each row is a concrete click that does the action. Every row also has
+ * an X to dismiss.
  *
- * Ranked by urgency:
- *   1. Unacked inbound signals (warm reply, brief view crossing)
- *   2. Meetings within 3 days
- *   3. Draft briefs waiting to send
- *   4. Follow-ups quiet 7+ days
- *   5. Meetings 3-14 days out
+ * Dismissal semantics (research-driven 2026-07-03):
+ *   - Onboarding rows: X = skip. Chain advances to next step. Persists
+ *     until state changes (upload a deck later → row was dismissed but
+ *     now irrelevant, no-op).
+ *   - Active-state rows: X = snooze 24h. Reappears next day if
+ *     underlying condition still applies. Prevents info loss.
  *
- * Cap at 8 items — beyond that, the founder has bigger problems than a
- * missing queue row. Overflow doesn't render; sidebar sections carry it.
+ * Progressive onboarding chain:
+ *   deck → matches → briefs → Gmail → Calendar
+ * Each step surfaces ONE row. If dismissed, the chain advances as if
+ * that step was handled some other way.
  *
- * Replaces the ambient "Next up" pill. Reason: floating one-item pill
- * couldn't do the ambient job (invisible when calm) or the alert job
- * (couldn't stack multiple urgent items). Queue does both cleanly.
+ * Cap at 8 items.
  */
+
+// localStorage key prefixes for dismissal state.
+const LS_ONBOARD_DISMISS_PREFIX = "raisefn:queue:dismissed:";
+const LS_ACTIVE_SNOOZE_PREFIX = "raisefn:queue:snoozed:";
+const ACTIVE_SNOOZE_MS = 24 * 60 * 60 * 1000;
 
 interface TodayQueueProps {
   state: SidebarState | null;
   signalsUnackCount: number;
   openPanel: (p: Panel) => void;
-  /** Direct actions — bypass chat routing. */
   queuePrepFor: (investorSlug: string) => Promise<void> | void;
   queueDraftFollowupFor: (investorSlug: string) => Promise<void> | void;
+  /** Fires the /queue/match backend + refetches sidebar state on success. */
+  queuePullMatches: () => Promise<void> | void;
+  /** Fires Gmail OAuth authorize flow (full-page redirect to Google). */
+  queueConnectGmail: () => Promise<void> | void;
+  /** True when Gmail is connected with a valid session. */
+  hasGmailConnected: boolean;
+  /** True when the Gmail grant includes calendar.events scope. */
+  hasCalendarScope: boolean;
 }
+
+type RowKind = "onboarding" | "active";
 
 type QueueItem = {
   key: string;
+  kind: RowKind;
   dot: "urgent" | "warm" | "cool";
   primary: string;
   secondary?: string;
@@ -45,24 +60,88 @@ type QueueItem = {
 
 const MAX_ITEMS = 8;
 
+function isOnboardDismissed(key: string): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem(LS_ONBOARD_DISMISS_PREFIX + key) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function isActiveSnoozed(key: string, now: number): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = localStorage.getItem(LS_ACTIVE_SNOOZE_PREFIX + key);
+    if (!raw) return false;
+    const until = parseInt(raw, 10);
+    if (Number.isNaN(until)) return false;
+    return until > now;
+  } catch {
+    return false;
+  }
+}
+
 export function TodayQueue({
   state,
   signalsUnackCount,
   openPanel,
   queuePrepFor,
   queueDraftFollowupFor,
+  queuePullMatches,
+  queueConnectGmail,
+  hasGmailConnected,
+  hasCalendarScope,
 }: TodayQueueProps) {
+  // Tick to force re-compute after dismissal writes to localStorage.
+  const [tick, setTick] = useState(0);
+  const bump = useCallback(() => setTick((t) => t + 1), []);
+
+  // Sweep snoozed active rows once on mount + every minute so expired
+  // snoozes drop off. Cheap — reads a handful of localStorage keys.
+  useEffect(() => {
+    const interval = setInterval(bump, 60_000);
+    return () => clearInterval(interval);
+  }, [bump]);
+
+  const dismissOnboarding = useCallback(
+    (key: string) => {
+      if (typeof window === "undefined") return;
+      try {
+        localStorage.setItem(LS_ONBOARD_DISMISS_PREFIX + key, "1");
+      } catch { /* ignore */ }
+      bump();
+    },
+    [bump],
+  );
+
+  const snoozeActive = useCallback(
+    (key: string) => {
+      if (typeof window === "undefined") return;
+      try {
+        localStorage.setItem(
+          LS_ACTIVE_SNOOZE_PREFIX + key,
+          String(Date.now() + ACTIVE_SNOOZE_MS),
+        );
+      } catch { /* ignore */ }
+      bump();
+    },
+    [bump],
+  );
+
   const items = useMemo<QueueItem[]>(() => {
     if (!state) return [];
     const out: QueueItem[] = [];
+    const now = Date.now();
+    // `tick` is a dependency so this re-runs after dismissal actions.
+    void tick;
 
-    // 1. Unacked signals — could be replies, brief views, doc views.
-    // We don't know which without querying /signals; the sidebar-state
-    // only carries the count. So the row opens the panel where the
-    // detail lives — that's the correct affordance anyway.
-    if (signalsUnackCount > 0) {
+    // ─── Active-state rows ────────────────────────────────────────
+
+    if (signalsUnackCount > 0 && !isActiveSnoozed("signals-unack", now)) {
       out.push({
         key: "signals-unack",
+        kind: "active",
         dot: "urgent",
         primary:
           signalsUnackCount === 1
@@ -73,58 +152,9 @@ export function TodayQueue({
       });
     }
 
-    // 1b. Progressive onboarding — surface THE current next step for
-    // founders who haven't completed the deck → matches → briefs →
-    // outreach on-ramp. One row at a time (not a stack of 4). Drops
-    // off automatically once the founder crosses each threshold.
-    // Only shows when there are no signals and no imminent meetings
-    // ahead — active state takes precedence over onboarding.
-    const documentsCount = state.documents?.length || 0;
-    const matchesCount = state.matches?.total_unique || 0;
-    const briefsCount = state.briefs?.length || 0;
-    const pipelineOutreachedCount = (state.pipeline || []).filter((p) => {
-      const s = (p.status || "").toLowerCase();
-      return s !== "" && s !== "identified";
-    }).length;
-    if (documentsCount === 0) {
-      out.push({
-        key: "onboard-deck",
-        dot: "urgent",
-        primary: "Upload your deck",
-        secondary: "I'll build your profile from it",
-        onClick: () => openPanel({ kind: "documents" }),
-      });
-    } else if (matchesCount === 0) {
-      out.push({
-        key: "onboard-matches",
-        dot: "urgent",
-        primary: "Pull your first matches",
-        secondary: "Investors that fit your raise",
-        onClick: () => openPanel({ kind: "matches" }),
-      });
-    } else if (briefsCount === 0) {
-      out.push({
-        key: "onboard-briefs",
-        dot: "urgent",
-        primary: "Generate your first brief",
-        secondary: "One-page pitch tuned to a specific investor",
-        onClick: () => openPanel({ kind: "matches" }),
-      });
-    } else if (pipelineOutreachedCount === 0) {
-      out.push({
-        key: "onboard-outreach",
-        dot: "urgent",
-        primary: "Send your first outreach",
-        secondary: "Reach out to a matched investor",
-        onClick: () => openPanel({ kind: "briefs" }),
-      });
-    }
-
-    const now = Date.now();
     const in3Days = now + 3 * 24 * 60 * 60 * 1000;
     const in14Days = now + 14 * 24 * 60 * 60 * 1000;
 
-    // 2. Meetings within 3 days — urgent prep.
     const meetings = (state.pipeline || [])
       .filter((p) => !!p.meeting_scheduled_for)
       .map((p) => ({ p, t: Date.parse(p.meeting_scheduled_for as string) }))
@@ -133,6 +163,8 @@ export function TodayQueue({
 
     for (const { p, t } of meetings) {
       if (t > in3Days) break;
+      const key = `meeting-soon-${p.id}`;
+      if (isActiveSnoozed(key, now)) continue;
       const dt = new Date(p.meeting_scheduled_for as string);
       const when = dt.toLocaleDateString(undefined, {
         weekday: "short",
@@ -141,12 +173,11 @@ export function TodayQueue({
       });
       const investorLabel = p.name + (p.firm ? ` (${p.firm})` : "");
       out.push({
-        key: `meeting-soon-${p.id}`,
+        key,
+        kind: "active",
         dot: "urgent",
         primary: `Prep for ${investorLabel}`,
         secondary: when,
-        // Direct action — hits /brain/queue/prep/{slug}, appends prep
-        // brief in chat log. No chat inject.
         onClick: () => {
           if (p.slug) void queuePrepFor(p.slug);
         },
@@ -154,11 +185,75 @@ export function TodayQueue({
       if (out.length >= MAX_ITEMS) return out;
     }
 
-    // 3. Draft briefs waiting to be sent — inline action from briefs panel.
-    // We don't have brief status in sidebar-state; skip for now, revisit
-    // when the state payload carries brief statuses. Placeholder ready.
+    // ─── Progressive onboarding — ONE row at a time ───────────────
+    // Chain advances if a step is dismissed. Rows drop off when state
+    // changes (deck uploaded → row gone regardless of dismissal).
 
-    // 4. Stale follow-ups — active pipeline entries quiet 7+ days.
+    const documentsCount = state.documents?.length || 0;
+    const matchesCount = state.matches?.total_unique || 0;
+    const briefsCount = state.briefs?.length || 0;
+
+    const needDeck = documentsCount === 0 && !isOnboardDismissed("onboard-deck");
+    const needMatches =
+      !needDeck && matchesCount === 0 && !isOnboardDismissed("onboard-matches");
+    const needBriefs =
+      !needDeck && !needMatches && briefsCount === 0 && !isOnboardDismissed("onboard-briefs");
+    const needGmail =
+      !needDeck && !needMatches && !needBriefs &&
+      !hasGmailConnected && !isOnboardDismissed("onboard-gmail");
+    const needCalendar =
+      !needDeck && !needMatches && !needBriefs && !needGmail &&
+      hasGmailConnected && !hasCalendarScope && !isOnboardDismissed("onboard-calendar");
+
+    if (needDeck) {
+      out.push({
+        key: "onboard-deck",
+        kind: "onboarding",
+        dot: "urgent",
+        primary: "Upload your deck",
+        secondary: "I'll build your profile from it",
+        onClick: () => openPanel({ kind: "documents" }),
+      });
+    } else if (needMatches) {
+      out.push({
+        key: "onboard-matches",
+        kind: "onboarding",
+        dot: "urgent",
+        primary: "Pull your first matches",
+        secondary: "Investors that fit your raise",
+        onClick: () => void queuePullMatches(),
+      });
+    } else if (needBriefs) {
+      out.push({
+        key: "onboard-briefs",
+        kind: "onboarding",
+        dot: "urgent",
+        primary: "Generate your first brief",
+        secondary: "One-page pitch tuned to a specific investor",
+        onClick: () => openPanel({ kind: "matches" }),
+      });
+    } else if (needGmail) {
+      out.push({
+        key: "onboard-gmail",
+        kind: "onboarding",
+        dot: "urgent",
+        primary: "Connect Gmail",
+        secondary: "So I can send outreach for you",
+        onClick: () => void queueConnectGmail(),
+      });
+    } else if (needCalendar) {
+      out.push({
+        key: "onboard-calendar",
+        kind: "onboarding",
+        dot: "urgent",
+        primary: "Enable Calendar",
+        secondary: "Reconnect Gmail to grant calendar scope",
+        onClick: () => void queueConnectGmail(),
+      });
+    }
+
+    // ─── Stale follow-ups ────────────────────────────────────────
+
     const active = (state.pipeline || []).filter((p) => {
       const s = (p.status || "").toLowerCase();
       return s !== "hard_pass" && s !== "soft_pass" && s !== "ghosted" && s !== "committed";
@@ -167,30 +262,30 @@ export function TodayQueue({
       .filter((p) => (p.days_since_update ?? 0) >= 7)
       .sort((a, b) => (b.days_since_update ?? 0) - (a.days_since_update ?? 0));
 
-    if (stale.length > 0) {
+    if (stale.length > 0 && !isActiveSnoozed("stale-followups", now)) {
       const first = stale[0];
       const rest = stale.length - 1;
       out.push({
         key: "stale-followups",
+        kind: "active",
         dot: "warm",
         primary:
           stale.length === 1
             ? `Follow up with ${first.name}`
             : `Follow up: ${first.name} +${rest} more`,
         secondary: `${first.days_since_update}d quiet`,
-        // Direct action — hits /brain/queue/draft_followup/{slug},
-        // appends outreach preview card in chat log. No chat inject.
-        // Drafts the FIRST stale investor; if there are more, founder
-        // handles them iteratively or via chat.
         onClick: () => {
           if (first.slug) void queueDraftFollowupFor(first.slug);
         },
       });
     }
 
-    // 5. Meetings 3-14 days out — cool reminder.
+    // ─── Meetings 3-14 days out — cool reminder ───────────────────
+
     for (const { p, t } of meetings) {
       if (t <= in3Days || t > in14Days) continue;
+      const key = `meeting-later-${p.id}`;
+      if (isActiveSnoozed(key, now)) continue;
       const dt = new Date(p.meeting_scheduled_for as string);
       const when = dt.toLocaleDateString(undefined, {
         weekday: "short",
@@ -199,7 +294,8 @@ export function TodayQueue({
       });
       const investorLabel = p.name + (p.firm ? ` (${p.firm})` : "");
       out.push({
-        key: `meeting-later-${p.id}`,
+        key,
+        kind: "active",
         dot: "cool",
         primary: `Meeting: ${investorLabel}`,
         secondary: when,
@@ -211,7 +307,29 @@ export function TodayQueue({
     }
 
     return out.slice(0, MAX_ITEMS);
-  }, [state, signalsUnackCount, openPanel, queuePrepFor, queueDraftFollowupFor]);
+  }, [
+    state,
+    signalsUnackCount,
+    openPanel,
+    queuePrepFor,
+    queueDraftFollowupFor,
+    queuePullMatches,
+    queueConnectGmail,
+    hasGmailConnected,
+    hasCalendarScope,
+    tick,
+  ]);
+
+  const handleDismiss = useCallback(
+    (item: QueueItem) => {
+      if (item.kind === "onboarding") {
+        dismissOnboarding(item.key);
+      } else {
+        snoozeActive(item.key);
+      }
+    },
+    [dismissOnboarding, snoozeActive],
+  );
 
   return (
     <div className="sb-today">
@@ -227,7 +345,7 @@ export function TodayQueue({
       ) : (
         <ul className="sb-today-list">
           {items.map((item) => (
-            <li key={item.key}>
+            <li key={item.key} className="sb-today-item">
               <button
                 type="button"
                 className="sb-today-row"
@@ -240,6 +358,22 @@ export function TodayQueue({
                     <span className="sb-today-secondary">{item.secondary}</span>
                   )}
                 </span>
+              </button>
+              <button
+                type="button"
+                className="sb-today-dismiss"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDismiss(item);
+                }}
+                aria-label={
+                  item.kind === "onboarding" ? "Skip this step" : "Snooze for 24 hours"
+                }
+                title={
+                  item.kind === "onboarding" ? "Skip this step" : "Snooze 24h"
+                }
+              >
+                ✕
               </button>
             </li>
           ))}
@@ -290,8 +424,21 @@ const TODAY_CSS = `
     flex-direction: column;
     gap: 2px;
   }
+  .sb-today-item {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    border-radius: 6px;
+    transition: background 150ms ease;
+  }
+  .sb-today-item:hover {
+    background: rgba(63, 63, 70, 0.4);
+  }
+  .sb-today-item:hover .sb-today-dismiss {
+    opacity: 1;
+  }
   .sb-today-row {
-    width: 100%;
+    flex: 1;
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -300,13 +447,10 @@ const TODAY_CSS = `
     border: none;
     text-align: left;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 6px 0 0 6px;
     color: inherit;
     font-family: inherit;
-    transition: background 150ms ease;
-  }
-  .sb-today-row:hover {
-    background: rgba(63, 63, 70, 0.4);
+    min-width: 0;
   }
   .sb-today-dot {
     width: 7px;
@@ -335,5 +479,24 @@ const TODAY_CSS = `
     font-size: 11px;
     color: #71717a;
     line-height: 1.3;
+  }
+  .sb-today-dismiss {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    background: none;
+    border: none;
+    color: #52525b;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 0 6px 6px 0;
+    opacity: 0;
+    transition: opacity 150ms ease, color 150ms ease;
+  }
+  .sb-today-dismiss:hover {
+    color: #d4d4d8;
   }
 `;

@@ -75,7 +75,9 @@ test.describe("sidebar reorder + collapsibles", () => {
 
 test.describe("TODAY queue in sidebar", () => {
   test("Empty state renders 'Nothing to handle' when no attention items", async ({ page }) => {
-    // Documents + matches + briefs + recent pipeline, no signals, no meetings, no stale.
+    // Documents + matches + briefs + recent pipeline + Gmail with cal scope
+    // + no signals + no meetings + no stale. Only in this fully-settled
+    // state should the queue be empty.
     await mockSidebarState(page, {
       documents: [{ id: "d1", filename: "deck.pdf", doc_type: "deck", created_at: new Date().toISOString() }],
       matches: { total_unique: 3, batches_count: 1, latest_batch: null },
@@ -93,6 +95,30 @@ test.describe("TODAY queue in sidebar", () => {
       ],
       signals_unack_count: 0,
     });
+    // Mock Gmail as connected with Calendar scope so those onboarding
+    // rows don't fire.
+    await page.route("**/v1/brain/connections", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          connections: [
+            {
+              provider: "gmail",
+              google_email: "founder@raisefn.local",
+              scopes: [
+                "https://www.googleapis.com/auth/gmail.send",
+                "https://www.googleapis.com/auth/calendar.events",
+              ],
+              connected_at: new Date().toISOString(),
+              last_used_at: null,
+              broken: false,
+              last_error: null,
+            },
+          ],
+        }),
+      }),
+    );
     await page.goto("/brain/deploy");
     await expect(page.locator(".sb-today")).toBeVisible({ timeout: 15_000 });
     await expect(page.locator(".sb-today-empty")).toContainText(/Nothing to handle/i);
@@ -177,40 +203,70 @@ test.describe("TODAY queue in sidebar", () => {
   });
 });
 
-test.describe("empty state chips (try: '<command>')", () => {
-  test("Matches panel empty state shows 'try: pull matches' chip", async ({ page }) => {
+test.describe("panel empty states", () => {
+  test("Matches panel empty state shows a real Pull matches BUTTON", async ({ page }) => {
     await page.goto("/brain/deploy");
     await expect(page.getByRole("button", { name: /Open Matches/i })).toBeVisible({ timeout: 15_000 });
     await page.getByRole("button", { name: /Open Matches/i }).click();
-    await expect(page.locator(".mp-empty-cmd")).toContainText(/pull matches/i);
+    // Real button — no chip
+    await expect(page.locator(".mp-empty-btn")).toBeVisible();
+    await expect(page.locator(".mp-empty-btn")).toContainText(/Pull matches/i);
+    // Chip removed
+    await expect(page.locator(".mp-empty-cmd")).toHaveCount(0);
   });
 
-  test("Briefs panel empty state shows 'try: brief …' chip", async ({ page }) => {
+  test("Briefs panel empty state (unchanged, still shows chip)", async ({ page }) => {
     await page.goto("/brain/deploy");
     await expect(page.getByRole("button", { name: /Open Briefs/i })).toBeVisible({ timeout: 15_000 });
     await page.getByRole("button", { name: /Open Briefs/i }).click();
     await expect(page.locator(".bp-empty-cmd")).toContainText(/brief/i);
   });
 
-  test("Pipeline panel empty state shows 'try: log a call' chip", async ({ page }) => {
+  test("Pipeline panel empty state is plain description text, no chip", async ({ page }) => {
     await page.goto("/brain/deploy");
     await expect(page.getByRole("button", { name: /Open Pipeline/i })).toBeVisible({ timeout: 15_000 });
     await page.getByRole("button", { name: /Open Pipeline/i }).click();
-    await expect(page.locator(".pp-empty-cmd")).toContainText(/log a call/i);
+    await expect(page.locator(".pp-empty-sub")).toContainText(/conversation/i);
+    await expect(page.locator(".pp-empty-cmd")).toHaveCount(0);
   });
 
-  test("Signals panel empty state shows 'nothing to do' chip", async ({ page }) => {
+  test("Signals panel empty state is plain description text, no chip", async ({ page }) => {
     await page.goto("/brain/deploy");
     await expect(page.getByRole("button", { name: /Open Signals/i })).toBeVisible({ timeout: 15_000 });
     await page.getByRole("button", { name: /Open Signals/i }).click();
-    await expect(page.locator(".sig-panel-empty-cmd")).toContainText(/nothing to do/i);
+    await expect(page.locator(".sig-panel-empty-body")).toContainText(/I['']ll ping/i);
+    await expect(page.locator(".sig-panel-empty-cmd")).toHaveCount(0);
   });
 
-  test("Documents panel empty state shows Google Slides hint", async ({ page }) => {
+  test("Documents panel empty state has drop-in-chat guidance + Google Slides", async ({ page }) => {
     await page.goto("/brain/deploy");
     await expect(page.getByRole("button", { name: /Open Documents/i })).toBeVisible({ timeout: 15_000 });
     await page.getByRole("button", { name: /Open Documents/i }).click();
-    await expect(page.locator(".docs-state-cmd")).toContainText(/Google Slides/i);
+    await expect(page.locator(".docs-state-sub")).toContainText(/Drop your deck/i);
+    await expect(page.locator(".docs-state-sub")).toContainText(/Google Slides/i);
+    await expect(page.locator(".docs-state-cmd")).toHaveCount(0);
+  });
+});
+
+test.describe("TODAY queue dismissal", () => {
+  test("Onboarding X advances the chain (dismiss Upload deck → chain proceeds)", async ({ page }) => {
+    await mockSidebarState(page, {
+      documents: [],
+      matches: { total_unique: 0, batches_count: 0, latest_batch: null },
+      briefs: [],
+      pipeline: [],
+    });
+    await page.goto("/brain/deploy");
+    const uploadRow = page.locator(".sb-today-row").filter({ hasText: /Upload your deck/i });
+    await expect(uploadRow).toBeVisible({ timeout: 15_000 });
+
+    // Click the row's dismiss (X) button
+    const uploadItem = page.locator(".sb-today-item").filter({ hasText: /Upload your deck/i });
+    await uploadItem.locator(".sb-today-dismiss").click();
+
+    // Chain advances — next onboarding row surfaces (Pull matches)
+    await expect(page.locator(".sb-today-row").filter({ hasText: /Pull your first matches/i })).toBeVisible();
+    await expect(uploadRow).toHaveCount(0);
   });
 });
 
