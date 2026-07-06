@@ -33,6 +33,58 @@ async function destinationForCurrentSession(): Promise<string> {
   return consumePostAuthDestination();
 }
 
+// Google OAuth from /raise-fund/join sets a "pendingSignupRole" flag in
+// localStorage before redirect (Google itself can't carry role
+// metadata through the OAuth flow). Here we read the flag right after
+// Supabase establishes the session, promote the user to that role via
+// updateUser, and fire the Slack ping so Justin knows an investor
+// signed up — same side effects the email/password path already had.
+async function applyPendingSignupRole(): Promise<void> {
+  if (typeof window === "undefined") return;
+  let pendingRole: string | null = null;
+  try {
+    pendingRole = localStorage.getItem("pendingSignupRole");
+  } catch {
+    return;
+  }
+  if (pendingRole !== "investor") return;
+  try { localStorage.removeItem("pendingSignupRole"); } catch { /* ignore */ }
+
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user;
+  if (!user) return;
+
+  // Idempotent: skip if role is already set (e.g. user visits /auth/callback
+  // twice, or an email-flow user re-authenticates via OAuth).
+  if (user.user_metadata?.role === "investor") return;
+
+  const nameFromGoogle =
+    (user.user_metadata?.full_name as string | undefined) ||
+    (user.user_metadata?.name as string | undefined) ||
+    user.email?.split("@")[0] ||
+    "";
+
+  await supabase.auth.updateUser({
+    data: {
+      role: "investor",
+      // Preserve name if Google provided it; fall back gracefully.
+      name: nameFromGoogle,
+    },
+  });
+
+  // Slack ping — mirrors the /api/signup call the email/password path
+  // fires from raise-fund/join. Best-effort; failures don't block.
+  fetch("/api/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: nameFromGoogle,
+      email: (user.email || "").toLowerCase(),
+      role: "investor",
+    }),
+  }).catch(() => {});
+}
+
 export default function AuthCallbackPage() {
   return (
     <Suspense fallback={<Loading />}>
@@ -79,6 +131,7 @@ function AuthCallbackInner() {
       const { data: { session: existingSession } } = await supabase.auth.getSession();
       if (existingSession) {
         const isRecovery = type === "recovery";
+        await applyPendingSignupRole();
         router.replace(isRecovery ? "/reset-password" : await destinationForCurrentSession());
         return;
       }
@@ -101,6 +154,7 @@ function AuthCallbackInner() {
           return;
         }
 
+        await applyPendingSignupRole();
         router.replace(isRecovery ? "/reset-password" : await destinationForCurrentSession());
         return;
       }
@@ -114,6 +168,7 @@ function AuthCallbackInner() {
           return;
         }
 
+        await applyPendingSignupRole();
         router.replace(isRecovery ? "/reset-password" : await destinationForCurrentSession());
         return;
       }
