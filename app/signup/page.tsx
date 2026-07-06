@@ -48,10 +48,7 @@ export default function SignupChooserPage() {
               agent sources the right investors, drafts the outreach,
               preps you for meetings, and tracks the pipeline.
             </p>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-zinc-500">
-                Free to start · 30-second signup
-              </span>
+            <div className="flex items-center justify-end">
               <span className="text-sm font-semibold text-orange-400 group-hover:text-orange-300 transition-colors">
                 Founder signup →
               </span>
@@ -74,10 +71,7 @@ export default function SignupChooserPage() {
               raising from LPs, JV partners, and backers. The agent handles
               targeting, briefs, DDQs, and pipeline to close.
             </p>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-zinc-500">
-                Free to start · 5-minute signup
-              </span>
+            <div className="flex items-center justify-end">
               <span className="text-sm font-semibold text-teal-400 group-hover:text-teal-300 transition-colors">
                 Investor signup →
               </span>
