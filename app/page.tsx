@@ -259,7 +259,7 @@ function StackDiagram() {
       label: "The Agent",
       headline: "Runs your raise alongside you.",
       interaction: "Match. Brief. Send. Track. Close.",
-      desc: "The founder-facing AI fundraising agent. Analyzes your deck, ranks the right investors, drafts briefs and outreach, tracks every reply, debriefs meetings, and closes the round with you. Every raise that runs through it makes the next one sharper — observed-truth data on who actually writes checks, how long they take, and what makes them move.",
+      desc: "The AI agent for your raise. Analyzes your materials, ranks the right investors, drafts briefs and outreach, tracks every reply, debriefs meetings, and closes the round with you. Works for founders raising for their company and investors raising a fund, deal, or SPV. Every raise that runs through it makes the next one sharper.",
       color: "#f97316",
       borderColor: "rgba(249,115,22,0.25)",
       badge: "THE PRODUCT",
@@ -585,24 +585,24 @@ export default function LandingPage() {
               Built for
             </p>
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              Founders raising. Investors connecting. Tools building.
+              Founders raising. Investors raising. Agents connecting.
             </h2>
           </div>
           <div className="mx-auto max-w-3xl grid gap-6 sm:grid-cols-3 text-center">
             {[
               {
                 who: "Founders raising",
-                what: "The agent runs your raise — matches, briefs, outreach, follow-ups, close. You stay in the room. Use it for your raise, not forever.",
+                what: "The agent runs your raise — matches, briefs, outreach, follow-ups, close. Persistent memory across sessions. Sharper the next raise, sharper the one after.",
                 color: "#2dd4bf",
               },
               {
-                who: "Investors connecting",
-                what: "Be in the network the agent recommends from. Plug your own ChatGPT or Claude in to query deal flow, draft notes, follow up — your tools, your data.",
+                who: "Investors raising",
+                what: "Venture GPs, real estate developers, syndicate leads — the agent targets the right investors, briefs you on every one, handles the DDQ, tracks pipeline through close.",
                 color: "#f97316",
               },
               {
-                who: "Tools building",
-                what: "MCP-compatible. Embed raise(fn) data + agent capabilities in your product. One connection, full raise coverage.",
+                who: "Agents connecting",
+                what: "MCP-compatible. Plug your own ChatGPT or Claude into your raise(fn) data — query your pipeline, draft the follow-up, run the raise from your tools.",
                 color: "#a78bfa",
               },
             ].map((item) => (

@@ -29,7 +29,7 @@ function FounderAssistantCard() {
         <div className="flex justify-start">
           <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 px-4 py-2.5 max-w-[85%]">
             <p className="text-zinc-300 leading-relaxed">
-              Your most recent meeting was with <span className="font-semibold text-white">Bill Trenchard (First Round)</span> on Monday. He requested a second meeting and asked for your customer reference deck. You haven&apos;t followed up yet — want me to draft an email?
+              Your most recent meeting was with <span className="font-semibold text-white">Maya Okonkwo (Compass Partners)</span> on Monday. She requested a second meeting and asked for your customer reference deck. You haven&apos;t followed up yet — want me to draft an email?
             </p>
           </div>
         </div>
@@ -43,7 +43,7 @@ function FounderAssistantCard() {
   );
 }
 
-/* ── Visual: investor asking Claude about deal flow ── */
+/* ── Visual: investor asking Claude about their fund raise ── */
 function InvestorAssistantCard() {
   return (
     <div className="rounded-2xl border border-zinc-800 overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(24,24,27,0.95), rgba(9,9,11,0.98))" }}>
@@ -54,16 +54,16 @@ function InvestorAssistantCard() {
       <div className="p-5 space-y-3 text-sm">
         <div className="flex justify-end">
           <div className="rounded-2xl bg-teal-950/40 border border-teal-900/40 px-4 py-2.5 max-w-[85%]">
-            <p className="text-zinc-200">Show me the 3 founders that hit my thesis this week.</p>
+            <p className="text-zinc-200">Which LPs replied this week? Anyone I need to follow up with?</p>
           </div>
         </div>
         <div className="flex justify-start">
           <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 px-4 py-2.5 max-w-[85%]">
-            <p className="text-zinc-300 leading-relaxed mb-2">Three founders matched 90%+ this week:</p>
+            <p className="text-zinc-300 leading-relaxed mb-2">Three replies this week — two need follow-up:</p>
             <ol className="text-zinc-400 space-y-1.5 ml-2">
-              <li><span className="text-white font-semibold">OpenBooks AI</span> — B2B SaaS, $18K MRR, 22% MoM, seed raising $2.5M</li>
-              <li><span className="text-white font-semibold">Meerkat Security</span> — secops, post-revenue, raising $3M led</li>
-              <li><span className="text-white font-semibold">Decodering</span> — devtools, $40K MRR, raising $1.5M seed</li>
+              <li><span className="text-white font-semibold">Meridian Family Office</span> — soft commit $2M, wants portfolio construction slide by Fri</li>
+              <li><span className="text-white font-semibold">Grant Halloway</span> — replied Thu, asked for updated pipeline. Not sent yet.</li>
+              <li><span className="text-white font-semibold">Blackpine Endowment</span> — DDQ submitted, next check-in end of month</li>
             </ol>
           </div>
         </div>
@@ -240,19 +240,19 @@ export default function AgentsPage() {
                 For Investors
               </p>
               <h2 className="text-3xl font-bold text-white mb-5 leading-tight">
-                Query your deal flow from anywhere.
+                Query your fund raise from anywhere.
               </h2>
               <p className="text-zinc-400 leading-relaxed mb-4">
-                Your assistant gets read-access to the founders matched to
-                your thesis, your pipeline, your meeting notes. Ask in
-                natural language; the data flows directly from raise(fn).
+                Your assistant gets read-access to your LP pipeline, meeting
+                notes, DDQ status, and outreach. Ask in natural language;
+                the data flows directly from raise(fn).
               </p>
               <ul className="text-sm text-zinc-300 space-y-2.5 mt-6">
                 {[
-                  "\"Show me the 3 founders that hit my thesis this week.\"",
-                  "\"Summarize the founders I've met that haven't moved to second meeting.\"",
-                  "\"Which of my passes still match the thesis a quarter later?\"",
-                  "\"Draft a follow-up to the OpenBooks founder.\"",
+                  "\"Which LPs replied this week?\"",
+                  "\"Summarize the LPs I've met that haven't moved to a second meeting.\"",
+                  "\"What's the status of the Blackpine DDQ?\"",
+                  "\"Draft the portfolio construction follow-up to Meridian.\"",
                 ].map((q) => (
                   <li key={q} className="flex items-start gap-3 leading-relaxed">
                     <span className="text-teal-400 text-lg leading-snug shrink-0">›</span>
@@ -316,9 +316,13 @@ export default function AgentsPage() {
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-sm text-zinc-500 mb-4">While you wait</p>
             <p className="text-zinc-300 mb-6">
-              The raise(fn) agent is already live for founders and
-              investors. Start there — your assistant will plug in when it&apos;s
-              ready.
+              The founder side of the raise(fn) agent is live today. The
+              investor agent goes live shortly — sign up at{" "}
+              <Link href="/raise-fund/join" className="text-teal-400 hover:text-teal-300 underline underline-offset-2">
+                /raise-fund/join
+              </Link>{" "}
+              to be notified. Either way, your assistant will plug in when
+              this ships.
             </p>
             <div className="flex items-center justify-center gap-4">
               <Link

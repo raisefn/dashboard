@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "For Agents — raise(fn)",
   description:
-    "Bring your AI to your raise. Connect your personal ChatGPT, Claude, or any AI assistant directly to your raise(fn) data. Founders query their pipeline. Investors query their deal flow. Coming soon — join the waitlist.",
+    "Connect your personal ChatGPT, Claude, or any AI assistant directly to your raise(fn) data. Founders and investors query their raise from any tool. Coming soon — join the waitlist.",
   alternates: { canonical: "/agents" },
   openGraph: {
     title: "For Agents — raise(fn)",

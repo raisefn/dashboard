@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "raise(fn) — The fundraising agent for founders",
-  description: "The AI fundraising agent for founders. Runs the raise alongside you.",
+  title: "raise(fn) — The AI agent for your raise",
+  description: "The AI agent for your raise. Whether you're a founder raising for your company or an investor raising a fund, deal, or SPV — raise(fn) runs the raise alongside you.",
   metadataBase: new URL("https://www.raisefn.com"),
 };
 
