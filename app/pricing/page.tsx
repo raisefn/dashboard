@@ -72,6 +72,12 @@ export default function PricingPage() {
   async function startCheckout(tier: CheckoutTier, opts?: { fromAutoResume?: boolean }) {
     setCheckoutError(null);
     const audience = tier.startsWith("founder") ? "founder" : "investor";
+    // Unauthed users route to the AUDIENCE-specific signup form —
+    // not the /signup chooser. They already picked their audience by
+    // clicking Get Founder / Get Investor; sending them back to a
+    // chooser is friction. After signup, the ?after= intent bounces
+    // them back to /pricing?checkout=resume-<audience> to complete.
+    const signupPath = audience === "founder" ? "/signup/founder" : "/raise-fund/join";
     let token: string | null = null;
     if (opts?.fromAutoResume) {
       token = await waitForSession(5000);
@@ -80,7 +86,7 @@ export default function PricingPage() {
       token = session?.access_token ?? null;
     }
     if (!token) {
-      router.push(`/signup?after=upgrade-${audience}`);
+      router.push(`${signupPath}?after=upgrade-${audience}`);
       return;
     }
 
@@ -95,7 +101,7 @@ export default function PricingPage() {
         body: JSON.stringify({ tier }),
       });
       if (res.status === 401) {
-        router.push(`/signup?after=upgrade-${audience}`);
+        router.push(`${signupPath}?after=upgrade-${audience}`);
         return;
       }
       const data = await res.json();

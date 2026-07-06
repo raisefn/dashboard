@@ -1807,8 +1807,11 @@ function BrainDeployInner() {
         const originalLabel = btn.textContent || "";
         // Auth intent value uses the audience (founder | investor), not
         // the cadence — cadence is preserved by re-selecting the same
-        // tier when the user comes back from signup.
+        // tier when the user comes back from signup. Unauthed users route
+        // to the audience-specific signup form, not the /signup chooser
+        // (they already picked audience by clicking a specific CTA).
         const audience = tier.startsWith("investor") ? "investor" : "founder";
+        const signupPath = audience === "investor" ? "/raise-fund/join" : "/signup/founder";
         btn.addEventListener("click", async () => {
           const { data: { session: freshSession } } = await supabase.auth.getSession();
           const token = freshSession?.access_token;
@@ -1816,7 +1819,7 @@ function BrainDeployInner() {
             try {
               localStorage.setItem("pendingPostAuthIntent", `upgrade-${audience}`);
             } catch { /* ignore */ }
-            router.push(`/signup?after=upgrade-${audience}`);
+            router.push(`${signupPath}?after=upgrade-${audience}`);
             return;
           }
           btn.disabled = true;
@@ -1834,7 +1837,7 @@ function BrainDeployInner() {
               try {
                 localStorage.setItem("pendingPostAuthIntent", `upgrade-${audience}`);
               } catch { /* ignore */ }
-              router.push(`/signup?after=upgrade-${audience}`);
+              router.push(`${signupPath}?after=upgrade-${audience}`);
               return;
             }
             const data = await res.json();
