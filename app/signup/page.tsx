@@ -25,9 +25,8 @@ export default function SignupChooserPage() {
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
             What are you raising?
           </h1>
-          <p className="text-base text-zinc-400 max-w-xl mx-auto leading-relaxed">
-            raise(fn) runs the raise with you. Pick your path — the agent
-            asks different questions depending on what you&apos;re raising.
+          <p className="text-sm text-zinc-500">
+            Free to start · 30-second signup
           </p>
         </div>
 
