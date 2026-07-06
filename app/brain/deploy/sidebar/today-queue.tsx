@@ -30,6 +30,12 @@ import type { Panel } from "../panels";
 const LS_ONBOARD_DISMISS_PREFIX = "raisefn:queue:dismissed:";
 const LS_ACTIVE_SNOOZE_PREFIX = "raisefn:queue:snoozed:";
 const ACTIVE_SNOOZE_MS = 24 * 60 * 60 * 1000;
+// Onboarding dismissals expire after 7 days so account resets (via
+// scripts/reset_founder_data.py) don't strand the founder with a
+// silent queue. Pre-fix (2026-07-03), dismissing "Upload your deck"
+// once left it hidden forever; nuking + re-signing-up left the founder
+// staring at an empty TODAY section wondering what to do next.
+const ONBOARD_DISMISS_MS = 7 * 24 * 60 * 60 * 1000;
 
 interface TodayQueueProps {
   state: SidebarState | null;
@@ -60,10 +66,27 @@ type QueueItem = {
 
 const MAX_ITEMS = 8;
 
-function isOnboardDismissed(key: string): boolean {
+function isOnboardDismissed(key: string, now: number): boolean {
   if (typeof window === "undefined") return false;
   try {
-    return localStorage.getItem(LS_ONBOARD_DISMISS_PREFIX + key) === "1";
+    const raw = localStorage.getItem(LS_ONBOARD_DISMISS_PREFIX + key);
+    if (!raw) return false;
+    // Legacy value from before 7-day expiry landed. Treat as
+    // dismissed-at-epoch-0 so it expires immediately on the next
+    // check (the account has been around long enough to warrant a
+    // fresh reminder anyway).
+    if (raw === "1") {
+      try { localStorage.removeItem(LS_ONBOARD_DISMISS_PREFIX + key); } catch { /* ignore */ }
+      return false;
+    }
+    const dismissedAt = parseInt(raw, 10);
+    if (Number.isNaN(dismissedAt)) return false;
+    if (now - dismissedAt > ONBOARD_DISMISS_MS) {
+      // Expired — clean up so localStorage doesn't accumulate.
+      try { localStorage.removeItem(LS_ONBOARD_DISMISS_PREFIX + key); } catch { /* ignore */ }
+      return false;
+    }
+    return true;
   } catch {
     return false;
   }
@@ -108,7 +131,10 @@ export function TodayQueue({
     (key: string) => {
       if (typeof window === "undefined") return;
       try {
-        localStorage.setItem(LS_ONBOARD_DISMISS_PREFIX + key, "1");
+        // Persist as timestamp instead of "1" so isOnboardDismissed can
+        // expire it after ONBOARD_DISMISS_MS (7 days). This prevents
+        // account-reset stranding.
+        localStorage.setItem(LS_ONBOARD_DISMISS_PREFIX + key, String(Date.now()));
       } catch { /* ignore */ }
       bump();
     },
@@ -193,17 +219,17 @@ export function TodayQueue({
     const matchesCount = state.matches?.total_unique || 0;
     const briefsCount = state.briefs?.length || 0;
 
-    const needDeck = documentsCount === 0 && !isOnboardDismissed("onboard-deck");
+    const needDeck = documentsCount === 0 && !isOnboardDismissed("onboard-deck", now);
     const needMatches =
-      !needDeck && matchesCount === 0 && !isOnboardDismissed("onboard-matches");
+      !needDeck && matchesCount === 0 && !isOnboardDismissed("onboard-matches", now);
     const needBriefs =
-      !needDeck && !needMatches && briefsCount === 0 && !isOnboardDismissed("onboard-briefs");
+      !needDeck && !needMatches && briefsCount === 0 && !isOnboardDismissed("onboard-briefs", now);
     const needGmail =
       !needDeck && !needMatches && !needBriefs &&
-      !hasGmailConnected && !isOnboardDismissed("onboard-gmail");
+      !hasGmailConnected && !isOnboardDismissed("onboard-gmail", now);
     const needCalendar =
       !needDeck && !needMatches && !needBriefs && !needGmail &&
-      hasGmailConnected && !hasCalendarScope && !isOnboardDismissed("onboard-calendar");
+      hasGmailConnected && !hasCalendarScope && !isOnboardDismissed("onboard-calendar", now);
 
     if (needDeck) {
       out.push({
