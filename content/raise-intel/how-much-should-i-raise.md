@@ -3,7 +3,7 @@ title: "How much should I raise?"
 description: "You're asking the wrong question. The right one is: what's the smallest amount that gets you to the next credible milestone plus six months of buffer? Everything above that is dilution. Everything below is round risk."
 published_at: "2026-07-06"
 updated_at: "2026-07-06"
-status: "published"
+status: "draft"
 category: "round-structure"
 tags: ["raise-amount", "round-sizing", "runway", "dilution", "pre-seed", "seed"]
 fund_slugs: []
