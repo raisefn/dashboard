@@ -256,7 +256,7 @@ export default function FoundersPage() {
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
             <Link
-              href="/signup"
+              href="/signup/founder"
               className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
             >
               Set up your agent →
@@ -518,7 +518,7 @@ export default function FoundersPage() {
             </p>
             <div className="flex items-center justify-center gap-4">
               <Link
-                href="/signup"
+                href="/signup/founder"
                 className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
               >
                 Set up your agent →

@@ -414,7 +414,7 @@ export default function HowWeLearnPage() {
       <section className="relative pt-16 pb-32 px-4">
         <div className="mx-auto max-w-2xl text-center">
           <Link
-            href="/signup"
+            href="/signup/founder"
             className="inline-flex items-center justify-center rounded-full bg-orange-600 px-10 py-4 text-sm font-bold tracking-wide text-white transition-all hover:bg-orange-500 hover:scale-105 shadow-2xl shadow-orange-900/40"
           >
             Set up your agent →

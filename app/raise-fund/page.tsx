@@ -27,7 +27,7 @@ function LPMatchCard() {
   return (
     <div className="rounded-2xl border border-zinc-800 overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(24,24,27,0.95), rgba(9,9,11,0.98))" }}>
       <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/80">
-        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">Top LP targets — Fund II, $18M target</span>
+        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">Top investor targets — Fund II, $18M target</span>
         <span className="text-[10px] text-teal-500/60 font-semibold tracking-widest uppercase">Live</span>
       </div>
       <div className="p-4 space-y-2.5">
@@ -64,7 +64,7 @@ function LPPipelineCard() {
   return (
     <div className="rounded-2xl border border-zinc-800 overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(24,24,27,0.95), rgba(9,9,11,0.98))" }}>
       <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/80">
-        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">LP pipeline — Captured as you work</span>
+        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">Investor pipeline — Captured as you work</span>
         <span className="text-[10px] text-teal-500/60 font-semibold tracking-widest uppercase">4 open</span>
       </div>
       <div className="p-4 space-y-2.5">
@@ -91,7 +91,7 @@ function LPBriefPreviewCard() {
   return (
     <div className="rounded-2xl border border-zinc-800 overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(24,24,27,0.95), rgba(9,9,11,0.98))" }}>
       <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/80">
-        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">LP brief · Confidential</span>
+        <span className="text-[11px] text-zinc-500 font-medium tracking-wide">Investor brief · Confidential</span>
         <span className="text-[10px] text-teal-400/70 font-semibold tracking-widest uppercase">Tailored</span>
       </div>
       <div className="relative">
@@ -199,11 +199,11 @@ function LPBriefPreviewCard() {
 /* ── Capability grid — everything else the agent handles for a
    fund raise ── */
 const CAPABILITIES = [
-  { icon: "🎯", name: "Targets the right LPs", desc: "Family offices, endowments, FoFs, HNWs — ranked by ticket, geo, cadence, historical fit." },
-  { icon: "🔎", name: "Researches every LP", desc: "Prior GP bets, decision process, key contacts, side-letter patterns." },
-  { icon: "✉️", name: "Writes and sends outreach", desc: "Per-LP archetype — family office vs endowment vs FoF each get a different angle." },
-  { icon: "📅", name: "Books the LP meetings", desc: "Drafts the invite, confirms with you, fires it into Google Calendar." },
-  { icon: "🎤", name: "Preps you for every meeting", desc: "Six-section briefing per LP: fit angle, likely questions, portfolio construction asks." },
+  { icon: "🎯", name: "Targets the right investors", desc: "Family offices, endowments, HNWs, JV partners, syndicate backers — ranked by ticket, geo, cadence, historical fit." },
+  { icon: "🔎", name: "Researches every investor", desc: "Prior bets, decision process, key contacts, side-letter patterns." },
+  { icon: "✉️", name: "Writes and sends outreach", desc: "Per-archetype — family office vs endowment vs HNW each get a different angle." },
+  { icon: "📅", name: "Books the investor meetings", desc: "Drafts the invite, confirms with you, fires it into Google Calendar." },
+  { icon: "🎤", name: "Preps you for every meeting", desc: "Six-section briefing per investor: fit angle, likely questions, portfolio construction asks." },
   { icon: "🗒️", name: "Captures the debrief", desc: "Sentiment, objections, ticket-size signal, next step — nothing lost between calls." },
   { icon: "📋", name: "Handles the DDQ", desc: "Auto-fills from your fund profile and prior answers. You review and send." },
   { icon: "📜", name: "Closes with you", desc: "Side letter review, closing timeline, wire coordination. All the way to close." },
@@ -241,9 +241,9 @@ export default function RaiseFundPage() {
             The agent that runs your fund raise alongside you.
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            raise(fn) targets the right LPs, drafts the outreach, briefs you
-            on every conversation, tracks your commitments, and coordinates
-            the close. You take the LP calls. The agent runs the rest.
+            raise(fn) targets the right investors, drafts the outreach, briefs
+            you on every conversation, tracks your commitments, and coordinates
+            the close. You take the calls. The agent runs the rest.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
             <Link
@@ -277,18 +277,18 @@ export default function RaiseFundPage() {
                 01 — Targeting
               </p>
               <h2 className="text-3xl font-bold text-white mb-5 leading-tight">
-                LPs who actually anchor your fund.
+                Investors who actually anchor your raise.
               </h2>
               <p className="text-zinc-400 leading-relaxed mb-4">
                 Not a flat directory of every family office and endowment. The
-                agent takes your fund size, sector, geo, stage focus, and
-                operator background, then sources and ranks LPs whose ticket
-                band, cadence, and historical GP bets actually fit.
+                agent takes your fund or deal shape, sector, geo, and operator
+                background, then sources and ranks investors whose ticket band,
+                cadence, and historical fit actually match.
               </p>
               <p className="text-zinc-400 leading-relaxed">
-                Includes the family offices allocating quietly to first-time
-                GPs, the endowment emerging-manager programs, the HNWs writing
-                anchor checks for operator-turned-GPs, and the FoFs open to
+                Family offices allocating quietly, endowment emerging-manager
+                programs, HNW anchor investors, JV partners for deal-by-deal
+                raises, syndicate members for SPVs, fund-of-funds open to
                 Fund I / II.
               </p>
             </div>
@@ -308,7 +308,7 @@ export default function RaiseFundPage() {
                 02 — Memory
               </p>
               <h2 className="text-3xl font-bold text-white mb-5 leading-tight">
-                Every LP conversation. Every commitment. Never lost.
+                Every conversation. Every commitment. Never lost.
               </h2>
               <p className="text-zinc-400 leading-relaxed mb-4">
                 The agent captures every meeting, soft commit, side-letter ask,
@@ -317,7 +317,8 @@ export default function RaiseFundPage() {
               </p>
               <p className="text-zinc-400 leading-relaxed">
                 Come back tomorrow, the agent knows where you left off with
-                every LP. Come back after the close, it remembers for Fund III.
+                every investor. Come back after the close, it remembers for
+                the next raise.
               </p>
             </div>
             <div className="md:order-1">
@@ -336,17 +337,17 @@ export default function RaiseFundPage() {
                 03 — Briefs
               </p>
               <h2 className="text-3xl font-bold text-white mb-5 leading-tight">
-                LP briefs in minutes, not weekends.
+                Investor briefs in minutes, not weekends.
               </h2>
               <p className="text-zinc-400 leading-relaxed mb-4">
-                The agent writes a one-page brief tailored to any LP — how they
-                allocate, what they&apos;ve backed, why this could fit, and who
-                makes the call. Use them to prep meetings, ground your intro
-                email, or send to your placement agent.
+                The agent writes a one-page brief tailored to any investor —
+                how they allocate, what they&apos;ve backed, why this could
+                fit, and who makes the call. Use them to prep meetings, ground
+                your intro email, or send to your placement agent.
               </p>
               <p className="text-zinc-400 leading-relaxed">
-                Works for LPs the agent surfaced — and for anyone you already
-                know. Drop in a name, get a brief.
+                Works for investors the agent surfaced — and for anyone you
+                already know. Drop in a name, get a brief.
               </p>
             </div>
             <div>
@@ -389,7 +390,7 @@ export default function RaiseFundPage() {
                 Built for capital raisers.
               </h2>
               <p className="text-zinc-400 max-w-2xl mx-auto">
-                Same architecture, different LP archetype. The agent adapts to
+                Same architecture, different investor archetype. The agent adapts to
                 the raise you&apos;re actually running.
               </p>
             </div>
@@ -403,7 +404,7 @@ export default function RaiseFundPage() {
                 {
                   audience: "Real estate developers",
                   scope: "Deal-by-deal · $1-15M target",
-                  desc: "Target LP JV partners and HNW investors for the specific deal. Draft deal memos. Coordinate closing across LPs.",
+                  desc: "Target JV partners and HNW investors for the specific deal. Draft deal memos. Coordinate closing across the cap stack.",
                 },
                 {
                   audience: "Angel syndicate leads",
@@ -437,21 +438,21 @@ export default function RaiseFundPage() {
               The difference
             </h2>
             <p className="text-zinc-400 max-w-2xl mx-auto">
-              Other tools point at LPs. raise(fn) runs the raise.
+              Other tools point at investors. raise(fn) runs the raise.
             </p>
           </div>
           <div className="mx-auto max-w-5xl grid grid-cols-1 sm:grid-cols-2 gap-10">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-5">
-                Most LP databases
+                Most investor databases
               </p>
               <div className="space-y-3.5">
                 {[
-                  "Long list of LPs with no signal on who's active for emerging managers",
+                  "Long list of investors with no signal on who's active for your kind of raise",
                   "Generic decks and templates you rewrite anyway",
-                  "DDQ answers scattered across drives, prior funds, and your head",
-                  "Re-explain your fund to every associate on the diligence call",
-                  "No memory of what worked for Fund I",
+                  "DDQ answers scattered across drives, prior raises, and your head",
+                  "Re-explain your raise to every associate on the diligence call",
+                  "No memory of what worked last time",
                 ].map((text) => (
                   <p key={text} className="text-sm text-zinc-500 flex items-start gap-3 leading-relaxed">
                     <span className="text-zinc-600 text-lg leading-snug shrink-0">•</span>
@@ -466,11 +467,11 @@ export default function RaiseFundPage() {
               </p>
               <div className="space-y-3.5">
                 {[
-                  "LPs ranked by actual fit — ticket, geo, cadence, historical GP bets",
-                  "Briefs and outreach tailored per LP archetype",
-                  "LP pipeline captured automatically as you talk to the agent",
-                  "Memory across sessions — pick up where you left off with any LP",
-                  "Gets sharper as more fund raises run through it",
+                  "Investors ranked by actual fit — ticket, geo, cadence, historical bets",
+                  "Briefs and outreach tailored per investor archetype",
+                  "Pipeline captured automatically as you talk to the agent",
+                  "Memory across sessions — pick up where you left off with anyone",
+                  "Gets sharper as more raises run through it",
                 ].map((text) => (
                   <p key={text} className="text-sm text-zinc-300 flex items-start gap-3 leading-relaxed">
                     <span className="text-teal-400 text-lg leading-snug shrink-0">•</span>
@@ -488,7 +489,7 @@ export default function RaiseFundPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-2xl sm:text-3xl font-semibold text-white leading-tight">
-              raise(fn) knows the LP.
+              raise(fn) knows the investor.
               <br />
               <span className="text-teal-400">Your CRM knows the contact.</span>
               <br />
@@ -497,7 +498,7 @@ export default function RaiseFundPage() {
             <p className="text-base text-zinc-500 leading-relaxed max-w-2xl mx-auto mt-8">
               raise(fn) is the intelligence and workflow layer for your fund
               raise. It runs the actions — targeting, drafting, prepping,
-              tracking — with LP-specific context. Your existing CRM stays
+              tracking — with investor-specific context. Your existing CRM stays
               your system of record if you want. Or you don&apos;t need one at
               all: the agent tracks the pipeline in chat.
             </p>

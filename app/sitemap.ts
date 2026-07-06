@@ -34,7 +34,6 @@ const STATIC_PAGES: MetadataRoute.Sitemap = [
   // Brain landing kept indexed; surfaced via footer post-revamp
   { url: `${SITE}/brain`, lastModified: NOW, changeFrequency: "weekly", priority: 0.7 },
   { url: `${SITE}/pricing`, lastModified: NOW, changeFrequency: "monthly", priority: 0.8 },
-  { url: `${SITE}/thesis`, lastModified: NOW, changeFrequency: "monthly", priority: 0.6 },
   // Trust pages — describe matching + learning. Strong inbound search intent
   // ("how does X match investors?", "AI investor matching") + internal SEO
   // backlinks from /founders, /investors, and footer Company section.

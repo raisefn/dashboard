@@ -89,17 +89,19 @@ export default function Nav() {
   return (
     <>
     <header className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-md">
-      {/* Primary nav */}
+      {/* Primary nav — 3-column grid so the middle links stay truly
+          centered regardless of the widths of the outer columns. Prior
+          justify-between drifted whenever CTA labels changed length. */}
       <nav className="border-b border-zinc-800">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+        <div className="mx-auto grid max-w-7xl grid-cols-3 items-center px-4 py-3">
           {/* Logo */}
-          <Link href="/" className="text-lg font-bold">
+          <Link href="/" className="justify-self-start text-lg font-bold">
             <span className="text-orange-500">raise</span>
             <span className="text-teal-400">(fn)</span>
           </Link>
 
-          {/* Desktop links */}
-          <div className="hidden md:flex gap-1">
+          {/* Desktop links — center column */}
+          <div className="hidden md:flex justify-self-center gap-1">
             {topLinks.map((link) => {
               const active = pathname.startsWith(link.prefix);
               return (
@@ -119,7 +121,7 @@ export default function Nav() {
           </div>
 
           {/* Right side: Log in + Get Started + hamburger */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-self-end gap-3">
             {showUpgrade && (
               <Link
                 href="/pricing"
