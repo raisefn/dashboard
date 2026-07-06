@@ -12,7 +12,7 @@ import TrackerSearch from "@/components/tracker-search";
 // investors plugging in personal AI assistants, not third-party devs).
 const topLinks = [
   { href: "/founders", label: "For Founders", prefix: "/founders" },
-  { href: "/investors", label: "For Investors", prefix: "/investors" },
+  { href: "/raise-fund", label: "Raise a Fund", prefix: "/raise-fund" },
   { href: "/agents", label: "For Agents", prefix: "/agents" },
   { href: "/pricing", label: "Pricing", prefix: "/pricing" },
 ];
@@ -26,9 +26,9 @@ const trackerLinks = [
 ];
 
 const brainLinks = [
-  { href: "/brain/entrepreneurs", label: "Founders" },
-  { href: "/brain/investors", label: "Investors" },
-  { href: "/brain/agents", label: "Developers" },
+  { href: "/founders", label: "Founders" },
+  { href: "/raise-fund", label: "Fund raisers" },
+  { href: "/agents", label: "Developers" },
 ];
 
 export default function Nav() {

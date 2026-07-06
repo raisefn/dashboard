@@ -259,7 +259,7 @@ export default function FoundersPage() {
               href="/signup"
               className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
             >
-              Drop your deck →
+              Set up your agent →
             </Link>
             <Link
               href="/pricing"
@@ -508,10 +508,10 @@ export default function FoundersPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
-              Drop your deck. The agent takes it from there.
+              Set up your agent. It takes it from there.
             </h2>
             <p className="text-zinc-400 mb-2 max-w-xl mx-auto">
-              Free to start. No credit card. The agent gets to work the second you upload.
+              Free to start. No credit card. Drop a deck or just tell the agent what you&apos;re building — it gets to work the second you finish.
             </p>
             <p className="text-zinc-500 text-sm mb-8 max-w-xl mx-auto">
               Your deck stays private. Never shared. Never used to train.
@@ -521,7 +521,7 @@ export default function FoundersPage() {
                 href="/signup"
                 className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
               >
-                Drop your deck →
+                Set up your agent →
               </Link>
               <Link
                 href="/pricing"

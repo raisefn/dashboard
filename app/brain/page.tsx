@@ -109,7 +109,7 @@ function BrainDiagram() {
             <span style={{ color: "#F97316" }}>raise</span>
             <span style={{ color: "#2DD4BF" }}>(fn)</span>
           </span>
-          <span className="mt-1 text-xs text-zinc-500">fundraising data layer</span>
+          <span className="mt-1 text-xs text-zinc-500">the fundraising agent</span>
         </div>
 
         {/* Nodes */}
@@ -297,9 +297,9 @@ export default function BrainPage() {
           </div>
           <div className="mx-auto max-w-3xl grid gap-6 sm:grid-cols-3 text-center">
             {[
-              { who: "Founders", what: "Run your raise with an agent that knows the market — from readiness to close.", color: "#2dd4bf", href: "/brain/entrepreneurs" },
-              { who: "Investors", what: "Better deal flow, faster diligence, and a pipeline that remembers everything.", color: "#f97316", href: "/brain/investors" },
-              { who: "Developers", what: "Embed raise(fn) in your product.", color: "#a78bfa", href: "/sdk" },
+              { who: "Founders", what: "Run your raise with an agent that knows the market — from readiness to close.", color: "#2dd4bf", href: "/founders" },
+              { who: "Fund raisers", what: "Run your fund or deal raise with the agent — LP targeting, briefs, pipeline, close.", color: "#f97316", href: "/raise-fund" },
+              { who: "Developers", what: "Embed raise(fn) in your product.", color: "#a78bfa", href: "/agents" },
             ].map((item) => (
               <Link key={item.who} href={item.href} className="group transition-all hover:bg-zinc-900/30 rounded-xl p-4">
                 <p className="text-sm font-semibold mb-2 group-hover:brightness-125" style={{ color: item.color }}>{item.who}</p>
@@ -318,11 +318,11 @@ export default function BrainPage() {
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">Ready to raise?</h2>
             <p className="text-zinc-500 mb-8">We&apos;re working closely with our first users.</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/brain/entrepreneurs" className="rounded-full border border-orange-700/50 bg-orange-950/30 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/40 hover:text-orange-200">
+              <Link href="/founders" className="rounded-full border border-orange-700/50 bg-orange-950/30 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/40 hover:text-orange-200">
                 I&apos;m a Founder
               </Link>
-              <Link href="/brain/investors" className="rounded-full border border-teal-700/50 bg-teal-950/30 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/40 hover:text-teal-200">
-                I&apos;m an Investor
+              <Link href="/raise-fund" className="rounded-full border border-teal-700/50 bg-teal-950/30 px-8 py-3 text-sm font-medium text-teal-300 transition-all hover:border-teal-500 hover:bg-teal-900/40 hover:text-teal-200">
+                I&apos;m raising a fund
               </Link>
               <Link href="/tracker" className="rounded-full border border-zinc-700/50 bg-zinc-900/30 px-8 py-3 text-sm font-medium text-zinc-400 transition-all hover:border-zinc-500 hover:bg-zinc-800/40 hover:text-zinc-300">
                 Explore the data

@@ -79,9 +79,9 @@ export default function Footer() {
             <ul className="space-y-2.5">
               {[
                 { href: "/founders", label: "Founders" },
-                { href: "/investors", label: "Investors" },
+                { href: "/raise-fund", label: "Fund raisers" },
                 { href: "/agents", label: "Agents" },
-                { href: "/investors/join", label: "Join as an investor" },
+                { href: "/raise-fund/join", label: "Start a fund raise" },
               ].map((l) => (
                 <li key={l.href}>
                   <Link

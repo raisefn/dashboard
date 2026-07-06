@@ -246,7 +246,7 @@ function StackDiagram() {
       layer: 1,
       label: "Eyes & Ears",
       headline: "How the agent knows what it knows.",
-      interaction: "The data layer.",
+      interaction: "The public tracker.",
       desc: "SEC filings, accelerator directories, investor registries, traction signals — standardized, cross-referenced, and updated continuously. Free and open source.",
       color: "#2dd4bf",
       borderColor: "rgba(45,212,191,0.25)",
@@ -388,10 +388,10 @@ export default function LandingPage() {
               href="/signup"
               className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
             >
-              Drop your deck →
+              Set up your agent →
             </Link>
             <p className="text-xs text-zinc-500">
-              Free to start — sign up in 30 seconds. Your deck stays private.
+              Free to start — signs up in 30 seconds. Drop a deck or just tell the agent what you&apos;re building.
             </p>
           </div>
           <div className="mt-12 flex justify-center animate-fade-in" style={{ animationDelay: "1.2s" }}>
@@ -577,40 +577,6 @@ export default function LandingPage() {
         </FadeInSection>
       </section>
 
-      {/* ── Data backing ── */}
-      <section className="relative py-32 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="rounded-2xl border border-teal-800/40 px-8 py-12 sm:px-12 sm:py-16" style={{ background: "linear-gradient(180deg, rgba(45,212,191,0.04), rgba(9,9,11,0.98))" }}>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-3">
-                The data layer
-              </p>
-              <h2 className="text-2xl font-bold text-white sm:text-3xl md:text-4xl leading-tight mb-8">
-                raise(fn) tracks every startup funding round in real time across 290+ sources.
-              </h2>
-              <p className="text-lg text-zinc-300 leading-relaxed mb-2">
-                No AI model has this data. It doesn&apos;t exist in any training set.
-              </p>
-              <p className="text-xl text-teal-400 font-semibold">
-                It&apos;s live, it&apos;s comprehensive, and it&apos;s the foundation everything else is built on.
-              </p>
-              <div className="mt-10 pt-8 border-t border-teal-800/30 grid grid-cols-3 gap-4">
-                {[
-                  { value: "290+", label: "Live sources" },
-                  { value: "Real-time", label: "No delays, no batches" },
-                  { value: "Ground truth", label: "The data AI models don't have" },
-                ].map(({ value, label }) => (
-                  <div key={label} className="text-center">
-                    <p className="text-2xl font-bold text-white">{value}</p>
-                    <p className="text-xs text-zinc-500 mt-1">{label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </FadeInSection>
-      </section>
-
       {/* ── Who It's For ── */}
       <section className="relative py-32 px-4">
         <FadeInSection>
@@ -702,10 +668,10 @@ export default function LandingPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
-              Drop your deck. The agent takes it from there.
+              Set up your agent. It takes it from there.
             </h2>
             <p className="text-zinc-500 mb-2">
-              Free to start. No credit card. The agent gets to work the second you upload.
+              Free to start. No credit card. Drop a deck or just tell the agent what you&apos;re building — it gets to work the second you finish.
             </p>
             <p className="text-zinc-600 text-sm mb-10">
               Your deck stays private. Never shared. Never used to train.
@@ -715,7 +681,7 @@ export default function LandingPage() {
                 href="/signup"
                 className="rounded-full border border-orange-700/50 bg-orange-950/30 px-8 py-3 text-sm font-medium text-orange-300 transition-all hover:border-orange-500 hover:bg-orange-900/40 hover:text-orange-200"
               >
-                Drop your deck →
+                Set up your agent →
               </Link>
               <Link
                 href="/agents"

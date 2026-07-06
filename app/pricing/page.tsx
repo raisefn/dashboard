@@ -129,7 +129,7 @@ export default function PricingPage() {
               <span className="text-sm text-zinc-500">$0 — try the agent</span>
             </div>
             <p className="text-sm text-zinc-400 mb-10 max-w-xl">
-              Drop your deck, put the agent to work, get real matches. Free
+              Set up your agent, put it to work, get real matches. Free
               to get started. Upgrade when you need more.
             </p>
 

@@ -23,7 +23,12 @@ const nextConfig: NextConfig = {
       { source: "/sdk", destination: "/agents", permanent: true },
       // Audience-specific brain pages → new top-level routes
       { source: "/brain/entrepreneurs", destination: "/founders", permanent: true },
-      { source: "/brain/investors", destination: "/investors", permanent: true },
+      { source: "/brain/investors", destination: "/raise-fund", permanent: true },
+      // 2026-07-06: /investors deleted (marketplace framing). Legacy links
+      // redirect to the new /raise-fund audience surface.
+      { source: "/investors", destination: "/raise-fund", permanent: true },
+      { source: "/investors/join", destination: "/raise-fund/join", permanent: true },
+      { source: "/investors/join-mock", destination: "/raise-fund/join", permanent: true },
       { source: "/brain/agents", destination: "/agents", permanent: true },
       // Phase 2 v3 (2026-06-23): legacy founder pages consolidate into
       // slide-over panels on /brain/deploy. Temporary 307 redirects so

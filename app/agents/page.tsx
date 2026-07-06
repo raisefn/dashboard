@@ -329,10 +329,10 @@ export default function AgentsPage() {
               </Link>
               <span className="text-zinc-700">·</span>
               <Link
-                href="/investors"
+                href="/raise-fund"
                 className="text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors"
               >
-                For investors →
+                Raise a fund →
               </Link>
             </div>
           </div>
