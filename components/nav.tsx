@@ -12,7 +12,7 @@ import TrackerSearch from "@/components/tracker-search";
 // investors plugging in personal AI assistants, not third-party devs).
 const topLinks = [
   { href: "/founders", label: "For Founders", prefix: "/founders" },
-  { href: "/raise-fund", label: "Raise a Fund", prefix: "/raise-fund" },
+  { href: "/raise-fund", label: "For Investors", prefix: "/raise-fund" },
   { href: "/agents", label: "For Agents", prefix: "/agents" },
   { href: "/pricing", label: "Pricing", prefix: "/pricing" },
 ];
@@ -27,7 +27,7 @@ const trackerLinks = [
 
 const brainLinks = [
   { href: "/founders", label: "Founders" },
-  { href: "/raise-fund", label: "Fund raisers" },
+  { href: "/raise-fund", label: "Investors" },
   { href: "/agents", label: "Developers" },
 ];
 
@@ -138,7 +138,7 @@ export default function Nav() {
               href="/signup"
               className="rounded-full border border-orange-700/60 bg-transparent px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all hover:border-orange-600 hover:text-orange-200 hover:bg-orange-950/30"
             >
-              Start your raise →
+              Set up your agent →
             </Link>
 
             {/* Mobile hamburger */}

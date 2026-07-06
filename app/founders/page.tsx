@@ -511,7 +511,7 @@ export default function FoundersPage() {
               Set up your agent. It takes it from there.
             </h2>
             <p className="text-zinc-400 mb-2 max-w-xl mx-auto">
-              Free to start. No credit card. Drop a deck or just tell the agent what you&apos;re building — it gets to work the second you finish.
+              Free to start. No credit card. Tell the agent what you&apos;re building — it gets to work the second you finish. Drop a deck if you have one.
             </p>
             <p className="text-zinc-500 text-sm mb-8 max-w-xl mx-auto">
               Your deck stays private. Never shared. Never used to train.

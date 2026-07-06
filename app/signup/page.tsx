@@ -330,11 +330,11 @@ function SignupForm() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Role selection — at the TOP so users see it before any
-              auth method. Defaults to Founder (the Set-Up-Your-Raise
-              CTA brings the founder cohort here). When user explicitly
-              picks Investor or Builder, the Google button hides below —
-              Google OAuth can't carry role metadata cleanly, so we route
-              non-founders through email/password where role IS captured. */}
+              auth method. Defaults to Founder (the Set-Up-Your-Agent
+              CTA brings the founder cohort here). Investor picks are
+              routed to /raise-fund/join because that flow has fund-
+              specific questions the founder form doesn't ask. Builder
+              stays on this form (Slack notification path only). */}
           <div>
             <label className="block text-xs text-zinc-500 mb-2">I am a...</label>
             <div className="flex gap-2">
@@ -353,11 +353,43 @@ function SignupForm() {
                 </button>
               ))}
             </div>
+            <p className="text-[11px] text-zinc-600 mt-2 leading-relaxed">
+              <span className="text-zinc-400">Founder</span> = raising for your company.{" "}
+              <span className="text-zinc-400">Investor</span> = raising a fund, SPV, or deal.
+            </p>
           </div>
 
-          {/* Google OAuth — only for founders. Investor + Builder
-              flows need role metadata that OAuth doesn't carry, so
-              they get the email/password path only. */}
+          {/* Investor path handoff — /raise-fund/join has fund-specific
+              questions (fund size, LP archetype, geo, cadence) that don't
+              belong on the founder signup form. Route them there instead
+              of collecting the wrong shape of data. */}
+          {role === "investor" && (
+            <div className="rounded-lg border border-teal-800/50 bg-teal-950/30 p-4">
+              <p className="text-sm text-teal-200 font-semibold mb-1.5">
+                Investors have a dedicated signup.
+              </p>
+              <p className="text-xs text-zinc-400 leading-relaxed mb-3">
+                Fund raises need a different setup than company raises — LP
+                targeting, ticket bands, DDQ, close mechanics. Our 5-minute
+                investor form asks the right questions.
+              </p>
+              <Link
+                href="/raise-fund/join"
+                className="inline-flex items-center justify-center rounded-full bg-teal-500 px-5 py-2 text-sm font-semibold text-black transition-colors hover:bg-teal-400"
+              >
+                Continue as an investor →
+              </Link>
+            </div>
+          )}
+
+          {/* When investor selected, we've already rendered the handoff
+              callout above — hide the rest of the founder/builder form
+              so there's a single unambiguous path forward. */}
+          {role !== "investor" && (
+          <>
+          {/* Google OAuth — only for founders. Builder flow needs role
+              metadata that OAuth doesn't carry, so builders get the
+              email/password path only. */}
           {role === "founder" && (
             <>
               <button
@@ -476,6 +508,8 @@ function SignupForm() {
           >
             {status === "sending" ? "Creating account..." : isBuilder ? "Submit" : "Create account"}
           </button>
+          </>
+          )}
 
           <p className="text-center text-xs text-zinc-600">
             Already have an account?{" "}

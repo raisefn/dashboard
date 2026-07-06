@@ -327,7 +327,7 @@ export default function PricingPage() {
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">
-              Start your raise.
+              Set up your agent.
             </h2>
             <p className="text-zinc-500 mb-8">
               Free to start. No credit card. The agent gets to work as soon as you upload.
@@ -336,7 +336,7 @@ export default function PricingPage() {
               onClick={() => router.push("/signup")}
               className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
             >
-              Start your raise →
+              Set up your agent →
             </button>
           </div>
         </FadeInSection>

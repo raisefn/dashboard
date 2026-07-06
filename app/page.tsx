@@ -391,7 +391,7 @@ export default function LandingPage() {
               Set up your agent →
             </Link>
             <p className="text-xs text-zinc-500">
-              Free to start — signs up in 30 seconds. Drop a deck or just tell the agent what you&apos;re building.
+              Free to start — signs up in 30 seconds. Tell the agent what you&apos;re building. Drop a deck if you have one.
             </p>
           </div>
           <div className="mt-12 flex justify-center animate-fade-in" style={{ animationDelay: "1.2s" }}>
@@ -671,7 +671,7 @@ export default function LandingPage() {
               Set up your agent. It takes it from there.
             </h2>
             <p className="text-zinc-500 mb-2">
-              Free to start. No credit card. Drop a deck or just tell the agent what you&apos;re building — it gets to work the second you finish.
+              Free to start. No credit card. Tell the agent what you&apos;re building — it gets to work the second you finish. Drop a deck if you have one.
             </p>
             <p className="text-zinc-600 text-sm mb-10">
               Your deck stays private. Never shared. Never used to train.

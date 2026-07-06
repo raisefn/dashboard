@@ -298,7 +298,7 @@ export default function BrainPage() {
           <div className="mx-auto max-w-3xl grid gap-6 sm:grid-cols-3 text-center">
             {[
               { who: "Founders", what: "Run your raise with an agent that knows the market — from readiness to close.", color: "#2dd4bf", href: "/founders" },
-              { who: "Fund raisers", what: "Run your fund or deal raise with the agent — LP targeting, briefs, pipeline, close.", color: "#f97316", href: "/raise-fund" },
+              { who: "Investors", what: "Run your fund or deal raise with the agent — LP targeting, briefs, pipeline, close.", color: "#f97316", href: "/raise-fund" },
               { who: "Developers", what: "Embed raise(fn) in your product.", color: "#a78bfa", href: "/agents" },
             ].map((item) => (
               <Link key={item.who} href={item.href} className="group transition-all hover:bg-zinc-900/30 rounded-xl p-4">
