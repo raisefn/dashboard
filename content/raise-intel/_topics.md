@@ -9,8 +9,8 @@ voice, ship.
 
 ## Status
 
-- ✅ done: 10
-- ⏳ pending: 11
+- ✅ done: 11
+- ⏳ pending: 10
 - 🎯 cadence target: daily (~1/day)
 
 ## Workflow
@@ -55,15 +55,8 @@ list. Priorities are loose — pick anything in the top tier.
   → [/raise-intel/how-do-i-get-a-warm-intro-to-a-vc](/raise-intel/how-do-i-get-a-warm-intro-to-a-vc)
 ### Tier 2 — informational / high search volume
 
-- [ ] **How much should I raise?**
-  Category: round-structure. Angle: raise what gets you to the next
-  milestone + 6 months buffer. Anything more is dilution. Anything
-  less is round risk.
-  <!-- DRAFT AWAITING JUSTIN REVIEW 2026-07-06 —
-       file exists at content/raise-intel/how-much-should-i-raise.md
-       (status: draft, hidden from listing + returns 404 on direct URL).
-       Do not re-flip to published without Justin OK. -->
-
+- [x] **How much should I raise?** ✅ published 2026-07-06
+  → [/raise-intel/how-much-should-i-raise](/raise-intel/how-much-should-i-raise)
 - [ ] **What valuation should I put on my company at pre-seed?**
   Category: round-structure. Angle: SAFE caps are signal, not math.
   Pick the cap that filters out the wrong investors.
