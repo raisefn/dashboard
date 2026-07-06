@@ -210,7 +210,7 @@ export default async function SectorDetailPage({ params }: Props) {
       )}
 
       <BrainCTAInline
-        text={`Building in ${displayName}? Get matched with investors active in this sector.`}
+        text={`Building in ${displayName}? Set up the agent that runs your raise with you — sourcing, briefs, meeting prep, pipeline.`}
       />
       </div>
     </>

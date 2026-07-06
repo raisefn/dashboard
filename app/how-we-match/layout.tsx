@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 // Metadata can't live on a client component, so the route uses a server
 // layout to set the head. SEO target: "how investor matching works",
 // "AI investor matching", "VC matching algorithm." Trust + transparency
-// page that backlinks to /founders, /raise-fund, /signup.
+// page for the matching architecture.
 export const metadata: Metadata = {
   title: "How we match — raise(fn)",
   description:

@@ -82,7 +82,7 @@ const FAQ_SECTIONS: FAQSection[] = [
     questions: [
       {
         q: "How is raise(fn) different from a database like Crunchbase or PitchBook?",
-        a: "Databases are searchable lists. You filter. You guess at thesis from website copy. You assemble the target list. Then you do everything else manually — emails, meetings, prep, pipeline, debriefs, intros. raise(fn) does the work. The list builds in 5 minutes, ranked by who actually deploys. The briefs, the prep, the pipeline, the debriefs — all of it lives in the same conversation. Databases hand you raw material. raise(fn) hands you a raise.",
+        a: "Databases are searchable lists. You filter. You guess at thesis from website copy. You assemble the target list. Then you do everything else manually — emails, meetings, prep, pipeline, debriefs. raise(fn) does the work. The agent surfaces the right investors ranked by who actually deploys, drafts the briefs, preps every meeting, tracks the pipeline, captures the debriefs — all in the same conversation. Databases hand you raw material. raise(fn) runs the raise.",
       },
       {
         q: "How is raise(fn) different from a fundraising CRM like Affinity, Streak, or a Notion template?",

@@ -81,7 +81,6 @@ export default function Footer() {
                 { href: "/founders", label: "Founders" },
                 { href: "/raise-fund", label: "Investors" },
                 { href: "/agents", label: "Agents" },
-                { href: "/raise-fund/join", label: "Set up your agent" },
               ].map((l) => (
                 <li key={l.href}>
                   <Link

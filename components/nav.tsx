@@ -26,9 +26,9 @@ const trackerLinks = [
 ];
 
 const brainLinks = [
-  { href: "/founders", label: "Founders" },
-  { href: "/raise-fund", label: "Investors" },
-  { href: "/agents", label: "Developers" },
+  { href: "/founders", label: "For Founders" },
+  { href: "/raise-fund", label: "For Investors" },
+  { href: "/agents", label: "For Agents" },
 ];
 
 export default function Nav() {

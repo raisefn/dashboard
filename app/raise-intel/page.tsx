@@ -5,9 +5,9 @@ import { listArticles } from "@/lib/raise-intel";
 const SITE = "https://www.raisefn.com";
 
 export const metadata: Metadata = {
-  title: "Raise Intel — investor research, observed thesis data | raise(fn)",
+  title: "Raise Intel — fundraising guides from raise(fn)",
   description:
-    "Research on what investors actually fund versus what they say. Stated thesis vs observed portfolio, sector deep-dives, and fund-by-fund analysis sourced from real round data.",
+    "Plain answers to the questions founders ask while raising — valuation, timelines, terms, outreach, meeting prep, and everything in between. From the raise(fn) team.",
   alternates: {
     canonical: `${SITE}/raise-intel`,
     types: {
@@ -17,18 +17,18 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Raise Intel — investor research from raise(fn)",
+    title: "Raise Intel — fundraising guides from raise(fn)",
     description:
-      "What investors actually fund versus what they say. Data-backed research from real round portfolios.",
+      "Plain answers to the questions founders ask while raising. Valuation, terms, outreach, meeting prep, follow-ups, close.",
     url: `${SITE}/raise-intel`,
     type: "website",
     siteName: "raise(fn)",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Raise Intel — investor research from raise(fn)",
+    title: "Raise Intel — fundraising guides from raise(fn)",
     description:
-      "What investors actually fund versus what they say. Data-backed research from real round portfolios.",
+      "Plain answers to the questions founders ask while raising. From the raise(fn) team.",
   },
 };
 

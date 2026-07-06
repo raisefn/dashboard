@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // page identical to Google.
     const displayName = nameFromSlug(slug);
     const title = `${displayName} — Investor Profile | raise(fn)`;
-    const description = `View funding activity and portfolio details for ${displayName} on raise(fn) — fundraising intelligence sourced from SEC filings and public records.`;
+    const description = `View funding activity and portfolio details for ${displayName} on raise(fn) — sourced from SEC filings and public records.`;
     return {
       title,
       description,
@@ -204,7 +204,7 @@ export default async function InvestorDetailPage({ params }: Props) {
       )}
 
       <BrainCTAInline
-        text={`Want to know if ${investor.name} is the right fit for your raise? Get matched with the right investors.`}
+        text={`Want to know if ${investor.name} is the right fit for your raise? Set up the agent — it targets the investors who actually deploy in your space.`}
       />
       </div>
     </>

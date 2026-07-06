@@ -30,6 +30,12 @@ const nextConfig: NextConfig = {
       { source: "/investors/join", destination: "/raise-fund/join", permanent: true },
       { source: "/investors/join-mock", destination: "/raise-fund/join", permanent: true },
       { source: "/brain/agents", destination: "/agents", permanent: true },
+      // 2026-07-06: /thesis page deleted (positioning cleanup). Any
+      // external backlinks land on homepage.
+      { source: "/thesis", destination: "/", permanent: true },
+      // 2026-07-06: /legal/engagement page deleted (Advisor tier retired).
+      { source: "/legal/engagement", destination: "/terms", permanent: true },
+      { source: "/legal/:path*", destination: "/terms", permanent: true },
       // Phase 2 v3 (2026-06-23): legacy founder pages consolidate into
       // slide-over panels on /brain/deploy. Temporary 307 redirects so
       // we can roll back if a regression surfaces during smoke. Public

@@ -13,11 +13,13 @@ const NOW = new Date();
 // Static marketing + content pages. Per-page priority weights skew toward
 // pages with the most editorial value / inbound search intent.
 //
-// Marketing v3 (2026-06-10): top nav audience pages (/founders /investors
-// /agents) added as P0.8. /sdk removed — 301s to /agents per next.config.
+// Marketing v3 (2026-06-10): top nav audience pages (/founders /agents)
+// added as P0.8. /sdk removed — 301s to /agents per next.config.
 // /brain landing demoted but kept indexed (footer access).
 // 2026-07-06: /investors deleted (marketplace framing, replaced by
 // /raise-fund audience under fund-raise-plan-v1). /raise-fund added.
+// /thesis deleted (positioning cleanup). /legal/engagement deleted
+// (Advisor tier retired).
 const STATIC_PAGES: MetadataRoute.Sitemap = [
   { url: `${SITE}/`, lastModified: NOW, changeFrequency: "weekly", priority: 1.0 },
   // Audience landing pages — primary CTA surfaces for organic + paid
@@ -36,7 +38,7 @@ const STATIC_PAGES: MetadataRoute.Sitemap = [
   { url: `${SITE}/pricing`, lastModified: NOW, changeFrequency: "monthly", priority: 0.8 },
   // Trust pages — describe matching + learning. Strong inbound search intent
   // ("how does X match investors?", "AI investor matching") + internal SEO
-  // backlinks from /founders, /investors, and footer Company section.
+  // backlinks from /founders, /raise-fund, and footer Company section.
   { url: `${SITE}/how-we-match`, lastModified: NOW, changeFrequency: "monthly", priority: 0.7 },
   { url: `${SITE}/how-we-learn`, lastModified: NOW, changeFrequency: "monthly", priority: 0.7 },
   { url: `${SITE}/faq`, lastModified: NOW, changeFrequency: "monthly", priority: 0.8 },

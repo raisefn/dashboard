@@ -14,11 +14,22 @@ function consumePostAuthDestination(): string {
     if (!intent) return "/brain/deploy";
     localStorage.removeItem("pendingPostAuthIntent");
     if (intent === "upgrade-pro") return "/pricing?checkout=resume-pro";
-    if (intent === "upgrade-advisor") return "/pricing?checkout=resume-advisor";
     return "/brain/deploy";
   } catch {
     return "/brain/deploy";
   }
+}
+
+// Investor signups (role=investor, set at /raise-fund/join) route to
+// /raise-fund on any post-auth entry — the investor-side brain surface
+// (Phase 2) isn't shipped yet, so dropping them into /brain/deploy
+// (the founder chat) would be broken UX. Once Phase 2 ships, swap this
+// to route to /raise-fund/deploy.
+async function destinationForCurrentSession(): Promise<string> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const role = session?.user?.user_metadata?.role;
+  if (role === "investor") return "/raise-fund";
+  return consumePostAuthDestination();
 }
 
 export default function AuthCallbackPage() {
@@ -67,7 +78,7 @@ function AuthCallbackInner() {
       const { data: { session: existingSession } } = await supabase.auth.getSession();
       if (existingSession) {
         const isRecovery = type === "recovery";
-        router.replace(isRecovery ? "/reset-password" : consumePostAuthDestination());
+        router.replace(isRecovery ? "/reset-password" : await destinationForCurrentSession());
         return;
       }
 
@@ -89,7 +100,7 @@ function AuthCallbackInner() {
           return;
         }
 
-        router.replace(isRecovery ? "/reset-password" : consumePostAuthDestination());
+        router.replace(isRecovery ? "/reset-password" : await destinationForCurrentSession());
         return;
       }
 
@@ -102,7 +113,7 @@ function AuthCallbackInner() {
           return;
         }
 
-        router.replace(isRecovery ? "/reset-password" : consumePostAuthDestination());
+        router.replace(isRecovery ? "/reset-password" : await destinationForCurrentSession());
         return;
       }
 

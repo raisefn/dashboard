@@ -14,11 +14,20 @@ function consumePostAuthDestination(): string {
     if (!intent) return "/brain/deploy";
     localStorage.removeItem("pendingPostAuthIntent");
     if (intent === "upgrade-pro") return "/pricing?checkout=resume-pro";
-    if (intent === "upgrade-advisor") return "/pricing?checkout=resume-advisor";
     return "/brain/deploy";
   } catch {
     return "/brain/deploy";
   }
+}
+
+// Investor signups (role=investor, set at /raise-fund/join) route to
+// /raise-fund on any post-auth entry — the investor-side brain surface
+// (Phase 2) isn't shipped yet. See app/auth/callback/page.tsx for the
+// mirror function; kept split by file to preserve each page's isolation.
+function destinationFor(user: { user_metadata?: Record<string, unknown> } | undefined): string {
+  const role = user?.user_metadata?.role;
+  if (role === "investor") return "/raise-fund";
+  return consumePostAuthDestination();
 }
 
 export default function AuthConfirmPage() {
@@ -85,12 +94,12 @@ function AuthConfirmInner() {
         (provider && provider !== "email") ||
         providers.some((p) => p && p !== "email");
       if (isOauth) {
-        router.replace(consumePostAuthDestination());
+        router.replace(destinationFor(user));
         return;
       }
       const hasSetPassword = user.user_metadata?.password_set;
       if (hasSetPassword) {
-        router.replace(consumePostAuthDestination());
+        router.replace(destinationFor(user));
       } else {
         setUserName((user.user_metadata?.name as string) || user.email?.split("@")[0] || "");
         setShowPasswordSetup(true);
@@ -126,7 +135,8 @@ function AuthConfirmInner() {
       return;
     }
 
-    router.replace(consumePostAuthDestination());
+    const { data: { user } } = await supabase.auth.getUser();
+    router.replace(destinationFor(user ?? undefined));
   }
 
   if (showPasswordSetup) {
