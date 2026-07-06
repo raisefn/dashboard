@@ -126,14 +126,9 @@ export default function PricingPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
             Pricing
           </p>
-          <h1 className="text-4xl font-bold text-white sm:text-5xl mb-6">
+          <h1 className="text-4xl font-bold text-white sm:text-5xl">
             The agent that runs your raise alongside you
           </h1>
-          <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            Sourcing, per-investor briefs, meeting prep, deck critique, pipeline
-            that updates itself. Free to try. Same product, priced by what
-            you&apos;re raising.
-          </p>
         </div>
       </section>
 
