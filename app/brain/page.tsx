@@ -184,7 +184,7 @@ export default function BrainPage() {
               { title: "Readiness Evaluation", desc: "Your metrics benchmarked against companies that actually closed. Know before you pitch.", color: "#34d399" },
               { title: "Narrative Analysis", desc: "Is your pitch resonating? What's working in the market right now? Fix it before you send it.", color: "#fbbf24" },
               { title: "Signal Reading", desc: "Investor behavior decoded. What their actions mean, and what to do next.", color: "#fb923c" },
-              { title: "Outreach Guidance", desc: "Per-investor strategy. What they care about, who can intro you, what angle lands.", color: "#f87171" },
+              { title: "Outreach Guidance", desc: "Per-investor strategy. What they care about, what angle lands, what to lead with.", color: "#f87171" },
               { title: "Term Sheet Intel", desc: "Your terms in context. What's standard, what's aggressive, where you have leverage.", color: "#a78bfa" },
             ].map((cap) => (
               <div key={cap.title} className="text-center">
@@ -222,8 +222,9 @@ export default function BrainPage() {
                 No spreadsheets. No CRM to update. No data entry. Just talk.
               </p>
               <p className="text-sm text-zinc-500 leading-relaxed">
-                Works for founders managing a raise and investors managing deal flow.
-                The CRM didn&apos;t get better — it disappeared into the conversation.
+                Works for founders raising for their company and investors
+                raising a fund, deal, or SPV. The CRM didn&apos;t get better —
+                it disappeared into the conversation.
               </p>
             </div>
           </div>

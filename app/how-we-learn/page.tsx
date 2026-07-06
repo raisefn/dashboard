@@ -28,8 +28,8 @@ const INPUTS = [
     angle: -18,
   },
   {
-    label: "Network paths",
-    sub: "Warm intros. Co-investors. Backed-by signals.",
+    label: "Network signal",
+    sub: "Co-investor patterns. Backed-by signals.",
     color: "#22d3ee",
     angle: 162,
   },
@@ -56,7 +56,7 @@ const OUTPUTS = [
     angle: 54,
   },
   {
-    label: "Tighter intros",
+    label: "Tighter outreach",
     sub: "Higher conviction. Faster closes.",
     color: "#fcd34d",
     angle: 90,

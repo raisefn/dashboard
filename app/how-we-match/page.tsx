@@ -298,8 +298,8 @@ export default function HowWeMatchPage() {
             </h2>
             <p className="text-lg text-zinc-400 max-w-3xl mx-auto leading-relaxed">
               Then we layer everything else investors actually care about — stage adjacency,
-              check fit, geography, deployment cadence, recent activity, behavioral history,
-              network depth. Then a human decides what becomes an intro.
+              check fit, geography, deployment cadence, recent activity, behavioral history.
+              The agent runs every layer against your raise before surfacing a match.
             </p>
           </div>
 
@@ -370,18 +370,11 @@ export default function HowWeMatchPage() {
                 desc: "We track what investors actually do, not what their website says — checks written, meetings taken, days to decision, ghost rates. The matcher quietly favors deciders.",
               },
               {
-                tag: "Layer 10 · Network signal",
+                tag: "Layer 10 · Behavioral aggregate",
                 kind: "signal",
                 color: "#5eead4",
-                title: "Warm-intro paths surface.",
+                title: "Cross-raise patterns surface.",
                 desc: "When other founders have engaged this investor, the aggregated history surfaces — commitment rates, what resonated, common objections — without ever exposing any individual pipeline.",
-              },
-              {
-                tag: "Layer 11 · Human curation",
-                kind: "the final gate",
-                color: "#fde68a",
-                title: "Every warm intro brokered by a person.",
-                desc: "The system surfaces signal. A human decides what becomes an intro. No auto-fired emails. No abused inboxes. Ever.",
               },
             ].map((layer) => (
               <div

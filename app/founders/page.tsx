@@ -210,7 +210,7 @@ function BriefPreviewCard() {
 const CAPABILITIES = [
   { icon: "📑", name: "Extracts your deck", desc: "Drop a PDF — sector, stage, MRR, team, raise size populated for you." },
   { icon: "🔎", name: "Researches every investor", desc: "GP-level detail — recent checks, sweet spots, what they pass on." },
-  { icon: "✉️", name: "Writes and sends outreach", desc: "Cold and warm intros, tailored per investor. Sends from your connected Gmail." },
+  { icon: "✉️", name: "Writes and sends outreach", desc: "Cold outreach tailored per investor. Sends from your connected Gmail." },
   { icon: "📅", name: "Books your meetings", desc: "Drafts the calendar invite, confirms with you, fires it into Google Calendar." },
   { icon: "🎤", name: "Preps you for every meeting", desc: "Six-section briefing per meeting: angles, risks, hard questions, asks." },
   { icon: "🗒️", name: "Captures the debrief", desc: "Next steps, commitments, status changes — nothing lost." },
@@ -296,9 +296,8 @@ export default function FoundersPage() {
               </p>
               <p className="text-zinc-400 leading-relaxed">
                 Includes the angels and family offices nobody else surfaces,
-                the firms that haven&apos;t posted in a year but are quietly
-                writing checks, and the warm-intro candidates in our
-                proprietary network.
+                and the firms that haven&apos;t posted in a year but are
+                quietly writing checks.
               </p>
               <p className="text-sm text-zinc-500 mt-5">
                 See{" "}
@@ -466,7 +465,7 @@ export default function FoundersPage() {
               {[
                 {
                   q: "What does my raise look like with raise(fn)?",
-                  a: "You talk to it. No forms. No dashboard. You tell it what you're building, where you are, what you're trying to do — it captures the company, the team, the metrics, the wedge, the round shape. Then it runs your raise: builds the investor list ranked by who actually deploys into your space, critiques your deck slide-by-slide, writes briefs for every match, preps you for every meeting, tracks the pipeline, debriefs after each conversation, brokers warm intros where there's a relationship in the network, and walks you through the term sheet when one lands. One conversation. Replaces the database, the CRM, the spreadsheet, the slide-critique service, and the strategy session — all of it.",
+                  a: "You talk to it. No forms. No dashboard. You tell it what you're building, where you are, what you're trying to do — it captures the company, the team, the metrics, the wedge, the round shape. Then it runs your raise: builds the investor list ranked by who actually deploys into your space, critiques your deck slide-by-slide, writes briefs for every match, preps you for every meeting, tracks the pipeline, debriefs after each conversation, and walks you through the term sheet when one lands. One conversation. Replaces the database, the CRM, the spreadsheet, the slide-critique service, and the strategy session — all of it.",
                 },
                 {
                   q: "Can raise(fn) help if I'm not raising yet?",
@@ -478,7 +477,7 @@ export default function FoundersPage() {
                 },
                 {
                   q: "If I'm on the free plan, why would I pay?",
-                  a: "Free gives you the matching engine with a use cap. Paid removes the cap and unlocks the full system across your raise — deeper meeting prep, debrief support, pipeline tracking, deck critique, pitch refinement, term sheet walkthrough, warm intros. If your round is small and the cap covers it, free is enough. If you're running an active raise with 20+ parallel investor conversations, paid is built for that.",
+                  a: "Free gives you the matching engine with a use cap. Paid removes the cap and unlocks the full system across your raise — deeper meeting prep, debrief support, pipeline tracking, deck critique, pitch refinement, term sheet walkthrough. If your round is small and the cap covers it, free is enough. If you're running an active raise with 20+ parallel investor conversations, paid is built for that.",
                 },
               ].map((qa) => (
                 <div key={qa.q}>

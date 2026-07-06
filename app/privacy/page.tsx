@@ -54,12 +54,11 @@ export default function PrivacyPage() {
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>You</li>
-            <li>raisefn team (for support and concierge service)</li>
+            <li>raisefn team (for support only)</li>
             <li>
-              When we facilitate matches between founders and investors, we share
-              relevant company and investment details to enable introductions.
-              Private conversations, meeting notes, and pipeline status are never
-              shared with other users.
+              We do not share your data with other users of the platform. Your
+              conversations, meeting notes, pipeline status, and fundraising
+              activity stay private to your account.
             </li>
           </ul>
         </section>

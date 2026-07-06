@@ -54,29 +54,6 @@ function PreviewInner() {
               </button>
             </div>
 
-            <div className="upgrade-card-tier upgrade-card-tier--advisor">
-              <div className="upgrade-card-tier-name">Advisor</div>
-              <div className="upgrade-card-tier-price">$999/mo × 3 · or $1,999 upfront</div>
-              <div className="upgrade-card-tier-pitch">
-                Three months with raise(fn) Team in the loop on your raise — guidance from someone who's been there, plus warm intros to our proprietary investor network.
-              </div>
-              <ul className="upgrade-card-tier-list">
-                <li>Warm intros to our proprietary network when there's a match</li>
-                <li>Tailored briefs for every investor you target</li>
-                <li>Pre-meeting prep + post-meeting debriefs</li>
-                <li>Pipeline tracking + weekly check-ins</li>
-              </ul>
-              <button
-                className="upgrade-card-tier-cta"
-                onClick={() => alert("preview only — real card opens Stripe checkout")}
-              >
-                Get Advisor — $999/mo
-              </button>
-              <div className="upgrade-card-tier-foot">
-                No success fees. No equity. Save ~33% with $1,999 upfront.{" "}
-                <a href="/legal/engagement">Full engagement letter</a>.
-              </div>
-            </div>
           </div>
         </div>
       </div>

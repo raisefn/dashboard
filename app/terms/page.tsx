@@ -26,11 +26,16 @@ export default function TermsPage() {
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              An intelligence platform for fundraising — investor matching, pipeline
-              tracking, outreach strategy, and concierge support
+              The AI agent for your raise &mdash; sourcing, per-investor briefs,
+              meeting prep, outreach, pipeline tracking, and everything else
+              running a raise needs
             </li>
-            <li>Built for founders raising capital, investors deploying capital, and builders</li>
-            <li>You can use it free, or pay for additional features and concierge support</li>
+            <li>
+              Built for anyone raising capital &mdash; founders raising for their
+              company, investors raising a fund, deal, or SPV, and developers
+              building on top of the agent
+            </li>
+            <li>You can use it free, or pay for Pro to unlock the full agent</li>
           </ul>
         </section>
 
@@ -63,51 +68,22 @@ export default function TermsPage() {
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            Investor introductions
+            Your conversations
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>
-              When we match you with investors, the introduction is anonymous until both
-              sides opt in
+              raisefn is your working environment. Investors and LPs you engage
+              with are never exposed to the platform &mdash; your conversations
+              stay confidential
             </li>
             <li>
-              We don&rsquo;t guarantee meetings, term sheets, or funding outcomes &mdash;
-              raisefn is a tool, not a placement agent (unless you&rsquo;ve signed a
-              separate concierge agreement)
+              We don&rsquo;t guarantee meetings, term sheets, or funding outcomes
+              &mdash; raisefn is a tool, not a placement agent or broker-dealer
             </li>
             <li>
-              You&rsquo;re responsible for your conversations with investors &mdash; what
-              you share, how you represent yourself, and any commitments you make
-            </li>
-          </ul>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            Advisor engagement
-          </h2>
-          <ul className="space-y-2 text-sm leading-relaxed">
-            <li>
-              Advisor is one month of hands-on setup and guidance from raise(fn) Team,
-              then Pro ongoing. $1,997 today ($199 first month Pro + $1,798 setup).
-              Pro auto-renews at $199/month starting day 31. No success fees.
-            </li>
-            <li>
-              Self-serve at{" "}
-              <a
-                href="/pricing"
-                className="text-teal-400 hover:text-teal-300 transition-colors"
-              >
-                /pricing
-              </a>{" "}
-              or email{" "}
-              <a
-                href="mailto:team@raisefn.com"
-                className="text-teal-400 hover:text-teal-300 transition-colors"
-              >
-                team@raisefn.com
-              </a>{" "}
-              with questions. Full engagement terms reviewed and accepted at checkout.
+              You&rsquo;re responsible for your conversations with investors and
+              LPs &mdash; what you share, how you represent yourself, and any
+              commitments you make
             </li>
           </ul>
         </section>
@@ -118,9 +94,8 @@ export default function TermsPage() {
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
             <li>Pro is $199/month via Stripe &mdash; cancel anytime, access continues through end of billing period</li>
-            <li>Advisor is $1,997 today via Stripe (mixed line items: $199 first-month Pro + $1,798 setup), then Pro auto-renews at $199/month starting day 31</li>
             <li><strong className="text-zinc-100">All purchases final.</strong> Funds paid are funds paid.</li>
-            <li>You can stop future Pro charges anytime from your account or by emailing team@raisefn.com. Past charges are non-refundable.</li>
+            <li>You can stop future charges anytime from your account or by emailing team@raisefn.com. Past charges are non-refundable.</li>
             <li>Disputes or chargebacks: email team@raisefn.com before opening a dispute</li>
           </ul>
         </section>

@@ -46,11 +46,11 @@ const FAQ_SECTIONS: FAQSection[] = [
     questions: [
       {
         q: "What does my raise look like with raise(fn)?",
-        a: "You talk to it. No forms. No dashboard. No menus. You tell it what you're building, where you are, what you're trying to do — it captures the company, the team, the metrics, the wedge, the round shape. All in conversation. Persistent. It remembers everything across every session. Then it runs your raise: targets the right investors (ranked by who actually deploys in your space, not by what they claim on their website), critiques your deck slide-by-slide, writes the brief for every match, preps you for every meeting, tracks the pipeline, debriefs after each conversation, brokers warm intros where there's a relationship in the network, notifies you when new investors come online who fit your raise, and walks you through the term sheet when one lands. One agent, whole raise.",
+        a: "You talk to it. No forms. No dashboard. No menus. You tell it what you're building, where you are, what you're trying to do — it captures the company, the team, the metrics, the wedge, the round shape. All in conversation. Persistent. It remembers everything across every session. Then it runs your raise: targets the right investors (ranked by who actually deploys in your space, not by what they claim on their website), critiques your deck slide-by-slide, writes the brief for every match, preps you for every meeting, tracks the pipeline, debriefs after each conversation, notifies you when new investors come online who fit your raise, and walks you through the term sheet when one lands. One agent, whole raise.",
       },
       {
         q: "What can a founder actually do with raise(fn)?",
-        a: "Find investors by real check behavior instead of website copy. Get a deck critique — slide-by-slide, what's strong, what's missing, what investors will probe. Pull tailored briefs that land as cold email or pre-meeting context — investor-specific, not templated. Get per-meeting prep on what each partner will ask, lead with, deflect. Get post-meeting debriefs on what landed, what to change. Track the pipeline across every parallel conversation — without a CRM. Get warm intros to investors in raise(fn)'s network. Get strategic framing — how much to raise, when, at what valuation, on what instrument. Get pushback when your story isn't ready, your ask is vague, or your metrics are thin. Get notified when new investors come online who fit your raise. Get help closing — term sheet walkthrough, structural trap flags, what to negotiate. Everything happens in the same chat.",
+        a: "Find investors by real check behavior instead of website copy. Get a deck critique — slide-by-slide, what's strong, what's missing, what investors will probe. Pull tailored briefs that land as cold email or pre-meeting context — investor-specific, not templated. Get per-meeting prep on what each partner will ask, lead with, deflect. Get post-meeting debriefs on what landed, what to change. Track the pipeline across every parallel conversation — without a CRM. Get strategic framing — how much to raise, when, at what valuation, on what instrument. Get pushback when your story isn't ready, your ask is vague, or your metrics are thin. Get notified when new investors come online who fit your raise. Get help closing — term sheet walkthrough, structural trap flags, what to negotiate. Everything happens in the same chat.",
       },
       {
         q: "What does using raise(fn) actually look like?",
@@ -90,7 +90,7 @@ const FAQ_SECTIONS: FAQSection[] = [
       },
       {
         q: "How is raise(fn) different from a fundraising coach or advisor?",
-        a: "Coaches charge retainer or hourly to give advice. The advice is generic, the work is still yours. raise(fn) doesn't give advice. It does the work — builds the list, writes the briefs, preps the meetings, tracks the pipeline, brokers the intros, walks you through the term sheet. Fixed-fee, fixed-scope, no success fee, no equity. More output, less money, better aligned.",
+        a: "Coaches charge retainer or hourly to give advice. The advice is generic, the work is still yours. raise(fn) doesn't give advice. It does the work — builds the list, writes the briefs, preps the meetings, tracks the pipeline, walks you through the term sheet. Fixed-fee, fixed-scope, no success fee, no equity. More output, less money, better aligned.",
       },
       {
         q: "How is raise(fn) different from an accelerator?",
@@ -138,7 +138,7 @@ const FAQ_SECTIONS: FAQSection[] = [
       },
       {
         q: "If I'm on the free plan, why would I pay?",
-        a: "Free gives you the matching engine with a use cap. Paid removes the cap and unlocks everything else the agent does — drafts your outreach, preps every meeting, captures every debrief, tracks your full pipeline automatically, walks you through term sheets, and brokers warm intros when there's a path in the network. If your round is small and the cap covers it, free is enough. If you're running an active raise across 20+ parallel investor conversations, paid is built for that.",
+        a: "Free gives you the matching engine with a use cap. Paid removes the cap and unlocks everything else the agent does — drafts your outreach, preps every meeting, captures every debrief, tracks your full pipeline automatically, and walks you through term sheets. If your round is small and the cap covers it, free is enough. If you're running an active raise across 20+ parallel investor conversations, paid is built for that.",
       },
     ],
   },

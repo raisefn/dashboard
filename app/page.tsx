@@ -431,7 +431,7 @@ export default function LandingPage() {
               { verb: "Analyzes", title: "your deck", desc: "Slide-by-slide critique. Narrative gaps. Comp rounds at your stage." },
               { verb: "Matches", title: "you to the right investors", desc: "Ranked by actual fit. Stage, sector, check size, who's deploying right now." },
               { verb: "Drafts", title: "investor briefs", desc: "One-page founder briefs with your traction, narrative, and ask. Shareable link." },
-              { verb: "Drafts", title: "your outreach", desc: "Per-investor angle. Warm-intro path if one exists. Approve and send." },
+              { verb: "Drafts", title: "your outreach", desc: "Per-investor angle, tailored to what they actually fund. Approve and send." },
               { verb: "Preps", title: "every meeting", desc: "Brief on the investor, prior conversation notes, what they'll probe." },
               { verb: "Debriefs", title: "after each call", desc: "Captures what they asked, what they liked, what they passed on. Updates your pipeline." },
               { verb: "Tracks", title: "your pipeline", desc: "Every status, every commitment, every follow-up. Auto-updated from your conversations." },

@@ -3,16 +3,16 @@ import type { Metadata } from "next";
 // Metadata can't live on a client component, so the route uses a server
 // layout to set the head. SEO target: "how investor matching works",
 // "AI investor matching", "VC matching algorithm." Trust + transparency
-// page that backlinks to /founders, /investors, /signup.
+// page that backlinks to /founders, /raise-fund, /signup.
 export const metadata: Metadata = {
   title: "How we match — raise(fn)",
   description:
-    "Five dimensions, specialty signal, hard-no honored, human curation. Inside the investor matching architecture that surfaces eight investors who actually write your check — not eight hundred keyword matches.",
+    "Inside the matching architecture that surfaces the investors who actually write your check — sector, stage, check size, geography, deployment cadence, behavioral history. The agent runs every layer against your raise.",
   alternates: { canonical: "https://www.raisefn.com/how-we-match" },
   openGraph: {
     title: "How we match — raise(fn)",
     description:
-      "Investor matching across five dimensions — industry, modality, technology, audience, business model. Specialists outrank generalists. Hard nos honored. Every warm intro brokered by a human.",
+      "Investor matching by sector, stage, check size, geography, and deployment cadence. Specialists outrank generalists. Hard nos honored. The agent runs the whole stack.",
     url: "https://www.raisefn.com/how-we-match",
     type: "article",
   },
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "How we match — raise(fn)",
     description:
-      "Five dimensions, specialty-weighted, hard-no honored, human-brokered. The matching architecture explained.",
+      "The matching architecture explained. Sector, stage, check, geo, cadence, behavior — all layered by the agent.",
   },
 };
 

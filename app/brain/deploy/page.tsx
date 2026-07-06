@@ -1733,43 +1733,20 @@ function BrainDeployInner() {
             </button>
             <div class="upgrade-card-error" data-err="pro" style="display:none"></div>
           </div>
-          <div class="upgrade-card-tier upgrade-card-tier--advisor">
-            <div class="upgrade-card-tier-name">Advisor</div>
-            <div class="upgrade-card-tier-price">$1,997 today · $199/mo after month 1</div>
-            <div class="upgrade-card-tier-pitch">
-              Month 1 with raise(fn) Team hands-on. We set your agent up, guide you through the first month, and make warm intros to our proprietary network when we can. Pro from month 2.
-            </div>
-            <ul class="upgrade-card-tier-list">
-              <li>Agent setup, done for you</li>
-              <li>Month 1 hands-on guidance from raise(fn) Team</li>
-              <li>Warm intros to our proprietary network when there's a match</li>
-              <li>Pro uncapped from month 2, $199/mo, cancel anytime</li>
-            </ul>
-            <button class="upgrade-card-tier-cta" data-cta="advisor">
-              Get Advisor — $1,997
-            </button>
-            <div class="upgrade-card-error" data-err="advisor" style="display:none"></div>
-            <div class="upgrade-card-tier-foot">
-              $1,997 today = first month Pro ($199) + setup ($1,798).
-              No success fees. No equity.
-              <a href="/legal/engagement">Full engagement letter</a>.
-            </div>
-          </div>
         </div>
       `;
     } else {
       card.innerHTML = `
         <div class="upgrade-card-leadin">
-          Heavy month — you've hit a monthly soft cap on Advisor usage.
-          This is a temporary cost protection during your engagement.
+          Heavy month — you've hit a monthly soft cap.
+          If you need the cap bumped, just email and we'll handle it.
         </div>
         <div class="upgrade-card-header">Need more this month?</div>
         <div class="upgrade-card-subhead">
-          If you're actively closing a raise and need the cap bumped, just
-          email and we'll handle it.
+          Actively closing a raise? Email us and we'll bump the cap.
         </div>
         <div class="upgrade-card-cta-row">
-          <a href="mailto:team@raisefn.com?subject=Advisor%20cap%20bump"
+          <a href="mailto:team@raisefn.com?subject=Usage%20cap%20bump"
              class="upgrade-card-btn"
              style="text-decoration:none">
             Email team@raisefn.com
@@ -1784,7 +1761,7 @@ function BrainDeployInner() {
     });
 
     if (isFreeVerified) {
-      const wireTierCta = (tier: "pro" | "advisor") => {
+      const wireTierCta = (tier: "pro") => {
         const btn = card.querySelector(
           `.upgrade-card-tier-cta[data-cta="${tier}"]`
         ) as HTMLButtonElement | null;
@@ -1839,7 +1816,6 @@ function BrainDeployInner() {
         });
       };
       wireTierCta("pro");
-      wireTierCta("advisor");
     }
   }, [router]);
 
