@@ -132,36 +132,6 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ── Cadence toggle (applies to both Founder + Investor tiles) ── */}
-      <section className="relative px-4 pt-4">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex rounded-full border border-zinc-800 bg-zinc-900/40 p-1">
-            <button
-              type="button"
-              onClick={() => setCadence("monthly")}
-              className={`rounded-full px-5 py-1.5 text-xs font-medium transition-colors ${
-                cadence === "monthly"
-                  ? "bg-zinc-800 text-white"
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              type="button"
-              onClick={() => setCadence("annual")}
-              className={`rounded-full px-5 py-1.5 text-xs font-medium transition-colors ${
-                cadence === "annual"
-                  ? "bg-teal-900/50 text-teal-200 border border-teal-700/50"
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              Annual <span className="text-[10px] font-semibold text-teal-400 ml-1">save 58%</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
       {/* ── Explorer ── */}
       <section className="relative py-14 px-4">
         <FadeInSection>
@@ -208,6 +178,45 @@ export default function PricingPage() {
       <div className="mx-auto max-w-3xl px-4">
         <div className="border-t border-zinc-800/50" />
       </div>
+
+      {/* ── Cadence toggle — placed right above the paid tiles so it
+           reads as an active decision affecting Founder + Investor.
+           Was originally near the hero above Explorer, which made it
+           feel like decoration. ── */}
+      <section className="relative px-4 pt-16 pb-4">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500 mb-4">
+            Billing
+          </p>
+          <div className="inline-flex rounded-full border border-zinc-800 bg-zinc-900/60 p-1.5 shadow-lg shadow-black/40">
+            <button
+              type="button"
+              onClick={() => setCadence("monthly")}
+              className={`rounded-full px-7 py-2.5 text-sm font-semibold transition-colors ${
+                cadence === "monthly"
+                  ? "bg-zinc-800 text-white shadow"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              type="button"
+              onClick={() => setCadence("annual")}
+              className={`rounded-full px-7 py-2.5 text-sm font-semibold transition-colors ${
+                cadence === "annual"
+                  ? "bg-teal-900/60 text-teal-100 border border-teal-600/60 shadow"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              Annual
+              <span className="ml-2 rounded-full bg-teal-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-teal-300">
+                save 58%
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* ── Founder ── */}
       <section className="relative py-14 px-4">
