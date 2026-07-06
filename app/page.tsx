@@ -255,19 +255,14 @@ export default function LandingPage() {
           <p className="mx-auto mt-8 max-w-2xl text-2xl sm:text-3xl font-medium text-white leading-tight">
             The AI Fundraising Agent
           </p>
-          <p className="mx-auto mt-4 max-w-lg text-lg text-zinc-400">
-            You stay in control. The agent does the work.
-          </p>
-          <div className="mt-10 flex flex-col items-center gap-3 animate-fade-in" style={{ animationDelay: "0.6s" }}>
+          <div className="mt-12 flex flex-col items-center gap-3 animate-fade-in" style={{ animationDelay: "0.6s" }}>
             <Link
               href="/signup"
               className="rounded-full bg-orange-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 shadow-lg shadow-orange-900/30"
             >
               Set up your agent →
             </Link>
-            <p className="text-xs text-zinc-500">
-              Free to start — signs up in 30 seconds. Tell the agent what you&apos;re building. Drop a deck if you have one.
-            </p>
+            <p className="text-xs text-zinc-500">Free to start.</p>
           </div>
           <div className="mt-12 flex justify-center animate-fade-in" style={{ animationDelay: "1.2s" }}>
             <svg
@@ -288,25 +283,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── The Six Moves ── */}
+      {/* ── The Six Moves — editorial vertical rows ── */}
       <section className="relative py-32 px-4">
         <FadeInSection>
-          <div className="mx-auto max-w-3xl text-center mb-16">
+          <div className="mx-auto max-w-3xl text-center mb-20">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-500 mb-4">
               What the agent does
             </p>
-            <h2 className="text-3xl font-bold sm:text-4xl">
+            <h2 className="text-4xl font-bold sm:text-5xl lg:text-6xl leading-tight">
               <span className="text-white">Six moves.</span>{" "}
               <span className="text-teal-400">One conversation.</span>{" "}
               <span className="text-white">Whole raise.</span>
             </h2>
-            <p className="mt-6 text-base text-zinc-500 max-w-xl mx-auto leading-relaxed">
-              Same agent for founders raising for their company and investors
-              raising a fund, deal, or SPV. Vocabulary adapts. Moves are the same.
-            </p>
           </div>
 
-          <div className="mx-auto max-w-4xl grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mx-auto max-w-5xl">
             {[
               {
                 num: "01",
@@ -344,25 +335,34 @@ export default function LandingPage() {
                 desc: "Term sheet or side letter walkthrough. Structural flags. Close-day coordination. All the way through to signed docs.",
                 color: "#a78bfa",
               },
-            ].map((move) => (
+            ].map((move, i) => (
               <div
                 key={move.num}
-                className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:border-zinc-700 transition-colors"
+                className={`grid grid-cols-12 gap-6 sm:gap-10 items-center py-12 sm:py-16 ${
+                  i > 0 ? "border-t border-zinc-800/60" : ""
+                }`}
               >
-                <div className="flex items-baseline gap-3 mb-3">
+                {/* Giant number — design element, not a label */}
+                <div className="col-span-4 sm:col-span-3">
                   <span
-                    className="text-xs font-bold uppercase tracking-widest"
-                    style={{ color: move.color }}
+                    className="block text-6xl sm:text-8xl lg:text-9xl font-black leading-none tracking-tight"
+                    style={{ color: move.color, opacity: 0.9 }}
                   >
                     {move.num}
                   </span>
-                  <p className="text-lg font-semibold text-white">
+                </div>
+
+                {/* Verb + description */}
+                <div className="col-span-8 sm:col-span-9">
+                  <h3
+                    className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4 tracking-tight"
+                  >
                     {move.verb}
+                  </h3>
+                  <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-2xl">
+                    {move.desc}
                   </p>
                 </div>
-                <p className="text-sm text-zinc-400 leading-relaxed">
-                  {move.desc}
-                </p>
               </div>
             ))}
           </div>
