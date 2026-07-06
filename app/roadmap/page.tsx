@@ -1,74 +1,71 @@
 import FadeInSection from "@/components/fade-in-section";
 
 type Status = "live" | "building" | "planned";
+type Audience = "founders" | "investors" | "everyone";
 
-const audienceColors: Record<string, string> = {
+const audienceColors: Record<Audience, string> = {
   founders: "#2dd4bf",
   investors: "#f97316",
-  developers: "#a78bfa",
   everyone: "#fbbf24",
 };
 
-const capabilities: { label: string; oneliner: string; status: Status; audience: string; color: string }[] = [
-  // Live
-  { label: "Investor Targeting", oneliner: "Find who's actively deploying in your sector right now", status: "live", audience: "founders", color: "#2dd4bf" },
-  { label: "Readiness Evaluation", oneliner: "Know if your metrics are strong enough before you pitch", status: "live", audience: "founders", color: "#34d399" },
-  { label: "Narrative Analysis", oneliner: "Is your pitch landing? Find out before you send it", status: "live", audience: "founders", color: "#fbbf24" },
-  { label: "Signal Reading", oneliner: "Decode what investor behavior actually means", status: "live", audience: "founders", color: "#fb923c" },
-  { label: "Outreach Guidance", oneliner: "Per-investor strategy — specific, not generic", status: "live", audience: "founders", color: "#f87171" },
-  { label: "Term Sheet Read", oneliner: "Your terms in context against live market data", status: "live", audience: "founders", color: "#a78bfa" },
-  { label: "Pipeline Memory", oneliner: "Your raise has a memory — no spreadsheet required", status: "live", audience: "everyone", color: "#2dd4bf" },
-  { label: "Meeting Ingestion", oneliner: "Paste a transcript, raise(fn) captures everything", status: "live", audience: "everyone", color: "#34d399" },
-  { label: "Conversation Memory", oneliner: "raise(fn) remembers your entire history across sessions", status: "live", audience: "everyone", color: "#a78bfa" },
-  { label: "Tracker — Rounds", oneliner: "Live funding rounds from SEC filings and 290+ sources", status: "live", audience: "everyone", color: "#2dd4bf" },
-  { label: "Tracker — Investors", oneliner: "Investor profiles cross-referenced across data sources", status: "live", audience: "everyone", color: "#fb923c" },
-  { label: "Tracker — Projects", oneliner: "Companies tracked with traction signals and team data", status: "live", audience: "everyone", color: "#34d399" },
-  { label: "Deal Memory", oneliner: "Track every deal through conversation — no data entry", status: "live", audience: "everyone", color: "#fb923c" },
-  { label: "Pitch Deck Analysis", oneliner: "Paste your deck, get calibrated feedback on narrative and positioning", status: "live", audience: "founders", color: "#fbbf24" },
-  { label: "Email Notifications", oneliner: "Follow-up reminders and stale pipeline alerts via email", status: "live", audience: "everyone", color: "#34d399" },
-  { label: "Outreach Drafting", oneliner: "Cold emails and follow-ups — tailored per investor", status: "live", audience: "founders", color: "#f87171" },
-  { label: "Gmail Send", oneliner: "Connect Gmail. Draft per-investor, review, send from your own inbox", status: "live", audience: "founders", color: "#f87171" },
-  // Building — top three are code-complete on branches, awaiting deploy
-  { label: "Verified MRR", oneliner: "Real revenue verified live from Stripe — not a number you typed in a form", status: "building", audience: "founders", color: "#2dd4bf" },
-  { label: "Founder Pattern Library", oneliner: "Cross-founder patterns for cold emails, decks, pitches, and diligence — privacy-preserving aggregation", status: "building", audience: "founders", color: "#a78bfa" },
-  { label: "Cross-Raise Memory", oneliner: "Your seed round teaches your Series A — emails, decks, positioning, and diligence carry forward", status: "building", audience: "founders", color: "#34d399" },
-  { label: "Stay in Touch Agent", oneliner: "Automatically keep investors warm between raises — updates, milestones, no effort", status: "building", audience: "founders", color: "#fbbf24" },
-  { label: "Reply Detection", oneliner: "When investors reply, raise(fn) reads it and updates your pipeline automatically", status: "building", audience: "founders", color: "#f87171" },
-  { label: "Valuation Calibration", oneliner: "What the data says your company is worth right now", status: "building", audience: "founders", color: "#fbbf24" },
-  { label: "Raise Timing", oneliner: "Should you raise now or wait?", status: "building", audience: "founders", color: "#34d399" },
-  { label: "Competitive Raise Intel", oneliner: "Who else is raising in your space right now", status: "building", audience: "founders", color: "#f87171" },
-  { label: "Co-investor Sequencing", oneliner: "Who to bring in first to unlock the next investor", status: "building", audience: "founders", color: "#a78bfa" },
-  // Planned
-  { label: "Calendar Integration", oneliner: "Connect your calendar — meetings auto-captured, prep + debrief without manual logging", status: "planned", audience: "everyone", color: "#34d399" },
-  { label: "Cap Table", oneliner: "Living cap table — captured conversationally, updates as new rounds close, ready for your Series A", status: "planned", audience: "founders", color: "#a78bfa" },
-  { label: "Term Sheet Comparison", oneliner: "Two offers, side-by-side — dilution, board seats, pro-rata, prefs, with a verdict", status: "planned", audience: "founders", color: "#fbbf24" },
-  { label: "Reference Call Prep", oneliner: "When investors check your references — auto-prep your refs, brief them, follow up", status: "planned", audience: "founders", color: "#34d399" },
-  { label: "Fund Raise Plan V1", oneliner: "Agent for investors raising a fund, deal, or SPV — LP targeting, briefs, DDQ, pipeline through close", status: "building", audience: "investors", color: "#f97316" },
-  { label: "Post-raise Planning", oneliner: "Prepare for your next round before you need it", status: "planned", audience: "founders", color: "#2dd4bf" },
-  { label: "Fit Scores", oneliner: "Quantified fit between founders and investors — sector, stage, check size, activity, thesis alignment", status: "planned", audience: "everyone", color: "#2dd4bf" },
-  { label: "LP Context", oneliner: "Who backs the funds you're pitching — fund cycle pressure, mandate constraints, deployment timing", status: "planned", audience: "founders", color: "#a78bfa" },
-
-  { label: "Meeting Tool Integration", oneliner: "Otter, Fireflies, Fathom — transcripts flow in automatically", status: "planned", audience: "everyone", color: "#2dd4bf" },
-  { label: "Data Freshness Layer", oneliner: "Every data point timestamped and scored — stale intel surfaced transparently", status: "planned", audience: "everyone", color: "#fb923c" },
-  { label: "Privacy & Aggregation", oneliner: "Behavioral data anonymized at source, minimum thresholds enforced, dispute mechanism", status: "planned", audience: "everyone", color: "#f87171" },
-  { label: "Developer SDK", oneliner: "REST API and native integrations for LangChain, CrewAI, Claude", status: "planned", audience: "developers", color: "#a78bfa" },
-  { label: "x402 Payments", oneliner: "Agents discover and pay autonomously — no API key required", status: "planned", audience: "developers", color: "#a78bfa" },
-  { label: "Crowdfunding Strategy", oneliner: "Evaluate and plan equity crowdfunding alongside traditional raises", status: "planned", audience: "founders", color: "#fbbf24" },
-  { label: "Revenue-Based Financing", oneliner: "Explore non-dilutive funding options based on your metrics", status: "planned", audience: "founders", color: "#34d399" },
-  { label: "Grant Discovery", oneliner: "Find and qualify for grants matched to your company and sector", status: "planned", audience: "founders", color: "#2dd4bf" },
-];
-
-const audienceLabel: Record<string, string> = {
+const audienceLabel: Record<Audience, string> = {
   founders: "Founders",
   investors: "Investors",
-  developers: "Developers",
   everyone: "Everyone",
 };
 
+// Roadmap v3 (2026-07-06): rewritten to reflect actual current state.
+// Killed aspirational content items (Grant Discovery, Crowdfunding
+// Strategy, Revenue-Based Financing), marketplace framing (Fit Scores,
+// LP Context), data-first items (Data Freshness Layer, Privacy &
+// Aggregation), and "capabilities" that were really just "the agent
+// can talk about this" (Signal Reading, Term Sheet Read, Outreach
+// Guidance, Valuation Calibration, Raise Timing, Competitive Raise
+// Intel, Co-investor Sequencing).
+//
+// What's here: the founder-side product that actually ships today,
+// the investor-side product that's in progress, and the near-term
+// planned work. Honest. If you can't demo it in a chat session, it's
+// not "live."
+const capabilities: {
+  label: string;
+  oneliner: string;
+  status: Status;
+  audience: Audience;
+}[] = [
+  // ── LIVE for founders (the shipped product) ──
+  { label: "Agent chat", oneliner: "Captures your raise from conversation — company, team, metrics, story, ask", status: "live", audience: "founders" },
+  { label: "Deck critique", oneliner: "Slide-by-slide analysis — narrative gaps, weak asks, comp rounds at your stage", status: "live", audience: "founders" },
+  { label: "Investor sourcing", oneliner: "Ranked by real check behavior — sector, stage, geo, cadence, active-deployment filtering", status: "live", audience: "founders" },
+  { label: "Investor briefs", oneliner: "One-page per-investor research — thesis, recent bets, decision process, key contacts", status: "live", audience: "founders" },
+  { label: "Outreach drafting", oneliner: "Personalized per investor — approve, edit, send", status: "live", audience: "founders" },
+  { label: "Gmail send", oneliner: "Draft in-app, send from your own inbox — every reply captured", status: "live", audience: "founders" },
+  { label: "Meeting prep", oneliner: "Six-section briefing per meeting — angles, risks, hard questions, asks", status: "live", audience: "founders" },
+  { label: "Meeting debriefs", oneliner: "Captured after each call — what landed, what to change, next steps", status: "live", audience: "founders" },
+  { label: "Pipeline memory", oneliner: "Auto-updated as you work — no CRM to keep clean", status: "live", audience: "founders" },
+  { label: "Persistent memory", oneliner: "Across sessions, across raises — pick up exactly where you left off", status: "live", audience: "founders" },
+  { label: "Term sheet walkthrough", oneliner: "Plain English every clause — flags the founder-hostile ones", status: "live", audience: "founders" },
+
+  // ── LIVE for everyone (public resources) ──
+  { label: "Public tracker", oneliner: "Funding rounds, investors, projects — sourced from SEC filings and public records", status: "live", audience: "everyone" },
+  { label: "Raise Intel", oneliner: "Published fundraising research — updated on a daily cadence", status: "live", audience: "everyone" },
+
+  // ── IN PROGRESS ──
+  { label: "Fund Raise Plan V1", oneliner: "The investor agent — LP targeting, per-LP briefs, DDQ handling, pipeline through close", status: "building", audience: "investors" },
+  { label: "Bring your agent (MCP)", oneliner: "Connect ChatGPT, Claude, or your own assistant to your raise(fn) data", status: "building", audience: "everyone" },
+
+  // ── PLANNED (near-term) ──
+  { label: "Reply detection", oneliner: "Agent reads investor replies, updates your pipeline automatically", status: "planned", audience: "founders" },
+  { label: "Cross-raise memory", oneliner: "Your seed round teaches your Series A — emails, decks, positioning carry forward", status: "planned", audience: "founders" },
+  { label: "Calendar integration", oneliner: "Google Calendar — meetings auto-captured, prep + debrief without manual logging", status: "planned", audience: "everyone" },
+  { label: "Meeting transcript ingestion", oneliner: "Otter, Fireflies, Fathom — transcripts flow in automatically", status: "planned", audience: "everyone" },
+];
+
 export default function RoadmapPage() {
-  const live = capabilities.filter(c => c.status === "live");
-  const building = capabilities.filter(c => c.status === "building");
-  const planned = capabilities.filter(c => c.status === "planned");
+  const live = capabilities.filter((c) => c.status === "live");
+  const building = capabilities.filter((c) => c.status === "building");
+  const planned = capabilities.filter((c) => c.status === "planned");
 
   return (
     <div className="relative">
@@ -84,7 +81,10 @@ export default function RoadmapPage() {
             What we&apos;ve built. What&apos;s next.
           </h1>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            We&apos;re building in the open. Here&apos;s exactly where things stand — what&apos;s live, what we&apos;re actively working on, and what&apos;s coming.
+            We&apos;re building in the open. Here&apos;s exactly where things
+            stand — what&apos;s live, what we&apos;re actively working on, and
+            what&apos;s coming next. If you can&apos;t use it in a chat session
+            today, it&apos;s not marked live.
           </p>
           <div className="flex justify-center gap-8 mt-10">
             <div className="flex items-center gap-2">
@@ -115,9 +115,9 @@ export default function RoadmapPage() {
             <div className="space-y-0">
               {live.map((cap, i) => (
                 <div key={i} className="flex items-center gap-4 py-3.5 border-b border-zinc-800/40">
-                  <div className="w-1 self-stretch rounded-full shrink-0" style={{ backgroundColor: cap.color }} />
+                  <div className="w-1 self-stretch rounded-full shrink-0" style={{ backgroundColor: audienceColors[cap.audience] }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold" style={{ color: cap.color }}>{cap.label}</p>
+                    <p className="text-sm font-semibold" style={{ color: audienceColors[cap.audience] }}>{cap.label}</p>
                     <p className="text-sm text-zinc-500">{cap.oneliner}</p>
                   </div>
                   <span className="shrink-0 text-[10px] font-medium uppercase tracking-wider" style={{ color: audienceColors[cap.audience] }}>
