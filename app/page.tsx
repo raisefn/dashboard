@@ -239,131 +239,6 @@ function ExecutionDemo() {
   );
 }
 
-/* ── Animated stack diagram ── */
-function StackDiagram() {
-  const layers = [
-    {
-      layer: 1,
-      label: "Eyes & Ears",
-      headline: "How the agent knows what it knows.",
-      interaction: "The public tracker.",
-      desc: "SEC filings, accelerator directories, investor registries, traction signals — standardized, cross-referenced, and updated continuously. Free and open source.",
-      color: "#2dd4bf",
-      borderColor: "rgba(45,212,191,0.25)",
-      badge: "OPEN SOURCE",
-      badgeColor: "text-teal-400 border-teal-700/50",
-      href: "/tracker",
-    },
-    {
-      layer: 2,
-      label: "The Agent",
-      headline: "Runs your raise alongside you.",
-      interaction: "Match. Brief. Send. Track. Close.",
-      desc: "The AI agent for your raise. Analyzes your materials, ranks the right investors, drafts briefs and outreach, tracks every reply, debriefs meetings, and closes the round with you. Works for founders raising for their company and investors raising a fund, deal, or SPV. Every raise that runs through it makes the next one sharper.",
-      color: "#f97316",
-      borderColor: "rgba(249,115,22,0.25)",
-      badge: "THE PRODUCT",
-      badgeColor: "text-orange-400 border-orange-700/50",
-      href: "/founders",
-    },
-    {
-      layer: 3,
-      label: "Bring your AI",
-      headline: "Connect ChatGPT, Claude, or your own agent.",
-      interaction: "Query raise(fn) from anywhere.",
-      desc: "Your assistant gets read-access to your raise(fn) data — pipeline, briefs, matches, meeting notes. Ask in natural language; data flows from raise(fn). MCP-compatible. Founders and investors both supported.",
-      color: "#a78bfa",
-      borderColor: "rgba(167,139,250,0.25)",
-      badge: "COMING SOON",
-      badgeColor: "text-violet-400 border-violet-700/50",
-      href: "/agents",
-    },
-  ];
-
-  return (
-    <div className="mx-auto max-w-3xl space-y-4">
-      {layers.map((layer, i) => (
-        <Link
-          key={layer.label}
-          href={layer.href}
-          className="group relative block rounded-xl border px-6 py-5 sm:px-8 sm:py-6 transition-all hover:bg-zinc-800/20"
-          style={{
-            borderColor: layer.borderColor,
-            background:
-              "linear-gradient(135deg, rgba(24,24,27,0.7), rgba(24,24,27,0.95))",
-            minHeight: 130,
-          }}
-        >
-          <div className="flex items-start gap-5 sm:gap-6">
-            {/* Layer badge */}
-            <div
-              className="shrink-0 flex items-center justify-center rounded-lg text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5 mt-0.5"
-              style={{
-                color: layer.color,
-                border: `1px solid ${layer.borderColor}`,
-                background: "rgba(24,24,27,0.8)",
-              }}
-            >
-              Layer {layer.layer}
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline flex-wrap gap-x-2 mb-1">
-                <span
-                  className="text-lg font-bold sm:text-xl"
-                  style={{ color: layer.color }}
-                >
-                  {layer.label}
-                </span>
-                <span className="text-zinc-400 text-sm font-medium">
-                  — {layer.headline}
-                </span>
-              </div>
-              <p className="text-sm text-zinc-500 leading-relaxed">
-                <span className="text-zinc-400 font-medium">
-                  {layer.interaction}
-                </span>{" "}
-                {layer.desc}
-              </p>
-            </div>
-
-            {/* Badge */}
-            <span
-              className={`shrink-0 hidden sm:inline-block rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-wider ${layer.badgeColor}`}
-            >
-              {layer.badge}
-            </span>
-          </div>
-
-          {/* Animated connecting line between layers */}
-          {i < layers.length - 1 && (
-            <svg
-              className="absolute left-1/2 -bottom-4 -translate-x-1/2 pointer-events-none"
-              width={2}
-              height={16}
-              viewBox="0 0 2 16"
-            >
-              <line
-                x1={1}
-                y1={0}
-                x2={1}
-                y2={16}
-                stroke={layers[i + 1].color}
-                strokeWidth={1.5}
-                strokeOpacity={0.2}
-                strokeDasharray="4 3"
-                className="animate-dash"
-                style={{ animationDelay: `${i * 0.5}s` }}
-              />
-            </svg>
-          )}
-        </Link>
-      ))}
-    </div>
-  );
-}
-
 export default function LandingPage() {
   return (
     <div className="relative">
@@ -413,38 +288,81 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── What we do ── */}
+      {/* ── The Six Moves ── */}
       <section className="relative py-32 px-4">
         <FadeInSection>
           <div className="mx-auto max-w-3xl text-center mb-16">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-500 mb-4">
-              What we do
+              What the agent does
             </p>
             <h2 className="text-3xl font-bold sm:text-4xl">
-              <span className="text-white">Match. Brief. Send. Track. Close.</span>
-              <br />
-              <span className="text-teal-400">One agent for the whole raise.</span>
+              <span className="text-white">Six moves.</span>{" "}
+              <span className="text-teal-400">One conversation.</span>{" "}
+              <span className="text-white">Whole raise.</span>
             </h2>
+            <p className="mt-6 text-base text-zinc-500 max-w-xl mx-auto leading-relaxed">
+              Same agent for founders raising for their company and investors
+              raising a fund, deal, or SPV. Vocabulary adapts. Moves are the same.
+            </p>
           </div>
-          <div className="mx-auto max-w-3xl grid gap-y-7 gap-x-10 sm:grid-cols-2">
+
+          <div className="mx-auto max-w-4xl grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { verb: "Analyzes", title: "your deck", desc: "Slide-by-slide critique. Narrative gaps. Comp rounds at your stage." },
-              { verb: "Matches", title: "you to the right investors", desc: "Ranked by actual fit. Stage, sector, check size, who's deploying right now." },
-              { verb: "Drafts", title: "investor briefs", desc: "One-page founder briefs with your traction, narrative, and ask. Shareable link." },
-              { verb: "Drafts", title: "your outreach", desc: "Per-investor angle, tailored to what they actually fund. Approve and send." },
-              { verb: "Preps", title: "every meeting", desc: "Brief on the investor, prior conversation notes, what they'll probe." },
-              { verb: "Debriefs", title: "after each call", desc: "Captures what they asked, what they liked, what they passed on. Updates your pipeline." },
-              { verb: "Tracks", title: "your pipeline", desc: "Every status, every commitment, every follow-up. Auto-updated from your conversations." },
-              { verb: "Closes", title: "the round with you", desc: "Term sheet review. Term comparison. Comms with the room. The whole close." },
-            ].map((cap) => (
-              <div key={cap.title} className="flex items-start gap-3">
-                <span className="shrink-0 mt-0.5 inline-flex items-center justify-center w-1.5 h-1.5 rounded-full bg-teal-400" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-base font-semibold text-white leading-snug">
-                    <span className="text-teal-400">{cap.verb}</span> {cap.title}
+              {
+                num: "01",
+                verb: "Understand",
+                desc: "Captures your raise from conversation. Company or fund, metrics or thesis, team, story, ask — all as you talk. No forms, no dashboards.",
+                color: "#2dd4bf",
+              },
+              {
+                num: "02",
+                verb: "Sharpen",
+                desc: "Where the pitch leaks, where the materials break, where the ask is fuzzy. The agent flags the weak points before you go out.",
+                color: "#34d399",
+              },
+              {
+                num: "03",
+                verb: "Identify",
+                desc: "Ranks the right targets by real check behavior, not website copy. Sector, stage, geo, cadence, historical fit — all layered.",
+                color: "#fbbf24",
+              },
+              {
+                num: "04",
+                verb: "Outreach",
+                desc: "Drafts personalized outreach per target. Approve and send from your Gmail. Every reply captured, every thread tracked.",
+                color: "#fb923c",
+              },
+              {
+                num: "05",
+                verb: "Run",
+                desc: "Preps every meeting, captures every debrief, keeps every follow-up on time. The pipeline updates itself as you work.",
+                color: "#f87171",
+              },
+              {
+                num: "06",
+                verb: "Close",
+                desc: "Term sheet or side letter walkthrough. Structural flags. Close-day coordination. All the way through to signed docs.",
+                color: "#a78bfa",
+              },
+            ].map((move) => (
+              <div
+                key={move.num}
+                className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:border-zinc-700 transition-colors"
+              >
+                <div className="flex items-baseline gap-3 mb-3">
+                  <span
+                    className="text-xs font-bold uppercase tracking-widest"
+                    style={{ color: move.color }}
+                  >
+                    {move.num}
+                  </span>
+                  <p className="text-lg font-semibold text-white">
+                    {move.verb}
                   </p>
-                  <p className="text-sm text-zinc-500 leading-relaxed mt-0.5">{cap.desc}</p>
                 </div>
+                <p className="text-sm text-zinc-400 leading-relaxed">
+                  {move.desc}
+                </p>
               </div>
             ))}
           </div>
@@ -510,73 +428,6 @@ export default function LandingPage() {
         </FadeInSection>
       </section>
 
-      {/* ── The Stack ── */}
-      <section className="relative py-32 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl mb-12">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400 mb-4">
-              How it's built
-            </p>
-            <h2 className="text-3xl font-bold sm:text-4xl">
-              <span className="text-white">The data underneath. The agent on top. Open to other AIs.</span>
-            </h2>
-          </div>
-          <StackDiagram />
-        </FadeInSection>
-      </section>
-
-      {/* ── The Flywheel ── */}
-      <section className="relative py-32 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl text-center mb-16">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-500 mb-4">
-              The flywheel
-            </p>
-            <h2 className="text-3xl font-bold sm:text-4xl">
-              <span className="text-white">Every raise makes the next one</span>{" "}
-              <span className="text-teal-400">smarter.</span>
-            </h2>
-          </div>
-          <div className="mx-auto max-w-2xl space-y-10">
-            {[
-              {
-                title: "More founders raise → sharper agent",
-                desc: "Every raise generates signal no model can train on — which briefs landed with which investor archetypes, which openers converted, which objections killed deals. The agent calibrates on outcomes. Every raise that runs through raise(fn) makes the next one sharper.",
-                color: "#2dd4bf",
-              },
-              {
-                title: "More data sources → harder to replicate",
-                desc: "SEC filings, accelerator directories, investor registries, traction platforms — each with custom ingestion, normalization, and cross-referencing logic. Copying one source is easy. Copying the signal that emerges from combining them is not.",
-                color: "#fb923c",
-              },
-              {
-                title: "Persistent context → switching costs",
-                desc: "The agent remembers your raise — metrics, investor conversations, pitch iterations, every conversation in your pipeline. Walk away and you start from zero somewhere else.",
-                color: "#a78bfa",
-              },
-              {
-                title: "Other agents connect → infrastructure lock-in",
-                desc: "When ChatGPT, Claude, or a custom agent connects to raise(fn) for fundraising data, raise(fn) becomes infrastructure. Ripping out a working integration is a cost nobody pays voluntarily.",
-                color: "#fbbf24",
-              },
-            ].map((item) => (
-              <div key={item.title} className="border-l-2 pl-6" style={{ borderColor: `${item.color}40` }}>
-                <p className="text-sm font-semibold mb-1" style={{ color: item.color }}>{item.title}</p>
-                <p className="text-sm text-zinc-500 leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mx-auto max-w-2xl mt-12 text-center">
-            <Link
-              href="/how-we-learn"
-              className="text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors"
-            >
-              How the agent learns →
-            </Link>
-          </div>
-        </FadeInSection>
-      </section>
-
       {/* ── Who It's For ── */}
       <section className="relative py-32 px-4">
         <FadeInSection>
@@ -604,49 +455,6 @@ export default function LandingPage() {
                 who: "Agents connecting",
                 what: "MCP-compatible. Plug your own ChatGPT or Claude into your raise(fn) data — query your pipeline, draft the follow-up, run the raise from your tools.",
                 color: "#a78bfa",
-              },
-            ].map((item) => (
-              <div key={item.who}>
-                <p
-                  className="text-sm font-semibold mb-2"
-                  style={{ color: item.color }}
-                >
-                  {item.who}
-                </p>
-                <p className="text-sm text-zinc-500">{item.what}</p>
-              </div>
-            ))}
-          </div>
-        </FadeInSection>
-      </section>
-
-      {/* ── Where This Goes ── */}
-      <section className="relative py-32 px-4">
-        <FadeInSection>
-          <div className="mx-auto max-w-3xl text-center mb-16">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-500 mb-4">
-              Where this goes
-            </p>
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              From tool to infrastructure.
-            </h2>
-          </div>
-          <div className="mx-auto max-w-3xl grid gap-8 sm:grid-cols-3 text-center">
-            {[
-              {
-                who: "Today",
-                what: "The agent runs your raise. Every raise that runs through it makes the next one sharper — observed-truth data on who actually writes checks, how long they take, and what makes them move.",
-                color: "#2dd4bf",
-              },
-              {
-                who: "Next",
-                what: "Deeper integration with your stack. Gmail and Calendar so the agent sends from your inbox, schedules from your calendar, debriefs from your meetings — your tools, the agent's reach.",
-                color: "#a78bfa",
-              },
-              {
-                who: "Then",
-                what: "raise(fn) becomes the layer that powers fundraising AI. Any agent, any assistant, queries raise(fn) for what they need underneath.",
-                color: "#f97316",
               },
             ].map((item) => (
               <div key={item.who}>
