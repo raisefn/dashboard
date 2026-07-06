@@ -260,7 +260,7 @@ export default function RaiseFundPage() {
             </Link>
           </div>
           <p className="text-xs text-zinc-500 mt-3">
-            5-minute signup. No credit card.
+            30-second signup. No credit card.
           </p>
           <p className="text-xs text-zinc-600 mt-1">
             Your fund materials stay private. Never shared. Never used to train.
@@ -506,6 +506,58 @@ export default function RaiseFundPage() {
         </FadeInSection>
       </section>
 
+      {/* ── FAQ (cherry-picked from /faq — no FAQPage JSON-LD here; the
+           canonical schema lives on /faq) ── */}
+      <section className="relative py-20 px-4 bg-zinc-950/40">
+        <FadeInSection>
+          <div className="mx-auto max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-wider text-teal-400/80 mb-2">
+              Common questions
+            </p>
+            <h2 className="text-3xl font-bold text-white sm:text-4xl mb-8">
+              For investors.
+            </h2>
+            <div className="space-y-8">
+              {[
+                {
+                  q: "What is raise(fn) for investors?",
+                  a: "The AI agent for your fund raise. If you're a venture GP raising Fund I or II, a real estate developer raising for a specific deal, or a syndicate lead running an SPV — raise(fn) targets the right investors, drafts the outreach, briefs you on every conversation, handles the DDQ, and tracks the pipeline through close. Same conversational surface founders use, adapted to how capital raises actually run.",
+                },
+                {
+                  q: "Who is raise(fn) for on the investor side?",
+                  a: "Emerging venture managers raising Fund I or II ($5-25M targets). Real estate developers raising for specific deals or funds ($1-15M target). Angel syndicate leads running SPVs ($1-5M target). Broadly, anyone raising capital where the counterparty is LPs, JV partners, or backers — not customers.",
+                },
+                {
+                  q: "How is raise(fn) different from an LP database or a placement agent?",
+                  a: "LP databases hand you a list. You still do the targeting, the outreach, the briefs, the DDQs, the follow-ups. Placement agents charge success fees and control the process — you get less leverage as the raise unfolds. raise(fn) runs the raise with you. Targeting, briefs, meeting prep, pipeline, DDQ, close — one conversation. No success fee, no equity, fixed pricing.",
+                },
+                {
+                  q: "Will my LPs / investors see me on the platform?",
+                  a: "No. raise(fn) is your working environment, not a marketplace. Your LPs and investors are never exposed to the platform — they get personal outreach and materials from you (drafted by the agent, sent through your tools). No public directory of raises, no cross-fund visibility. Your raise stays confidential.",
+                },
+              ].map((qa) => (
+                <div key={qa.q}>
+                  <h3 className="text-lg font-semibold text-white leading-snug mb-2">
+                    {qa.q}
+                  </h3>
+                  <p className="text-zinc-300 leading-relaxed text-sm sm:text-base">
+                    {qa.a}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8">
+              <Link
+                href="/faq"
+                className="text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors"
+              >
+                Read the full FAQ →
+              </Link>
+            </div>
+          </div>
+        </FadeInSection>
+      </section>
+
       {/* ── CTA ── */}
       <section className="relative py-24 px-4">
         <FadeInSection>
@@ -514,8 +566,7 @@ export default function RaiseFundPage() {
               Set up your agent. It takes it from there.
             </h2>
             <p className="text-zinc-400 mb-2 max-w-xl mx-auto">
-              5-minute signup. No credit card. Tell the agent about your fund
-              — it gets to work the second you finish.
+              30-second signup. No credit card. The agent asks the rest in chat.
             </p>
             <p className="text-zinc-500 text-sm mb-8 max-w-xl mx-auto">
               Your fund materials stay private. Never shared. Never used to train.

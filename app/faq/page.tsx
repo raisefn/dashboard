@@ -98,25 +98,25 @@ const FAQ_SECTIONS: FAQSection[] = [
       },
       {
         q: "How is raise(fn) different from generic AI tools like ChatGPT or Perplexity?",
-        a: "ChatGPT can draft a cold email. It can't tell you which investors actually deploy in your space, because it doesn't have the domain data + persistent context across your raise. raise(fn) is an agent tuned to fundraising: observed thesis from real check behavior, persistent memory of your prior conversations, and a feedback loop that gets sharper every raise. ChatGPT is a single-task tool. raise(fn) is an agent that runs the whole raise.",
+        a: "ChatGPT can draft a cold email. It can't tell you which investors actually deploy in your space, because it doesn't have persistent context across your raise or calibration on real fundraising outcomes. raise(fn) is an agent tuned to fundraising: it looks at what investors actually fund (not what they claim), remembers your prior conversations across sessions, and gets sharper with every raise that runs through it. ChatGPT is a single-task tool. raise(fn) runs the whole raise.",
       },
     ],
   },
   {
-    title: "Data and how it works",
-    eyebrow: "Under the hood",
+    title: "How the agent gets it right",
+    eyebrow: "Why the matches are useful",
     questions: [
       {
-        q: "What is 'observed thesis' and why does it matter?",
-        a: "Most investor matching uses stated thesis — what funds publish on their website. Stated thesis is marketing. The gap between what funds say they fund and what they actually fund is 18+ months wide on average. Observed thesis is derived from real check data: which sectors a fund actually deployed into in the last 12-18 months, at what stage, in what geography, alongside which co-investors. It's the truth. It's what makes the matches actually useful — and it's what no other tool has at this depth.",
+        q: "How does the agent know which investors to actually pitch?",
+        a: "It looks at what investors actually fund, not what they claim on their website. The agent factors in what an investor has recently deployed into — which sectors, at what stage, in what geography, alongside which co-investors — and matches against your raise on real behavior. Website claims and actual check patterns often disagree; the agent goes with the behavior.",
       },
       {
-        q: "How does raise(fn) know who's actually still writing checks?",
-        a: "Every investor in the database is tracked for SEC Form D filings, public round announcements, portfolio additions, partner activity. Funds quietly winding down or paused between vintages get flagged automatically. You don't waste pitches on funds that haven't written a check in 12+ months.",
+        q: "How does the agent know an investor is still active?",
+        a: "Recent check activity is a first-class signal. Funds quietly winding down or paused between vintages don't get surfaced. You don't waste pitches on someone who hasn't written a check in over a year.",
       },
       {
-        q: "Where does the investor data come from?",
-        a: "Public sources: SEC Form D filings, 13F holdings, fund websites, batch announcements, press. Observed behavior derived from real round data. The agent combines stated thesis (what investors say) with observed thesis (what they actually fund) to target more precisely than either alone.",
+        q: "Does the agent get sharper over time?",
+        a: "Yes. Every raise that runs through raise(fn) sharpens the next one — which matches convert, which briefs land, which meeting prep angles hold up, which pitches don't survive first contact. The agent runs the same raise smarter for the next founder than it did for the last.",
       },
     ],
   },
@@ -144,23 +144,31 @@ const FAQ_SECTIONS: FAQSection[] = [
   },
   {
     title: "For investors",
-    eyebrow: "If you back companies",
+    eyebrow: "If you're raising a fund, deal, or SPV",
     questions: [
       {
-        q: "How does raise(fn) help me as an investor?",
-        a: "Surfaces founders that actually match your check behavior — what your portfolio reveals, not what your website says. Surfaced when there's an actual fit, not bulk-fed. No daily deal-flow firehose. Quality over volume.",
+        q: "What is raise(fn) for investors?",
+        a: "The AI agent for your fund raise. If you're a venture GP raising Fund I or II, a real estate developer raising for a specific deal, or a syndicate lead running an SPV — raise(fn) targets the right investors, drafts the outreach, briefs you on every conversation, handles the DDQ, and tracks the pipeline through close. Same conversational surface founders use, adapted to how capital raises actually run.",
       },
       {
-        q: "What does raise(fn) cost an investor?",
-        a: "Free, for now. Won't always be — pricing will come once raise(fn) matures. Founders fund raise(fn) today.",
+        q: "Who is raise(fn) for on the investor side?",
+        a: "Emerging venture managers raising Fund I or II ($5-25M targets). Real estate developers raising for specific deals or funds ($1-15M target). Angel syndicate leads running SPVs ($1-5M target). Broadly, anyone raising capital where the counterparty is LPs, JV partners, or backers — not customers.",
       },
       {
-        q: "Will founders see me before I want to engage?",
-        a: "No. Investors are invisible to founders by default. No public ratings, no 'passed on' lists, no exposure of who turned down what. Engagement is private and happens only when you signal it.",
+        q: "How is raise(fn) different from an LP database or a placement agent?",
+        a: "LP databases hand you a list. You still do the targeting, the outreach, the briefs, the DDQs, the follow-ups. Placement agents charge success fees and control the process — you get less leverage as the raise unfolds. raise(fn) runs the raise with you. Targeting, briefs, meeting prep, pipeline, DDQ, close — one conversation. No success fee, no equity, fixed pricing.",
       },
       {
-        q: "Can I connect raise(fn) to my own agent?",
-        a: "MCP support coming soon. You'll be able to connect your investor agent directly and have raise(fn) deal flow surface inside your existing workflow — your agent gets the matches, you stay in your tools.",
+        q: "What does raise(fn) cost for a fund raise?",
+        a: "Free to start, same pricing tiers as the founder side. See /pricing for current rates. No success fee, no equity, no percentage of capital raised — same fixed-pricing model regardless of raise size.",
+      },
+      {
+        q: "Is the investor side live right now?",
+        a: "Signup is live. The investor agent surface goes live shortly — sign up at /raise-fund/join and you'll be notified the second it opens. First in, first served. Founders are on the live product today.",
+      },
+      {
+        q: "Will my LPs / investors see me on the platform?",
+        a: "No. raise(fn) is your working environment, not a marketplace. Your LPs and investors are never exposed to the platform — they get personal outreach and materials from you (drafted by the agent, sent through your tools). No public directory of raises, no cross-fund visibility. Your raise stays confidential.",
       },
     ],
   },
@@ -170,7 +178,7 @@ const FAQ_SECTIONS: FAQSection[] = [
     questions: [
       {
         q: "What's actually different about raise(fn) vs every other fundraising tool?",
-        a: "Three things. One: observed thesis instead of stated thesis — real check behavior, not website copy. The 18-month gap between what funds say and what they fund is where most fundraising tools fail. Two: end-to-end coverage in one conversation — matching, briefs, meeting prep, debriefs, pipeline tracking, intros, deck feedback, term sheet review — all in the same chat. Other tools cover one feature. raise(fn) replaces the stack. Three: no success fee, ever — fixed pricing, equity-free, transaction-free. Most tools either charge a percent of the round or take equity. Most other tools fail on at least two of those three.",
+        a: "Three things. One: the agent matches on what investors actually fund, not what they claim on their website. When those two diverge (they usually do), the agent goes with reality. Two: end-to-end coverage in one conversation — matching, briefs, meeting prep, debriefs, pipeline tracking, intros, deck feedback, term sheet review — all in the same chat. Other tools cover one feature. raise(fn) replaces the stack. Three: no success fee, ever — fixed pricing, equity-free, transaction-free. Most tools either charge a percent of the round or take equity. Most other tools fail on at least two of those three.",
       },
     ],
   },
