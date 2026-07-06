@@ -64,18 +64,38 @@ Imperatives.]
 - **"[Generic founder phrase or behavior]."** [Why it kills.] Dead.
 - **"[Another one]."** [Why it kills.] Killed.
 
-## The list is the real problem
+## Get an agent that runs this with you
 
-[Standard segue into the raise(fn) pitch — adapt to article topic.
-Keep it ~3 sentences. End with "Free to try" or a non-numeric CTA hook.]
+[3 paragraphs, adapted per article. Structure is fixed; content varies.]
 
-We index 17,000+ investors. We've classified 4,331 of them against a
-5-dimensional ontology of what they actually fund. 892 have observed
-thesis pulled from real check data — not what they claim on their
-website, what they actually wrote checks for in the last 18 months.
+[Paragraph 1 — one sentence acknowledging what the article just walked
+the reader through (e.g. "You picked the right amount" / "You know the
+shape of a cold email that lands" / "You know who's active"). One
+sentence naming the gap between knowing and doing (e.g. "Now you need
+to actually raise it" / "Now you need to write 40 of them, each tuned
+to a specific investor"). One sentence naming the operational load
+(e.g. "That's where founders lose weeks — juggling 30 investor
+conversations, drafting 40 pieces of outreach, prepping for meetings,
+tracking who said what and when").]
 
-That dataset powers raise(fn). You answer a 5-minute intake. We give
-you the ranked list.
+raise(fn) is the agent that runs your raise with you. You chat. It
+targets the right investors given your milestone-and-buffer math. It
+drafts outreach with real context, not generic templates. It preps
+you from your prior meeting debriefs. It tracks the pipeline so you
+always know where each conversation stands.
+
+You don't fill out forms. You don't run a CRM. You raise, and the
+agent handles the rest.
+
+<!-- VOICE RULES for this pitch section (per feedback-do-not-sell-the-database):
+- DO NOT lead with database volume (17K investors, 4,331 classified, etc.)
+- DO NOT frame reader's problem as "you don't have the list"
+- DO NOT position raise(fn) as an intake-form → output-list
+- DO lead with the AGENT that runs the work
+- DO name the four verbs: target, draft, prep, track
+- DO end with "You don't fill out forms. You don't run a CRM."
+-->
+
 
 ## FAQ
 

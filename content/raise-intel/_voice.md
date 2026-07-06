@@ -72,14 +72,17 @@ Founders need to make decisions. Tell them what to do.
 >
 > ✓ "Don't send a deck. Send a one-page brief."
 
-### 6. Specific numbers, never pricing
+### 6. Specific numbers, never pricing, never database volume
 
-Numbers earn trust — but only verifiable ones.
+Numbers earn trust — but only verifiable, non-marketing ones.
 
 - **OK:** specific tactical numbers ("Four sentences." "5 business days."
   "$15K MRR, 30% MoM for four months.")
-- **OK:** our verifiable dataset numbers ("17,000+ investors", "4,331
-  classified", "892 with observed thesis")
+- **NEVER:** database volume claims ("17,000+ investors", "4,331 classified",
+  "892 with observed thesis", "5-dimensional ontology"). Per
+  `feedback-do-not-sell-the-database` in memory: the product is the AGENT,
+  not the database. Every marketing surface that leads with volume trains
+  the reader to see us as a data provider. We aren't. Kill the pattern.
 - **NEVER:** specific pricing or match-count claims ("free tier 50/month",
   "$199/mo"). Pricing drifts. Articles last. Use evergreen CTAs only.
 - **NEVER:** fabricated outcome stats ("our data shows X founders close

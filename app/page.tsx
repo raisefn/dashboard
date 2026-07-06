@@ -429,7 +429,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-3xl grid gap-y-7 gap-x-10 sm:grid-cols-2">
             {[
               { verb: "Analyzes", title: "your deck", desc: "Slide-by-slide critique. Narrative gaps. Comp rounds at your stage." },
-              { verb: "Matches", title: "you to 17K investors", desc: "Ranked by actual fit. Stage, sector, check size, who's deploying right now." },
+              { verb: "Matches", title: "you to the right investors", desc: "Ranked by actual fit. Stage, sector, check size, who's deploying right now." },
               { verb: "Drafts", title: "investor briefs", desc: "One-page founder briefs with your traction, narrative, and ask. Shareable link." },
               { verb: "Drafts", title: "your outreach", desc: "Per-investor angle. Warm-intro path if one exists. Approve and send." },
               { verb: "Preps", title: "every meeting", desc: "Brief on the investor, prior conversation notes, what they'll probe." },
@@ -540,8 +540,8 @@ export default function LandingPage() {
           <div className="mx-auto max-w-2xl space-y-10">
             {[
               {
-                title: "More founders raise → real outcome data",
-                desc: "Every raise generates data no model can train on — who responded, who passed, who led, what terms closed. The agent calibrates on results. That dataset doesn't exist anywhere else, and every raise that runs through raise(fn) makes the next one sharper.",
+                title: "More founders raise → sharper agent",
+                desc: "Every raise generates signal no model can train on — which briefs landed with which investor archetypes, which openers converted, which objections killed deals. The agent calibrates on outcomes. Every raise that runs through raise(fn) makes the next one sharper.",
                 color: "#2dd4bf",
               },
               {

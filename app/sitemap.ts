@@ -16,11 +16,13 @@ const NOW = new Date();
 // Marketing v3 (2026-06-10): top nav audience pages (/founders /investors
 // /agents) added as P0.8. /sdk removed — 301s to /agents per next.config.
 // /brain landing demoted but kept indexed (footer access).
+// 2026-07-06: /investors deleted (marketplace framing, replaced by
+// /raise-fund audience under fund-raise-plan-v1). /raise-fund added.
 const STATIC_PAGES: MetadataRoute.Sitemap = [
   { url: `${SITE}/`, lastModified: NOW, changeFrequency: "weekly", priority: 1.0 },
   // Audience landing pages — primary CTA surfaces for organic + paid
   { url: `${SITE}/founders`, lastModified: NOW, changeFrequency: "weekly", priority: 0.9 },
-  { url: `${SITE}/investors`, lastModified: NOW, changeFrequency: "weekly", priority: 0.9 },
+  { url: `${SITE}/raise-fund`, lastModified: NOW, changeFrequency: "weekly", priority: 0.9 },
   { url: `${SITE}/agents`, lastModified: NOW, changeFrequency: "weekly", priority: 0.8 },
   // Tracker — public catalog drives the biggest share of organic traffic
   { url: `${SITE}/tracker`, lastModified: NOW, changeFrequency: "daily", priority: 0.9 },
@@ -41,7 +43,7 @@ const STATIC_PAGES: MetadataRoute.Sitemap = [
   { url: `${SITE}/faq`, lastModified: NOW, changeFrequency: "monthly", priority: 0.8 },
   { url: `${SITE}/raise-intel`, lastModified: NOW, changeFrequency: "weekly", priority: 0.8 },
   { url: `${SITE}/roadmap`, lastModified: NOW, changeFrequency: "weekly", priority: 0.5 },
-  { url: `${SITE}/investors/join`, lastModified: NOW, changeFrequency: "monthly", priority: 0.7 },
+  { url: `${SITE}/raise-fund/join`, lastModified: NOW, changeFrequency: "monthly", priority: 0.7 },
   { url: `${SITE}/privacy`, lastModified: NOW, changeFrequency: "yearly", priority: 0.3 },
   { url: `${SITE}/terms`, lastModified: NOW, changeFrequency: "yearly", priority: 0.3 },
 ];

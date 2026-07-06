@@ -46,7 +46,7 @@ const FAQ_SECTIONS: FAQSection[] = [
     questions: [
       {
         q: "What does my raise look like with raise(fn)?",
-        a: "You talk to it. No forms. No dashboard. No menus. You tell it what you're building, where you are, what you're trying to do — it captures the company, the team, the metrics, the wedge, the round shape. All in conversation. Persistent. It remembers everything across every session. Then it runs your raise: builds the investor list (ranked by who actually deploys into your space, sourced from real check behavior across 17,000+ funds, not website copy), critiques your deck slide-by-slide, writes the brief for every match, preps you for every meeting, tracks the pipeline, debriefs after each conversation, brokers warm intros where there's a relationship in the network, notifies you when new investors come online who fit your raise, and walks you through the term sheet when one lands. One conversation. Replaces the database, the CRM, the spreadsheet, the slide-critique service, the meeting-prep doc, the debrief notes, and the warm-intro broker — all of it.",
+        a: "You talk to it. No forms. No dashboard. No menus. You tell it what you're building, where you are, what you're trying to do — it captures the company, the team, the metrics, the wedge, the round shape. All in conversation. Persistent. It remembers everything across every session. Then it runs your raise: targets the right investors (ranked by who actually deploys in your space, not by what they claim on their website), critiques your deck slide-by-slide, writes the brief for every match, preps you for every meeting, tracks the pipeline, debriefs after each conversation, brokers warm intros where there's a relationship in the network, notifies you when new investors come online who fit your raise, and walks you through the term sheet when one lands. One agent, whole raise.",
       },
       {
         q: "What can a founder actually do with raise(fn)?",
@@ -98,7 +98,7 @@ const FAQ_SECTIONS: FAQSection[] = [
       },
       {
         q: "How is raise(fn) different from generic AI tools like ChatGPT or Perplexity?",
-        a: "ChatGPT can draft a cold email. It can't tell you which 50 of 17,000 investors actually deploy in your space, because it doesn't have the data. raise(fn) has 17,000+ classified investors, observed thesis from real round filings, persistent context across your entire raise, and a feedback loop that gets sharper every conversation. ChatGPT is a single-task tool. raise(fn) is a system.",
+        a: "ChatGPT can draft a cold email. It can't tell you which investors actually deploy in your space, because it doesn't have the domain data + persistent context across your raise. raise(fn) is an agent tuned to fundraising: observed thesis from real check behavior, persistent memory of your prior conversations, and a feedback loop that gets sharper every raise. ChatGPT is a single-task tool. raise(fn) is an agent that runs the whole raise.",
       },
     ],
   },
@@ -116,7 +116,7 @@ const FAQ_SECTIONS: FAQSection[] = [
       },
       {
         q: "Where does the investor data come from?",
-        a: "Public sources: SEC Form D filings, 13F holdings, fund websites, batch announcements, press. Proprietary: investors who join raise(fn) directly tell us what they fund, plus observed behavior derived from real round data across 17,000+ investors. The combination is the moat — no other tool has both stated and observed thesis at this scale.",
+        a: "Public sources: SEC Form D filings, 13F holdings, fund websites, batch announcements, press. Observed behavior derived from real round data. The agent combines stated thesis (what investors say) with observed thesis (what they actually fund) to target more precisely than either alone.",
       },
     ],
   },
