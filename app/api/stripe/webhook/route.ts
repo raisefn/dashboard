@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStripe, getTierFromPrice } from "@/lib/stripe";
+import { getStripe, getTierFromPrice, parseTierVariant } from "@/lib/stripe";
 import { getSupabase } from "@/lib/supabase";
 import Stripe from "stripe";
 import { notifySlack } from "@/lib/slack";
@@ -29,11 +29,26 @@ export async function POST(req: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    // Derive tier from metadata or from the price ID (needed before the
-    // consent check because consent is required ONLY for Advisor — Pro is
-    // pure SaaS with no engagement letter).
-    let tier = session.metadata?.tier;
+    // Pricing v6 (2026-07-06): Explorer + Founder + Investor. All paid
+    // variants collapse to internal tier="pro" downstream. Audience
+    // (founder/investor) is preserved separately in session metadata for
+    // reporting.
+    const tierVariant = session.metadata?.tier;
+    const { audience, cadence } = parseTierVariant(tierVariant);
+    let tier: string | undefined = undefined;
 
+    // The four v6 checkout variants all resolve to "pro".
+    if (
+      tierVariant === "founder_monthly" ||
+      tierVariant === "founder_annual" ||
+      tierVariant === "investor_monthly" ||
+      tierVariant === "investor_annual"
+    ) {
+      tier = "pro";
+    }
+
+    // Fallback: derive from the price ID. Handles legacy subs (v5 pro at
+    // $199, v4/v5 advisor variants) that predate v6 metadata.
     if (!tier) {
       try {
         const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
@@ -49,40 +64,6 @@ export async function POST(req: Request) {
     if (!tier) {
       console.error("Could not determine tier for session:", session.id);
       return NextResponse.json({ received: true });
-    }
-
-    // Consent audit (was: hard refuse — relaxed 2026-06-25).
-    //
-    // Original behavior refused to flip to Advisor unless
-    // session.consent.terms_of_service was literally "accepted." That works
-    // for Checkout API sessions where the checkout route explicitly sets
-    // consent_collection.terms_of_service='required', but it BREAKS for
-    // Payment Link sessions — Stripe Payment Links don't reliably populate
-    // session.consent in the same shape, even when the "Require ToS" toggle
-    // is enabled at the link level. Result: paying Advisor customers (Matt
-    // Battistel, 2026-06-25) were silently locked out of their tier despite
-    // having actually paid and accepted the engagement letter at checkout.
-    //
-    // The legal protection here is the engagement letter URL displayed on
-    // the checkout page — set globally at Stripe Settings → Public details
-    // → Terms of service URL = https://raisefn.com/legal/engagement. The
-    // customer cannot complete checkout without clicking through that link
-    // pattern. The session.consent boolean is just an audit trail of that
-    // click — not the legal mechanism.
-    //
-    // New behavior: log a warning when consent isn't explicit so we can
-    // audit anomalies later, but don't block the tier flip. Verify ToS is
-    // enabled on every Advisor Payment Link as a separate operational
-    // check.
-    if (tier === "advisor" && session.consent?.terms_of_service !== "accepted") {
-      console.warn(
-        "Advisor session missing terms_of_service consent value (proceeding — engagement letter URL is displayed at checkout regardless):",
-        session.id,
-        "consent:",
-        session.consent,
-        "consent_collection:",
-        session.consent_collection
-      );
     }
 
     try {
@@ -149,8 +130,7 @@ export async function POST(req: Request) {
 
           // Record first-paid-at for the metrics dashboard's free→paid
           // conversion chart. ON CONFLICT DO NOTHING so a repeat checkout
-          // (e.g. customer upgrades twice via Stripe in a session) doesn't
-          // overwrite the original first-paid timestamp.
+          // doesn't overwrite the original first-paid timestamp.
           await pool.query(
             `INSERT INTO api_key_billing_state (api_key_id, first_paid_at, first_paid_source)
              VALUES ($1, NOW(), 'stripe')
@@ -164,14 +144,6 @@ export async function POST(req: Request) {
 
       console.log(`Payment completed: ${customerEmail} → ${tier}`);
 
-      // Public display names — internal tier codes stay the same.
-      // Pricing v3 (2026-06-10): pro + advisor paid tiers.
-      const TIER_DISPLAY: Record<string, string> = {
-        pro: "Pro",
-        advisor: "Advisor",
-      };
-      const displayName = TIER_DISPLAY[tier] ?? tier;
-
       // amount_total is in minor units (cents).
       let amountText = "";
       if (session.amount_total != null) {
@@ -180,63 +152,30 @@ export async function POST(req: Request) {
         amountText = ` — $${major} ${currency}`;
       }
 
+      // Audience-named tier label in the Slack message so we can tell
+      // Founder revenue from Investor revenue at a glance. Legacy subs
+      // (pre-v6) surface as just "Pro" with no audience label.
+      const tierLabel =
+        audience === "founder" ? "Founder"
+        : audience === "investor" ? "Investor"
+        : "Pro";
+      const cadenceLabel = cadence ? ` (${cadence})` : "";
+
       await notifySlack(
         "stripePayments",
-        `💰 Payment completed: *${customerEmail}* → ${displayName}${amountText}`
+        `💰 Payment completed: *${customerEmail}* → ${tierLabel}${cadenceLabel}${amountText}`
       );
     } catch (err) {
       console.error("Error processing checkout webhook:", err);
     }
   }
 
-  // Pricing v4 (2026-06-11): auto-cancel Advisor monthly subscriptions
-  // after 3 billing cycles. The engagement letter is a 3-month engagement;
-  // without this hook the subscription would bill indefinitely until the
-  // founder emails to stop. cancel_at fires when reached → Stripe
-  // automatically transitions to subscription.deleted, which is handled
-  // below and flips tier to 'free'.
-  //
-  // Math: current_period_start + 90 days lands AFTER invoice 3 (which
-  // fires at day 60) and BEFORE invoice 4 (which would fire at day 90).
-  // Slight calendar-month drift is acceptable.
-  //
-  // Pro subscriptions are NOT auto-cancelled — they bill until founder
-  // cancels via Stripe portal or via app.
-  if (event.type === "customer.subscription.created") {
-    const sub = event.data.object as Stripe.Subscription;
-    if (
-      sub.metadata?.tier === "advisor" &&
-      sub.metadata?.advisor_billing === "monthly" &&
-      !sub.cancel_at
-    ) {
-      try {
-        // sub.start_date = engagement creation timestamp (Unix seconds).
-        // 90 days lands AFTER invoice 3 (day 60) and BEFORE invoice 4 (day 90).
-        const cancelAt = sub.start_date + 90 * 86400;
-        await stripe.subscriptions.update(sub.id, { cancel_at: cancelAt });
-        console.log(
-          `Advisor monthly auto-cancel scheduled for sub ${sub.id} at ${new Date(cancelAt * 1000).toISOString()}`
-        );
-      } catch (err) {
-        console.error("Could not set cancel_at on Advisor monthly subscription:", err);
-      }
-    }
-  }
-
-  // Pricing v4 (2026-06-11): Pro AND Advisor (monthly) are recurring
-  // subscriptions. When the subscription is fully terminated (cancelled
-  // and period ended, or payment failed past retry window), Stripe fires
-  // customer.subscription.deleted — flip tier back to free.
-  //
-  // customer.subscription.updated fires on every renewal and on
-  // user-initiated cancellation (status='canceled' with
-  // cancel_at_period_end=true while access continues). We do NOT
-  // downgrade on updated — only on deleted, which is the actual
-  // end-of-access signal.
-  //
-  // Advisor upfront ($1,999 one-time) doesn't have a subscription, so
-  // this code path doesn't apply to them. They stay tier='advisor'
-  // until manually managed.
+  // Pro (monthly or annual) subscription ended → flip tier back to free.
+  // Fired when a subscription is fully terminated (cancelled + period
+  // ended, or payment failed past retry window). customer.subscription
+  // .updated fires on renewals + user-initiated cancel-at-period-end;
+  // we do NOT downgrade on updated — only on deleted, which is the
+  // actual end-of-access signal.
   if (event.type === "customer.subscription.deleted") {
     const sub = event.data.object as Stripe.Subscription;
     let customerEmail: string | null = null;
@@ -249,38 +188,18 @@ export async function POST(req: Request) {
       console.error("Could not fetch customer for subscription:", sub.id, err);
     }
 
-    // Determine which tier the subscription was for, so we know which
-    // tier to downgrade FROM. v4 has both pro and advisor_monthly subs.
-    const subTier = sub.metadata?.tier;
-
     if (customerEmail) {
       try {
         const dbUrl = process.env.DATABASE_URL;
         if (dbUrl) {
           const { Pool } = await import("pg");
           const pool = new Pool({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
-          // Downgrade ONLY if the user is currently on the tier that
-          // matches the ended subscription. Defense against stale events:
-          // a Pro-sub-deleted event shouldn't demote an Advisor row, and
-          // vice versa.
-          if (subTier === "pro") {
-            await pool.query(
-              "UPDATE api_keys SET tier = 'free' WHERE email = $1 AND tier = 'pro'",
-              [customerEmail.toLowerCase()]
-            );
-          } else if (subTier === "advisor") {
-            await pool.query(
-              "UPDATE api_keys SET tier = 'free' WHERE email = $1 AND tier = 'advisor'",
-              [customerEmail.toLowerCase()]
-            );
-          } else {
-            // No tier metadata on the subscription. Conservative default:
-            // only demote pro (matches pre-v4 behavior).
-            await pool.query(
-              "UPDATE api_keys SET tier = 'free' WHERE email = $1 AND tier = 'pro'",
-              [customerEmail.toLowerCase()]
-            );
-          }
+          // Only downgrade a currently-pro row. Defense against stale
+          // events firing after tier has already been managed elsewhere.
+          await pool.query(
+            "UPDATE api_keys SET tier = 'free' WHERE email = $1 AND tier = 'pro'",
+            [customerEmail.toLowerCase()]
+          );
           await pool.end();
         }
 
@@ -290,12 +209,11 @@ export async function POST(req: Request) {
           .update({ status: "cancelled" })
           .eq("stripe_subscription_id", sub.id);
 
-        const displayTier = subTier === "advisor" ? "Advisor" : "Pro";
         await notifySlack(
           "stripePayments",
-          `❌ ${displayTier} subscription ended: *${customerEmail}* → free`
+          `❌ Pro subscription ended: *${customerEmail}* → free`
         );
-        console.log(`Subscription ended (${subTier ?? "unknown"}): ${customerEmail} → free`);
+        console.log(`Subscription ended: ${customerEmail} → free`);
       } catch (err) {
         console.error("Error processing subscription deletion:", err);
       }
@@ -306,15 +224,12 @@ export async function POST(req: Request) {
   // subscription stays active, the api_keys.tier row stays as set.
   // Only customer.subscription.deleted triggers downgrade.
 
-  // Pricing v4 (2026-06-11): Advisor upfront ($1,999 one-time) payments
-  // CAN be manually refunded. charge.refunded flips tier back to free.
-  // This is defensive — engagement letter says "all purchases final,
-  // funds paid are funds paid" but if Stripe processes a refund anyway
-  // (chargeback, manual support refund) we shouldn't keep the user on a
-  // paid tier. Advisor monthly subs use subscription.deleted, not this.
+  // Full refund → flip tier back to free. Terms of service says "all
+  // purchases final," but if Stripe processes a refund anyway
+  // (chargeback, manual support refund) we shouldn't keep the user on
+  // a paid tier. Partial refunds keep access.
   if (event.type === "charge.refunded") {
     const charge = event.data.object as Stripe.Charge;
-    // Only flip on FULL refunds. Partial refunds keep advisor access.
     const fullyRefunded =
       charge.refunded === true && charge.amount_refunded === charge.amount;
     if (!fullyRefunded) {

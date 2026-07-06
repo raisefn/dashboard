@@ -1700,13 +1700,31 @@ function BrainDeployInner() {
    * Single source of truth for the upgrade UX; when we improve the
    * card, every entry point gets the improvement for free.
    */
-  const renderUpgradeCardInChat = useCallback((lr: {
+  const renderUpgradeCardInChat = useCallback(async (lr: {
     tier: string;
     reason: string | null;
     cap: number | null;
   }) => {
     if (!messagesInnerRef.current) return;
     const isFreeVerified = lr.tier === "free";
+
+    // Pricing v6 (2026-07-06): audience-named tiers. Founder ($199/mo,
+    // $999/yr) and Investor ($399/mo, $1,999/yr) share the same card
+    // layout with different prices. Role comes from session metadata,
+    // set at signup (/signup/founder → role=founder, /raise-fund/join
+    // → role=investor). Fall back to founder pricing if role is missing
+    // (legacy accounts predate the split).
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    const role = (currentSession?.user?.user_metadata?.role as string | undefined) === "investor"
+      ? "investor"
+      : "founder";
+    const monthlyTier = role === "investor" ? "investor_monthly" : "founder_monthly";
+    const annualTier = role === "investor" ? "investor_annual" : "founder_annual";
+    const tierName = role === "investor" ? "Investor" : "Founder";
+    const monthlyLabel = role === "investor" ? "$399/mo" : "$199/mo";
+    const annualPriceLabel = role === "investor" ? "$1,999/yr" : "$999/yr";
+    const annualEffective = role === "investor" ? "$167/month" : "$83/month";
+    const accentClass = role === "investor" ? "upgrade-card-tier--investor" : "upgrade-card-tier--founder";
 
     const card = document.createElement("div");
     card.className = "upgrade-card";
@@ -1716,22 +1734,39 @@ function BrainDeployInner() {
       card.innerHTML = `
         <div class="upgrade-card-leadin">${leadin}</div>
         <div class="upgrade-card-tiers">
-          <div class="upgrade-card-tier upgrade-card-tier--pro">
-            <div class="upgrade-card-tier-name">Pro</div>
-            <div class="upgrade-card-tier-price">$199/mo · cancel anytime</div>
+          <div class="upgrade-card-tier ${accentClass}">
+            <div class="upgrade-card-tier-name">${tierName} · Annual</div>
+            <div class="upgrade-card-tier-price">${annualPriceLabel} · ${annualEffective} effective</div>
             <div class="upgrade-card-tier-pitch">
-              Uncapped agent, same one you already know. The SaaS path.
+              Uncapped agent for the whole raise. Save 58% vs monthly.
             </div>
             <ul class="upgrade-card-tier-list">
-              <li>Uncapped investor matches</li>
+              <li>Uncapped ${role === "investor" ? "LP" : "investor"} matches</li>
               <li>Uncapped briefs</li>
               <li>Uncapped outreach drafts + meeting prep + debriefs</li>
               <li>Pipeline + memory across sessions</li>
             </ul>
-            <button class="upgrade-card-tier-cta" data-cta="pro">
-              Get Pro — $199/mo
+            <button class="upgrade-card-tier-cta" data-cta="${annualTier}">
+              Get ${tierName} — ${annualPriceLabel}
             </button>
-            <div class="upgrade-card-error" data-err="pro" style="display:none"></div>
+            <div class="upgrade-card-error" data-err="${annualTier}" style="display:none"></div>
+          </div>
+          <div class="upgrade-card-tier ${accentClass}">
+            <div class="upgrade-card-tier-name">${tierName} · Monthly</div>
+            <div class="upgrade-card-tier-price">${monthlyLabel} · cancel anytime</div>
+            <div class="upgrade-card-tier-pitch">
+              Same uncapped agent, month-to-month.
+            </div>
+            <ul class="upgrade-card-tier-list">
+              <li>Uncapped ${role === "investor" ? "LP" : "investor"} matches</li>
+              <li>Uncapped briefs</li>
+              <li>Uncapped outreach + meeting prep + debriefs</li>
+              <li>Pipeline + memory across sessions</li>
+            </ul>
+            <button class="upgrade-card-tier-cta" data-cta="${monthlyTier}">
+              Get ${tierName} — ${monthlyLabel}
+            </button>
+            <div class="upgrade-card-error" data-err="${monthlyTier}" style="display:none"></div>
           </div>
         </div>
       `;
@@ -1761,7 +1796,7 @@ function BrainDeployInner() {
     });
 
     if (isFreeVerified) {
-      const wireTierCta = (tier: "pro") => {
+      const wireTierCta = (tier: string) => {
         const btn = card.querySelector(
           `.upgrade-card-tier-cta[data-cta="${tier}"]`
         ) as HTMLButtonElement | null;
@@ -1770,14 +1805,18 @@ function BrainDeployInner() {
         ) as HTMLDivElement | null;
         if (!btn) return;
         const originalLabel = btn.textContent || "";
+        // Auth intent value uses the audience (founder | investor), not
+        // the cadence — cadence is preserved by re-selecting the same
+        // tier when the user comes back from signup.
+        const audience = tier.startsWith("investor") ? "investor" : "founder";
         btn.addEventListener("click", async () => {
           const { data: { session: freshSession } } = await supabase.auth.getSession();
           const token = freshSession?.access_token;
           if (!token) {
             try {
-              localStorage.setItem("pendingPostAuthIntent", `upgrade-${tier}`);
+              localStorage.setItem("pendingPostAuthIntent", `upgrade-${audience}`);
             } catch { /* ignore */ }
-            router.push(`/signup?after=upgrade-${tier}`);
+            router.push(`/signup?after=upgrade-${audience}`);
             return;
           }
           btn.disabled = true;
@@ -1793,9 +1832,9 @@ function BrainDeployInner() {
             });
             if (res.status === 401) {
               try {
-                localStorage.setItem("pendingPostAuthIntent", `upgrade-${tier}`);
+                localStorage.setItem("pendingPostAuthIntent", `upgrade-${audience}`);
               } catch { /* ignore */ }
-              router.push(`/signup?after=upgrade-${tier}`);
+              router.push(`/signup?after=upgrade-${audience}`);
               return;
             }
             const data = await res.json();
@@ -1815,7 +1854,8 @@ function BrainDeployInner() {
           }
         });
       };
-      wireTierCta("pro");
+      wireTierCta(annualTier);
+      wireTierCta(monthlyTier);
     }
   }, [router]);
 

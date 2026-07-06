@@ -93,7 +93,16 @@ export default function TermsPage() {
             Payments
           </h2>
           <ul className="space-y-2 text-sm leading-relaxed">
-            <li>Pro is $199/month via Stripe &mdash; cancel anytime, access continues through end of billing period</li>
+            <li>
+              <strong className="text-zinc-100">Founder</strong> is $199/month
+              or $999/year via Stripe &mdash; cancel anytime, access
+              continues through end of billing period
+            </li>
+            <li>
+              <strong className="text-zinc-100">Investor</strong> is $399/month
+              or $1,999/year via Stripe &mdash; cancel anytime, access
+              continues through end of billing period
+            </li>
             <li><strong className="text-zinc-100">All purchases final.</strong> Funds paid are funds paid.</li>
             <li>You can stop future charges anytime from your account or by emailing team@raisefn.com. Past charges are non-refundable.</li>
             <li>Disputes or chargebacks: email team@raisefn.com before opening a dispute</li>

@@ -13,7 +13,8 @@ function consumePostAuthDestination(): string {
     const intent = localStorage.getItem("pendingPostAuthIntent");
     if (!intent) return "/brain/deploy";
     localStorage.removeItem("pendingPostAuthIntent");
-    if (intent === "upgrade-pro") return "/pricing?checkout=resume-pro";
+    if (intent === "upgrade-founder") return "/pricing?checkout=resume-founder";
+    if (intent === "upgrade-investor") return "/pricing?checkout=resume-investor";
     return "/brain/deploy";
   } catch {
     return "/brain/deploy";

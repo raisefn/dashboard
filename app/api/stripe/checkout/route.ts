@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStripe, getCheckoutLineItems } from "@/lib/stripe";
+import { getStripe, getCheckoutLineItems, parseTierVariant } from "@/lib/stripe";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
@@ -42,68 +42,38 @@ export async function POST(req: Request) {
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://raisefn.com";
+    const { audience, cadence } = parseTierVariant(tier);
 
-    // Pricing v5 (2026-07-01):
-    // - pro: single-line $199/mo subscription
-    // - advisor: mixed-mode subscription ($199/mo Pro) + one-time ($1,798
-    //   setup fee) = $1,997 due at checkout, then $199/mo Pro from day 31.
-    //   Engagement letter accepted natively via consent_collection.
-    //
-    // Grandfathered v4 advisor customers (Matt/Taylor/Ralph/Alfredo) keep
-    // their existing subscriptions — no code path forces migration.
-    const isAdvisor = tier === "advisor";
-
-    const session = await stripe.checkout.sessions.create(
-      isAdvisor
-        ? {
-            // Mixed-mode: subscription (Pro) + one-time (Setup Fee).
-            // Stripe supports both line item types in a single session
-            // when mode='subscription'.
-            mode: "subscription",
-            line_items: lineItems,
-            customer_email: user.email,
-            consent_collection: {
-              terms_of_service: "required",
-            },
-            custom_text: {
-              terms_of_service_acceptance: {
-                message:
-                  "I agree to the **raise(fn) Advisor Engagement Letter**. $1,997 today = first month of Pro ($199) + setup and guidance ($1,798). Pro continues at $199/mo, cancel anytime. No success fees. Funds paid are funds paid.",
-              },
-            },
-            metadata: {
-              supabase_user_id: user.id,
-              tier,
-              pricing_version: "v5",
-            },
-            subscription_data: {
-              metadata: {
-                email: user.email,
-                tier,
-                pricing_version: "v5",
-              },
-            },
-            success_url: `${baseUrl}/brain/deploy?checkout=success`,
-            cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
-          }
-        : {
-            mode: "subscription",
-            line_items: lineItems,
-            customer_email: user.email,
-            metadata: {
-              supabase_user_id: user.id,
-              tier,
-            },
-            subscription_data: {
-              metadata: {
-                email: user.email,
-                tier,
-              },
-            },
-            success_url: `${baseUrl}/brain/deploy?checkout=success`,
-            cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
-          }
-    );
+    // Pricing v6 (2026-07-06): Explorer (Free) + Founder + Investor.
+    // Audience-named tiers, both cadences (monthly/annual). Single-line
+    // subscription for all four variants — no mixed-mode, no consent
+    // collection. Success routes back to /brain/deploy for founders and
+    // /raise-fund/deploy for investors (once Phase 2 lands); today both
+    // resolve to /brain/deploy but auth callback role-routes on next
+    // page load if the investor surface isn't ready.
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      line_items: lineItems,
+      customer_email: user.email,
+      metadata: {
+        supabase_user_id: user.id,
+        tier,
+        audience: audience || "",
+        cadence: cadence || "",
+        pricing_version: "v6",
+      },
+      subscription_data: {
+        metadata: {
+          email: user.email,
+          tier,
+          audience: audience || "",
+          cadence: cadence || "",
+          pricing_version: "v6",
+        },
+      },
+      success_url: `${baseUrl}/brain/deploy?checkout=success`,
+      cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
+    });
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
