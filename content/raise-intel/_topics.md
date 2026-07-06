@@ -9,8 +9,8 @@ voice, ship.
 
 ## Status
 
-- ✅ done: 11
-- ⏳ pending: 10
+- ✅ done: 12
+- ⏳ pending: 9
 - 🎯 cadence target: daily (~1/day)
 
 ## Workflow
@@ -60,9 +60,8 @@ list. Priorities are loose — pick anything in the top tier.
 - [ ] **What valuation should I put on my company at pre-seed?**
   Category: round-structure. Angle: SAFE caps are signal, not math.
   Pick the cap that filters out the wrong investors.
-- [ ] **How long will fundraising take?**
-  Category: timing. Angle: 4-8 weeks if you're ready. 4-6 months if
-  you're not. Almost always determined by prep, not market.
+- [x] **How long will fundraising take?** ✅ published 2026-07-06
+  → [/raise-intel/how-long-will-fundraising-take](/raise-intel/how-long-will-fundraising-take)
 - [ ] **What do investors actually want to see in my deck?**
   Category: deck. Angle: 80% of decks are wrong. Here's the 5 slides
   that matter and why the other 7 don't.
