@@ -71,13 +71,13 @@ Do this before you talk to a single investor:
 4. **Round to the nearest tidy number** — up if you're within 15%, not down. So $1.42M → $1.5M. $1.55M → $1.75M. Round numbers matter for SAFE caps and investor conversations.
 5. **That's your number.** Stop moving it because Twitter said something.
 
-## The list is the real problem
+## Get an agent that runs this with you
 
-You picked the right amount. Great. Now you need the right investors — the ones who write checks at your stage, in your space, at your check size. That's a filter problem, not a story problem, and it's where most founders lose weeks.
+You picked the right amount. Now you need to actually raise it. That's where most founders lose weeks — juggling 30 investor conversations, drafting 40 pieces of outreach, prepping for 12 meetings, tracking who said what and when.
 
-We index 17,000+ investors. We've classified 4,331 of them against a 5-dimensional ontology of what they actually fund. 892 have observed thesis pulled from real check data — not what they claim on their website, what they actually wrote checks for in the last 18 months.
+raise(fn) is the agent that runs your raise with you. You chat. It targets funds that fit your specific milestone-and-buffer math. It drafts outreach with real investor context, not generic templates. It preps you from your prior meeting debriefs. It tracks the pipeline so you always know where each conversation stands.
 
-That dataset powers raise(fn). Answer a 5-minute intake. We give you the ranked list — sized right for the amount you just picked.
+You don't fill out forms. You don't run a CRM. You raise, and the agent handles the rest.
 
 ## FAQ
 
