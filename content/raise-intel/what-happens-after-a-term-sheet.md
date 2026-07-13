@@ -1,14 +1,14 @@
 ---
 title: "What happens after a term sheet?"
 description: "4-6 weeks of diligence, doc review, and wire. Here are the specific traps that kill deals at this stage — and how to close cleanly."
-published_at: "2026-07-06"
-updated_at: "2026-07-06"
-status: "draft"
+published_at: "2026-07-13"
+updated_at: "2026-07-13"
+status: "published"
 category: "process"
 tags: ["term-sheet", "closing", "diligence", "legal", "seed"]
 fund_slugs: []
 sector_slugs: []
-related_slugs: ["how-do-i-negotiate-terms-with-a-vc", "what-are-standard-safe-terms-in-2026", "how-do-i-close-the-round-faster"]
+related_slugs: ["what-are-standard-safe-terms-in-2026", "how-do-i-close-the-round-faster", "what-valuation-should-i-put-on-my-company-at-pre-seed"]
 tldr: "A term sheet isn't a deal. It's an intent to deal, subject to 4-6 weeks of diligence and paperwork. Most rounds don't die on the pitch. They die in this window. Specific traps: DD scope creep, discovered problems (technical, legal, customer), lead investor cold feet, follow-on investors dropping, timing gaps in the closing docs, wire delays. Here's what actually happens, in order, and what to watch for."
 cta_text: "Open raise(fn) — get matched with investors who fund your space."
 cta_href: "/signup"

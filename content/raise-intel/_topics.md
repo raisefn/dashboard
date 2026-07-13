@@ -84,9 +84,8 @@ list. Priorities are loose — pick anything in the top tier.
 - [ ] **How do I negotiate terms with a VC?**
   Category: terms. Angle: most terms aren't really negotiable. Pick
   the 2-3 that are and push hard there. Concede the rest.
-- [ ] **What happens after a term sheet?**
-  Category: process. Angle: 4-6 weeks of diligence, doc review, wire.
-  The traps that kill deals at this stage.
+- [x] **What happens after a term sheet?** ✅ published 2026-07-13
+  → [/raise-intel/what-happens-after-a-term-sheet](/raise-intel/what-happens-after-a-term-sheet)
 
 ## Cross-link plan
 
