@@ -1,137 +1,111 @@
 ---
 title: "What valuation should I put on my company at pre-seed?"
-description: "SAFE caps aren't math — they're signal. Pick the cap that filters out the wrong investors, not the one that maximizes on paper. Here's how to actually set it."
-published_at: "2026-07-06"
-updated_at: "2026-07-06"
-status: "draft"
+description: "You're not setting a valuation. You're setting a filter. The SAFE cap you pick determines which investors say yes, which walk, and how much of the company you keep. Here's how to pick the number that gets the right people in the room."
+published_at: "2026-07-13"
+updated_at: "2026-07-13"
+status: "published"
 category: "round-structure"
-tags: ["pre-seed-valuation", "SAFE-cap", "round-structure", "dilution", "pre-seed"]
+tags: ["valuation", "pre-seed", "safe", "cap-table", "dilution", "fundraising"]
 fund_slugs: []
 sector_slugs: []
-related_slugs: ["how-much-should-i-raise", "what-are-standard-safe-terms-in-2026", "am-i-ready-to-raise"]
-tldr: "SAFE caps aren't calculated, they're signaled. Pick the cap that filters out the wrong investors and pulls in the right ones. Too low = you're leaving money on the table AND signaling desperation. Too high = you scare off writers who care about ownership targets and end up chasing tourist checks. The right cap sits at the intersection of your amount, your target investors' ownership math, and the story you can defend for what the company becomes in 18 months."
+related_slugs: ["how-much-should-i-raise", "am-i-ready-to-raise", "what-are-standard-safe-terms-in-2026"]
+tldr: "Pre-seed valuation isn't a math problem. It's a filtering problem. There is no formula that spits out the right number from your revenue, team size, or TAM. The SAFE cap you pick is a signal — it tells investors what kind of deal this is and whether they're the right fit. Too high and serious seed investors walk. Too low and you give away the company before you've proved anything. The right cap is the one that gets 3-5 qualified investors to yes without dropping below 80% founder ownership post-round."
 cta_text: "Open raise(fn) — get matched with investors who fund your space."
 cta_href: "/signup"
 ---
 
-## Valuation isn't math. It's signal.
+## There is no formula. Stop looking for one.
 
-Every pre-seed founder wants to know the "right" valuation like it's a calculation. Revenue multiples, market comps, DCF variants adjusted for stage. None of those apply. Pre-seed valuation isn't a math problem because there's usually no revenue, no comps that hold, and no cash flow to discount.
+Every founder raising pre-seed googles this question and finds the same useless advice: "pre-seed valuations typically range from $2M to $10M." That's not an answer. That's a range so wide it's meaningless.
 
-Pre-seed valuation is a signal. The cap you set tells the investor three things simultaneously: how big you think this becomes, how much conviction you have, and how much dilution you're willing to accept for whose money.
+The reason there's no formula is that pre-seed valuation isn't a math problem. You don't have revenue to discount. You don't have comps that map cleanly. You have a team, an idea, maybe a prototype, and a story about why this will be big. The "valuation" is a negotiated number that reflects how much the investor wants in and how much you're willing to give up. That's it.
 
-Pick a cap that pulls in the investors you want, filters out the ones you don't, and matches the amount you're raising to the ownership targets of the funds you're targeting. Everything else is theater.
+Stop trying to calculate the number. Start thinking about what the number signals.
 
-## The cap band, not the cap number
+## The cap is a filter, not a price tag
 
-Nobody sets a pre-seed cap in a vacuum. Every cap sits in a band determined by three variables:
+Your SAFE cap tells investors three things before you say a word:
 
-1. **How much you're raising.** Amount and cap move together. $1M raise implies different caps than $2M raise.
-2. **Who you're raising from.** Different fund types solve for different ownership. Institutional pre-seed VCs want 8-15% for a lead check. Angels solve for 1-5%. Family offices vary. Different investor types → different acceptable cap bands.
-3. **Where the company plausibly gets to in 18 months.** Not a valuation forecast — a story you can defend. If you can credibly say "this becomes a $30M seed round," the pre-seed cap can be higher.
+### 1. What kind of round this is
 
-Concrete pre-seed cap bands as of mid-2026:
+A $3M cap says "early, scrappy, high-risk, high-upside." A $12M cap says "we think we're further along than most pre-seeds." Investors self-select based on the cap. Angel investors writing $25-50K checks are comfortable at $3-6M. Institutional seed funds writing $500K-$1M want to see $6-12M caps with traction to justify them.
 
-- **Raising $500K-1M as SAFE:** $6-10M cap
-- **Raising $1-2M as SAFE:** $10-15M cap
-- **Raising $2-4M as SAFE:** $15-25M cap
-- **Raising $4M+ as SAFE:** you're at the edge of "priced seed" territory; consider a priced round
+Pick the cap that matches the investors you want in the room. If you want angels, price like an angel round. If you want institutional, you need the traction to justify institutional pricing.
 
-These are bands, not points. Where you land in the band comes from investor archetype + story defensibility.
+### 2. How much you value yourself vs. the market
 
-## What determines your position in the band
+A cap that's wildly above market for your stage signals one of two things: either you have unusual traction (good) or you have unusual ego (bad). Investors pattern-match instantly. A first-time founder with no revenue asking for a $15M cap gets a polite pass. A repeat founder with $20K MRR asking for the same cap gets a meeting.
 
-Move UP the band if:
-- Repeat founder with prior exit
-- Deep technical moat that took years to build
-- Design partners or LOIs from name-brand customers
-- Traction inflection (revenue growing or user growth)
-- Working in a "hot" narrative sector where cap inflation is happening (AI, defense-tech, whatever's currently premium)
-- Have multiple funds circling → optionality supports higher cap
+The market has a baseline. In 2026, pre-seed SAFE caps cluster around:
 
-Move DOWN the band if:
-- First-time founder in unproven space
-- No product yet, pure concept
-- Cold-only pipeline, no warm signal
-- One fund interested → weak leverage, take what's offered
-- Story you can't defend at higher valuation → don't fake it
+- **$3-5M** — pre-product, pre-revenue, team + idea only
+- **$5-8M** — prototype or MVP, early waitlist or design partners, some signal
+- **$8-12M** — launched product, early revenue ($5-15K MRR), or exceptional team with prior exits
+- **$12M+** — unusual. Requires either strong revenue, a repeat founder with a real exit, or a market so hot investors are competing
 
-The band is generous. The wrong-position-in-band kills rounds. Set too high with weak story = pass. Set too low with strong story = you leave money and signal weakness.
+These aren't rules. They're the center of gravity. Your specific number depends on your leverage.
 
-## Filter, not maximize
+### 3. How the dilution math works
 
-The mistake is treating cap as a "maximize the number" exercise. What you're actually doing: filtering your target investor universe.
+Investors solve backwards: check size / cap = ownership percentage. A $500K check on a $5M cap is 10%. Same check on a $10M cap is 5%. The investor decides whether that ownership stake is worth their time, given the risk.
 
-- **Cap set at $6M:** filter is inclusive. Wide range of investors. Bad-fit investors will consider you. You have more optionality but more noise.
-- **Cap set at $12M:** filter tightens. Funds with strict ownership targets (usually institutional pre-seed) may pass. Angels and family offices still play.
-- **Cap set at $18M:** filter narrows further. Now you're mostly in institutional territory with funds writing $500K+ leads. Angels drop out.
-- **Cap set at $25M+:** filter is very narrow. Mostly established funds with big check sizes. Anyone else prices out.
+Your job is to make sure the total dilution stays sane. Rule of thumb: don't give up more than 20% at pre-seed. If you're raising $1M, that means a $5M+ cap. If you're raising $500K, a $3M cap keeps you above 80% ownership.
 
-Match the filter to who you actually want. If you want angels + emerging institutional together, keep cap in the $8-12M band. If you want a specific fund known to lead at $20M+ caps, sit at $18-20M. Don't fight the filter — use it.
+Below 80% founder ownership after pre-seed is a yellow flag for seed investors. They'll look at your cap table and calculate how much is left for them — and for the Series A after that.
 
-## The ownership math investors run
+## How to pick your number
 
-Every fund solves for a target ownership percentage post-round. For pre-seed:
+Forget the spreadsheet. Answer these four questions:
 
-- **Institutional pre-seed fund leading a round:** wants 8-15% (typically 10-12%)
-- **Institutional pre-seed fund following:** 2-5%
-- **Angel writing $25-100K:** wants 0.5-3%
-- **Family office writing $250K-1M:** wants 2-8%
-- **Micro VC writing $250-500K:** wants 3-8%
-- **Strategic corporate VC:** varies wildly, often 1-5%
+**How much are you raising?** See [How much should I raise](/raise-intel/how-much-should-i-raise). The amount and the cap are linked — the cap needs to make the dilution math work for both sides.
 
-Their check ÷ (target ownership %) = the post-money valuation they need. If your cap prices at $8M post and they need to write $250K for 5%, they need a $5M post — they can't do the deal at your cap. They pass.
+**What's your strongest proof point?** Revenue beats prototype beats idea. A $10K MRR company can justify a $6-8M cap. A wireframe cannot. Be honest about where you are.
 
-Understanding this math for your target investors is more useful than any generic "cap should be $X" advice.
+**Who do you want investing?** Angels cluster at lower caps. Institutional pre-seed funds need higher caps (their fund math requires it). You can't have both at the same cap — and you usually don't need to.
 
-## What to skip
+**What's the next round's likely valuation?** If seed rounds in your sector are closing at $10-15M, your pre-seed cap should be well below that. Investors need to see a 2-3x step-up between rounds. A $12M pre-seed cap with a $15M seed round is a broken cap table — the pre-seed investors got almost no markup.
 
-Common cap-setting mistakes:
+## What kills deals
 
-- **"Set it high, negotiate down."** Signals desperation and unfamiliarity with the game. Sophisticated funds pass on obviously-inflated caps rather than negotiate.
-- **"Match what my friend raised at."** Your friend's business shape, sector, and traction determined their cap. Yours are different. Copying the number without copying the context is a mistake.
-- **"Set a cap that gets me to $XM valuation."** Working backward from a target valuation to a cap is the wrong direction. Work from investor targets + your defensible story to the cap.
-- **"Uncapped SAFE to keep it flexible."** Sophisticated investors won't touch uncapped SAFEs at pre-seed anymore. It signals amateur.
-- **"Priced round for the cleanliness."** At pre-seed with <$2M, SAFEs are usually cheaper + faster. Priced rounds add legal cost + lawyer cycles + board discussion that doesn't earn its place until larger amounts.
+- **"We'll figure out the valuation later."** Uncapped SAFEs used to be common. In 2026, serious investors won't write uncapped checks. An uncapped SAFE means the founder either doesn't understand dilution or is trying to avoid the negotiation. Neither is a good signal.
+- **Anchoring to your peer's round.** Your YC batchmate raised at $20M. You're not your batchmate. Their cap reflected their traction, their team, their investor demand. Yours reflects yours.
+- **Negotiating the cap up after a verbal yes.** You told an angel $5M. They said yes. Now you want $7M because another investor showed interest. This burns trust and kills rounds. Pick the number. Hold it.
+- **Setting the cap based on "what you think you're worth."** You're not worth anything yet. The company might be worth a lot someday. The cap reflects risk-adjusted future value as perceived by the investor writing the check today. It's not a statement about your self-worth.
 
-## What to defend when investors push back
+## SAFE caps vs. priced rounds at pre-seed
 
-When a partner says "your cap's too high," you should have three answers ready:
+Most pre-seed rounds use SAFEs, not priced equity. The cap on a SAFE isn't technically a valuation — it's a ceiling on the conversion price when the next priced round happens. But functionally, everyone treats it like a valuation.
 
-1. **Why this becomes a $XM company at seed.** Concrete milestones + realistic trajectory.
-2. **What other investors are pricing at.** If you have three warm angels at your cap already, say so. Optionality supports position.
-3. **What you'd take instead.** Not "I'll lower the cap" — that's collapsing under pressure. "I'd consider $XM cap with $Y check and Z ownership" is a real trade. Or: "I'll take the pass at this cap and see you at seed."
+The advantage of SAFEs at pre-seed: speed. No board seats, no negotiating a full term sheet, no legal bills. You can close a SAFE in days. A priced round at pre-seed takes weeks and costs $10-20K in legal fees — for a round that might be $500K.
 
-The push-back moment is the negotiation. Fold and you signal weakness for the rest of the round. Hold and either they meet you or you learn they weren't a real fit.
+If an investor insists on a priced round at pre-seed, ask why. If they want a board seat, that's a different conversation. If they just "prefer priced rounds," they're probably not the right pre-seed investor.
 
-## Get an agent that runs this with you
+## Get matched to investors at your cap
 
-Setting the cap is one decision. Running the round that closes at that cap is a hundred. Target the right funds at that cap band, draft outreach that positions the story to justify it, prep for the partner meetings where the cap gets tested, track which investors softly pass on cap vs which pass on fit.
+You've got the cap. Now find the investors who write checks at that number. That's the hard part — and it's where most founders waste weeks cold-emailing funds that don't do their stage, their sector, or their check size.
 
-raise(fn) is the agent that runs your raise with you. Chat as the interface. Real work as the output. You don't fill out forms. You don't run a CRM. You raise, and the agent handles the rest.
+raise(fn) matches you to investors based on what they actually fund — stage, sector, check size, and observed deployment behavior. Not what they say on their website. What they've actually done in the last 18 months.
+
+Drop your deck. The agent finds who fits.
 
 ## FAQ
 
-### What if my target investors say my cap is too low?
+### Should I set the cap higher to leave room for negotiation?
 
-Rare, but it means you left money on the table. If more than one target says this, raise the cap 20-30% and see if the process stays warm. Don't over-adjust.
+No. Set the cap you want. Investors who negotiate down are telling you they don't believe the traction justifies the price — that's useful information. Investors who accept are pre-qualified. Inflating to leave room just wastes everyone's time and signals you don't know your number.
 
-### What if my target investors say my cap is too high?
+### What if every investor says the cap is too high?
 
-Common. Either lower the cap 20% or hold and lose the pass. Never negotiate mid-conversation — that signals you'll fold on other terms too.
-
-### Should I use MFN clauses?
-
-Yes on SAFEs. MFN gives your early SAFEs the benefit of any better terms you extend to later SAFEs. Standard, non-controversial, always include it. See [What are standard SAFE terms in 2026](/raise-intel/what-are-standard-safe-terms-in-2026).
-
-### What's the difference between a valuation cap and a discount?
-
-Cap sets a max price when your SAFE converts at the next priced round. Discount gives your SAFE a % discount to that next round's price. Modern SAFEs almost always use cap only (discount is rare unless the cap is very high).
+Lower it. The market is telling you something. Either your traction doesn't support the number, or you're talking to the wrong tier of investor. If angels say $8M is too high but you have $15K MRR, you might need institutional pre-seed funds who are comfortable at that range. If institutional funds also say it's too high, your traction isn't where you think it is. See [Am I ready to raise](/raise-intel/am-i-ready-to-raise).
 
 ### Can I have different caps for different investors?
 
-Legally yes (each SAFE is its own instrument). Practically no — MFN clauses mean if you give one investor a better cap, others get pulled to it. Set one cap and hold it across investors in the same round.
+Technically yes. Practically, don't. Word travels. If Angel A finds out Angel B got a lower cap, you've created a trust problem that follows you through the round. One cap. One set of terms. Clean.
 
-### What if I don't have real conviction on cap?
+### What's the difference between pre-money and post-money SAFEs?
 
-Then you probably aren't ready to raise. See [Am I ready to raise](/raise-intel/am-i-ready-to-raise). Cap conviction comes from milestone clarity + defensible 18-month vision.
+Post-money SAFEs (the YC standard) set the cap as the post-money valuation, meaning your dilution is fixed regardless of how much you raise on SAFEs. Pre-money SAFEs dilute more as you raise more. In 2026, most SAFEs are post-money. Use post-money unless you have a specific reason not to.
+
+### Does the cap matter if I'm doing an MFN SAFE?
+
+MFN (Most Favored Nation) means the investor gets whatever the best terms are from later SAFEs. It's a way to take money early without setting a cap. It works for small checks from angels who trust you. It doesn't work for lead checks or institutional money — they want to know the price before they write the check.

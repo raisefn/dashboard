@@ -57,9 +57,8 @@ list. Priorities are loose — pick anything in the top tier.
 
 - [x] **How much should I raise?** ✅ published 2026-07-06
   → [/raise-intel/how-much-should-i-raise](/raise-intel/how-much-should-i-raise)
-- [ ] **What valuation should I put on my company at pre-seed?**
-  Category: round-structure. Angle: SAFE caps are signal, not math.
-  Pick the cap that filters out the wrong investors.
+- [x] **What valuation should I put on my company at pre-seed?** ✅ published 2026-07-13
+  → [/raise-intel/what-valuation-should-i-put-on-my-company-at-pre-seed](/raise-intel/what-valuation-should-i-put-on-my-company-at-pre-seed)
 - [x] **How long will fundraising take?** ✅ published 2026-07-06
   → [/raise-intel/how-long-will-fundraising-take](/raise-intel/how-long-will-fundraising-take)
 - [x] **What do investors actually want to see in my deck?** ✅ published 2026-07-13
