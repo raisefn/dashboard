@@ -1,133 +1,114 @@
 ---
 title: "What do investors actually want to see in my deck?"
-description: "80% of decks are wrong. Investors don't want the 12-slide standard template. They want five specific answers. Here's what those are and why every other slide is wasted."
-published_at: "2026-07-06"
-updated_at: "2026-07-06"
-status: "draft"
+description: "Most decks have 12-15 slides and investors skim 5. Here's which 5 they actually read, what they're deciding on each one, and why the other slides are actively hurting you."
+published_at: "2026-07-13"
+updated_at: "2026-07-13"
+status: "published"
 category: "deck"
-tags: ["deck", "pitch-deck", "pitch", "narrative", "pre-seed", "seed"]
+tags: ["pitch-deck", "deck-review", "pre-seed", "seed", "investor-meeting", "fundraising"]
 fund_slugs: []
 sector_slugs: []
-related_slugs: ["how-do-i-write-a-cold-email-to-a-vc", "how-do-i-close-the-round-faster", "what-questions-will-vcs-ask-me-in-a-pre-seed-meeting"]
-tldr: "Most pitch decks are wrong because they follow the template. Investors don't read decks the way founders write them. They scan for five answers: why-this, why-now, why-you, what's-real, what's-the-ask. Every slide that doesn't push one of those forward is dead weight. The 12-slide standard template makes founders write for the slot instead of writing for the reader. Kill the standard template. Answer the five questions. Cut everything else."
+related_slugs: ["am-i-ready-to-raise", "how-much-should-i-raise", "what-questions-will-vcs-ask-me-in-a-pre-seed-meeting"]
+tldr: "Investors don't read your deck. They scan 5 slides in under 3 minutes and make a yes/no decision on whether to take the meeting. The 5 that matter: problem (is this real), traction (do people want it), team (can they build it), ask (does the math work), and market (is this big enough to care). Everything else — competitive landscape, go-to-market timeline, your 14-slide appendix — is noise that dilutes the signal. Kill it."
 cta_text: "Open raise(fn) — get matched with investors who fund your space."
 cta_href: "/signup"
 ---
 
-## Investors don't read your deck. They scan it.
+## Your deck has 14 slides. Investors read 5.
 
-Founders write decks like documents. Sequential, narrative, arriving at conclusions. Investors don't consume decks that way. A partner opens a deck on their phone between meetings, scans the first 3-5 slides, and decides in 90 seconds whether to book a call. If those slides don't hit the five answers they need, the deck gets closed. The remaining seven slides don't matter — they were never going to be read.
+The average VC spends 2 minutes and 41 seconds on a pitch deck. That's not enough time to read your competitive matrix. It's barely enough to decide whether to take the meeting.
 
-The 12-slide standard template ("problem, solution, market, team, traction, competition, business model, use of funds, timeline, financials, contact, thanks") was built to answer investor concerns in a live pitch — where you're presenting. Nobody presents anymore. Decks get scanned in 90 seconds on someone else's schedule. The template doesn't match the read pattern. And so the template produces decks that fail.
+Most founders treat the deck like a document. It's not. It's a filter. The investor is scanning for five answers, in order. If any answer is wrong — or missing — they close the tab. Your 14-slide narrative arc doesn't matter if slide 3 didn't land.
 
-The winning move: stop writing for the template, start writing for the five questions actual investors are scanning for.
+## The 5 slides that decide the meeting
 
-## The five questions investors actually scan for
+These are the five decisions investors are making, in order, and what each slide needs to deliver.
 
-Every pitch deck should answer these five, in this order, in the first 3-5 slides:
+### 1. Problem — "Is this real?"
 
-**1. Why this?** What is this business, in one sentence, in a way that lets me pattern-match to something I already understand? Not the abstract "we're building the future of X" — the specific "we're the CRM for solo doctors" or "we do autonomous drone inspection for oil pipelines."
+Not "is this a problem." Every deck has a problem slide. The question is whether the problem is *felt* — whether real humans are spending real money or real time suffering through it right now.
 
-**2. Why now?** What changed in the market, tech, regulation, or user behavior that makes this the moment? "AI just got good enough" is not an answer — everyone can claim that. Specific answers: "the Shell drone regulatory approval landed in June and we're the first US operator with it." "GPT-4 dropped API costs 90% and now the unit economics of Y flip positive." Real "why now" is a specific event, not a vague vibe.
+The slide needs one thing: a specific, observable pain. Not a market trend. Not "companies struggle with X." A sentence that makes the investor think "yeah, I've seen that" or "I know someone dealing with that."
 
-**3. Why you?** Not "the team is amazing." Specific unfair advantages: prior experience in the exact category, unusual customer access, patents, relationships nobody else has. If the answer is "we're smart engineers," you don't have a why-you. Skip the slide rather than fake it.
+- **Works:** "Sales teams spend 11 hours a week updating CRM fields that nobody reads."
+- **Doesn't work:** "The CRM market is fragmented and legacy solutions lack modern AI capabilities."
 
-**4. What's real?** Traction proof. Numbers. Signed LOIs. Live pilots. Product demo. Whatever exists. If nothing's real yet, be explicit about that AND explain what will be real in 3 months. "Nothing yet, but we ship the beta by August 15" is more credible than a fake KPI slide.
+The second one is true. Nobody cares. The first one makes a VP of Sales nod.
 
-**5. What's the ask?** Amount, cap, use of funds in one specific sentence. Not "we're raising to grow the team." Specific: "we're raising $1.5M on a $10M SAFE cap to hit $30K MRR + hire 2 engineers by Q1."
+### 2. Traction — "Do people want it?"
 
-Get those five right in the first five slides and the deck has already worked. Everything after that is redundancy for anyone still reading.
+This is the slide investors jump to first. Many skip problem entirely and go straight here. If traction is strong, everything else gets read charitably. If it's weak, nothing saves the deck.
 
-## What the standard template gets wrong
+What counts as traction depends on stage:
 
-The 12-slide template puts "problem" and "solution" first. That's presenter framing — it works when you're in the room walking someone through your logic. When someone scans your deck on their phone, they don't need you to explain the problem. They need to know what the business is and whether it's worth 20 more seconds. The problem-solution frame delays that answer by 2-3 slides.
+- **Pre-seed:** Waitlist, LOIs, design partners, pilot commitments. Anything that proves someone besides you wants this to exist.
+- **Seed:** Revenue. $10-50K MRR. Or usage — 500+ actives with retention proof. Growth rate matters more than absolute number. 20% MoM for 4 months beats $40K MRR flat.
+- **Series A:** $80K+ MRR, net revenue retention above 100%, clear repeatable acquisition channel. The investor is underwriting the growth line, not the snapshot.
 
-Other common template failures:
+If you don't have traction yet, don't fake it with vanity metrics. Say what you've built, what you've shipped, and what the first signal is. Honesty at pre-seed reads as maturity. Inflated metrics at pre-seed read as a warning sign. See [Am I ready to raise](/raise-intel/am-i-ready-to-raise).
 
-- **"Market size" slide with TAM/SAM/SOM triangles.** Every founder writes these. No investor believes them. Delete or bury.
-- **"Competition" slide with a 2x2 quadrant.** You're always in the top-right, competitors are always in the bottom-left. Everyone knows the format is fake. Delete.
-- **"Business model" slide when the model is obviously SaaS.** Delete. Say "SaaS, $X per seat per month" in one line on the ask slide.
-- **"Team" slide as slide 4 with headshots and LinkedIn logos.** Move the founder credibility earlier if it's real. If it isn't real, don't fake it with a slide.
-- **"Timeline" slide showing a hockey stick.** Everyone's timeline is a hockey stick. Nobody believes them. Delete.
-- **"Thanks" slide at the end.** Delete. Nobody's thanking you back.
+### 3. Team — "Can they build it?"
 
-The template teaches you to write slides that fail. Kill the template.
+Investors fund teams, not ideas. But they don't fund résumés either. The team slide needs to answer one question: why is this specific team the one that will win this specific market?
 
-## The five-slide version that actually works
+Domain credibility. Technical depth. Prior startup experience. A combination. If the founder selling AI compliance tools spent 8 years at a Big Four audit firm, that's the slide. If the CTO shipped ML infrastructure at Stripe, that's the slide.
 
-The tight version:
+What doesn't work: headshot grids with logos of companies people worked at. Nobody cares that your VP of Marketing was at Google unless that Google experience is directly relevant to the problem.
 
-1. **Cover + one-sentence description.** Company name, one sentence: "raise(fn) is the AI agent that runs founder fundraising."
-2. **Why now.** Specific market/tech/regulatory change + your access to it.
-3. **Why you + what's real.** Founder background paragraph + traction paragraph. Two things on one slide.
-4. **The ask.** Amount + cap + use of funds in specifics.
-5. **How it becomes big.** One paragraph on what the company looks like in 18 months if the raise works.
+### 4. Ask — "Does the math work?"
 
-Five slides. Investors scan them in 60-90 seconds. If those slides hit, you get the meeting. If they don't hit, twelve slides won't save you.
+How much. What it buys. What milestone it gets you to. Three numbers, one sentence each.
 
-## Expanded decks (12+ slides) for follow-up
+"Raising $2M on a SAFE. 18 months of runway to $100K MRR and Series A readiness."
 
-The five-slide version is what gets sent cold or as a warm-intro attachment. If an investor moves to a first meeting, they'll ask for more. Prepare an expanded deck with 8-12 slides that goes deeper on:
+That's the slide. Investors solve backwards from the ask: does $2M at this burn rate get them to a milestone that justifies a 3-4x step-up in the next round? If yes, the math works. If the milestone is vague or the amount doesn't connect to it, the math doesn't work.
 
-- Detailed product screenshots or demo
-- Detailed traction (retention curves, revenue by cohort, unit economics)
-- Team detail (why each founder is essential)
-- Market detail (TAM/SAM/SOM if you must, but with defensible sources)
-- Roadmap (18-month product plan)
-- Detailed use of funds
-- Prior investor references (if applicable)
+See [How much should I raise](/raise-intel/how-much-should-i-raise) for the milestone-first sizing framework.
 
-Send THIS deck to warm/interested investors after the first meeting, not before. Different tool for a different job.
+### 5. Market — "Is this big enough to care?"
 
-## What to skip entirely
+This is the slide founders spend the most time on and investors spend the least. They don't need your TAM/SAM/SOM waterfall. They need to believe the market is large enough that a $50M+ outcome is plausible.
 
-- **Video pitches embedded in decks.** Nobody watches them. Add friction, add nothing.
-- **Complicated custom fonts.** Load slowly, look weird on some devices, distract. Use system fonts.
-- **Fancy animations in Google Slides / PowerPoint.** Fail on the PDF export everyone actually reads.
-- **Testimonial slides from advisors.** Investors don't care what your advisor thinks. They care what customers say.
-- **"Vision" slide at the end.** Vision belongs in the specific "how it becomes big" slide, not as a separate abstract.
-- **"Timeline" showing you at Series A in 18 months.** Everyone shows this. Nobody believes it. Delete.
+One sentence about market size, grounded in something real. "47,000 US companies spend $1B+ annually on compliance software" is better than a Gartner quadrant.
 
-## Test whether your deck works
+If the market is obviously big (fintech, healthcare, enterprise SaaS), this slide barely matters. If the market is niche, this is where you prove it's bigger than it looks. Either way — one slide, not three.
 
-Send it to three people cold who don't know you. Ask them to scan for 90 seconds and answer three questions:
+## What to kill
 
-1. What does this company do?
-2. Why is now the right time for it?
-3. What's the ask?
+These slides are in 80% of decks. They're actively hurting you.
 
-If they can't answer all three from a 90-second scan, your deck fails. Rewrite the first five slides until they can. Everything else is polish.
+- **"Competitive landscape" matrix.** You put yourself in the top-right quadrant of a 2x2 grid. The investor knows. They've seen 400 of these. It signals that you think positioning is a checkbox exercise. Killed.
+- **"Go-to-market" timeline.** Gantt charts of hypothetical channel launches. Nobody believes a 12-month GTM timeline from a 3-person team. If you have a GTM insight, put it in the problem or traction slide. Don't give it its own slide.
+- **"Business model" breakdown.** "We charge $X per seat per month." That's one line on the traction slide, not a slide. Revenue model complexity at pre-seed is a red flag, not a feature.
+- **"Vision" slide.** "In 5 years we'll be the platform for..." Nobody is investing in where you'll be in 5 years. They're investing in whether you can get to the next round. Kill the vision slide. Use that time on traction.
+- **The 8-slide appendix.** If the investor wants more, they'll ask in the meeting. The appendix doesn't get read in the initial scan. It adds scroll weight and dilutes the signal of the 5 slides that matter.
 
-## Get an agent that runs this with you
+## The real problem isn't the deck
 
-Writing the deck is one part of the raise. Testing it, iterating it, matching it to the specific investor archetype, drafting the outreach that goes with it, tracking who's seen which version — that's the round.
+It's who you send it to. A perfect deck sent to the wrong 30 investors gets the same result as a bad deck sent to the right 10: silence.
 
-raise(fn) is the agent that runs your raise with you. Chat as the interface. Real work as the output. Sharpens your deck against investor archetypes, drafts your outreach with real context, preps you for every meeting from prior conversation notes, tracks pipeline so you know where each conversation stands.
+raise(fn) is the agent that matches you to investors who actually fund your stage, sector, and check size — ranked by observed behavior, not self-reported thesis. It drafts per-investor outreach with context from their real portfolio, not a template. It tracks who opened, who replied, and who you need to follow up with.
 
-You don't fill out forms. You don't run a CRM. You raise, and the agent handles the rest.
+Drop your deck. The agent does the rest.
 
 ## FAQ
 
-### How many slides should a pre-seed deck be?
+### How many slides should my deck be?
 
-5 for cold/warm outreach. 10-12 for follow-up after first meeting. Different decks for different jobs.
+8-12 for the send-ahead. No appendix. If you can't tell the story in 12 slides, the story isn't clear yet — the fix is editing, not adding.
 
-### Should I include financial projections?
+### Should I send the deck before or after the meeting?
 
-Not in the cold deck. Include a use-of-funds slide (specific milestones + budget). Save detailed projections for follow-up conversations with warm investors.
+Before. Always. Investors who ask for a meeting without seeing the deck are either doing you a favor or aren't serious. The deck-first filter saves you time. Investors who take the meeting after reading the deck are pre-qualified.
 
-### Do I need a demo video?
+### Do I need a design-heavy deck?
 
-No. If your product is visual, a screenshot or two beats an embedded video. Videos add friction and rarely get watched.
+No. Clean beats pretty. White background, readable type, one chart per slide. Founders who spend $3K on deck design before they have traction are optimizing the wrong thing. The content is the design.
 
-### Should I show the actual product screenshot?
+### What format — PDF, Google Slides, or DocSend?
 
-Yes, if there's a product. One clean screenshot of the core experience beats 15 slides of feature lists. If there's no product yet, describe what will exist in 3 months instead of pretending.
+PDF via a shareable link with view tracking. DocSend works. So does raise(fn)'s [shareable brief links](/signup). The point is knowing who opened it, not the format.
 
-### Can I hire a designer for the deck?
+### Should I customize the deck for each investor?
 
-Marginal help. Design isn't the reason bad decks fail. Bad decks fail because the first 5 slides don't answer the five questions. Fix content first.
-
-### What about a "vision" slide?
-
-Fold vision into the "how this becomes big" slide. Standalone vision slides feel abstract and get skipped.
+No. Customize the outreach email. Keep the deck the same. Per-investor customization of 14 slides across 30 investors is a time trap that produces worse decks, not better ones. The personalization lives in the email, not the slides. See [How do I write a cold email to a VC](/raise-intel/how-do-i-write-a-cold-email-to-a-vc).

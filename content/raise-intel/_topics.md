@@ -62,9 +62,8 @@ list. Priorities are loose — pick anything in the top tier.
   Pick the cap that filters out the wrong investors.
 - [x] **How long will fundraising take?** ✅ published 2026-07-06
   → [/raise-intel/how-long-will-fundraising-take](/raise-intel/how-long-will-fundraising-take)
-- [ ] **What do investors actually want to see in my deck?**
-  Category: deck. Angle: 80% of decks are wrong. Here's the 5 slides
-  that matter and why the other 7 don't.
+- [x] **What do investors actually want to see in my deck?** ✅ published 2026-07-13
+  → [/raise-intel/what-do-investors-actually-want-to-see-in-my-deck](/raise-intel/what-do-investors-actually-want-to-see-in-my-deck)
 
 ### Tier 3 — tactical / process
 
